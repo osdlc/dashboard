@@ -1,0 +1,72 @@
+[package]
+name = "dashboard"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+# Which built-in modules the binary includes: a bundle, or one module. Same
+# names as on dashboard-modules. See docs/modules.md.
+[features]
+default = [
+    "bundle-system",
+    "bundle-dev",
+    "bundle-ops",
+    "bundle-fun",
+    "bundle-agents",
+    "bundle-personal",
+]
+# Each bundle turns on its module features here too, so cfg(feature = "module-x")
+# works in this crate's tests.
+bundle-system = [
+    "dashboard-modules/bundle-system",
+    "module-cpu",
+    "module-memory",
+    "module-network",
+    "module-disk",
+    "module-processes",
+    "module-log",
+    "module-uptime",
+]
+bundle-dev = [
+    "dashboard-modules/bundle-dev",
+    "module-github-prs",
+    "module-github-issues",
+    "module-jira",
+    "module-linear",
+    "module-forgejo",
+]
+bundle-ops = ["dashboard-modules/bundle-ops"]
+bundle-fun = ["dashboard-modules/bundle-fun", "module-demo"]
+bundle-agents = ["dashboard-modules/bundle-agents", "module-codex", "module-copilot"]
+bundle-personal = ["dashboard-modules/bundle-personal"]
+module-cpu = ["dashboard-modules/module-cpu"]
+module-memory = ["dashboard-modules/module-memory"]
+module-network = ["dashboard-modules/module-network"]
+module-disk = ["dashboard-modules/module-disk"]
+module-processes = ["dashboard-modules/module-processes"]
+module-log = ["dashboard-modules/module-log"]
+module-uptime = ["dashboard-modules/module-uptime"]
+module-github-prs = ["dashboard-modules/module-github-prs"]
+module-github-issues = ["dashboard-modules/module-github-issues"]
+module-jira = ["dashboard-modules/module-jira"]
+module-linear = ["dashboard-modules/module-linear"]
+module-forgejo = ["dashboard-modules/module-forgejo"]
+module-demo = ["dashboard-modules/module-demo"]
+module-codex = ["dashboard-modules/module-codex"]
+module-copilot = ["dashboard-modules/module-copilot"]
+
+[dependencies]
+anyhow = "1.0.104"
+clap = { version = "4.6.7", features = ["derive"] }
+dashboard-config = { version = "0.4.0", path = "../config" }
+dashboard-contract = { version = "0.4.0", path = "../contract" }
+dashboard-cswap = { version = "0.4.0", path = "../../plugins/cswap" }
+dashboard-host = { version = "0.4.0", path = "../host" }
+dashboard-modules = { version = "0.4.0", path = "../modules", default-features = false }
+dashboard-tui = { version = "0.4.0", path = "../tui" }
+dashboard-web = { version = "0.4.0", path = "../web" }
+schemars = "1.2.3"
+serde_json = "1.0.154"
+tokio = { version = "1.54.1", features = ["full"] }
+tracing = "0.1.44"
+tracing-subscriber = "0.3.23"

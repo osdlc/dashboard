@@ -1,0 +1,51 @@
+id: git-repos
+version: 0.1.0
+name: Git repositories
+description: >-
+  Local git repositories at a glance: branch, uncommitted changes, commits not
+  pushed or pulled, and the age of the last commit.
+tags: [example, git, dev, local]
+run: [python3, git_repos.py]
+runtime: python3>=3.9
+binaries: [git]
+size: wide
+config_schema:
+  type: object
+  additionalProperties: false
+  properties:
+    roots: { type: array, items: { type: string }, description: Folders searched for repositories. }
+    depth: { type: integer, minimum: 0, description: How deep to look under each root. }
+    repos: { type: array, items: { type: string }, description: Extra repositories, by path. }
+    limit: { type: integer, minimum: 1, description: Rows shown, most recently committed first. }
+    fetch: { type: boolean, description: Run `git fetch` first, so "behind" is current. }
+demo:
+  status: warn
+  summary: 4 repos · 2 with changes · 1 unpushed
+  root:
+    type: column
+    children:
+      - type: row
+        children:
+          - { type: stat, label: Repositories, value: "4" }
+          - { type: stat, label: With changes, value: "2", status: warn }
+          - { type: stat, label: Unpushed, value: "1", status: warn }
+          - { type: stat, label: Behind, value: "0", status: ok }
+      - type: table
+        columns:
+          - { key: repo, label: Repository }
+          - { key: branch, label: Branch }
+          - { key: changes, label: Changes }
+          - { key: sync, label: Upstream }
+          - { key: last, label: Last commit }
+        rows:
+          - cells: { repo: api, branch: rate-limits, changes: 3 changed, sync: 2 ahead, last: 12m ago }
+            status: warn
+            action: { type: open_url, url: "https://github.com/acme/api" }
+          - cells: { repo: web, branch: main, changes: 1 changed, sync: up to date, last: 3h ago }
+            status: warn
+            action: { type: open_url, url: "https://github.com/acme/web" }
+          - cells: { repo: infra, branch: main, changes: clean, sync: up to date, last: 2d ago }
+            status: ok
+            action: { type: open_url, url: "https://github.com/acme/infra" }
+          - cells: { repo: notes, branch: main, changes: clean, sync: no upstream, last: 5d ago }
+            status: ok

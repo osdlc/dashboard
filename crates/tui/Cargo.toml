@@ -1,0 +1,18 @@
+[package]
+name = "dashboard-tui"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow = "1.0.104"
+dashboard-contract = { version = "0.4.0", path = "../contract" }
+dashboard-host = { version = "0.4.0", path = "../host" }
+ratatui = "0.30.2"
+terminal-colorsaurus = "1.0.3"
+tokio = { version = "1.54.1", features = ["full"] }
+
+[dev-dependencies]
+dashboard-config = { path = "../config" }
+dashboard-modules = { path = "../modules" }
+tokio = { version = "1.54.1", features = ["rt", "macros"] }

@@ -1,0 +1,24 @@
+# A plugin package: this file plus the plugin's own files. See docs/plugins.md.
+id: hello
+version: 0.1.0
+name: Hello
+description: The smallest example plugin. A greeting, a clock and a render counter.
+tags: [example, local]
+# Run in this folder.
+run: [python3, hello.py]
+runtime: python3>=3.9
+size: small
+config_schema:
+  type: object
+  additionalProperties: false
+  properties:
+    name: { type: string, description: Who to greet. }
+# Shown in the catalog before the plugin is set up.
+demo:
+  status: ok
+  summary: hello, world
+  root:
+    type: row
+    children:
+      - { type: stat, label: "Hello, world", value: "09:41:00" }
+      - { type: stat, label: Renders, value: "12" }

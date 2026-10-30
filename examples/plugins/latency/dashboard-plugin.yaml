@@ -1,0 +1,48 @@
+id: latency
+version: 0.1.0
+name: Network latency
+description: >-
+  The time to open a TCP connection to each target, as a live chart. Turns
+  yellow when a target is slow and red when it is down. No ping privileges needed.
+tags: [example, network, monitoring, local]
+run: [python3, latency.py]
+runtime: python3>=3.9
+hosts: [the targets you set]
+size: wide
+config_schema:
+  type: object
+  additionalProperties: false
+  required: [targets]
+  properties:
+    slow_ms: { type: number, description: Slower than this is a warning. }
+    history: { type: integer, minimum: 2, description: Points kept per target. }
+    targets:
+      type: array
+      minItems: 1
+      items:
+        type: object
+        additionalProperties: false
+        required: [name, host]
+        properties:
+          name: { type: string }
+          host: { type: string }
+          port: { type: integer, minimum: 1, maximum: 65535 }
+demo:
+  status: warn
+  summary: github 38ms · dns 12ms · office vpn 212ms
+  root:
+    type: column
+    children:
+      - type: row
+        children:
+          - { type: stat, label: github, value: "38", unit: ms, status: ok }
+          - { type: stat, label: dns, value: "12", unit: ms, status: ok }
+          - { type: stat, label: office vpn, value: "212", unit: ms, status: warn }
+      - type: series
+        label: Connect time
+        unit: ms
+        style: line
+        series:
+          - { name: github, points: [[1793000000000, 38.0], [1793000005000, 40.9], [1793000010000, 43.0], [1793000015000, 44.0], [1793000020000, 43.5], [1793000025000, 41.6], [1793000030000, 38.8], [1793000035000, 35.9], [1793000040000, 33.5], [1793000045000, 32.1], [1793000050000, 32.2], [1793000055000, 33.8], [1793000060000, 36.3], [1793000065000, 39.3], [1793000070000, 41.9], [1793000075000, 43.6], [1793000080000, 43.9], [1793000085000, 42.8], [1793000090000, 40.5], [1793000095000, 37.5], [1793000100000, 34.7], [1793000105000, 32.7], [1793000110000, 32.0], [1793000115000, 32.7]] }
+          - { name: dns, points: [[1793000000000, 14.5], [1793000005000, 15.0], [1793000010000, 14.7], [1793000015000, 13.8], [1793000020000, 12.4], [1793000025000, 10.9], [1793000030000, 9.7], [1793000035000, 9.1], [1793000040000, 9.1], [1793000045000, 9.9], [1793000050000, 11.2], [1793000055000, 12.6], [1793000060000, 14.0], [1793000065000, 14.8], [1793000070000, 15.0], [1793000075000, 14.4], [1793000080000, 13.2], [1793000085000, 11.8], [1793000090000, 10.4], [1793000095000, 9.4], [1793000100000, 9.0], [1793000105000, 9.4], [1793000110000, 10.4], [1793000115000, 11.8]] }
+          - { name: office vpn, points: [[1793000000000, 217.3], [1793000005000, 208.0], [1793000010000, 194.2], [1793000015000, 179.5], [1793000020000, 167.3], [1793000025000, 160.7], [1793000030000, 161.2], [1793000035000, 168.8], [1793000040000, 181.6], [1793000045000, 196.5], [1793000050000, 209.7], [1793000055000, 218.1], [1793000060000, 219.7], [1793000065000, 214.0], [1793000070000, 202.4], [1793000075000, 187.7], [1793000080000, 173.7], [1793000085000, 163.6], [1793000090000, 160.0], [1793000095000, 163.7], [1793000100000, 173.9], [1793000105000, 188.0], [1793000110000, 202.6], [1793000115000, 214.1]] }

@@ -1,0 +1,24 @@
+{
+  "name": "web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview",
+    "gen:types": "cargo run -q -p dashboard-contract --example web_schema > src/contract.schema.tmp.json && json2ts --no-additionalProperties --bannerComment '/* Generated from the Rust contract by pnpm gen:types. Do not edit. */' < src/contract.schema.tmp.json > src/contract.ts.tmp && mv src/contract.ts.tmp src/contract.ts && rm src/contract.schema.tmp.json"
+  },
+  "dependencies": {
+    "vue": "^3.5.44"
+  },
+  "devDependencies": {
+    "@osdlc/tsconfig": "^0.4.1",
+    "@types/node": "^24.19.2",
+    "@vitejs/plugin-vue": "^6.0.10",
+    "json-schema-to-typescript": "^16.0.0",
+    "typescript": "~6.0.3",
+    "vite": "^8.3.4",
+    "vue-tsc": "^3.3.13"
+  }
+}
