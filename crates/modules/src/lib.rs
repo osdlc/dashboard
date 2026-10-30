@@ -78,6 +78,7 @@ mod tests {
                 "github-issues",
                 "log",
                 "uptime",
+                "screensaver",
                 "jira",
                 "linear",
                 "forgejo",
@@ -105,7 +106,8 @@ mod tests {
                 "disk",
                 "processes",
                 "log",
-                "uptime"
+                "uptime",
+                "screensaver"
             ]
         );
         assert!(builtin("jira").is_none());

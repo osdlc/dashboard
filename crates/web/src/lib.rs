@@ -15,7 +15,7 @@ use axum::middleware::{self, Next};
 use axum::response::{IntoResponse, Response};
 use axum::routing::get;
 use axum::{Json, Router};
-use dashboard_contract::{ClientMessage, ServerMessage, UiSettings};
+use dashboard_contract::{ClientMessage, ServerMessage, UiSettings, Widget};
 use dashboard_host::Host;
 use futures_util::{SinkExt, StreamExt};
 use rust_embed::RustEmbed;
@@ -69,6 +69,7 @@ pub async fn serve(
     let api = Router::new()
         .route("/api/tiles", get(tiles))
         .route("/api/ws", get(ws))
+        .route("/api/image", get(image))
         .layer(middleware::from_fn_with_state(state.clone(), guard));
     let app = Router::new().merge(api).fallback(ui).with_state(state);
 
@@ -148,6 +149,72 @@ async fn tiles(State(state): State<AppState>) -> impl IntoResponse {
     Json(state.host.snapshot().await)
 }
 
+/// Larger pictures are refused; they would be slow to send and to draw.
+const MAX_IMAGE_BYTES: u64 = 32 * 1024 * 1024;
+
+#[derive(Deserialize)]
+struct ImageQuery {
+    path: String,
+}
+
+/// Sends a picture that an `image` widget shows now. Only those: a path no
+/// tile's current view names is refused, so this can't read other files.
+async fn image(State(state): State<AppState>, Query(q): Query<ImageQuery>) -> Response {
+    let shown = state
+        .host
+        .snapshot()
+        .await
+        .iter()
+        .any(|t| shows_image(&t.view.root, &q.path));
+    if !shown {
+        return StatusCode::NOT_FOUND.into_response();
+    }
+    let Some(mime) = image_type(&q.path) else {
+        return StatusCode::UNSUPPORTED_MEDIA_TYPE.into_response();
+    };
+    match tokio::fs::metadata(&q.path).await {
+        Ok(m) if m.is_file() && m.len() <= MAX_IMAGE_BYTES => {}
+        Ok(m) if m.is_file() => return StatusCode::PAYLOAD_TOO_LARGE.into_response(),
+        _ => return StatusCode::NOT_FOUND.into_response(),
+    }
+    match tokio::fs::read(&q.path).await {
+        Ok(bytes) => (
+            [
+                (header::CONTENT_TYPE, mime),
+                (header::CACHE_CONTROL, "private, no-cache"),
+            ],
+            bytes,
+        )
+            .into_response(),
+        Err(_) => StatusCode::NOT_FOUND.into_response(),
+    }
+}
+
+fn image_type(path: &str) -> Option<&'static str> {
+    let ext = std::path::Path::new(path)
+        .extension()?
+        .to_str()?
+        .to_ascii_lowercase();
+    Some(match ext.as_str() {
+        "png" => "image/png",
+        "jpg" | "jpeg" => "image/jpeg",
+        "gif" => "image/gif",
+        "webp" => "image/webp",
+        "bmp" => "image/bmp",
+        _ => return None,
+    })
+}
+
+fn shows_image(widget: &Widget, path: &str) -> bool {
+    match widget {
+        Widget::Image { path: p, .. } => p == path,
+        Widget::Row { children } | Widget::Column { children } => {
+            children.iter().any(|c| shows_image(c, path))
+        }
+        _ => false,
+    }
+}
+
 async fn ws(State(state): State<AppState>, upgrade: WebSocketUpgrade) -> Response {
     upgrade.on_upgrade(move |socket| feed(socket, state.host, state.settings, state.actions))
 }
@@ -222,4 +289,24 @@ fn new_token() -> Result<String> {
     let mut bytes = [0u8; 16];
     getrandom::fill(&mut bytes).map_err(|e| anyhow::anyhow!("getrandom: {e}"))?;
     Ok(bytes.iter().map(|b| format!("{b:02x}")).collect())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn only_pictures_in_the_view_are_served() {
+        let view = Widget::Column {
+            children: vec![Widget::Image {
+                path: "/pics/a.png".into(),
+                caption: None,
+            }],
+        };
+        assert!(shows_image(&view, "/pics/a.png"));
+        assert!(!shows_image(&view, "/pics/b.png"));
+        assert!(!shows_image(&view, "/etc/passwd"));
+        assert_eq!(image_type("/pics/A.JPG"), Some("image/jpeg"));
+        assert_eq!(image_type("/pics/a.svg"), None);
+    }
 }

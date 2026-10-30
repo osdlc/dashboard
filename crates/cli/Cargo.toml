@@ -26,6 +26,7 @@ bundle-system = [
     "module-processes",
     "module-log",
     "module-uptime",
+    "module-screensaver",
 ]
 bundle-dev = [
     "dashboard-modules/bundle-dev",
@@ -46,6 +47,7 @@ module-disk = ["dashboard-modules/module-disk"]
 module-processes = ["dashboard-modules/module-processes"]
 module-log = ["dashboard-modules/module-log"]
 module-uptime = ["dashboard-modules/module-uptime"]
+module-screensaver = ["dashboard-modules/module-screensaver"]
 module-github-prs = ["dashboard-modules/module-github-prs"]
 module-github-issues = ["dashboard-modules/module-github-issues"]
 module-jira = ["dashboard-modules/module-jira"]

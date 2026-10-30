@@ -1,7 +1,7 @@
 //! The system bundle: CPU, memory, network, disk and processes (one module per
 //! area, so each can be placed, sized and refreshed on its own), plus log
-//! tailing and uptime checks. Each module sits behind a cargo feature named
-//! after its id.
+//! tailing, uptime checks and a picture screensaver. Each module sits behind
+//! a cargo feature named after its id.
 
 use std::time::Instant;
 
@@ -25,6 +25,8 @@ pub mod memory;
 pub mod network;
 #[cfg(feature = "processes")]
 pub mod processes;
+#[cfg(feature = "screensaver")]
+pub mod screensaver;
 #[cfg(feature = "uptime")]
 pub mod uptime;
 
@@ -78,6 +80,13 @@ pub const MODULES: &[Builtin] = &[
         core: false,
         new: || Box::new(uptime::Uptime::default()),
         catalog: uptime::catalog,
+    },
+    #[cfg(feature = "screensaver")]
+    Builtin {
+        id: "screensaver",
+        core: false,
+        new: || Box::new(screensaver::Screensaver::default()),
+        catalog: screensaver::catalog,
     },
 ];
 

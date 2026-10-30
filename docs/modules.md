@@ -13,7 +13,7 @@ Built-in modules are grouped into bundles, one crate per bundle:
 
 | Bundle | Crate | Modules |
 |---|---|---|
-| system | `crates/modules-system` | cpu, memory, network, disk, processes, log, uptime |
+| system | `crates/modules-system` | cpu, memory, network, disk, processes, log, uptime, screensaver |
 | dev | `crates/modules-dev` | github-prs, github-issues, jira, linear, forgejo |
 | fun | `crates/modules-fun` | demo |
 | agents | `crates/modules-agents` | codex, copilot |

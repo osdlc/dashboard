@@ -25,6 +25,7 @@ use tokio::sync::{mpsc, watch};
 mod canvas;
 mod charts;
 mod help;
+mod images;
 mod layout;
 mod mouse;
 mod rotate;
@@ -202,6 +203,7 @@ pub async fn run(
 
 fn init_terminal() -> Result<ratatui::DefaultTerminal> {
     let terminal = ratatui::init();
+    images::detect();
     execute!(std::io::stdout(), EnableMouseCapture)?;
     Ok(terminal)
 }

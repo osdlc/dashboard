@@ -1,0 +1,21 @@
+# The screensaver module: the pictures in a folder, one after another, on one
+# screen. From the repository root:
+#
+#   cargo run -p dashboard -- tui --config examples/screensaver.yaml
+#
+# The terminal draws them with Kitty, iTerm2 or Sixel graphics when it
+# supports them (kitty, Ghostty, WezTerm, iTerm2, foot, ...), and with colored
+# half blocks otherwise. DASHBOARD_IMAGES=halfblocks forces half blocks.
+# With no `dir:` it shows its built-in samples, one per format; add
+# `config: { dir: ~/Pictures }` for your own. `refresh:` is how long each
+# one stays.
+
+modules:
+  pictures:
+    builtin: screensaver
+    refresh: 5s
+
+screens:
+  - name: pictures
+    tiles:
+      - { module: pictures, size: large }

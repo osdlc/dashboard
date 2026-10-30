@@ -323,3 +323,10 @@ main.grid { animation: screen-in 0.25s ease-out; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+.w-image { margin: 0; height: 100%; min-height: 0; display: flex; flex-direction: column; gap: 4px; }
+.w-image .frame { flex: 1; min-height: 0; position: relative; display: grid; place-items: center; overflow: hidden; }
+.w-image .frame.empty { min-height: 3rem; border: 1px dashed var(--border); border-radius: 6px; color: var(--muted); font-size: 0.85rem; }
+/* Fills the frame and keeps its shape, scaling small pictures up too, like the terminal. */
+.w-image img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.w-image figcaption { color: var(--muted); font-size: 0.85rem; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

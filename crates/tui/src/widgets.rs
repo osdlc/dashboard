@@ -267,6 +267,9 @@ fn draw_widget(f: &mut Canvas, p: &Palette, area: Rect, widget: &Widget, hits: &
                 );
             }
         }
+        Widget::Image { path, caption } => {
+            crate::images::draw(f, p, area, path, caption.as_deref());
+        }
         Widget::Row { children } if stack(children.len(), area.width) => {
             let constraints = children
                 .iter()
@@ -409,6 +412,7 @@ pub fn min_height(widget: &Widget, width: u16) -> u16 {
         Widget::Table { rows, .. } => 1 + rows.len().clamp(1, 5) as u16,
         Widget::Log { label, .. } => 5 + label.is_some() as u16,
         Widget::Uptime { checks } => checks.len().max(1) as u16,
+        Widget::Image { caption, .. } => 4 + caption.is_some() as u16,
         Widget::Row { children } if stack(children.len(), width) => {
             children.iter().map(|c| min_height(c, width)).sum()
         }
@@ -467,7 +471,7 @@ fn height_hint(widget: &Widget, width: u16) -> Constraint {
                 None => Constraint::Fill(1),
             }
         }
-        Widget::Series { .. } => Constraint::Min(4),
+        Widget::Series { .. } | Widget::Image { .. } => Constraint::Min(4),
         _ => Constraint::Fill(1),
     }
 }

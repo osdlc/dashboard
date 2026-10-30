@@ -8,7 +8,11 @@ license.workspace = true
 anyhow = "1.0.104"
 dashboard-contract = { version = "0.4.0", path = "../contract" }
 dashboard-host = { version = "0.4.0", path = "../host" }
+# Decoders for the image widget: the formats it documents, nothing more.
+image = { version = "0.25.10", default-features = false, features = ["png", "jpeg", "gif", "webp", "bmp"] }
 ratatui = "0.30.2"
+# Draws the image widget with Kitty, iTerm2 or Sixel graphics, or half blocks.
+ratatui-image = { version = "11.1.0", default-features = false, features = ["crossterm"] }
 terminal-colorsaurus = "1.0.3"
 tokio = { version = "1.54.1", features = ["full"] }
 

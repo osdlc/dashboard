@@ -6,6 +6,7 @@ import { stableKeys } from '../motion'
 import AnimatedNumber from './AnimatedNumber.vue'
 import BarList from './BarList.vue'
 import UptimeView from './UptimeView.vue'
+import ImageView from './ImageView.vue'
 import LogView from './LogView.vue'
 import MeterGrid from './MeterGrid.vue'
 import SeriesChart from './SeriesChart.vue'
@@ -75,6 +76,7 @@ const keys = computed(() => {
   <LogView v-else-if="w.type === 'log'" :widget="w" />
 
   <UptimeView v-else-if="w.type === 'uptime'" :widget="w" />
+  <ImageView v-else-if="w.type === 'image'" :widget="w" />
   <TransitionGroup v-else-if="w.type === 'list'" tag="ul" name="row" class="w-list">
     <li v-if="w.items.length === 0" key="__empty" class="empty">{{ w.empty_text ?? 'Nothing here' }}</li>
     <li v-for="(item, i) in w.items" :key="keys[i]" :data-status="item.status ?? undefined">
