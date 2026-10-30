@@ -1,0 +1,153 @@
+# Try-out config: one or more screens for each feature merged so far. From the
+# repository root:
+#
+#   cargo run -p dashboard -- serve --config examples/try.yaml   # web view
+#   cargo run -p dashboard -- tui   --config examples/try.yaml   # terminal
+#   cargo run -p dashboard -- --config examples/try.yaml config  # check the file
+#
+# Switch screens with the number keys or [ and ].
+#
+# Tiles marked `demo: true` show made-up data from the module's catalog entry.
+# They need a token, an account or software that may not be installed. Nothing
+# runs for them: no process, no network calls. Remove the line (and set the
+# token variable named next to it) to run the module for real.
+#
+# Everything else is real: system stats, the gh CLI (read-only, your login),
+# local Codex logs, cswap if installed, and public websites for uptime.
+#
+# Bundles: built-in modules come in bundles (system, dev, fun, agents) that are
+# Cargo features of the binary. All are on by default. A smaller build, e.g.
+#   cargo run -p dashboard --no-default-features --features bundle-system -- widgets
+# lists only what it has; a config naming a left-out module reports it as an
+# error on its tile. See docs/modules.md.
+
+theme: auto
+
+modules:
+  # ---- system bundle: real, local ----
+  cpu: {}
+  memory: {}
+  network: {}
+  disk: {}
+  processes: {}
+  install-log:
+    builtin: log
+    config: { path: /var/log/install.log, lines: 200 }
+  uptime:
+    config:
+      timeout: 10
+      checks:
+        - { name: github, url: https://github.com }
+        - { name: github api, url: https://api.github.com/zen, slow_ms: 800 }
+        - { name: codeberg, url: https://codeberg.org }
+        - name: local dev
+          # Nothing listens here, so this shows a failing check.
+          curl: 'curl http://127.0.0.1:9/health'
+
+  # ---- dev bundle: GitHub is real through gh; the rest need tokens ----
+  github-prs: {}
+  github-issues: {}
+  jira:
+    demo: true            # real: set $JIRA_API_TOKEN and config { url, email }
+  linear:
+    demo: true            # real: set $LINEAR_API_KEY
+  forgejo:
+    demo: true            # real: set $FORGEJO_TOKEN and config { url }
+
+  # ---- agents bundle and the bundled cswap plugin ----
+  codex: {}               # reads local Codex session logs
+  copilot:
+    demo: true            # real: needs a Copilot plan on your gh login
+  cswap: {}               # real when cswap is installed; else the tile shows an error
+
+  # ---- fun bundle: the demo module in a few styles ----
+  hero:
+    builtin: demo
+    config: { show: mixed, title: Hero, color: sunset, style: area, signal: pulse }
+  heatwall:
+    builtin: demo
+    config: { show: meters, color: heat, signal: noise, count: 32 }
+  events:
+    builtin: demo
+    config: { show: feed, count: 8 }
+  fleet:
+    builtin: demo
+    config: { show: table, count: 8 }
+
+  # ---- plugin packages from examples/plugins (found next to this file) ----
+  hello:
+    package: hello
+    config: { name: try-out }
+  git-repos:
+    package: git-repos
+    # A package runs in its own folder, so three levels up is the repository root.
+    config: { roots: [../../..], depth: 1 }
+  ci:
+    package: gh-actions
+    config: { repos: [osdlc/dashboard, osdlc/osdlc], limit: 4 }
+  latency:
+    package: latency
+    refresh: 2s
+    config:
+      slow_ms: 150
+      targets:
+        - { name: github, host: github.com }
+        - { name: cloudflare dns, host: 1.1.1.1, port: 53 }
+
+  # ---- demo mode: the same modules shown with `demo: true` ----
+  cpu-demo:
+    builtin: cpu
+    demo: true
+  prs-demo:
+    builtin: github-prs
+    demo: true
+  ci-demo:
+    package: gh-actions
+    demo: true
+  cswap-demo:
+    builtin: cswap
+    demo: true
+
+# Sizes on the 12-column grid: small 3x1, medium 4x2, large 6x3, wide 8x2, tall 4x4.
+screens:
+  - name: system
+    tiles:
+      - { module: cpu, size: wide }
+      - { module: memory, size: medium }
+      - { module: network, size: medium }
+      - { module: disk, size: medium }
+      - { module: processes, size: medium }
+  - name: ops
+    tiles:
+      - { module: uptime, size: large }
+      - { module: latency, size: large }
+      - { module: install-log, size: wide }
+  - name: dev
+    tiles:
+      - { module: github-prs, size: large }
+      - { module: github-issues, size: large }
+      - { module: jira, size: medium }
+      - { module: linear, size: medium }
+      - { module: forgejo, size: medium }
+  - name: agents
+    tiles:
+      - { module: cswap, size: wide }
+      - { module: codex, size: medium }
+      - { module: copilot, size: medium }
+  - name: plugins
+    tiles:
+      - { module: git-repos, size: wide }
+      - { module: hello, size: medium }
+      - { module: ci, size: tall }
+  - name: demo mode
+    tiles:
+      - { module: cpu-demo, size: wide }
+      - { module: prs-demo, size: medium }
+      - { module: ci-demo, size: medium }
+      - { module: cswap-demo, size: medium }
+  - name: fun
+    tiles:
+      - { module: hero, size: large }
+      - { module: heatwall, size: large }
+      - { module: events, size: wide }
+      - { module: fleet, size: medium }

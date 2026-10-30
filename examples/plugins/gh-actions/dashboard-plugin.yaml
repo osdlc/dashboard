@@ -1,0 +1,54 @@
+id: gh-actions
+version: 0.1.0
+name: GitHub Actions
+description: >-
+  Recent GitHub Actions runs for a few repositories, newest first, with
+  passed, failed and running counts. Uses the gh CLI and its login.
+tags: [example, github, ci, dev]
+run: [node, gh_actions.mjs]
+runtime: node>=18
+binaries: [gh]
+hosts: [api.github.com]
+size: medium
+config_schema:
+  type: object
+  additionalProperties: false
+  required: [repos]
+  properties:
+    repos: { type: array, items: { type: string }, minItems: 1, description: "Repositories as owner/name." }
+    limit: { type: integer, minimum: 1, description: Runs per repository. }
+    branch: { type: [string, "null"], description: Only runs on this branch. }
+demo:
+  status: error
+  summary: "failing: acme/web"
+  root:
+    type: column
+    children:
+      - type: row
+        children:
+          - { type: stat, label: Passed, value: "5", status: ok }
+          - { type: stat, label: Failed, value: "1", status: error }
+          - { type: stat, label: Running, value: "1", status: warn }
+      - type: list
+        empty_text: No runs yet
+        items:
+          - title: Add rate limiting to the search endpoint
+            subtitle: acme/api · CI · 2m ago
+            status: warn
+            tags: [rate-limits, running]
+            action: { type: open_url, url: "https://github.com/acme/api/actions" }
+          - title: Move settings page to the new form components
+            subtitle: acme/web · CI · 25m ago · took 4m 12s
+            status: error
+            tags: [settings-forms]
+            action: { type: open_url, url: "https://github.com/acme/web/actions" }
+          - title: Retry webhook deliveries with backoff
+            subtitle: acme/api · CI · 1h ago · took 3m 2s
+            status: ok
+            tags: [main]
+            action: { type: open_url, url: "https://github.com/acme/api/actions" }
+          - title: Nightly build
+            subtitle: acme/web · Release · 9h ago · took 11m 40s
+            status: ok
+            tags: [main]
+            action: { type: open_url, url: "https://github.com/acme/web/actions" }

@@ -1,0 +1,17 @@
+[workspace]
+resolver = "3"
+members = ["crates/*", "plugins/*"]
+
+[workspace.package]
+edition = "2024"
+version = "0.4.0"
+license = "MIT OR Apache-2.0"
+
+# Smallest binary: `cargo build --profile small`. Slower to build.
+[profile.small]
+inherits = "release"
+lto = "fat"
+codegen-units = 1
+opt-level = "s"
+strip = true
+panic = "abort"

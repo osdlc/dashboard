@@ -1,0 +1,375 @@
+# Module Contract (v0.1)
+
+This is the contract between the host and a module. Built-in Rust modules implement it as a trait. Stdio plugins implement it over JSON-RPC 2.0. Both produce the same `View` JSON, which is also what the host sends to the TUI and web renderers.
+
+**Writing a plugin:** [plugins.md](plugins.md),
+the practical guide with every widget and the protocol as implemented.
+
+**Implemented vs planned.** Built today: poll-mode modules and plugins, every widget below,
+host-kept series history, `open_url` actions, the [catalog](#catalog) and plugin packages.
+Designed here but not built yet: push mode
+(the host rejects push plugins), running declared commands with approval, and the
+`run_command` action. The Rust types in `crates/contract` are the source of truth;
+`dashboard schema view` prints the current JSON Schema.
+
+## Overview
+
+```text
+            ┌────────────── host ──────────────┐
+ built-in ──┤ Module trait                     │
+ module     │                                  ├── TUI renderer (ratatui)
+            │ scheduler → latest View per tile ├── web renderer (axum → Vue)
+ stdio   ───┤ JSON-RPC client                  │
+ plugin     │ command runner + approvals       │
+            └──────────────────────────────────┘
+```
+
+- The host asks modules for views, keeps the latest `View` per tile, and pushes it to every attached renderer.
+- **Modules never run commands.** They declare commands; the host runs them after confirmation. In v1 a plugin cannot cause anything to execute on its own.
+
+## Versioning
+
+`contract_version` is `MAJOR.MINOR`. The host refuses a plugin with a different major version. Minor versions only add optional fields; both sides ignore fields they don't know.
+
+## Types
+
+Rust is the source of truth. JSON Schema (for plugin authors) is generated with `schemars`; TypeScript types (for the Vue app) with `ts-rs` or `specta`. All JSON fields are `snake_case`.
+
+```rust
+// ---- Manifest: what a module is ----
+
+pub struct Manifest {
+    pub id: String,                    // "cswap", unique per host
+    pub name: String,                  // "Claude accounts"
+    pub contract_version: String,      // "0.1"
+    pub refresh: Refresh,
+    pub layout: LayoutHints,
+    pub commands: Vec<CommandDecl>,    // may be empty
+    pub config_schema: Option<serde_json::Value>, // JSON Schema for this module's config block
+}
+
+#[serde(tag = "mode", rename_all = "snake_case")]
+pub enum Refresh {
+    Poll {
+        interval_ms: u64,              // suggested period; config can override
+        min_interval_ms: Option<u64>,  // floor for overrides (e.g. API rate limits)
+    },
+    Push,                              // module sends view/update when it has something new
+}
+
+pub struct LayoutHints {
+    pub size: Size,
+    pub priority: i32,                 // higher = placed earlier when auto-placing
+    pub min_size: Option<Size>,
+}
+
+#[serde(rename_all = "snake_case")]
+pub enum Size { Small, Medium, Large, Wide, Tall }
+
+// ---- Commands ----
+
+pub struct CommandDecl {
+    pub id: String,                    // "switch"
+    pub label: String,                 // "Switch to account"
+    pub argv: Vec<String>,             // ["cswap", "switch", "{account}"]
+    pub cwd: Option<String>,
+    pub params: Vec<ParamDecl>,        // placeholders allowed in argv
+}
+
+pub struct ParamDecl {
+    pub name: String,                  // "account"
+    pub pattern: String,               // regex the value must fully match, e.g. "^[0-9]+$"
+}
+
+// ---- View: what a module shows ----
+
+pub struct View {
+    pub status: Status,                // overall tile status
+    pub summary: String,               // one line, used when the tile is too small
+    pub root: Widget,
+}
+
+#[serde(rename_all = "snake_case")]
+pub enum Status { Ok, Warn, Error, Unknown }
+
+#[serde(tag = "type", rename_all = "snake_case")]
+pub enum Widget {
+    Text   { text: String, #[serde(default)] markdown: bool },
+    Stat   { label: String, value: String, unit: Option<String>, delta: Option<String>, status: Option<Status> },
+    Gauge  { label: String, percent: f64, marker: Option<f64>, thresholds: Option<Thresholds>, caption: Option<String> },
+    Series { label: String, unit: Option<String>, y_max: Option<f64>,
+             id: Option<String>, history: Option<u32>,   // host-kept history, see below
+             style: SeriesStyle,      // line | area | bars
+             color: ColorScale,       // accent | heat | cool | sunset (colored by value)
+             mirrored: bool,          // first series above the axis, second below (e.g. net down/up)
+             format: ValueFormat,     // plain | bytes (KiB/MiB/GiB) | count (12.3k, 4.2M), then `unit`
+             series: Vec<SeriesData> },
+    MeterGrid { label: Option<String>, meters: Vec<Meter>, color: ColorScale },   // e.g. per-core CPU
+    Bars   { label: Option<String>, unit: Option<String>, format: ValueFormat, max: Option<f64>, bars: Vec<Bar> },
+    List   { items: Vec<ListItem>, empty_text: Option<String> },
+    Table  { columns: Vec<Column>, rows: Vec<Row> },
+    Log    { label: Option<String>, lines: Vec<LogLine> },               // newest last
+    Uptime { checks: Vec<UptimeCheck> },                                 // status strip per check
+    Row    { children: Vec<Widget> },
+    Column { children: Vec<Widget> },
+}
+
+pub struct Thresholds { pub warn: f64, pub error: f64 }   // percent values
+
+pub struct SeriesData {
+    pub name: String,
+    pub points: Vec<(i64, f64)>,       // (unix ms, value)
+}
+
+pub struct ListItem {
+    pub title: String,
+    pub subtitle: Option<String>,
+    pub status: Option<Status>,
+    pub tags: Vec<String>,             // short labels: "draft", "review requested"
+    pub action: Option<Action>,
+}
+
+pub struct Column { pub key: String, pub label: String }
+
+pub struct Row {
+    pub cells: BTreeMap<String, Cell>, // keyed by Column.key
+    pub status: Option<Status>,
+    pub action: Option<Action>,
+}
+
+#[serde(untagged)]
+pub enum Cell {
+    Text(String),
+    Number(f64),
+    Widget(Widget),                    // only Stat and Gauge are rendered inline; others fall back to text
+}
+
+// ---- Actions ----
+
+#[serde(tag = "type", rename_all = "snake_case")]
+pub enum Action {
+    OpenUrl    { url: String },                            // http/https only
+    RunCommand { command: String, params: BTreeMap<String, String> },
+}
+```
+
+### Built-in module trait
+
+```rust
+#[async_trait]
+pub trait Module: Send {
+    /// Called once with this module's config block. Returns the manifest
+    /// (for plugins, the manifest only exists after `initialize`).
+    async fn init(&mut self, config: serde_json::Value) -> Result<Manifest>;
+    /// Called on each poll tick. Push-mode modules are given a sender instead (see `start`).
+    async fn render(&mut self) -> Result<View>;
+    /// Push-mode only: keep running and send views when they change.
+    async fn start(&mut self, _tx: ViewSender) -> Result<()> { Ok(()) }
+}
+```
+
+### Series history
+
+A module that sets `id` on a `Series` widget sends only **new** samples in each update. The host appends them to a buffer per (tile, `id`, series name), keeps the last `history` points (default 300), drops samples older than the last one kept, and hands renderers the full history. Without `id`, `points` is taken as the complete series.
+
+Renderers currently receive the full series on every update. On localhost this is cheap; sending only the new points to renderers is a possible later optimization and doesn't change what modules send.
+
+## Stdio plugin protocol
+
+### Transport
+
+- The host spawns the plugin from its config (`plugin.command`, an argv list).
+- **stdin/stdout:** JSON-RPC 2.0, one message per line (newline-delimited JSON, as MCP's stdio transport does). Messages must not contain raw newlines.
+- **stderr:** free text, captured into the host log under the module's ID.
+
+### Methods
+
+| Direction | Method | Kind | Purpose |
+|---|---|---|---|
+| host → plugin | `initialize` | request | Send contract version and the module's config; get the `Manifest` back. |
+| host → plugin | `view/render` | request | Poll mode: return the current `View`. |
+| host → plugin | `shutdown` | request | Stop work; reply, then wait for `exit`. |
+| host → plugin | `exit` | notification | Exit the process. |
+| plugin → host | `view/update` | notification | Push mode: here is a new `View`. |
+| plugin → host | `log` | notification | `{ level, message }` for the host log. |
+
+No method lets a plugin run a command. Commands run only from a user action in a renderer.
+
+### Lifecycle and failure handling
+
+1. Spawn, in the config file's folder → `initialize`. A failure or invalid manifest shows an error tile.
+2. Poll mode: `view/render` every `interval_ms` (or the config's `refresh` override, never below `min_interval_ms`), never overlapping. Every request times out after 30 s.
+3. A render error or timeout keeps the last good view, marked stale, with an error status and message.
+4. If the process exits, or a request fails or times out, the process is dropped and started again at the next refresh, so the refresh period is the backoff.
+5. On host exit or config change the process is killed. (`shutdown` → `exit` is planned.)
+
+### Errors
+
+Standard JSON-RPC error codes, plus:
+
+| Code | Meaning |
+|---|---|
+| -32001 | Upstream unavailable (e.g. `gh` not logged in, `cswap` not found). The host shows `message` in the tile. |
+| -32002 | Config invalid. |
+
+## Commands: execution and approval
+
+When the user triggers `RunCommand { command, params }`:
+
+1. Look up `command` in the module's manifest. If it's unknown, reject.
+2. Check that every `{name}` placeholder has a param, every param value fully matches its `pattern`, and there are no extra params.
+3. Substitute the values into `argv`. Each value becomes exactly one argument; no shell is involved.
+4. Check approvals. The approval key is `module_id + command_id + sha256(argv template + cwd)`. Param values are not part of the key, so "approve always" covers the command for any value that passes its pattern. If the module later changes the template, the key changes and the user is asked again.
+5. If not approved: show the label and the fully resolved argv, with options **Run**, **Always allow**, **Cancel**.
+6. Run it, stream stdout and stderr to the output panel, and show the exit code. Then trigger an immediate `view/render` for that module so the tile reflects the change.
+
+Approvals are stored at `~/.config/<app>/approvals.yaml` and can be listed and revoked from the CLI.
+
+## Renderer feed (host → TUI / web)
+
+Renderers receive the same `View` JSON, wrapped per tile:
+
+```json
+{ "type": "tile", "tile": { "tile_id": "cswap", "view": { ... }, "updated_at": 1793000000000, "stale": false, "demo": false } }
+```
+
+`demo` is true when the config sets `demo: true` for the module: the view is its catalog demo
+view and the module is not running.
+
+On connect, the web view first gets renderer settings, then a tile message per tile:
+
+```json
+{ "type": "settings", "settings": {
+    "theme": "auto",
+    "screens": [{ "name": "main", "tiles": [{ "tile_id": "sysperf", "size": "large" }] }],
+    "modules": [{ "tile_id": "sysperf", "name": "System", "refresh_ms": 1000, "refresh_overridden": false, "commands": [] }],
+    "rotate": null,
+    "config": { "path": "/Users/me/.config/dashboard/config.yaml", "exists": true, "error": null } } }
+```
+
+The web view gets these over a WebSocket. Settings are sent again whenever the config is reloaded.
+
+The web view sends actions back as `ClientMessage`s (the TUI sends the same values over a channel):
+
+```json
+{ "type": "set_theme", "theme": "dark" }
+```
+
+The host writes `theme:` into the config file with yaml-splice (only that key's bytes change) and reloads. Running commands will be added here as `run_command`.
+
+## Example: cswap plugin
+
+The plugin is a small adapter around `cswap list --json`. (Emails below are placeholders.)
+
+**host → plugin**
+
+```json
+{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"contract_version":"0.1","host":{"name":"dashboard","version":"0.1.0"},"config":{}}}
+```
+
+**plugin → host**
+
+```json
+{"jsonrpc":"2.0","id":1,"result":{"manifest":{
+  "id":"cswap",
+  "name":"Claude accounts",
+  "contract_version":"0.1",
+  "refresh":{"mode":"poll","interval_ms":60000,"min_interval_ms":15000},
+  "layout":{"size":"medium","priority":50,"min_size":"small"},
+  "commands":[{
+    "id":"switch",
+    "label":"Switch to account",
+    "argv":["cswap","switch","{account}"],
+    "params":[{"name":"account","pattern":"^[0-9]+$"}]
+  }],
+  "config_schema":null
+}}}
+```
+
+**host → plugin**
+
+```json
+{"jsonrpc":"2.0","id":2,"method":"view/render"}
+```
+
+**plugin → host**
+
+```json
+{"jsonrpc":"2.0","id":2,"result":{
+  "status":"warn",
+  "summary":"2 accounts · active #1 at 81% (5h)",
+  "root":{"type":"table",
+    "columns":[
+      {"key":"account","label":"Account"},
+      {"key":"five_hour","label":"5 hours"},
+      {"key":"seven_day","label":"7 days"},
+      {"key":"resets","label":"5h resets"}
+    ],
+    "rows":[
+      {"status":"warn",
+       "cells":{
+         "account":"● 1 work@example.com",
+         "five_hour":{"type":"gauge","label":"5h","percent":81,"thresholds":{"warn":75,"error":90}},
+         "seven_day":{"type":"gauge","label":"7d","percent":40,"marker":52,"thresholds":{"warn":75,"error":90},"caption":"on pace"},
+         "resets":"1h 12m"},
+       "action":null},
+      {"status":"ok",
+       "cells":{
+         "account":"2 personal@example.com",
+         "five_hour":{"type":"gauge","label":"5h","percent":5},
+         "seven_day":{"type":"gauge","label":"7d","percent":22,"marker":52},
+         "resets":"4h 40m"},
+       "action":{"type":"run_command","command":"switch","params":{"account":"2"}}}
+    ]}
+}}
+```
+
+Mapping from `cswap list --json`: `usage.fiveHour.pct` → 5-hour gauge, `usage.sevenDay.pct` → 7-day gauge, `usage.sevenDay.expectedPct` → `marker`, `aheadOfPace` / `willLastToReset` → caption and row status, `fiveHour.countdown` → resets column. The active account has no switch action.
+
+## Catalog
+
+Everything that can be added to a dashboard has a catalog entry: built-in modules (from the
+binary), bundled plugins (cswap), and installed plugin packages (from their
+`dashboard-plugin.yaml`, see [plugins.md](plugins.md#package-it)). `dashboard widgets` lists and
+searches them; `dashboard schema catalog-entry` prints the JSON Schema.
+
+```rust
+pub struct CatalogEntry {
+    pub id: String,              // what the config names: modules.<id>, or package: <id>
+    pub name: String,
+    pub version: String,
+    pub description: String,
+    pub tags: Vec<String>,
+    pub kind: EntryKind,         // builtin | plugin
+    pub source: String,          // "builtin", "bundled", or the package's folder
+    pub default_size: Size,
+    pub config_schema: Option<serde_json::Value>,  // JSON Schema for the config: block
+    pub requirements: Requirements,
+    pub demo: View,              // made-up data; needs no account
+}
+
+pub struct Requirements {
+    pub binaries: Vec<String>,   // e.g. "gh", "node>=22"
+    pub env: Vec<String>,        // e.g. "JIRA_API_TOKEN"
+    pub hosts: Vec<String>,      // network hosts it calls
+}
+```
+
+The demo view is what the editor preview, the site's screenshots and the tests show. Built
+from a sample response in the API's documented shape, it goes through the same parse code as
+live data. Modules built only from API docs, with no live test yet, carry the tag
+`untested-live` and say so in their description.
+
+Search (`catalog::search`) keeps an entry when every word of the query appears in its ID, name,
+description or tags, ignoring case, and when it has the `--tag` given, if any.
+
+A built-in module adds its entry with a `catalog()` function next to the module, named in the
+`Builtin` entry of its bundle's `MODULES` list (see docs/modules.md). A test checks every built-in has one, with a description, tags
+and a demo view that passes `check_view`.
+
+## Not in v0.1
+
+- WASM plugins. The same types will be mirrored in a WIT file once the contract is stable.
+- Plugin-defined events or callbacks (clicks sent to the plugin).
+- Data passed between modules.
+- Per-size rendering (a different view for each size class).

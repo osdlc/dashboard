@@ -1,0 +1,214 @@
+# Demo layout: eight screens using every tile size and widget style. This is
+# also the default config when ~/.config/dashboard/config.yaml doesn't exist.
+#
+#   cargo run -p dashboard -- serve --config examples/demo.yaml
+#   cargo run -p dashboard -- tui   --config examples/demo.yaml
+#
+# Switch screens with 1-7 or [ and ]. Edit this file while it runs; changes apply live.
+# Each demo tile is the `demo` built-in with its own settings:
+#   show:   chart | lines | mirrored | meters | gauges | stats | leaderboard | table | feed | note | mixed | log
+#   style:  line | area | bars                      (charts)
+#   color:  accent | heat | cool | sunset
+#   signal: wave | noise | spiky | sawtooth | steps | pulse
+#   count:  meters / rows / items          seed: varies the random numbers
+#   size (outside config): small | medium | large | wide | tall
+
+theme: auto
+
+# Uncomment to cycle screens automatically (pauses for a minute after you press a key).
+# rotate:
+#   interval: 15s
+#   screens: [showcase, charts, meters]
+
+modules:
+  # Listed so the "live" screen is valid even where cswap isn't installed
+  # (the tile then shows an error instead).
+  cswap: {}
+
+  # ---- showcase ----
+  hero:
+    builtin: demo
+    config: { show: mixed, title: Hero, color: sunset, style: area, signal: pulse }
+  headline:
+    builtin: demo
+    config: { show: stats }
+  readme:
+    builtin: demo
+    config: { show: note }
+  heatwall:
+    builtin: demo
+    config: { show: meters, color: heat, signal: noise, count: 32 }
+  budgets:
+    builtin: demo
+    config: { show: gauges }
+  events:
+    builtin: demo
+    config: { show: feed, count: 8 }
+
+  # ---- charts ----
+  heat-area:
+    builtin: demo
+    config: { show: chart, style: area, color: heat, signal: wave }
+  cool-bars:
+    builtin: demo
+    config: { show: chart, style: bars, color: cool, signal: spiky }
+  sunset-saw:
+    builtin: demo
+    config: { show: chart, style: area, color: sunset, signal: sawtooth }
+  latency:
+    builtin: demo
+    config: { show: lines, count: 4 }
+  steps:
+    builtin: demo
+    config: { show: chart, style: bars, color: accent, signal: steps, seed: 7 }
+  heartbeat:
+    builtin: demo
+    config: { show: chart, style: line, color: accent, signal: pulse }
+  traffic:
+    builtin: demo
+    config: { show: mirrored, color: cool, signal: noise }
+  noise-heat-bars:
+    builtin: demo
+    config: { show: chart, style: bars, color: heat, signal: noise, seed: 3 }
+
+  sunset-bars:
+    builtin: demo
+    config: { show: chart, style: bars, color: sunset, signal: wave, seed: 4 }
+  cool-area:
+    builtin: demo
+    config: { show: chart, style: area, color: cool, signal: noise, seed: 11 }
+
+  # ---- meters ----
+  pulse-grid:
+    builtin: demo
+    config: { show: meters, color: heat, signal: pulse, count: 16 }
+  cool-grid:
+    builtin: demo
+    config: { show: meters, color: cool, signal: wave, count: 12 }
+  sunset-grid:
+    builtin: demo
+    config: { show: meters, color: sunset, signal: sawtooth, count: 48 }
+  accent-grid:
+    builtin: demo
+    config: { show: meters, color: accent, signal: steps, count: 24 }
+  quota:
+    builtin: demo
+    config: { show: gauges, count: 5 }
+  leaders:
+    builtin: demo
+    config: { show: leaderboard, count: 10 }
+
+  # ---- logs ----
+  app-log:
+    builtin: demo
+    config: { show: log, title: api server }
+  worker-log:
+    builtin: demo
+    config: { show: log, title: build worker, seed: 2 }
+  # Tail a real file with the `log` built-in (match is optional, case-insensitive):
+  # syslog:
+  #   builtin: log
+  #   config: { path: /var/log/system.log, lines: 300, match: error }
+
+  # Issue trackers: uncomment, set the token variable, and add them to a screen.
+  # Tokens come from the environment (or token_command), never this file.
+  # linear: {}                                              # $LINEAR_API_KEY
+  # jira:
+  #   config: { url: https://acme.atlassian.net, email: me@acme.com }   # $JIRA_API_TOKEN
+  # forgejo:
+  #   config: { url: https://codeberg.org }                 # $FORGEJO_TOKEN
+
+  # ---- AI agent usage. Claude Code is the cswap tile (runs when cswap is
+  # installed). Codex reads its local session logs; Copilot uses the gh login. ----
+  codex: {}
+  copilot: {}
+
+  # ---- uptime: each check runs curl. Use `url`, or a full `curl` command run
+  # with sh (so $VARS expand; keep tokens in the environment). ----
+  uptime:
+    config:
+      timeout: 10
+      checks:
+        - { name: github, url: https://github.com }
+        - { name: github api, url: https://api.github.com/zen, slow_ms: 800 }
+        - { name: codeberg, url: https://codeberg.org }
+        - name: local dev
+          # Nothing listens here, so this shows a failing check.
+          curl: 'curl -H "Accept: application/json" http://127.0.0.1:9/health'
+        # - name: api health
+        #   curl: 'curl -H "Authorization: Bearer $API_TOKEN" https://api.example.com/health'
+        #   expect: 200            # one code or a list; default any 2xx/3xx
+
+  # ---- lists ----
+  fleet:
+    builtin: demo
+    config: { show: table, count: 10 }
+  activity:
+    builtin: demo
+    config: { show: feed, count: 10, seed: 5 }
+  kpis:
+    builtin: demo
+    config: { show: stats, seed: 9 }
+
+# Sizes on the 12-column grid: small 3x1, medium 4x2, large 6x3, wide 8x2, tall 4x4.
+screens:
+  - name: showcase
+    tiles:
+      - { module: hero, size: large }
+      - { module: budgets, size: large }
+      - { module: heatwall, size: wide }
+      - { module: headline, size: medium }
+      - { module: events, size: wide }
+      - { module: readme, size: medium }
+  - name: charts
+    tiles:
+      - { module: heat-area, size: wide }
+      - { module: heartbeat, size: medium }
+      - { module: cool-bars, size: medium }
+      - { module: sunset-saw, size: medium }
+      - { module: latency, size: medium }
+      - { module: traffic, size: wide }
+      - { module: steps, size: medium }
+      - { module: noise-heat-bars, size: medium }
+      - { module: sunset-bars, size: medium }
+      - { module: cool-area, size: medium }
+  - name: meters
+    tiles:
+      - { module: sunset-grid, size: wide }
+      - { module: leaders, size: tall }
+      - { module: cool-grid, size: medium }
+      - { module: quota, size: medium }
+      - { module: accent-grid, size: wide }
+      - { module: pulse-grid, size: medium }
+  - name: lists
+    tiles:
+      - { module: fleet, size: wide }
+      - { module: activity, size: tall }
+      - { module: kpis, size: medium }
+      - { module: leaders, size: medium }
+  - name: logs
+    tiles:
+      - { module: app-log, size: wide }
+      - { module: kpis, size: medium }
+      - { module: worker-log, size: large }
+      - { module: budgets, size: large }
+  - name: github
+    tiles:
+      - { module: github-prs, size: large }
+      - { module: github-issues, size: large }
+  - name: agents
+    tiles:
+      - { module: cswap, size: wide }
+      - { module: codex, size: medium }
+      - { module: copilot, size: medium }
+      - { module: github-prs, size: wide }
+  - name: live
+    tiles:
+      - { module: cpu, size: wide }
+      - { module: memory, size: medium }
+      - { module: network, size: medium }
+      - { module: disk, size: medium }
+      - { module: cswap, size: medium }
+      - { module: processes, size: wide }
+      - { module: github-prs, size: medium }
+      - { module: uptime, size: large }

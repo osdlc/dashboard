@@ -1,0 +1,35 @@
+# The example plugins on one screen. From the repository root:
+#
+#   cargo run -p dashboard -- --config examples/plugins.yaml
+#
+# Each example is a plugin package: a folder under plugins/ with a
+# dashboard-plugin.yaml. Packages next to the config file are found by ID, so
+# `package: hello` runs plugins/hello/. See docs/plugins.md.
+modules:
+  hello:
+    package: hello
+    config: { name: plugins }
+  git-repos:
+    package: git-repos
+    # A package runs in its own folder (plugins/git-repos/), so the roots are
+    # relative to it: three levels up is the repository root.
+    config: { roots: [../../..], depth: 1 }
+  ci:
+    package: gh-actions
+    config: { repos: [osdlc/dashboard, osdlc/osdlc], limit: 4 }
+  latency:
+    package: latency
+    refresh: 2s
+    config:
+      slow_ms: 150
+      targets:
+        - { name: github, host: github.com }
+        - { name: cloudflare dns, host: 1.1.1.1, port: 53 }
+
+screens:
+  - name: plugins
+    tiles:
+      - { module: git-repos, size: wide }
+      - { module: hello, size: medium }
+      - { module: ci, size: tall }
+      - { module: latency, size: wide }
