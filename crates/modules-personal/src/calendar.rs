@@ -45,6 +45,7 @@ struct Config {
     /// Command that prints the feed's URL, e.g. `["op", "read", "op://me/calendar/url"]`.
     url_command: Option<Vec<String>>,
     /// A local `.ics` file instead of a URL. `~/` is expanded.
+    #[schemars(extend("x-path" = true))]
     path: Option<String>,
     /// Days to show, starting today.
     days: u32,
@@ -293,6 +294,7 @@ fn agenda_view(
             let link = o.event.join_link();
             let in_progress = !o.all_day && o.start <= now && now < o.end;
             ListItem {
+                tone: None,
                 title: o.event.summary.clone(),
                 subtitle: Some(sub.join(" · ")),
                 status: if in_progress {

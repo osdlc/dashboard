@@ -44,6 +44,7 @@ const DC_NS: &str = "http://purl.org/dc/elements/1.1/";
 struct Config {
     /// Feed URLs, RSS or Atom. An entry that does not start with `http://`
     /// or `https://` is read as a file, for tests and demos.
+    #[schemars(extend("x-path" = true))]
     feeds: Vec<String>,
     /// How many items to show, newest first, across all feeds.
     max_items: usize,
@@ -715,6 +716,7 @@ fn view(feeds: &[(String, Result<Feed, Failure>)], max_items: usize) -> Result<V
     let mut list: Vec<ListItem> = failed
         .iter()
         .map(|(entry, why)| ListItem {
+            tone: None,
             title: format!("Could not read {entry}"),
             subtitle: Some(why.reason()),
             status: Some(Status::Error),
@@ -723,6 +725,7 @@ fn view(feeds: &[(String, Result<Feed, Failure>)], max_items: usize) -> Result<V
         })
         .collect();
     list.extend(items.iter().map(|(feed, item)| ListItem {
+        tone: None,
         title: if item.title.is_empty() {
             "(no title)".into()
         } else {

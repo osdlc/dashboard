@@ -4,11 +4,13 @@ import type { Cell, Thresholds, Widget } from '../contract'
 import { inlineMarkdown } from '../format'
 import { webUrl } from '../actions'
 import { stableKeys } from '../motion'
+import { toneColor } from '../colors'
 import AnimatedNumber from './AnimatedNumber.vue'
 import BarList from './BarList.vue'
 import UptimeView from './UptimeView.vue'
 import LogView from './LogView.vue'
 import MeterGrid from './MeterGrid.vue'
+import PieChart from './PieChart.vue'
 import SeriesChart from './SeriesChart.vue'
 
 defineOptions({ name: 'WidgetView' })
@@ -73,28 +75,39 @@ const keys = computed(() => {
 
   <BarList v-else-if="w.type === 'bars'" :widget="w" />
 
+  <PieChart v-else-if="w.type === 'pie'" :widget="w" />
+
   <LogView v-else-if="w.type === 'log'" :widget="w" />
 
   <UptimeView v-else-if="w.type === 'uptime'" :widget="w" />
   <TransitionGroup v-else-if="w.type === 'list'" tag="ul" name="row" class="w-list">
     <li v-if="w.items.length === 0" key="__empty" class="empty">{{ w.empty_text ?? 'Nothing here' }}</li>
-    <li v-for="(item, i) in w.items" :key="keys[i]" :data-status="item.status ?? undefined" data-nav-item>
-      <a v-if="item.action?.type === 'open_url' && webUrl(item.action.url)" :href="webUrl(item.action.url)" target="_blank" rel="noopener">{{ item.title }}</a>
-      <span v-else>{{ item.title }}</span>
-      <span v-for="tag in item.tags ?? []" :key="tag" class="tag">{{ tag }}</span>
-      <div v-if="item.subtitle" class="sub">{{ item.subtitle }}</div>
+    <li
+      v-for="(item, i) in w.items"
+      :key="keys[i]"
+      :data-status="item.status ?? undefined"
+      :data-tone="!item.status && item.tone ? item.tone : undefined"
+      :style="!item.status && item.tone ? { '--tone': toneColor(item.tone) } : undefined"
+      data-nav-item
+    >
+      <div class="item-head">
+        <a v-if="item.action?.type === 'open_url' && webUrl(item.action.url)" class="title" :title="item.title" :href="webUrl(item.action.url)" target="_blank" rel="noopener">{{ item.title }}</a>
+        <span v-else class="title" :title="item.title">{{ item.title }}</span>
+        <span v-for="tag in item.tags ?? []" :key="tag" class="tag">{{ tag }}</span>
+      </div>
+      <div v-if="item.subtitle" class="sub" :title="item.subtitle">{{ item.subtitle }}</div>
     </li>
   </TransitionGroup>
 
   <table v-else-if="w.type === 'table'" class="w-table">
     <thead>
-      <tr><th v-for="c in w.columns" :key="c.key">{{ c.label }}</th></tr>
+      <tr><th v-for="c in w.columns" :key="c.key" :data-priority="c.priority ?? undefined">{{ c.label }}</th></tr>
     </thead>
     <TransitionGroup tag="tbody" name="row">
       <tr v-for="(row, i) in w.rows" :key="keys[i]" :data-status="row.status ?? undefined" data-nav-item>
         <td v-for="c in w.columns" :key="c.key">
           <WidgetView v-if="isWidget(row.cells[c.key])" :widget="row.cells[c.key] as Widget" />
-          <template v-else>{{ row.cells[c.key] ?? '' }}</template>
+          <span v-else :title="String(row.cells[c.key] ?? '')">{{ row.cells[c.key] ?? '' }}</span>
         </td>
       </tr>
     </TransitionGroup>

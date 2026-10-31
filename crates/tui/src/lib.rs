@@ -25,21 +25,25 @@ use tokio::sync::{mpsc, watch};
 
 mod canvas;
 mod charts;
+mod fit;
 mod help;
 mod layout;
 mod mouse;
 mod nav;
+mod pie;
 mod rotate;
 mod settings;
 #[cfg(test)]
 mod size_tests;
 mod theme;
+#[cfg(test)]
+mod tile_shots;
 mod widgets;
 
 use canvas::Canvas;
 use mouse::{Click, Hits};
 use nav::{Dir, Focus};
-use theme::Palette;
+use theme::{Depth, Palette};
 
 struct App {
     settings: UiSettings,
@@ -116,7 +120,12 @@ pub async fn run(
     // Query the terminal before entering raw mode / the alternate screen.
     let auto_light = Palette::terminal_is_light();
     let settings = settings_rx.borrow_and_update().clone();
-    let palette = Palette::for_theme(settings.theme, auto_light);
+    let palette = Palette::new(
+        settings.theme,
+        &settings.color_theme,
+        auto_light,
+        Depth::detect(),
+    );
     let mut rx = host.subscribe();
     let tiles = host
         .snapshot()
@@ -245,7 +254,12 @@ impl App {
         self.screen = current
             .and_then(|name| settings.screens.iter().position(|s| s.name == name))
             .unwrap_or(0);
-        self.palette = Palette::for_theme(settings.theme, self.auto_light);
+        self.palette = Palette::new(
+            settings.theme,
+            &settings.color_theme,
+            self.auto_light,
+            Depth::detect(),
+        );
         self.rotation = settings
             .rotate
             .as_ref()
@@ -324,6 +338,7 @@ impl App {
                     });
                 }
             }
+            Click::ColorTheme(name) => self.set_color_theme(name),
             Click::EditConfig => self.edit_config = true,
             Click::Close => self.overlay = Overlay::None,
             Click::Run(action) => self.run(&action),
@@ -456,6 +471,15 @@ impl App {
         self.scroll = scroll.min(self.max_scroll.get());
     }
 
+    fn set_color_theme(&self, name: String) {
+        if let Some(tx) = &self.actions {
+            let _ = tx.send(ClientMessage::SetColorTheme {
+                name,
+                etag: self.settings.config.etag.clone(),
+            });
+        }
+    }
+
     /// Keys here must match `help::KEYS`.
     fn on_key(&mut self, key: KeyEvent, now: Instant) {
         let count = self.settings.screens.len().max(1);
@@ -475,6 +499,12 @@ impl App {
                             theme,
                             etag: self.settings.config.etag.clone(),
                         });
+                    }
+                    return;
+                }
+                KeyCode::Char('c') => {
+                    if let Some(name) = settings::next_color_theme(&self.settings) {
+                        self.set_color_theme(name);
                     }
                     return;
                 }
@@ -697,20 +727,14 @@ fn perimeter(r: Rect) -> impl Iterator<Item = (u16, u16)> {
 
 /// Tile rects on the page, the page width and its height. When the page is
 /// taller than the view, the last column is left for the scrollbar.
-fn page_layout(app: &App, screen: &ScreenLayout, width: u16, height: u16) -> (Vec<Rect>, u16, u16) {
+fn page_layout(screen: &ScreenLayout, width: u16, height: u16) -> (Vec<Rect>, u16, u16) {
     let sizes: Vec<_> = screen.tiles.iter().map(|t| t.size).collect();
-    let min_height = |i: usize, w: u16| {
-        app.tiles
-            .get(&screen.tiles[i].tile_id)
-            .map(|t| widgets::tile_min_height(t, w))
-            .unwrap_or(3)
-    };
-    let (rects, page) = layout::place(width, height, &sizes, min_height);
+    let (rects, page) = layout::place(width, height, &sizes);
     if page <= height {
         return (rects, width, page);
     }
     let page_width = width.saturating_sub(1);
-    let (rects, page) = layout::place_with_tier(page_width, width, height, &sizes, min_height);
+    let (rects, page) = layout::place_with_tier(page_width, width, height, &sizes);
     (rects, page_width, page)
 }
 
@@ -718,7 +742,7 @@ fn page_layout(app: &App, screen: &ScreenLayout, width: u16, height: u16) -> (Ve
 /// shows the part scrolled to, with a scrollbar when there's more.
 fn draw_page(f: &mut Frame, app: &App, main: Rect, screen: &ScreenLayout, hits: &mut Hits) {
     let p = &app.palette;
-    let (rects, width, page_height) = page_layout(app, screen, main.width, main.height);
+    let (rects, width, page_height) = page_layout(screen, main.width, main.height);
     let max_scroll = page_height.saturating_sub(main.height);
     app.max_scroll.set(max_scroll);
     let scroll = app.scroll.min(max_scroll);
@@ -806,6 +830,8 @@ mod tests {
         };
         let settings = UiSettings {
             theme: Theme::Dark,
+            color_theme: Default::default(),
+            color_themes: vec![],
             screens: vec![
                 ScreenLayout {
                     name: "work".into(),
@@ -979,6 +1005,55 @@ mod tests {
         ));
     }
 
+    #[test]
+    fn picking_colors_sends_the_theme_name() {
+        let (tx, mut rx) = mpsc::unbounded_channel();
+        let mut app = app();
+        app.actions = Some(tx);
+        app.settings.color_themes = dashboard_contract::theme::BUILTIN
+            .iter()
+            .map(|s| s.to_string())
+            .collect();
+        app.overlay = Overlay::Settings;
+        let mut terminal = Terminal::new(TestBackend::new(100, 30)).unwrap();
+        let mut hits = Hits::default();
+        terminal
+            .draw(|f| hits = draw(f, &app, Instant::now()))
+            .unwrap();
+        let buf = terminal.backend().buffer().clone();
+        let (x, y) = (0..30)
+            .flat_map(|y| (0..95).map(move |x| (x, y)))
+            .find(|&(x, y)| (0..5).map(|i| buf[(x + i, y)].symbol()).collect::<String>() == "paper")
+            .expect("color themes are drawn");
+        let c = hits.at(x, y).cloned().expect("color theme is clickable");
+        app.on_click(c, Instant::now());
+        assert!(matches!(
+            rx.try_recv(),
+            Ok(ClientMessage::SetColorTheme { name, .. }) if name == "paper"
+        ));
+        // `c` steps to the theme after the current one.
+        app.on_key(KeyEvent::from(KeyCode::Char('c')), Instant::now());
+        assert!(matches!(
+            rx.try_recv(),
+            Ok(ClientMessage::SetColorTheme { name, .. }) if name == "contrast"
+        ));
+    }
+
+    #[test]
+    fn colors_follow_the_color_theme() {
+        let mut app = app();
+        let ember = dashboard_contract::theme::builtin("ember").unwrap();
+        let mut settings = app.settings.clone();
+        settings.color_theme = ember.clone();
+        app.apply_settings(settings, Instant::now());
+        let expected = Palette::new(Theme::Dark, &ember, false, Depth::detect());
+        assert_eq!(app.palette.accent, expected.accent);
+        assert_ne!(
+            app.palette.accent,
+            Palette::for_theme(Theme::Dark, false).accent
+        );
+    }
+
     fn render(app: &App) -> String {
         let mut terminal = Terminal::new(TestBackend::new(100, 30)).unwrap();
         terminal
@@ -1055,6 +1130,7 @@ mod tests {
                     items: titles
                         .iter()
                         .map(|t| dashboard_contract::ListItem {
+                            tone: None,
                             title: t.to_string(),
                             subtitle: None,
                             status: None,
@@ -1186,9 +1262,9 @@ mod tests {
         key(&mut app, KeyCode::Enter);
         assert_eq!(app.ran.len(), 2);
 
-        // Fullscreen in a view too short to draw the list: nothing to go into.
+        // Fullscreen in a view with no room inside the border: nothing to go into.
         app.expanded = Some("cswap".into());
-        draw_sized(&mut app, 160, 6);
+        draw_sized(&mut app, 160, 4);
         app.focus = Focus::Tile("cswap".into());
         key(&mut app, KeyCode::Enter);
         assert_eq!(app.focus, Focus::Tile("cswap".into()));
@@ -1270,9 +1346,10 @@ pub fn tile_text(tile: &dashboard_contract::TileUpdate, width: u16, height: u16)
         .join("\n")
 }
 
-/// Rows a tile needs at this width to be usable, borders included.
-pub fn tile_min_height(tile: &dashboard_contract::TileUpdate, width: u16) -> u16 {
-    widgets::tile_min_height(tile, width)
+/// Rows a tile would take to show all of its view at this width, borders
+/// included. On a dashboard a tile's rows come from its size instead.
+pub fn tile_wanted_height(tile: &dashboard_contract::TileUpdate, width: u16) -> u16 {
+    widgets::tile_wanted_height(tile, width)
 }
 
 #[cfg(test)]
@@ -1285,6 +1362,20 @@ mod preview {
     #[ignore]
     fn preview_system_tile() {
         println!("{}", render_sample(110, 34));
+    }
+
+    /// `COLOR_THEME=paper MODE=light cargo test -p dashboard-tui preview_colors
+    /// -- --ignored --nocapture > tile.html` writes the sample in color.
+    #[test]
+    #[ignore]
+    fn preview_colors() {
+        let name = std::env::var("COLOR_THEME").unwrap_or_else(|_| "default".into());
+        let colors = dashboard_contract::theme::builtin(&name).expect("a built-in color theme");
+        let theme = match std::env::var("MODE").as_deref() {
+            Ok("light") => dashboard_contract::Theme::Light,
+            _ => dashboard_contract::Theme::Dark,
+        };
+        println!("{}", sample_html(110, 34, theme, &colors));
     }
 }
 
@@ -1327,6 +1418,7 @@ mod tests_support {
                 .into_iter()
                 .enumerate()
                 .map(|(i, v)| SeriesData {
+                    tone: None,
                     name: format!("s{i}"),
                     points: v
                         .into_iter()
@@ -1343,6 +1435,8 @@ mod tests_support {
         App {
             settings: UiSettings {
                 theme: Theme::Dark,
+                color_theme: Default::default(),
+                color_themes: vec![],
                 screens: vec![],
                 modules: vec![],
                 rotate: None,
@@ -1370,6 +1464,61 @@ mod tests_support {
     }
 
     pub fn render_sample(w: u16, h: u16) -> String {
+        let buf = sample_buffer(w, h, Theme::Dark, &Default::default());
+        (0..buf.area.height)
+            .map(|y| {
+                (0..buf.area.width)
+                    .map(|x| buf[(x, y)].symbol())
+                    .collect::<String>()
+            })
+            .collect::<Vec<_>>()
+            .join("\n")
+    }
+
+    /// The sample as an HTML page in truecolor, on the theme's background as
+    /// a terminal with that background would show it.
+    pub fn sample_html(
+        w: u16,
+        h: u16,
+        theme: Theme,
+        colors: &dashboard_contract::ColorTheme,
+    ) -> String {
+        let buf = sample_buffer(w, h, theme, colors);
+        let tokens = colors.variant(theme == Theme::Dark);
+        let css = |c: ratatui::style::Color, default: &str| match c {
+            ratatui::style::Color::Rgb(r, g, b) => format!("#{r:02x}{g:02x}{b:02x}"),
+            _ => default.to_string(),
+        };
+        let mut out = format!(
+            "<!doctype html><meta charset=utf-8><pre style=\"margin:0;padding:8px;font:13px/1.2 Menlo,monospace;background:{};color:{}\">",
+            tokens.bg, tokens.text
+        );
+        for y in 0..buf.area.height {
+            for x in 0..buf.area.width {
+                let cell = &buf[(x, y)];
+                let sym = match cell.symbol() {
+                    "<" => "&lt;",
+                    ">" => "&gt;",
+                    "&" => "&amp;",
+                    s => s,
+                };
+                out += &format!(
+                    "<span style=\"color:{};background:{}\">{sym}</span>",
+                    css(cell.fg, "inherit"),
+                    css(cell.bg, "transparent")
+                );
+            }
+            out.push('\n');
+        }
+        out + "</pre>"
+    }
+
+    fn sample_buffer(
+        w: u16,
+        h: u16,
+        theme: Theme,
+        colors: &dashboard_contract::ColorTheme,
+    ) -> Buffer {
         let wave = |n: usize, k: f64, amp: f64, base: f64| -> Vec<f64> {
             (0..n)
                 .map(|i| base + amp * ((i as f64) * k).sin().abs())
@@ -1406,6 +1555,7 @@ mod tests_support {
                     label: Some("Cores".into()),
                     meters: (0..10)
                         .map(|i| Meter {
+                            tone: None,
                             label: format!("{}", i + 1),
                             percent: (i * 11) as f64,
                         })
@@ -1447,16 +1597,19 @@ mod tests_support {
                     max: Some(100.0),
                     bars: vec![
                         Bar {
+                            tone: None,
                             label: "cargo".into(),
                             value: 88.0,
                             status: None,
                         },
                         Bar {
+                            tone: None,
                             label: "Google Chrome Helper".into(),
                             value: 31.5,
                             status: None,
                         },
                         Bar {
+                            tone: None,
                             label: "node".into(),
                             value: 4.0,
                             status: None,
@@ -1466,7 +1619,9 @@ mod tests_support {
             ],
         };
         let settings = UiSettings {
-            theme: Theme::Dark,
+            theme,
+            color_theme: colors.clone(),
+            color_themes: vec![],
             screens: vec![ScreenLayout {
                 name: "system".into(),
                 tiles: vec![TilePlacement {
@@ -1502,7 +1657,7 @@ mod tests_support {
         )]);
         let app = App {
             settings,
-            palette: Palette::for_theme(Theme::Dark, false),
+            palette: Palette::new(theme, colors, false, theme::Depth::True),
             auto_light: false,
             tiles,
             screen: 0,
@@ -1527,15 +1682,7 @@ mod tests_support {
                 draw(f, &app, Instant::now());
             })
             .unwrap();
-        let buf = terminal.backend().buffer();
-        (0..buf.area.height)
-            .map(|y| {
-                (0..buf.area.width)
-                    .map(|x| buf[(x, y)].symbol())
-                    .collect::<String>()
-            })
-            .collect::<Vec<_>>()
-            .join("\n")
+        terminal.backend().buffer().clone()
     }
 
     #[test]

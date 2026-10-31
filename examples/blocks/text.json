@@ -1,0 +1,16 @@
+{
+  "id": "text",
+  "title": "Text",
+  "group": "primitives",
+  "default_size": "small",
+  "description": "A paragraph of text. With `markdown: true`, two stars on each side make bold and backticks make code; nothing else is markup, so text from an API shows as written. Good for a note, a status line, or the one thing a tile has to say.",
+  "view": {
+    "status": "ok",
+    "summary": "Release freeze Thursday 18:00",
+    "root": {
+      "type": "text",
+      "markdown": true,
+      "text": "**Release freeze** starts Thursday at 18:00. Ask in `#deploys` before merging, and tag the release with `v2.4.0`."
+    }
+  }
+}

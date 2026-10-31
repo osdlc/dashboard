@@ -29,6 +29,7 @@ use crate::{
 #[serde(default, deny_unknown_fields)]
 struct Config {
     /// The todo.txt file. `~/` is expanded.
+    #[schemars(extend("x-path" = true))]
     path: String,
     /// Only tasks with this `+project` (without the `+`).
     project: Option<String>,

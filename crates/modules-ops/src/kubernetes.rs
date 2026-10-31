@@ -315,10 +315,11 @@ fn age(created: Option<&str>, now: i64) -> String {
     }
 }
 
-fn column(key: &str, label: &str) -> Column {
+fn column(key: &str, label: &str, priority: i32) -> Column {
     Column {
         key: key.into(),
         label: label.into(),
+        priority: Some(priority),
     }
 }
 
@@ -387,6 +388,7 @@ fn view(pods: &[Pod], now: i64, problems_only: bool, limit: usize) -> View {
     let bars = namespaces
         .iter()
         .map(|(ns, (count, worst))| Bar {
+            tone: None,
             label: ns.to_string(),
             value: *count as f64,
             status: Some(worst.status()),
@@ -437,12 +439,14 @@ fn view(pods: &[Pod], now: i64, problems_only: bool, limit: usize) -> View {
                 },
                 Widget::Table {
                     columns: vec![
-                        column("namespace", "Namespace"),
-                        column("pod", "Pod"),
-                        column("status", "Status"),
-                        column("ready", "Ready"),
-                        column("restarts", "Restarts"),
-                        column("age", "Age"),
+                        // In a narrow tile: the pod and its status first,
+                        // the namespace (also in the bars above) last.
+                        column("pod", "Pod", 3),
+                        column("namespace", "Namespace", -1),
+                        column("status", "Status", 2),
+                        column("ready", "Ready", 1),
+                        column("restarts", "Restarts", 0),
+                        column("age", "Age", 0),
                     ],
                     rows,
                 },

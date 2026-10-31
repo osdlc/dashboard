@@ -1,0 +1,63 @@
+{
+  "id": "list",
+  "title": "List",
+  "group": "primitives",
+  "default_size": "medium",
+  "description": "Items with a title, a quieter subtitle, a marker colored by status or tone, and tags shown as chips. An `open_url` action makes an item a link. `empty_text` is what shows when there are no items.",
+  "view": {
+    "status": "error",
+    "summary": "1 failed, 1 rolling back",
+    "root": {
+      "type": "list",
+      "empty_text": "No deploys today",
+      "items": [
+        {
+          "title": "Deploy finished · atlas",
+          "subtitle": "prod · 12s ago",
+          "status": "ok",
+          "tags": [
+            "prod"
+          ],
+          "action": {
+            "type": "open_url",
+            "url": "https://example.com/deploys/atlas"
+          }
+        },
+        {
+          "title": "Build failed on main · ember",
+          "subtitle": "ci · 38s ago",
+          "status": "error",
+          "tags": [
+            "main",
+            "ci"
+          ],
+          "action": {
+            "type": "open_url",
+            "url": "https://example.com/builds/ember"
+          }
+        },
+        {
+          "title": "Rollback started · harbor",
+          "subtitle": "deploy · 2m ago",
+          "status": "warn",
+          "tags": [
+            "manual"
+          ]
+        },
+        {
+          "title": "Review requested · iris",
+          "subtitle": "pull request #482 · 5m ago",
+          "tone": "info",
+          "tags": [
+            "review"
+          ]
+        },
+        {
+          "title": "Nightly backup · quill",
+          "subtitle": "cron · 6h ago",
+          "tone": "muted"
+        }
+      ]
+    }
+  }
+}

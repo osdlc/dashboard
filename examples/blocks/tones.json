@@ -1,0 +1,78 @@
+{
+  "id": "tones",
+  "title": "Tones",
+  "group": "primitives",
+  "default_size": "tall",
+  "description": "Widgets never carry raw colors. They name a tone, and each renderer looks it up in the color theme in use: accent, the status colors, muted, and six series colors. Here every tone is one bar; switch the color theme to see them change.",
+  "view": {
+    "status": "ok",
+    "summary": "12 tones",
+    "root": {
+      "type": "bars",
+      "label": "Tones",
+      "max": 100,
+      "bars": [
+        {
+          "label": "accent",
+          "value": 100,
+          "tone": "accent"
+        },
+        {
+          "label": "ok",
+          "value": 94,
+          "tone": "ok"
+        },
+        {
+          "label": "warn",
+          "value": 88,
+          "tone": "warn"
+        },
+        {
+          "label": "error",
+          "value": 82,
+          "tone": "error"
+        },
+        {
+          "label": "info",
+          "value": 76,
+          "tone": "info"
+        },
+        {
+          "label": "muted",
+          "value": 70,
+          "tone": "muted"
+        },
+        {
+          "label": "series-1",
+          "value": 64,
+          "tone": "series-1"
+        },
+        {
+          "label": "series-2",
+          "value": 58,
+          "tone": "series-2"
+        },
+        {
+          "label": "series-3",
+          "value": 52,
+          "tone": "series-3"
+        },
+        {
+          "label": "series-4",
+          "value": 46,
+          "tone": "series-4"
+        },
+        {
+          "label": "series-5",
+          "value": 40,
+          "tone": "series-5"
+        },
+        {
+          "label": "series-6",
+          "value": 34,
+          "tone": "series-6"
+        }
+      ]
+    }
+  }
+}

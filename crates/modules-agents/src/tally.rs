@@ -126,6 +126,7 @@ impl Tally {
                     .days
                     .iter()
                     .map(|(date, tokens, _)| Bar {
+                        tone: None,
                         label: day_label(date),
                         value: *tokens as f64,
                         status: None,

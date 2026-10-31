@@ -322,6 +322,7 @@ fn view(s: &Summary, b: &Blocking, top: Option<&TopDomains>, base: &str) -> View
                 .domains
                 .iter()
                 .map(|d| ListItem {
+                    tone: None,
                     title: d.domain.clone(),
                     subtitle: Some(format!("{} blocked", count(d.count))),
                     status: None,

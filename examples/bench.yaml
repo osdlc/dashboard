@@ -8,9 +8,8 @@
 #
 # See bench/README.md.
 #
-# A plugin runs in the config file's folder (examples/), so its paths start
-# with `../`. A built-in module reads paths from where the dashboard was
-# started: run it from the repository root.
+# Relative paths start from the config file's folder (examples/), for plugins
+# and built-in modules alike, so they start with `../`.
 
 modules:
   # ---- clock: now, in a few zones ----
@@ -38,7 +37,7 @@ modules:
 
   # ---- textfile: the same notes file; edit it and all three update ----
   textfile:
-    config: { path: crates/modules-system/testdata/textfile/notes.md }
+    config: { path: ../crates/modules-system/testdata/textfile/notes.md }
   textfile-ts:
     plugin: [node, ../plugins/ext/textfile-ts/main.ts]
     config: { path: ../crates/modules-system/testdata/textfile/notes.md }
@@ -47,7 +46,7 @@ modules:
     config: { path: ../crates/modules-system/testdata/textfile/notes.md }
 
   git:
-    config: { repos: [.] }
+    config: { repos: [..] }
   git-ts:
     plugin: [node, ../plugins/ext/git-ts/main.ts]
     config: { repos: [..] }
@@ -75,7 +74,7 @@ modules:
   # ---- hackernews: the same saved stories, no network ----
   hackernews-sample:
     builtin: hackernews
-    config: { sample: crates/modules-fun/testdata/hackernews/top.json }
+    config: { sample: ../crates/modules-fun/testdata/hackernews/top.json }
   hackernews-ts-sample:
     plugin: [node, ../plugins/ext/hackernews-ts/main.ts]
     config: { sample: ../crates/modules-fun/testdata/hackernews/top.json }
@@ -108,9 +107,9 @@ modules:
     builtin: feedreader
     config:
       feeds:
-        - crates/modules-fun/testdata/feedreader/rss2.xml
-        - crates/modules-fun/testdata/feedreader/atom.xml
-        - crates/modules-fun/testdata/feedreader/rdf.xml
+        - ../crates/modules-fun/testdata/feedreader/rss2.xml
+        - ../crates/modules-fun/testdata/feedreader/atom.xml
+        - ../crates/modules-fun/testdata/feedreader/rdf.xml
   feedreader-ts-sample:
     plugin: [node, ../plugins/ext/feedreader-ts/main.ts]
     config:
@@ -136,7 +135,7 @@ modules:
   # ---- battery: the same saved pmset output, for machines without a battery ----
   battery-sample:
     builtin: battery
-    config: { sample: crates/modules-system/testdata/battery/pmset-discharging.txt }
+    config: { sample: ../crates/modules-system/testdata/battery/pmset-discharging.txt }
   battery-ts-sample:
     plugin: [node, ../plugins/ext/battery-ts/main.ts]
     config: { sample: ../crates/modules-system/testdata/battery/pmset-discharging.txt }

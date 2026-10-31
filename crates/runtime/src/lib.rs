@@ -16,7 +16,7 @@ use anyhow::Result;
 use dashboard_config::dashboards::Registry;
 use dashboard_config::layers::{self, LayerKind, Layered, Sources};
 use dashboard_config::packages::{Packages, market_entries, market_index_path};
-use dashboard_config::{Config, Missing, ModuleConfig, NewModule};
+use dashboard_config::{Config, Missing, ModuleConfig, NewModule, Part};
 use dashboard_contract::{
     AddOutcome, CatalogEntry, ClientMessage, ConfigInfo, DashboardSummary, EntryKind,
     ModuleSummary, Size, UiSettings,
@@ -223,6 +223,18 @@ impl Runtime {
                 );
                 self.after_write("saving theme", result).await;
             }
+            ClientMessage::SetColorTheme { name, etag } => {
+                // Only a theme this config has, so a typo never reaches the file.
+                let result = self.config.color_theme_named(&name).and_then(|_| {
+                    dashboard_config::write_color_theme(
+                        self.path(),
+                        self.missing(),
+                        &name,
+                        etag.as_deref(),
+                    )
+                });
+                self.after_write("saving color theme", result).await;
+            }
             ClientMessage::SaveScreens { screens, etag } => {
                 self.notice = None;
                 // The project file's screens are edited there, not copied here.
@@ -342,17 +354,23 @@ impl Runtime {
         let mut packages = None;
         let mut starting = vec![];
         for id in &wanted {
-            let module_config = new.module(id);
+            let mut module_config = new.module(id);
             if !module_config.enabled || (running.contains(id) && !changed(id)) {
                 continue;
             }
+            // Relative paths are relative to the config file that set them.
+            let dir = self
+                .loaded
+                .module_dirs
+                .get(id)
+                .filter(|d| !d.as_os_str().is_empty());
             let module: Box<dyn Module> = if module_config.demo {
                 let packages =
                     packages.get_or_insert_with(|| Packages::load_for(&self.loaded.paths()));
                 match demo_module(id, &module_config, packages) {
                     Ok(m) => m,
                     Err(err) => {
-                        errors.push(err);
+                        errors.push(self.loaded.locate(&Part::Module(id.clone()), &err));
                         continue;
                     }
                 }
@@ -363,8 +381,11 @@ impl Runtime {
                 match packages.get(name) {
                     Some(p) => Box::new(Plugin::new(id, p.argv()).in_dir(&p.dir)),
                     None => {
-                        errors.push(format!(
-                            "modules.{id}.package: no installed package {name:?} (see `dashboard widgets`)"
+                        errors.push(self.loaded.locate(
+                            &Part::Module(id.clone()),
+                            &format!(
+                                "modules.{id}.package: no installed package {name:?} (see `dashboard widgets`)"
+                            ),
                         ));
                         continue;
                     }
@@ -373,22 +394,27 @@ impl Runtime {
                 match plugin_argv(id, &module_config) {
                     // Relative paths in a plugin's argv are relative to the
                     // config file that set it.
-                    Some(argv) => match self
-                        .loaded
-                        .module_dirs
-                        .get(id)
-                        .filter(|d| !d.as_os_str().is_empty())
-                    {
+                    Some(argv) => match dir {
                         Some(dir) => Box::new(Plugin::new(id, argv).in_dir(dir)),
                         None => Box::new(Plugin::new(id, argv)),
                     },
                     None => {
                         let name = module_config.builtin.as_deref().unwrap_or(id);
                         match dashboard_modules::builtin(name) {
-                            Some(m) => m,
+                            Some(m) => {
+                                if let Some(dir) = dir {
+                                    dashboard_modules::resolve_paths(
+                                        name,
+                                        &mut module_config.config,
+                                        dir,
+                                    );
+                                }
+                                m
+                            }
                             None => {
-                                errors.push(format!(
-                                    "modules.{id}.builtin: no built-in module {name:?}"
+                                errors.push(self.loaded.locate(
+                                    &Part::Module(id.clone()),
+                                    &format!("modules.{id}.builtin: no built-in module {name:?}"),
                                 ));
                                 continue;
                             }
@@ -437,6 +463,9 @@ impl Runtime {
         let screens = self.config.screen_layouts(&running);
         let settings = UiSettings {
             theme: self.config.theme,
+            // `load_valid` checked it; a failure here would be a bug, so fall back quietly.
+            color_theme: self.config.color_theme().unwrap_or_default(),
+            color_themes: self.config.color_theme_names(),
             rotate: self.config.rotate_settings(&screens),
             screens,
             modules: modules
@@ -619,9 +648,17 @@ pub fn watch_config(runtime: Arc<Mutex<Runtime>>) {
 }
 
 /// Load the layers and check the merged config.
+/// An error names the file the mistake is in.
 pub fn load_valid(sources: &Sources) -> Result<Layered> {
     let loaded = layers::load(sources)?;
-    loaded.config.validate(&known_modules(&loaded.config))?;
+    if let Err(err) = loaded.config.validate(&known_modules(&loaded.config)) {
+        let file = loaded.file_of(&err.part).map(|p| p.display().to_string());
+        let err = anyhow::Error::new(err);
+        return Err(match file {
+            Some(file) => err.context(format!("in {file}")),
+            None => err,
+        });
+    }
     Ok(loaded)
 }
 
@@ -695,16 +732,20 @@ pub fn known_modules(config: &Config) -> Vec<String> {
     ids
 }
 
-/// A problem for each `modules.<id>.package` that no installed package matches.
-pub fn missing_packages(config: &Config, packages: &Packages) -> Vec<String> {
+/// A problem for each `modules.<id>.package` that no installed package
+/// matches, with the module's ID.
+pub fn missing_packages(config: &Config, packages: &Packages) -> Vec<(String, String)> {
     config
         .modules
         .iter()
         .filter_map(|(id, m)| {
             let name = m.package.as_ref()?;
             packages.get(name).is_none().then(|| {
-                format!(
-                    "modules.{id}.package: no installed package {name:?} (see `dashboard widgets`)"
+                (
+                    id.clone(),
+                    format!(
+                        "modules.{id}.package: no installed package {name:?} (see `dashboard widgets`)"
+                    ),
                 )
             })
         })
@@ -753,6 +794,8 @@ fn wanted_modules(config: &Config) -> Vec<String> {
 fn placeholder_settings() -> UiSettings {
     UiSettings {
         theme: Default::default(),
+        color_theme: Default::default(),
+        color_themes: vec![],
         screens: vec![],
         modules: vec![],
         rotate: None,
@@ -797,7 +840,78 @@ mod tests {
         let packages = Packages::load_from(&[dir]);
         assert_eq!(
             missing_packages(&config, &packages),
-            ["modules.b.package: no installed package \"nope\" (see `dashboard widgets`)"]
+            [(
+                "b".to_string(),
+                "modules.b.package: no installed package \"nope\" (see `dashboard widgets`)"
+                    .to_string()
+            )]
+        );
+    }
+
+    /// A screen, module or rotate mistake names the file it is in, whichever
+    /// layer that is.
+    #[test]
+    fn config_errors_name_their_file() {
+        let dir = std::env::temp_dir().join(format!("dashboard-errfile-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(dir.join("dashboards")).unwrap();
+        std::fs::create_dir_all(dir.join("repo")).unwrap();
+        let machine = dir.join("config.yaml");
+        let trust = dir.join("trusted-projects");
+        let sources = |dashboard: Option<&str>| Sources {
+            machine: Some(machine.clone()),
+            dashboard: dashboard.map(String::from),
+            project_from: Some(dir.join("repo")),
+            registry: Some(dir.join("dashboards")),
+            trust: Some(trust.clone()),
+        };
+        let error =
+            |dashboard: Option<&str>| format!("{:#}", load_valid(&sources(dashboard)).unwrap_err());
+
+        // A screen in the machine file.
+        std::fs::write(
+            &machine,
+            "screens:\n  - name: main\n    tiles: [{ module: memroy }]\n",
+        )
+        .unwrap();
+        let err = error(None);
+        assert!(
+            err.starts_with(&format!("in {}: screen \"main\"", machine.display())),
+            "{err}"
+        );
+
+        // A module in a saved dashboard.
+        std::fs::write(&machine, "rotate: { interval: 10s }\n").unwrap();
+        let work = dir.join("dashboards/work.yaml");
+        std::fs::write(&work, "modules:\n  x: { plugin: [] }\n").unwrap();
+        let err = error(Some("work"));
+        assert!(
+            err.starts_with(&format!("in {}: modules.x", work.display())),
+            "{err}"
+        );
+
+        // `rotate:` in the machine file, a screen in the project file.
+        std::fs::write(&machine, "rotate: { interval: 0s }\n").unwrap();
+        let err = error(None);
+        assert!(
+            err.starts_with(&format!("in {}: rotate", machine.display())),
+            "{err}"
+        );
+        std::fs::write(&machine, "").unwrap();
+        let project = dir.join("repo/.dashboard.yaml");
+        std::fs::write(
+            &project,
+            "screens:\n  - name: repo\n    tiles: [{ module: memroy }]\n",
+        )
+        .unwrap();
+        dashboard_config::trust::Trust::new(&trust)
+            .allow(&project)
+            .unwrap();
+        let err = error(None);
+        std::fs::remove_dir_all(&dir).ok();
+        assert!(
+            err.starts_with(&format!("in {}: screen \"repo\"", project.display())),
+            "{err}"
         );
     }
 
@@ -835,6 +949,53 @@ mod tests {
             .map(|l| &l[..1])
             .collect();
         assert_eq!(order, ["a", "b", "c"], "{error}");
+    }
+
+    /// A color theme is saved by name; an unknown name is refused and the
+    /// file stays as it was.
+    #[tokio::test]
+    async fn saves_color_theme() {
+        let dir = std::env::temp_dir().join(format!("dashboard-colors-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let machine = dir.join("config.yaml");
+        std::fs::write(
+            &machine,
+            "theme: dark\ncolor_themes:\n  mine:\n    dark:\n      accent: \"#ff8800\"\n",
+        )
+        .unwrap();
+        let (mut runtime, rx) = Runtime::start(Sources {
+            machine: Some(machine.clone()),
+            dashboard: None,
+            project_from: None,
+            registry: Some(dir.join("dashboards")),
+            trust: Some(dir.join("trusted-projects")),
+        })
+        .await
+        .unwrap();
+        assert_eq!(rx.borrow().color_themes.last().unwrap(), "mine");
+        let etag = rx.borrow().config.etag.clone();
+        runtime
+            .handle(ClientMessage::SetColorTheme {
+                name: "mine".into(),
+                etag,
+            })
+            .await;
+        let s = rx.borrow().clone();
+        assert_eq!(s.color_theme.name, "mine", "{:?}", s.config.error);
+        assert_eq!(s.color_theme.dark.accent, "#ff8800");
+        let etag = s.config.etag.clone();
+        runtime
+            .handle(ClientMessage::SetColorTheme {
+                name: "nope".into(),
+                etag,
+            })
+            .await;
+        let written = std::fs::read_to_string(&machine).unwrap();
+        let error = rx.borrow().config.error.clone().unwrap_or_default();
+        std::fs::remove_dir_all(&dir).ok();
+        assert!(written.ends_with("color_theme: mine\n"), "{written}");
+        assert!(error.contains("unknown theme \"nope\""), "{error}");
     }
 
     /// With only a project file, saving a setting creates the machine file
@@ -875,6 +1036,11 @@ mod tests {
         std::fs::remove_dir_all(&dir).ok();
         assert_eq!(written.trim(), "theme: light");
         assert_eq!(s.config.error, None);
+        assert_eq!(s.color_theme.name, "default");
+        assert_eq!(
+            s.color_themes[..4],
+            ["default", "contrast", "paper", "ember"]
+        );
         let screens: Vec<_> = s.screens.iter().map(|x| x.name.as_str()).collect();
         assert_eq!(screens, ["proj"]);
         let modules: Vec<_> = s.modules.iter().map(|m| m.tile_id.as_str()).collect();
@@ -1071,6 +1237,55 @@ mod tests {
             runtime.host.stop(&m.tile_id).await;
         }
         std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    /// A built-in's relative paths start in the folder of the file that set
+    /// them, not where the dashboard was started (a subfolder here).
+    #[tokio::test]
+    async fn builtin_paths_start_in_the_config_files_folder() {
+        if dashboard_modules::builtin("textfile").is_none() {
+            return;
+        }
+        let dir = std::env::temp_dir().join(format!("dashboard-paths-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(dir.join("repo/src/deep")).unwrap();
+        std::fs::write(dir.join("repo/TODO.md"), "- [ ] write the docs\n").unwrap();
+        let project = dir.join("repo/.dashboard.yaml");
+        std::fs::write(
+            &project,
+            "modules:\n  notes:\n    builtin: textfile\n    config: { path: TODO.md }\n",
+        )
+        .unwrap();
+        let trust = dir.join("trusted-projects");
+        dashboard_config::trust::Trust::new(&trust)
+            .allow(&project)
+            .unwrap();
+        let (runtime, _rx) = Runtime::start(Sources {
+            machine: Some(dir.join("config.yaml")),
+            dashboard: None,
+            project_from: Some(dir.join("repo/src/deep")),
+            registry: Some(dir.join("dashboards")),
+            trust: Some(trust),
+        })
+        .await
+        .unwrap();
+        let mut summary = None;
+        for _ in 0..100 {
+            if let Some(t) = runtime
+                .host
+                .snapshot()
+                .await
+                .into_iter()
+                .find(|t| t.tile_id == "notes")
+            {
+                summary = Some(t.view.summary);
+                break;
+            }
+            tokio::time::sleep(Duration::from_millis(50)).await;
+        }
+        runtime.host.stop_all().await;
+        std::fs::remove_dir_all(&dir).ok();
+        assert_eq!(summary.as_deref(), Some("TODO.md · 1 line"));
     }
 
     #[tokio::test]

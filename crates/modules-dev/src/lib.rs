@@ -141,6 +141,7 @@ fn list_item(issue: Issue) -> ListItem {
         sub.push(format!("updated {}", ago(updated)));
     }
     ListItem {
+        tone: None,
         title: issue.title,
         subtitle: Some(sub.join(" · ")),
         status: issue.status,

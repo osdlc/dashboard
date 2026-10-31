@@ -32,6 +32,7 @@ use crate::{day_text, expand_home, link, manifest, parse_date, today};
 #[serde(default, deny_unknown_fields)]
 struct Config {
     /// The repository, or its `docs/planning` folder. `~/` is expanded.
+    #[schemars(extend("x-path" = true))]
     path: String,
     /// Also list tasks still in planning (`planning/*` states).
     planning: bool,
@@ -339,6 +340,7 @@ fn view(tasks: &[Entity], milestones: &[Entity], today: Date, c: &Config) -> Vie
                 .flatten()
                 .map(|url| Action::OpenUrl { url: url.clone() });
             ListItem {
+                tone: None,
                 title: t.title.clone(),
                 subtitle: Some(sub.join(" · ")),
                 status: match rank {

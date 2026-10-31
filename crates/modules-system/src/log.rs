@@ -28,6 +28,7 @@ const BYTES_PER_LINE: u64 = 512;
 #[serde(default, deny_unknown_fields)]
 struct Config {
     /// File to tail. `~/` is expanded.
+    #[schemars(extend("x-path" = true))]
     path: Option<String>,
     /// Lines to keep.
     lines: usize,

@@ -10,11 +10,11 @@ tauri-build = { version = "2.7.4", features = [] }
 
 [dependencies]
 anyhow = "1.0.104"
-dashboard-config = { version = "0.7.0", path = "../../crates/config" }
+dashboard-config = { version = "0.8.0", path = "../../crates/config" }
 # Not used directly: its default features put every built-in module in the app.
-dashboard-modules = { version = "0.7.0", path = "../../crates/modules" }
-dashboard-runtime = { version = "0.7.0", path = "../../crates/runtime" }
-dashboard-web = { version = "0.7.0", path = "../../crates/web" }
+dashboard-modules = { version = "0.8.0", path = "../../crates/modules" }
+dashboard-runtime = { version = "0.8.0", path = "../../crates/runtime" }
+dashboard-web = { version = "0.8.0", path = "../../crates/web" }
 tauri = { version = "2.12.5", features = ["tray-icon"] }
 tokio = { version = "1.54.1", features = ["sync"] }
 tracing = "0.1.44"

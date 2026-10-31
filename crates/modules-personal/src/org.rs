@@ -30,6 +30,7 @@ use crate::{
 #[serde(default, deny_unknown_fields)]
 struct Config {
     /// `.org` files, or folders to search for them. `~/` is expanded.
+    #[schemars(extend("x-path" = true))]
     paths: Vec<String>,
     /// Show dated items up to this many days ahead. Overdue ones always show.
     days: i64,

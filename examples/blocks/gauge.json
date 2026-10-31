@@ -1,0 +1,22 @@
+{
+  "id": "gauge",
+  "title": "Gauge",
+  "group": "primitives",
+  "default_size": "small",
+  "description": "A meter from 0 to 100%. Thresholds turn the fill the warn and error colors as it rises; a marker puts a tick on the track, for example where usage should be by now; a caption adds a line of detail under it.",
+  "view": {
+    "status": "warn",
+    "summary": "5-hour limit 81%",
+    "root": {
+      "type": "gauge",
+      "label": "5-hour limit",
+      "percent": 81,
+      "marker": 60,
+      "thresholds": {
+        "warn": 75,
+        "error": 90
+      },
+      "caption": "ahead of pace · resets in 1 h 12 m"
+    }
+  }
+}

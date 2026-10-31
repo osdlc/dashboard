@@ -156,6 +156,9 @@ LogLevel = Literal["error", "warn", "info", "debug"]
 
 Status = Literal["ok", "warn", "error", "unknown"]
 
+# A token a widget can color something with, e.g. one line of a chart.
+Tone = Literal["accent", "ok", "warn", "error", "info", "muted", "series-1", "series-2", "series-3", "series-4", "series-5", "series-6"]
+
 
 class _CommandDeclRequired(TypedDict):
     # Program and arguments. May contain `{name}` placeholders declared in `params`.
@@ -232,12 +235,24 @@ class _BarRequired(TypedDict):
 
 
 class Bar(_BarRequired, total=False):
+    # Colors the bar ok, warn or error.
     status: Optional["Status"]
+    # Fill color when `status` is not set. Default: `accent`.
+    tone: Optional["Tone"]
 
 
-class Column(TypedDict):
+class _ColumnRequired(TypedDict):
+    # Names the cell in each row's `cells`.
     key: str
+    # The column heading.
     label: str
+
+
+class Column(_ColumnRequired, total=False):
+    # Which columns to keep when a table is too narrow for all of them:
+    # renderers drop the lowest priority first (the rightmost of equal
+    # ones) and always keep the first column. Default 0.
+    priority: Optional[int]
 
 
 class _ListItemRequired(TypedDict):
@@ -245,10 +260,16 @@ class _ListItemRequired(TypedDict):
 
 
 class ListItem(_ListItemRequired, total=False):
+    # What clicking the item does, e.g. open a link.
     action: Optional["Action"]
+    # Colors the item's marker ok, warn or error.
     status: Optional["Status"]
+    # A second, quieter line.
     subtitle: Optional[str]
+    # Short labels shown as chips.
     tags: List[str]
+    # Color of the item's marker when `status` is not set.
+    tone: Optional["Tone"]
 
 
 class _LogLineRequired(TypedDict):
@@ -256,34 +277,65 @@ class _LogLineRequired(TypedDict):
 
 
 class LogLine(_LogLineRequired, total=False):
+    # error, warn, info or debug: colors the line.
     level: Optional["LogLevel"]
     # Shown before the text, e.g. "14:02:11".
     time: Optional[str]
 
 
-class Meter(TypedDict):
+class _MeterRequired(TypedDict):
     label: str
+    # 0-100.
     percent: float
 
 
+class Meter(_MeterRequired, total=False):
+    # A fixed color for this meter instead of the grid's color scale.
+    tone: Optional["Tone"]
+
+
 class _RowRequired(TypedDict):
-    # Keyed by `Column::key`.
+    # Keyed by the column's `key`.
     cells: Dict[str, "Cell"]
 
 
 class Row(_RowRequired, total=False):
+    # What clicking the row does, e.g. open a link.
     action: Optional["Action"]
+    # Colors the row's marker ok, warn or error.
     status: Optional["Status"]
 
 
-class SeriesData(TypedDict):
+class _SeriesDataRequired(TypedDict):
+    # Shown in the legend; also keys the history when the widget has an `id`.
     name: str
     # (unix ms, value)
     points: List[Tuple[int, float]]
 
 
+class SeriesData(_SeriesDataRequired, total=False):
+    # This series' color, instead of the widget's `color` (one series) or
+    # the next `series-N` token (several).
+    tone: Optional["Tone"]
+
+
+class _SliceRequired(TypedDict):
+    label: str
+    # Zero or more. Shown with the widget's `format` and `unit`.
+    value: float
+
+
+class Slice(_SliceRequired, total=False):
+    # Colors the slice ok, warn or error.
+    status: Optional["Status"]
+    # Color when `status` is not set. Default: the next `series-N` token.
+    tone: Optional["Tone"]
+
+
 class Thresholds(TypedDict):
+    # The percent at which the fill turns the error color.
     error: float
+    # The percent at which the fill turns the warn color.
     warn: float
 
 
@@ -311,42 +363,59 @@ class _TextWidgetRequired(TypedDict):
     type: Literal["text"]
 
 
+# A paragraph of text.
 class TextWidget(_TextWidgetRequired, total=False):
+    # Read markdown in `text`: `**bold**`, and code between backticks.
     markdown: bool
 
 
 class _StatWidgetRequired(TypedDict):
+    # Shown above or before the value.
     label: str
     type: Literal["stat"]
+    # Already formatted, e.g. "3451" or "1.2k".
     value: str
 
 
+# One number with a label, e.g. "p99 107 ms".
 class StatWidget(_StatWidgetRequired, total=False):
+    # A change to show beside the value, e.g. "+2.8%".
     delta: Optional[str]
+    # Colors the value: ok, warn or error.
     status: Optional["Status"]
+    # Shown after the value, smaller, e.g. "ms" or "/s".
     unit: Optional[str]
 
 
 class _GaugeWidgetRequired(TypedDict):
     label: str
+    # How full, 0-100.
     percent: float
     type: Literal["gauge"]
 
 
+# A horizontal meter from 0 to 100%.
 class GaugeWidget(_GaugeWidgetRequired, total=False):
+    # A line under the meter, e.g. "1721 of 1858 GiB used".
     caption: Optional[str]
+    # A tick on the track at this percent, e.g. where usage should be by now.
     marker: Optional[float]
+    # Percents at which the fill turns warn and error colored.
     thresholds: Optional["Thresholds"]
 
 
 class _SeriesWidgetRequired(TypedDict):
     label: str
+    # One or more lines, each with its points.
     series: List["SeriesData"]
     type: Literal["series"]
 
 
+# Values over time, as a line, a filled area or bars.
 class SeriesWidget(_SeriesWidgetRequired, total=False):
+    # The color of a single series.
     color: "ColorScale"
+    # How values are written: plain, bytes or count.
     format: "ValueFormat"
     # Points the host keeps per series when `id` is set. Default 300.
     history: Optional[int]
@@ -357,8 +426,11 @@ class SeriesWidget(_SeriesWidgetRequired, total=False):
     # Draw the first series above the axis and the second below it,
     # e.g. network download and upload.
     mirrored: bool
+    # A line, a filled area or one bar per sample.
     style: "SeriesStyle"
+    # Shown after values, e.g. "%" or "/s".
     unit: Optional[str]
+    # The top of the chart. Default: the largest value.
     y_max: Optional[float]
 
 
@@ -369,6 +441,7 @@ class _MeterGridWidgetRequired(TypedDict):
 
 # Many small meters in a compact grid, e.g. one per CPU core.
 class MeterGridWidget(_MeterGridWidgetRequired, total=False):
+    # The meters' color: `accent`, or a scale colored by each meter's value.
     color: "ColorScale"
     label: Optional[str]
 
@@ -380,10 +453,33 @@ class _BarsWidgetRequired(TypedDict):
 
 # Labeled horizontal bars, in the order given.
 class BarsWidget(_BarsWidgetRequired, total=False):
+    # How values are written: plain, bytes or count.
     format: "ValueFormat"
     label: Optional[str]
     # Value of a full bar. Default: the largest value.
     max: Optional[float]
+    # Shown after each value.
+    unit: Optional[str]
+
+
+class _PieWidgetRequired(TypedDict):
+    slices: List["Slice"]
+    type: Literal["pie"]
+
+
+# Shares of a whole, as a pie or donut with a legend. Slices keep the
+# order given; each one's share is its value over the sum of all values.
+class PieWidget(_PieWidgetRequired, total=False):
+    # `accent` (the default) gives each slice its own color, the theme's
+    # accent first. The other scales spread the slices along the scale
+    # in order. A slice's `status` overrides its color.
+    color: "ColorScale"
+    # A ring with a hole in the middle. Default true; false draws a full disc.
+    donut: bool
+    # How values are written in the legend: plain, bytes or count.
+    format: "ValueFormat"
+    label: Optional[str]
+    # Shown after each value in the legend.
     unit: Optional[str]
 
 
@@ -392,10 +488,13 @@ class _ListWidgetRequired(TypedDict):
     type: Literal["list"]
 
 
+# Items with a title, a subtitle, a status marker and tags.
 class ListWidget(_ListWidgetRequired, total=False):
+    # Shown when there are no items.
     empty_text: Optional[str]
 
 
+# Rows and columns. A cell holds text, a number, or a stat, gauge or pie.
 class TableWidget(TypedDict):
     columns: List["Column"]
     rows: List["Row"]
@@ -418,11 +517,13 @@ class UptimeWidget(TypedDict):
     type: Literal["uptime"]
 
 
+# Widgets side by side, sharing the width.
 class RowWidget(TypedDict):
     children: List["Widget"]
     type: Literal["row"]
 
 
+# Widgets stacked top to bottom.
 class ColumnWidget(TypedDict):
     children: List["Widget"]
     type: Literal["column"]
@@ -461,6 +562,6 @@ SeriesStyle = Union[Literal["line"], Literal["area"], Literal["bars"]]
 
 ValueFormat = Union[Literal["plain"], Literal["bytes"], Literal["count"]]
 
-Widget = Union["TextWidget", "StatWidget", "GaugeWidget", "SeriesWidget", "MeterGridWidget", "BarsWidget", "ListWidget", "TableWidget", "LogWidget", "UptimeWidget", "RowWidget", "ColumnWidget"]
+Widget = Union["TextWidget", "StatWidget", "GaugeWidget", "SeriesWidget", "MeterGridWidget", "BarsWidget", "PieWidget", "ListWidget", "TableWidget", "LogWidget", "UptimeWidget", "RowWidget", "ColumnWidget"]
 
 # ---- END GENERATED ----

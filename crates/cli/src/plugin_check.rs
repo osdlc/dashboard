@@ -149,7 +149,7 @@ pub async fn run(o: Options) -> Result<()> {
     };
     let height = o
         .height
-        .unwrap_or_else(|| dashboard_tui::tile_min_height(&tile, o.width).max(8));
+        .unwrap_or_else(|| dashboard_tui::tile_wanted_height(&tile, o.width).max(8));
     println!("\n{}\n", dashboard_tui::tile_text(&tile, o.width, height));
 
     for f in findings.iter().filter(|f| !f.problem) {

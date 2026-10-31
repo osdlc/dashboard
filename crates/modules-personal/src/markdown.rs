@@ -31,6 +31,7 @@ use crate::{
 #[serde(default, deny_unknown_fields)]
 struct Config {
     /// Markdown files, or folders to search for them. `~/` is expanded.
+    #[schemars(extend("x-path" = true))]
     paths: Vec<String>,
     /// Only tasks whose line contains this text, e.g. `#task` (the Obsidian
     /// Tasks global filter). It is removed from the title.
