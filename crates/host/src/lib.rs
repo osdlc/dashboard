@@ -14,8 +14,10 @@ use dashboard_contract::{
 use tokio::sync::{RwLock, broadcast, mpsc};
 use tokio::time::MissedTickBehavior;
 
+pub mod browser;
 pub mod history;
 mod plugin;
+pub mod process;
 pub use history::History;
 pub use plugin::Plugin;
 

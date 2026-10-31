@@ -7,7 +7,7 @@ exclude = ["plugins/ext", "bench/wasm"]
 
 [workspace.package]
 edition = "2024"
-version = "0.5.0"
+version = "0.6.0"
 license = "MIT OR Apache-2.0"
 
 # Smallest binary: `cargo build --profile small`. Slower to build.

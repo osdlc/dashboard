@@ -1,0 +1,16 @@
+[package]
+name = "dashboard-cli-kit"
+description = "Command-line conventions from the osdlc CLI standard: exit codes, the error line, --json documents and the web view's boot token. Kept free of dashboard types so it can move into a shared cli-kit crate."
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+clap = "4.6.7"
+getrandom = "0.4.3"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+
+[dev-dependencies]
+clap = { version = "4.6.7", features = ["derive"] }

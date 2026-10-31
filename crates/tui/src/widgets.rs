@@ -141,6 +141,17 @@ fn draw_widget(f: &mut Canvas, p: &Palette, area: Rect, widget: &Widget, hits: &
             max,
             bars,
         } => {
+            let top = area.y + label.is_some() as u16;
+            for i in 0..bars.len() as u16 {
+                hits.item(
+                    Rect {
+                        y: top.saturating_add(i),
+                        height: 1,
+                        ..area
+                    },
+                    area,
+                );
+            }
             let spec = charts::BarsSpec {
                 label: label.as_deref(),
                 unit: unit.as_deref(),
@@ -162,9 +173,10 @@ fn draw_widget(f: &mut Canvas, p: &Palette, area: Rect, widget: &Widget, hits: &
             let mut y = area.y;
             for item in items {
                 let height = 1 + item.subtitle.is_some() as u16;
-                if let Some(Action::OpenUrl { url }) = &item.action {
-                    let height = height.min(area.bottom().saturating_sub(y));
-                    hits.add(Rect { y, height, ..area }, Click::Open(url.clone()));
+                let row = Rect { y, height, ..area };
+                hits.item(row, area);
+                if let Some(action) = &item.action {
+                    hits.add(row.intersection(area), Click::Run(action.clone()));
                 }
                 y = y.saturating_add(height);
             }
@@ -190,16 +202,14 @@ fn draw_widget(f: &mut Canvas, p: &Palette, area: Rect, widget: &Widget, hits: &
         Widget::Table { columns, rows } => {
             // One header line, then one line per row.
             for (i, row) in rows.iter().enumerate() {
-                let y = area.y + 1 + i as u16;
-                if let (Some(Action::OpenUrl { url }), true) = (&row.action, y < area.bottom()) {
-                    hits.add(
-                        Rect {
-                            y,
-                            height: 1,
-                            ..area
-                        },
-                        Click::Open(url.clone()),
-                    );
+                let line = Rect {
+                    y: (area.y + 1).saturating_add(i as u16),
+                    height: 1,
+                    ..area
+                };
+                hits.item(line, area);
+                if let Some(action) = &row.action {
+                    hits.add(line.intersection(area), Click::Run(action.clone()));
                 }
             }
             let header = Row::new(columns.iter().map(|c| Cell::from(c.label.clone())))
@@ -254,17 +264,18 @@ fn draw_widget(f: &mut Canvas, p: &Palette, area: Rect, widget: &Widget, hits: &
                 .unwrap_or(0)
                 .min(20) as u16;
             for (i, check) in checks.iter().enumerate() {
-                let y = area.y + i as u16;
-                if y >= area.bottom() {
-                    break;
-                }
                 let row = Rect {
-                    y,
+                    y: area.y.saturating_add(i as u16),
                     height: 1,
                     ..area
                 };
+                hits.item(row, area);
+                if row.y >= area.bottom() {
+                    continue;
+                }
                 if let Some(url) = &check.url {
-                    hits.add(row, Click::Open(url.clone()));
+                    let action = Action::OpenUrl { url: url.clone() };
+                    hits.add(row, Click::Run(action));
                 }
                 f.render_widget(
                     Paragraph::new(uptime_line(p, check, name_w, area.width)),

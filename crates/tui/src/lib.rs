@@ -1,11 +1,12 @@
 //! TUI renderer (ratatui). Draws the latest `TileUpdate` per tile, one
 //! screen at a time.
 
+use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::time::{Duration, Instant};
 
 use anyhow::Result;
-use dashboard_contract::{ClientMessage, ScreenLayout, TileUpdate, UiSettings};
+use dashboard_contract::{Action, ClientMessage, ScreenLayout, TileUpdate, UiSettings};
 use dashboard_host::Host;
 use ratatui::Frame;
 use ratatui::buffer::Buffer;
@@ -27,6 +28,7 @@ mod charts;
 mod help;
 mod layout;
 mod mouse;
+mod nav;
 mod rotate;
 mod settings;
 #[cfg(test)]
@@ -36,6 +38,7 @@ mod widgets;
 
 use canvas::Canvas;
 use mouse::{Click, Hits};
+use nav::{Dir, Focus};
 use theme::Palette;
 
 struct App {
@@ -64,6 +67,24 @@ struct App {
     scroll: u16,
     /// How far the page can scroll, from the last draw.
     max_scroll: std::cell::Cell<u16>,
+    /// Keyboard focus: a tile, or an item inside one.
+    focus: Focus,
+    /// Where tiles and their items were drawn last, for arrow keys and for
+    /// scrolling the focused one into view.
+    geometry: RefCell<Geometry>,
+    /// Actions run by clicks and Enter, recorded instead of run in tests.
+    #[cfg(test)]
+    ran: Vec<Action>,
+}
+
+/// Tile and item rects from the last draw, on the page (before scrolling).
+#[derive(Debug, Default)]
+struct Geometry {
+    /// Height of the part of the page that is shown.
+    view_height: u16,
+    tiles: Vec<(String, Rect)>,
+    /// Per tile, in `nav::items` order.
+    items: BTreeMap<String, Vec<Rect>>,
 }
 
 /// Rows per mouse-wheel step.
@@ -124,6 +145,10 @@ pub async fn run(
         hover: None,
         scroll: 0,
         max_scroll: Default::default(),
+        focus: Focus::None,
+        geometry: Default::default(),
+        #[cfg(test)]
+        ran: vec![],
     };
 
     let mut terminal = init_terminal()?;
@@ -169,11 +194,7 @@ pub async fn run(
         let now = Instant::now();
         match input {
             Ok(Some(Input::Key(key))) => app.on_key(key, now),
-            Ok(Some(Input::Click(x, y))) => {
-                if let Some(click) = app.hits.at(x, y).cloned() {
-                    app.on_click(click, now);
-                }
-            }
+            Ok(Some(Input::Click(x, y))) => app.on_pointer(x, y, now),
             Ok(Some(Input::Wheel(step))) => app.on_wheel(step, now),
             Ok(Some(Input::Hover(x, y))) => app.hover = Some((x, y)),
             Ok(None) => {}
@@ -237,6 +258,19 @@ impl App {
             .and_then(|r| r.tick(self.screen, now))
         {
             self.screen = next;
+            self.focus = Focus::None;
+        }
+    }
+
+    /// A click at (x, y): focuses the tile under it, then acts on the target.
+    fn on_pointer(&mut self, x: u16, y: u16, now: Instant) {
+        if let Some(id) = self.hits.tile_at(x, y)
+            && self.focus.tile() != Some(id)
+        {
+            self.focus = Focus::Tile(id.to_string());
+        }
+        if let Some(click) = self.hits.at(x, y).cloned() {
+            self.on_click(click, now);
         }
     }
 
@@ -282,12 +316,15 @@ impl App {
             Click::Quit => self.quit = true,
             Click::Theme(theme) => {
                 if let Some(tx) = &self.actions {
-                    let _ = tx.send(ClientMessage::SetTheme { theme });
+                    let _ = tx.send(ClientMessage::SetTheme {
+                        theme,
+                        etag: self.settings.config.etag.clone(),
+                    });
                 }
             }
             Click::EditConfig => self.edit_config = true,
             Click::Close => self.overlay = Overlay::None,
-            Click::Open(url) => mouse::open_url(&url),
+            Click::Run(action) => self.run(&action),
             Click::Rotate | Click::Inside => {}
         }
     }
@@ -308,11 +345,113 @@ impl App {
         self.scroll = (self.scroll as i32 + rows).clamp(0, max) as u16;
     }
 
-    /// Switch screen, starting at the top.
+    /// Switch screen, starting at the top with nothing focused.
     fn go(&mut self, screen: usize) {
         self.screen = screen;
         self.expanded = None;
         self.scroll = 0;
+        self.focus = Focus::None;
+    }
+
+    /// Carries out an item's action, from a click or Enter. New kinds of
+    /// action are added here.
+    fn run(&mut self, action: &Action) {
+        #[cfg(test)]
+        self.ran.push(action.clone());
+        #[cfg(not(test))]
+        match action {
+            Action::OpenUrl { url } => {
+                // Nowhere to show an error in the TUI; the link just doesn't open.
+                let _ = dashboard_host::browser::open_web_link(url);
+            }
+            // Not run yet; `dashboard plugin-check` says so.
+            Action::RunCommand { .. } => {}
+        }
+    }
+
+    /// The selectable items of the focused tile, from its latest view.
+    fn focused_items(&self) -> Vec<nav::Item> {
+        self.focus
+            .tile()
+            .and_then(|id| self.tiles.get(id))
+            .map(|t| nav::items(&t.view.root))
+            .unwrap_or_default()
+    }
+
+    /// The focused tile's items that were drawn last frame. Items cut off at
+    /// the bottom of a tile (or a tile too small to draw its widget) are left
+    /// out, so the keyboard can't select, and Enter can't open, what isn't shown.
+    fn visible_items(&self) -> Vec<nav::Item> {
+        let g = self.geometry.borrow();
+        let Some(rects) = self.focus.tile().and_then(|id| g.items.get(id)) else {
+            return Vec::new();
+        };
+        self.focused_items()
+            .into_iter()
+            .zip(rects)
+            .filter(|(_, r)| r.height > 0)
+            .map(|(item, _)| item)
+            .collect()
+    }
+
+    /// Arrow keys: move focus, then scroll it into view.
+    fn nav(&mut self, dir: Dir) {
+        let items = self.visible_items();
+        let focus = {
+            let g = self.geometry.borrow();
+            self.focus.moved(dir, &g.tiles, &items)
+        };
+        self.focus = focus;
+        self.follow();
+    }
+
+    /// Enter: go into the focused tile, or run the focused item's action.
+    fn nav_enter(&mut self) {
+        let items = self.visible_items();
+        // An update pushed the focused item out of view: move to the nearest
+        // shown item first, so Enter never runs something not highlighted.
+        let all = self.focused_items();
+        if let Some(at) = self.focus.item_index(&all)
+            && !items.iter().any(|i| i.key == all[at].key)
+        {
+            self.focus = self.focus.settled(&items);
+            self.follow();
+            return;
+        }
+        let (focus, action) = self.focus.enter(&items);
+        self.focus = focus;
+        if let Some(action) = action {
+            self.run(&action);
+        }
+        self.follow();
+    }
+
+    /// Scrolls the page so the focused item, or else the focused tile, is in
+    /// view. A tile taller than the view shows its top.
+    fn follow(&mut self) {
+        if self.expanded.is_some() {
+            return;
+        }
+        let g = self.geometry.borrow();
+        let Some(id) = self.focus.tile() else { return };
+        let Some((_, tile)) = g.tiles.iter().find(|(t, _)| t == id) else {
+            return;
+        };
+        let item = self
+            .focus
+            .item_index(&self.focused_items())
+            .and_then(|i| g.items.get(id)?.get(i).copied())
+            .filter(|r| r.height > 0);
+        let target = item.unwrap_or(*tile);
+        let (top, h) = (self.scroll, g.view_height);
+        let scroll = if target.y < top {
+            target.y
+        } else if target.bottom() > top + h {
+            target.bottom().saturating_sub(h).min(target.y)
+        } else {
+            top
+        };
+        self.scroll = scroll.min(self.max_scroll.get());
     }
 
     /// Keys here must match `help::KEYS`.
@@ -330,7 +469,10 @@ impl App {
                 KeyCode::Char('t') => {
                     let theme = settings::next_theme(self.settings.theme);
                     if let Some(tx) = &self.actions {
-                        let _ = tx.send(ClientMessage::SetTheme { theme });
+                        let _ = tx.send(ClientMessage::SetTheme {
+                            theme,
+                            etag: self.settings.config.etag.clone(),
+                        });
                     }
                     return;
                 }
@@ -352,8 +494,13 @@ impl App {
             KeyCode::Char('q') => self.quit = true,
             KeyCode::Char('?') => self.overlay = toggle(self.overlay, Overlay::Help),
             KeyCode::Char('s') => self.overlay = toggle(self.overlay, Overlay::Settings),
-            KeyCode::Esc if self.overlay == Overlay::None => self.expanded = None,
-            KeyCode::Esc => self.overlay = Overlay::None,
+            KeyCode::Esc if self.overlay != Overlay::None => self.overlay = Overlay::None,
+            // Out of an item first, then out of fullscreen, then focus off.
+            KeyCode::Esc if matches!(self.focus, Focus::Item { .. }) => {
+                self.focus = self.focus.back()
+            }
+            KeyCode::Esc if self.expanded.is_some() => self.expanded = None,
+            KeyCode::Esc => self.focus = self.focus.back(),
             KeyCode::Tab => self.go((self.screen + 1) % count),
             KeyCode::BackTab => self.go((self.screen + count - 1) % count),
             KeyCode::Char(c @ '1'..='9') => {
@@ -362,8 +509,12 @@ impl App {
                     self.go(i);
                 }
             }
-            KeyCode::Down | KeyCode::Char('j') => self.scroll_by(1),
-            KeyCode::Up | KeyCode::Char('k') => self.scroll_by(-1),
+            _ if self.overlay != Overlay::None => {}
+            KeyCode::Up | KeyCode::Char('k') => self.nav(Dir::Up),
+            KeyCode::Down | KeyCode::Char('j') => self.nav(Dir::Down),
+            KeyCode::Left | KeyCode::Char('h') => self.nav(Dir::Left),
+            KeyCode::Right | KeyCode::Char('l') => self.nav(Dir::Right),
+            KeyCode::Enter => self.nav_enter(),
             KeyCode::PageDown | KeyCode::Char(' ') => self.scroll_by(10),
             KeyCode::PageUp => self.scroll_by(-10),
             KeyCode::Home => self.scroll = 0,
@@ -413,7 +564,7 @@ fn draw(f: &mut Frame, app: &App, now: Instant) -> Hits {
         (" ? help".to_string(), Some(Click::Help)),
         ("  ".to_string(), None),
         ("s settings".to_string(), Some(Click::Settings)),
-        ("  Tab screens  ".to_string(), None),
+        ("  Tab screens  arrows move  Enter open  ".to_string(), None),
         ("q quit".to_string(), Some(Click::Quit)),
     ];
     let mut hints: Vec<Span> = parts.iter().map(|(t, _)| Span::raw(t.clone())).collect();
@@ -428,9 +579,21 @@ fn draw(f: &mut Frame, app: &App, now: Instant) -> Hits {
     );
 
     app.max_scroll.set(0);
+    *app.geometry.borrow_mut() = Geometry {
+        view_height: main.height,
+        ..Default::default()
+    };
     let expanded = app.expanded.as_ref().and_then(|id| app.tiles.get(id));
     if let Some(update) = expanded {
-        widgets::draw_tile(&mut Canvas(f.buffer_mut()), p, main, update, &mut hits);
+        let mut tile_hits = Hits::default();
+        let mut canvas = Canvas(f.buffer_mut());
+        widgets::draw_tile(&mut canvas, p, main, update, &mut tile_hits);
+        let items = std::mem::take(&mut tile_hits.items);
+        draw_focus(&mut canvas, app, &update.tile_id, main, &items);
+        let mut g = app.geometry.borrow_mut();
+        g.tiles.push((update.tile_id.clone(), main));
+        g.items.insert(update.tile_id.clone(), items);
+        hits.extend_shifted(tile_hits, 0, 0, main);
     } else if let Some(screen) = app.settings.screens.get(app.screen) {
         if screen.tiles.is_empty() {
             f.render_widget(Paragraph::new("this screen has no running modules"), main);
@@ -487,6 +650,41 @@ fn draw_hover(f: &mut Frame, app: &App, hits: &Hits) {
     }
 }
 
+/// Marks keyboard focus on tile `id` if it has it: a thick accent border,
+/// and a highlighted background behind the selected item.
+fn draw_focus(f: &mut Canvas, app: &App, id: &str, area: Rect, items: &[Rect]) {
+    if app.focus.tile() != Some(id) {
+        return;
+    }
+    let p = &app.palette;
+    let buf = f.buffer_mut();
+    let area = area.intersection(buf.area);
+    for (x, y) in perimeter(area) {
+        let cell = &mut buf[(x, y)];
+        let thick = match cell.symbol() {
+            "─" => "━",
+            "│" => "┃",
+            "┌" => "┏",
+            "┐" => "┓",
+            "└" => "┗",
+            "┘" => "┛",
+            _ => continue,
+        };
+        cell.set_symbol(thick).set_fg(p.accent);
+    }
+    let selected = app
+        .focus
+        .item_index(&app.focused_items())
+        .and_then(|i| items.get(i));
+    if let Some(r) = selected {
+        for y in r.top()..r.bottom() {
+            for x in r.left()..r.right() {
+                buf[(x, y)].set_bg(p.selected);
+            }
+        }
+    }
+}
+
 fn perimeter(r: Rect) -> impl Iterator<Item = (u16, u16)> {
     let top_bottom =
         (r.left()..r.right()).flat_map(move |x| [(x, r.top()), (x, r.bottom().saturating_sub(1))]);
@@ -526,12 +724,18 @@ fn draw_page(f: &mut Frame, app: &App, main: Rect, screen: &ScreenLayout, hits: 
     let mut page = Buffer::empty(Rect::new(0, 0, width, page_height));
     let mut page_hits = Hits::default();
     let mut canvas = Canvas(&mut page);
+    let mut g = app.geometry.borrow_mut();
     for (tile, area) in screen.tiles.iter().zip(rects) {
         match app.tiles.get(&tile.tile_id) {
             Some(update) => widgets::draw_tile(&mut canvas, p, area, update, &mut page_hits),
             None => widgets::draw_waiting(&mut canvas, p, area, &tile.tile_id),
         }
+        let items = std::mem::take(&mut page_hits.items);
+        draw_focus(&mut canvas, app, &tile.tile_id, area, &items);
+        g.tiles.push((tile.tile_id.clone(), area));
+        g.items.insert(tile.tile_id.clone(), items);
     }
+    drop(g);
 
     let buf = f.buffer_mut();
     for y in 0..main.height {
@@ -556,17 +760,28 @@ fn draw_page(f: &mut Frame, app: &App, main: Rect, screen: &ScreenLayout, hits: 
     }
 }
 
-/// Run `$VISUAL` or `$EDITOR` (default `vi`) on the config file and wait.
-/// The variable may include arguments, e.g. `code -w`.
+/// Run `$VISUAL` or `$EDITOR` (default `vi`, `notepad` on Windows) on the
+/// config file and wait. The variable may include arguments, e.g. `code -w`,
+/// or be the path of a program with spaces in it (`C:\Program Files\...`).
 fn open_editor(path: &str) -> Result<()> {
+    let fallback = if cfg!(windows) { "notepad" } else { "vi" };
     let editor = std::env::var("VISUAL")
         .or_else(|_| std::env::var("EDITOR"))
-        .unwrap_or_else(|_| "vi".into());
-    let mut parts = editor.split_whitespace();
-    let program = parts.next().unwrap_or("vi");
+        .unwrap_or_else(|_| fallback.into());
+    let editor = editor.trim().trim_matches('"');
+    let mut argv: Vec<String> = match std::path::Path::new(editor).is_file() {
+        true => vec![editor.into()],
+        false => editor.split_whitespace().map(String::from).collect(),
+    };
+    if argv.is_empty() {
+        argv.push(fallback.into());
+    }
+    argv.push(path.into());
+    // On Windows, so `code` finds `code.cmd`.
+    let argv = dashboard_host::process::resolve_argv(&argv, None);
+    let program = &argv[0];
     std::process::Command::new(program)
-        .args(parts)
-        .arg(path)
+        .args(&argv[1..])
         .status()
         .map_err(|e| anyhow::anyhow!("running {program}: {e}"))?;
     Ok(())
@@ -580,6 +795,7 @@ mod tests {
     };
     use ratatui::Terminal;
     use ratatui::backend::TestBackend;
+    use ratatui::buffer::Buffer;
 
     fn app() -> App {
         let tile = |id: &str, size| TilePlacement {
@@ -644,6 +860,9 @@ mod tests {
             hover: None,
             scroll: 0,
             max_scroll: Default::default(),
+            focus: Focus::None,
+            geometry: Default::default(),
+            ran: vec![],
         }
     }
 
@@ -654,9 +873,8 @@ mod tests {
         terminal
             .draw(|f| hits = draw(f, app, Instant::now()))
             .unwrap();
-        if let Some(c) = hits.at(x, y).cloned() {
-            app.on_click(c, Instant::now());
-        }
+        app.hits = hits;
+        app.on_pointer(x, y, Instant::now());
     }
 
     #[test]
@@ -753,7 +971,8 @@ mod tests {
         assert!(matches!(
             rx.try_recv(),
             Ok(ClientMessage::SetTheme {
-                theme: Theme::Light
+                theme: Theme::Light,
+                ..
             })
         ));
     }
@@ -795,7 +1014,10 @@ mod tests {
         app.on_key(KeyEvent::from(KeyCode::Char('t')), Instant::now());
         assert_eq!(
             rx.try_recv().unwrap(),
-            ClientMessage::SetTheme { theme: Theme::Auto }
+            ClientMessage::SetTheme {
+                theme: Theme::Auto,
+                etag: None
+            }
         );
 
         app.on_key(KeyEvent::from(KeyCode::Char('e')), Instant::now());
@@ -803,6 +1025,201 @@ mod tests {
 
         app.on_key(KeyEvent::from(KeyCode::Esc), Instant::now());
         assert_eq!(app.overlay, Overlay::None);
+    }
+
+    fn key(app: &mut App, code: KeyCode) {
+        app.on_key(KeyEvent::from(code), Instant::now());
+    }
+
+    /// Draws at w x h and returns the buffer, recording geometry like the run loop.
+    fn draw_sized(app: &mut App, w: u16, h: u16) -> Buffer {
+        let mut terminal = Terminal::new(TestBackend::new(w, h)).unwrap();
+        let mut hits = Hits::default();
+        terminal
+            .draw(|f| hits = draw(f, app, Instant::now()))
+            .unwrap();
+        app.hits = hits;
+        terminal.backend().buffer().clone()
+    }
+
+    /// A list of links, newest first.
+    fn links(titles: &[&str]) -> TileUpdate {
+        TileUpdate {
+            tile_id: "cswap".into(),
+            view: View {
+                status: Status::Ok,
+                summary: String::new(),
+                root: Widget::List {
+                    items: titles
+                        .iter()
+                        .map(|t| dashboard_contract::ListItem {
+                            title: t.to_string(),
+                            subtitle: None,
+                            status: None,
+                            tags: vec![],
+                            action: Some(Action::OpenUrl {
+                                url: format!("https://example.com/{t}"),
+                            }),
+                        })
+                        .collect(),
+                    empty_text: None,
+                },
+            },
+            updated_at: 0,
+            stale: false,
+            demo: false,
+        }
+    }
+
+    fn open(url: &str) -> Action {
+        Action::OpenUrl {
+            url: format!("https://example.com/{url}"),
+        }
+    }
+
+    #[test]
+    fn keys_move_between_tiles_and_items_and_enter_opens() {
+        let mut app = app();
+        app.tiles.insert("cswap".into(), links(&["one", "two"]));
+        draw_sized(&mut app, 160, 30);
+
+        key(&mut app, KeyCode::Char('l'));
+        assert_eq!(
+            app.focus,
+            Focus::Tile("sysperf".into()),
+            "first key focuses a tile"
+        );
+        let buf = draw_sized(&mut app, 160, 30);
+        assert_eq!(buf[(0, 1)].symbol(), "┏", "focused tile has a thick border");
+        assert_eq!(buf[(0, 1)].fg, app.palette.accent);
+
+        key(&mut app, KeyCode::Enter);
+        assert_eq!(
+            app.focus,
+            Focus::Tile("sysperf".into()),
+            "no items to go into"
+        );
+        key(&mut app, KeyCode::Right);
+        assert_eq!(app.focus, Focus::Tile("cswap".into()));
+        key(&mut app, KeyCode::Enter);
+        key(&mut app, KeyCode::Down);
+        key(&mut app, KeyCode::Down);
+        assert_eq!(app.focus.item_index(&app.focused_items()), Some(1));
+        let buf = draw_sized(&mut app, 160, 30);
+        let row = (0..30)
+            .find(|&y| (0..160).any(|x| buf[(x, y)].bg == app.palette.selected))
+            .expect("selected item is highlighted");
+        let text: String = (0..160).map(|x| buf[(x, row)].symbol()).collect();
+        assert!(text.contains("two"), "{text}");
+
+        key(&mut app, KeyCode::Enter);
+        assert_eq!(app.ran, [open("two")]);
+        key(&mut app, KeyCode::Esc);
+        assert_eq!(app.focus, Focus::Tile("cswap".into()));
+        key(&mut app, KeyCode::Esc);
+        assert_eq!(app.focus, Focus::None);
+        assert_eq!(app.screen, 0, "Esc does not change screen");
+    }
+
+    #[test]
+    fn focus_stays_on_the_item_across_updates_and_clears_on_screen_change() {
+        let mut app = app();
+        app.tiles.insert("cswap".into(), links(&["one", "two"]));
+        draw_sized(&mut app, 160, 30);
+        app.focus = Focus::Tile("cswap".into());
+        key(&mut app, KeyCode::Enter);
+        key(&mut app, KeyCode::Char('j'));
+        // A new item arrives on top: Enter still opens "two".
+        app.tiles
+            .insert("cswap".into(), links(&["zero", "one", "two"]));
+        draw_sized(&mut app, 160, 30);
+        key(&mut app, KeyCode::Enter);
+        // "two" goes away: the nearest item is picked.
+        app.tiles.insert("cswap".into(), links(&["zero", "one"]));
+        key(&mut app, KeyCode::Enter);
+        assert_eq!(app.ran, [open("two"), open("one")]);
+
+        key(&mut app, KeyCode::Tab);
+        assert_eq!(app.focus, Focus::None);
+    }
+
+    #[test]
+    fn items_cut_off_by_a_short_tile_cannot_be_selected() {
+        let mut app = app();
+        let titles: Vec<String> = (0..20).map(|i| format!("link{i}")).collect();
+        let titles: Vec<&str> = titles.iter().map(String::as_str).collect();
+        app.tiles.insert("cswap".into(), links(&titles));
+        draw_sized(&mut app, 160, 12);
+        app.focus = Focus::Tile("cswap".into());
+        let shown = app.visible_items().len();
+        assert!(shown > 0 && shown < titles.len(), "{shown} shown");
+
+        key(&mut app, KeyCode::Enter);
+        for _ in 0..titles.len() {
+            key(&mut app, KeyCode::Char('j'));
+        }
+        let last = format!("link{}", shown - 1);
+        let buf = draw_sized(&mut app, 160, 12);
+        let row = (0..12)
+            .find(|&y| (0..160).any(|x| buf[(x, y)].bg == app.palette.selected))
+            .expect("selected item is highlighted");
+        let text: String = (0..160).map(|x| buf[(x, row)].symbol()).collect();
+        assert!(text.contains(&last), "{text}");
+        key(&mut app, KeyCode::Enter);
+        assert_eq!(app.ran, [open(&last)]);
+
+        // New items on top push the focused one out of the tile: Enter moves
+        // to a shown item instead of opening the hidden one.
+        let more: Vec<String> = (0..20)
+            .map(|i| format!("new{i}"))
+            .chain(titles.iter().map(|t| t.to_string()))
+            .collect();
+        let more: Vec<&str> = more.iter().map(String::as_str).collect();
+        app.tiles.insert("cswap".into(), links(&more));
+        draw_sized(&mut app, 160, 12);
+        key(&mut app, KeyCode::Enter);
+        assert_eq!(app.ran, [open(&last)]);
+        let shown = app.visible_items();
+        assert_eq!(app.focus.item_index(&shown), Some(shown.len() - 1));
+        key(&mut app, KeyCode::Enter);
+        assert_eq!(app.ran.len(), 2);
+
+        // Fullscreen in a view too short to draw the list: nothing to go into.
+        app.expanded = Some("cswap".into());
+        draw_sized(&mut app, 160, 6);
+        app.focus = Focus::Tile("cswap".into());
+        key(&mut app, KeyCode::Enter);
+        assert_eq!(app.focus, Focus::Tile("cswap".into()));
+    }
+
+    #[test]
+    fn clicking_a_tile_focuses_it_and_the_page_follows_focus() {
+        let mut app = app();
+        app.tiles.insert("cswap".into(), links(&["one", "two"]));
+        // Narrow and short: the tiles stack and the page scrolls.
+        draw_sized(&mut app, 60, 12);
+        assert!(app.max_scroll.get() > 0);
+        key(&mut app, KeyCode::Down);
+        key(&mut app, KeyCode::Down);
+        assert_eq!(app.focus, Focus::Tile("cswap".into()));
+        assert!(app.scroll > 0, "scrolled to the focused tile");
+        key(&mut app, KeyCode::Up);
+        assert_eq!(app.scroll, 0);
+        // PageDown still scrolls without moving focus.
+        key(&mut app, KeyCode::PageDown);
+        assert!(app.scroll > 0);
+        assert_eq!(app.focus, Focus::Tile("sysperf".into()));
+
+        // At 100 columns the tiles stack; "cswap" is the lower one.
+        let mut app = app_with_links();
+        click(&mut app, 5, 25);
+        assert_eq!(app.focus, Focus::Tile("cswap".into()));
+    }
+
+    fn app_with_links() -> App {
+        let mut app = app();
+        app.tiles.insert("cswap".into(), links(&["one", "two"]));
+        app
     }
 
     #[test]
@@ -944,6 +1361,9 @@ mod tests_support {
             hover: None,
             scroll: 0,
             max_scroll: Default::default(),
+            focus: Focus::None,
+            geometry: Default::default(),
+            ran: vec![],
         }
     }
 
@@ -1095,6 +1515,9 @@ mod tests_support {
             hover: None,
             scroll: 0,
             max_scroll: Default::default(),
+            focus: Focus::None,
+            geometry: Default::default(),
+            ran: vec![],
         };
         let mut terminal = Terminal::new(TestBackend::new(w, h)).unwrap();
         terminal

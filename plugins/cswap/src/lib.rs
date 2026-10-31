@@ -177,10 +177,7 @@ struct Window {
 }
 
 fn render() -> Result<View> {
-    let out = Command::new("cswap")
-        .args(["list", "--json"])
-        .output()
-        .context("running cswap")?;
+    let out = cswap(&["list", "--json"]).context("running cswap")?;
     if !out.status.success() {
         bail!(
             "cswap list failed: {}",
@@ -190,6 +187,24 @@ fn render() -> Result<View> {
     let list: CswapList =
         serde_json::from_slice(&out.stdout).context("parsing cswap list --json")?;
     Ok(build_view(&list))
+}
+
+/// Run `cswap`. On Windows it may be a `.cmd` shim (an npm-style install),
+/// which only runs when named with its extension; and as a Python tool it
+/// writes in the console's code page unless told to use UTF-8.
+fn cswap(args: &[&str]) -> std::io::Result<std::process::Output> {
+    let run = |program: &str| {
+        let mut cmd = Command::new(program);
+        cmd.args(args);
+        if cfg!(windows) {
+            cmd.env("PYTHONUTF8", "1").env("PYTHONIOENCODING", "utf-8");
+        }
+        cmd.output()
+    };
+    match run("cswap") {
+        Err(e) if cfg!(windows) && e.kind() == std::io::ErrorKind::NotFound => run("cswap.cmd"),
+        other => other,
+    }
 }
 
 fn build_view(list: &CswapList) -> View {
