@@ -1,0 +1,58 @@
+{
+  "incidents": [
+    {
+      "id": "Q1A2B3C4D5E6F7",
+      "type": "incident",
+      "summary": "[#1842] Payments API returning 502s",
+      "incident_number": 1842,
+      "title": "Payments API returning 502s",
+      "created_at": "2026-10-27T08:16:00Z",
+      "updated_at": "2026-10-27T08:16:00Z",
+      "status": "triggered",
+      "incident_key": "payments-502",
+      "urgency": "high",
+      "html_url": "https://acme.pagerduty.com/incidents/Q1A2B3C4D5E6F7",
+      "service": { "id": "PSVC001", "type": "service_reference", "summary": "payments-api", "html_url": "https://acme.pagerduty.com/service-directory/PSVC001" },
+      "assignments": [
+        { "at": "2026-10-27T08:16:00Z", "assignee": { "id": "PUSR001", "type": "user_reference", "summary": "Ana Ruiz" } }
+      ],
+      "escalation_policy": { "id": "PPOL001", "type": "escalation_policy_reference", "summary": "Payments" }
+    },
+    {
+      "id": "Q9Z8Y7X6W5V4U3",
+      "type": "incident",
+      "summary": "[#1839] Search index lagging behind",
+      "incident_number": 1839,
+      "title": "Search index lagging behind",
+      "created_at": "2026-10-27T06:05:00Z",
+      "updated_at": "2026-10-27T06:20:00Z",
+      "status": "acknowledged",
+      "urgency": "low",
+      "html_url": "https://acme.pagerduty.com/incidents/Q9Z8Y7X6W5V4U3",
+      "service": { "id": "PSVC002", "type": "service_reference", "summary": "search" },
+      "assignments": [
+        { "at": "2026-10-27T06:05:00Z", "assignee": { "id": "PUSR002", "type": "user_reference", "summary": "Sam Lee" } }
+      ],
+      "escalation_policy": { "id": "PPOL002", "type": "escalation_policy_reference", "summary": "Platform" }
+    },
+    {
+      "id": "Q5T6R7E8W9Q0P1",
+      "type": "incident",
+      "summary": "[#1836] Nightly export failed",
+      "incident_number": 1836,
+      "title": "Nightly export failed",
+      "created_at": "2026-10-26T23:40:00Z",
+      "updated_at": "2026-10-27T00:10:00Z",
+      "status": "acknowledged",
+      "urgency": "low",
+      "html_url": "https://acme.pagerduty.com/incidents/Q5T6R7E8W9Q0P1",
+      "service": { "id": "PSVC003", "type": "service_reference", "summary": "data-jobs" },
+      "assignments": [],
+      "escalation_policy": { "id": "PPOL002", "type": "escalation_policy_reference", "summary": "Platform" }
+    }
+  ],
+  "limit": 100,
+  "offset": 0,
+  "total": null,
+  "more": false
+}

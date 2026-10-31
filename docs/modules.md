@@ -13,19 +13,19 @@ Built-in modules are grouped into bundles, one crate per bundle:
 
 | Bundle | Crate | Modules |
 |---|---|---|
-| system | `crates/modules-system` | cpu, memory, network, disk, processes, log, uptime |
-| dev | `crates/modules-dev` | github-prs, github-issues, jira, linear, forgejo |
-| fun | `crates/modules-fun` | demo |
-| agents | `crates/modules-agents` | codex, copilot |
-| ops | none yet | |
-| personal | none yet | |
+| system | `crates/modules-system` | cpu, memory, gpu, network, disk, processes, log, uptime, textfile, battery, cmdrunner, security |
+| dev | `crates/modules-dev` | github-prs, github-issues, jira, linear, forgejo, git |
+| fun | `crates/modules-fun` | demo, clock, hackernews, feedreader, subreddit, devto, mempool, crypto, scores |
+| agents | `crates/modules-agents` | codex, copilot, cursor, antigravity, gemini, opencode, pi |
+| ops | `crates/modules-ops` | docker, kubernetes, ipinfo, pihole, transmission |
+| personal | `crates/modules-personal` | weather, todo, lunar, calendar, org-agenda, markdown-tasks, todo-txt, taskwarrior, sdlc |
 
 Two more crates hold the shared parts:
 
 - `crates/modules-common` (`dashboard-modules-common`): the `Builtin` registration type,
   catalog entry helpers (`entry`, `schema`, `strings`), `manifest`, times (`time::ago`,
-  `time::demo_time`) and, behind its `http` feature, an HTTP client (`http::client`,
-  `http::check`).
+  `time::demo_time`), tokens from the environment or a command (`secret::Secret`) and,
+  behind its `http` feature, an HTTP client (`http::client`, `http::check`).
 - `crates/modules` (`dashboard-modules`): the facade the rest of the workspace uses. It
   gathers the modules of every bundle in the build: `all()`, `ids()`, `builtin(id)` and
   `catalog()`.
@@ -48,7 +48,7 @@ names a module the build left out makes the config fail to load, with an error t
 module. A `modules:` entry for a left-out module is ignored: the module does not run.
 
 The order in the catalog and palette is: the core modules (system and GitHub) first, then the
-rest in bundle order (system, dev, fun, agents).
+rest in bundle order (system, dev, ops, fun, agents, personal).
 
 Heavy dependencies sit only in the bundles (and modules) that need them: `sysinfo` in the
 system modules that read it, and `reqwest` only in modules that call a web API (it comes from
@@ -68,7 +68,31 @@ Binary size, `--profile small` on macOS arm64:
 | no bundles | 3.3 MB (3,322,592 bytes) |
 
 Most of the gap between "every bundle" and "system only" is reqwest and its TLS stack, which
-only the token-API modules (jira, linear, forgejo, copilot) pull in.
+only the web-API modules (jira, linear, forgejo, copilot, cursor, antigravity, hackernews,
+feedreader, weather, ipinfo, pihole, transmission, subreddit, crypto, calendar and the like)
+pull in.
+
+## Built in or plugin?
+
+The rule comes from measuring the eight benchmark widgets three ways (built in, TypeScript plugin,
+Python plugin); `bench/` has the harness.
+
+1. **Build a widget in when it needs no account:** local data, a command on the machine, or a
+   public API with no key. Built in is the cheapest on every measure: +0 to 200 KB of binary,
+   under 5 MB of extra memory, no startup cost, and the same CPU or less.
+2. **A new heavy dependency is the exception.** If a widget needs a dependency over about 500 KB
+   that the binary doesn't have yet, build it in only when at least three built-in widgets would
+   use it. Until then, ship it as a plugin.
+3. **Ship a widget as a plugin when** it needs an account or token and nobody has run it live
+   (marked "untested live"), few people will use it, it depends on one company's fast-changing
+   API, it needs a library from another language, or someone outside this repository writes it.
+   Write it in **Python** when it runs all the time (4 to 20 MB per process); a Node plugin takes
+   45 to 140 MB.
+4. **Compile time is not a reason to keep a widget out:** rebuilding after touching a module
+   takes a few seconds.
+5. **WASM is not worth it yet.** Most widgets need subprocesses or networking, which WASI
+   doesn't give them, and embedding wasmtime adds 1 to 6 MB. It may be used later to sandbox
+   untrusted third-party plugins.
 
 ## Adding a module to a bundle
 
@@ -117,4 +141,4 @@ in `bundles()` in `crates/modules/src/lib.rs`.
    `scripts/check-features.sh`.
 
 Tokens never go in the config file or the code: read them through `token_env` /
-`token_command` (see `Secret` in `crates/modules-dev/src/lib.rs`).
+`token_command` (see `Secret` in `crates/modules-common/src/secret.rs`).

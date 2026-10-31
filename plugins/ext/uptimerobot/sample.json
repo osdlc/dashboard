@@ -1,0 +1,48 @@
+{
+  "stat": "ok",
+  "pagination": { "offset": 0, "limit": 50, "total": 4 },
+  "monitors": [
+    {
+      "id": 793154270, "friendly_name": "Website", "url": "https://www.example.com",
+      "type": 1, "sub_type": "", "keyword_type": null, "keyword_value": "", "http_username": "",
+      "port": "", "interval": 300, "status": 2, "create_datetime": 1760000000,
+      "custom_uptime_ratio": "99.984", "average_response_time": "231.402",
+      "response_times": [ { "datetime": 1793066100, "value": 212 } ],
+      "logs": [
+        { "id": 1188201001, "type": 2, "datetime": 1792807200, "duration": 259200, "reason": { "code": "200", "detail": "OK" } },
+        { "id": 1188200990, "type": 1, "datetime": 1792806900, "duration": 300, "reason": { "code": "503", "detail": "Service Unavailable" } }
+      ]
+    },
+    {
+      "id": 793154271, "friendly_name": "API", "url": "https://api.example.com/health",
+      "type": 2, "sub_type": "", "keyword_type": 2, "keyword_value": "ok", "http_username": "",
+      "port": "", "interval": 60, "status": 9, "create_datetime": 1760000000,
+      "custom_uptime_ratio": "98.712", "average_response_time": "402.110",
+      "response_times": [ { "datetime": 1793065000, "value": 30000 } ],
+      "logs": [
+        { "id": 1188209312, "type": 1, "datetime": 1793065020, "duration": 1380, "reason": { "code": "333333", "detail": "Connection Timeout" } },
+        { "id": 1188100221, "type": 2, "datetime": 1792500000, "duration": 565020, "reason": { "code": "200", "detail": "OK" } }
+      ]
+    },
+    {
+      "id": 793154272, "friendly_name": "Mail server", "url": "mail.example.com",
+      "type": 4, "sub_type": 6, "keyword_type": null, "keyword_value": "", "http_username": "",
+      "port": 25, "interval": 300, "status": 8, "create_datetime": 1760000000,
+      "custom_uptime_ratio": "99.901", "average_response_time": "88.000",
+      "response_times": [],
+      "logs": [
+        { "id": 1188000002, "type": 2, "datetime": 1792000000, "duration": 1066400, "reason": { "code": "98", "detail": "Started" } }
+      ]
+    },
+    {
+      "id": 793154273, "friendly_name": "Old blog", "url": "https://blog.example.com",
+      "type": 1, "sub_type": "", "keyword_type": null, "keyword_value": "", "http_username": "",
+      "port": "", "interval": 300, "status": 0, "create_datetime": 1700000000,
+      "custom_uptime_ratio": "100.000", "average_response_time": "0",
+      "response_times": [],
+      "logs": [
+        { "id": 1187000003, "type": 99, "datetime": 1791000000, "duration": 2066400, "reason": { "code": "99", "detail": "Paused" } }
+      ]
+    }
+  ]
+}

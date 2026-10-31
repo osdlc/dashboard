@@ -1,0 +1,62 @@
+# DigitalOcean droplets. Untested live: built from the API docs with a
+# hand-written sample reply (sample.json); `--sample` shows it.
+id: digitalocean
+version: 0.1.0
+name: DigitalOcean
+description: >-
+  Your DigitalOcean droplets: state, size, region and public IP, with the
+  count and monthly cost in the summary. Click one to open it in the control
+  panel. Untested live: built from the API docs with sample data.
+tags: [cloud, servers, ops, digitalocean, untested-live]
+run: [python3, main.py]
+runtime: python3>=3.9
+env: [DIGITALOCEAN_TOKEN]
+hosts: [api.digitalocean.com]
+size: medium
+config_schema:
+  type: object
+  additionalProperties: false
+  properties:
+    tag: { type: [string, "null"], description: "Only droplets with this tag. Default all." }
+    limit: { type: integer, minimum: 1, maximum: 200, description: "Droplets shown. Default 20." }
+    token_env:
+      type: string
+      description: >-
+        Environment variable holding a personal access token (read scope is
+        enough). Default DIGITALOCEAN_TOKEN.
+    token_command:
+      type: [array, "null"]
+      items: { type: string }
+      description: Command that prints the token, e.g. [op, read, "op://dev/digitalocean/token"].
+demo:
+  status: "warn"
+  summary: "5 droplets · 3 active · 1 off · $102/mo"
+  root:
+    type: "list"
+    items:
+      - title: "web-1"
+        subtitle: "s-1vcpu-2gb · fra1 · 203.0.113.21"
+        status: "ok"
+        tags: ["web", "prod"]
+        action: { type: "open_url", url: "https://cloud.digitalocean.com/droplets/512340001" }
+      - title: "web-2"
+        subtitle: "s-1vcpu-2gb · fra1 · 203.0.113.22"
+        status: "ok"
+        tags: ["web", "prod"]
+        action: { type: "open_url", url: "https://cloud.digitalocean.com/droplets/512340002" }
+      - title: "db-primary"
+        subtitle: "s-4vcpu-8gb · fra1 · 203.0.113.30"
+        status: "ok"
+        tags: ["db", "prod"]
+        action: { type: "open_url", url: "https://cloud.digitalocean.com/droplets/512340003" }
+      - title: "staging"
+        subtitle: "off · s-1vcpu-1gb · ams3 · 198.51.100.7"
+        status: "unknown"
+        tags: ["staging"]
+        action: { type: "open_url", url: "https://cloud.digitalocean.com/droplets/512340004" }
+      - title: "build-runner"
+        subtitle: "new · s-2vcpu-4gb · fra1"
+        status: "unknown"
+        tags: []
+        action: { type: "open_url", url: "https://cloud.digitalocean.com/droplets/512340005" }
+    empty_text: "no droplets"

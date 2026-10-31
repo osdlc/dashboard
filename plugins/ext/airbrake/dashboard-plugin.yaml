@@ -1,0 +1,50 @@
+# Airbrake's unresolved error groups for one project. Untested live: built from
+# the API docs with a hand-written sample reply (sample.json); `--sample` shows it.
+id: airbrake
+version: 0.1.0
+name: Airbrake
+description: >-
+  An Airbrake project's unresolved error groups, most recent first, with
+  notice counts, environment, where it happened and age. Click one to open it
+  in Airbrake. Untested live: built from the API docs with sample data.
+tags: [errors, monitoring, ops, airbrake, untested-live]
+run: [python3, main.py]
+runtime: python3>=3.9
+env: [AIRBRAKE_USER_KEY]
+hosts: [api.airbrake.io]
+size: medium
+config_schema:
+  type: object
+  additionalProperties: false
+  required: [project_id]
+  properties:
+    project_id: { type: integer, minimum: 1, description: "The project's number, from its Airbrake URL." }
+    limit: { type: integer, minimum: 1, maximum: 50, description: "Groups shown. Default 10." }
+    token_env:
+      type: string
+      description: Environment variable holding your user API key. Default AIRBRAKE_USER_KEY.
+    token_command:
+      type: [array, "null"]
+      items: { type: string }
+      description: Command that prints the key, e.g. [op, read, "op://dev/airbrake/key"].
+demo:
+  status: "error"
+  summary: "3 open errors · 1 critical"
+  root:
+    type: "list"
+    items:
+      - title: "ActiveRecord::RecordNotFound: Couldn't find User with 'id'=42"
+        subtitle: "1.2k notices · production · users#show · 7m ago"
+        tags: []
+        status: "warn"
+        action: { type: "open_url", url: "https://airbrake.io/projects/95123/groups/3410958123771200417" }
+      - title: "Net::ReadTimeout: Net::ReadTimeout with #<TCPSocket:(closed)>"
+        subtitle: "87 notices · production · PaymentsJob · 30m ago"
+        tags: []
+        status: "error"
+        action: { type: "open_url", url: "https://airbrake.io/projects/95123/groups/3410958123771200533" }
+      - title: "I18n::MissingTranslationData: translation missing: de.checkout.title"
+        subtitle: "5 notices · staging · checkout#index · 12h ago"
+        tags: ["muted"]
+        action: { type: "open_url", url: "https://airbrake.io/projects/95123/groups/3410958123771199012" }
+    empty_text: "no open errors"

@@ -1,0 +1,60 @@
+# Zendesk tickets from a search. Untested live: built from the API docs with a
+# hand-written sample reply (sample.json); `--sample` shows it.
+id: zendesk
+version: 0.1.0
+name: Zendesk
+description: >-
+  Zendesk tickets from a search, by default the unsolved ones assigned to you:
+  status, priority, tags and last update. Urgent tickets turn the tile red.
+  Click one to open it in Zendesk. Untested live: built from the API docs with
+  sample data.
+tags: [support, tickets, ops, zendesk, untested-live]
+run: [python3, main.py]
+runtime: python3>=3.9
+env: [ZENDESK_API_TOKEN]
+hosts: ["<subdomain>.zendesk.com"]
+size: medium
+config_schema:
+  type: object
+  additionalProperties: false
+  required: [subdomain, email]
+  properties:
+    subdomain: { type: string, description: "The part before .zendesk.com, e.g. acme." }
+    email: { type: string, description: "The address you sign in with; used with the API token." }
+    query:
+      type: string
+      description: >-
+        A Zendesk search. Default "type:ticket status<solved assignee:me".
+    limit: { type: integer, minimum: 1, maximum: 100, description: "Tickets shown. Default 10." }
+    token_env:
+      type: string
+      description: Environment variable holding the API token. Default ZENDESK_API_TOKEN.
+    token_command:
+      type: [array, "null"]
+      items: { type: string }
+      description: Command that prints the token, e.g. [op, read, "op://dev/zendesk/token"].
+demo:
+  status: "error"
+  summary: "4 tickets · 1 urgent"
+  root:
+    type: "list"
+    items:
+      - title: "Password reset email never arrives"
+        subtitle: "#48233 · new · updated 5m ago"
+        tags: ["login", "email", "account"]
+        action: { type: "open_url", url: "https://acme.zendesk.com/agent/tickets/48233" }
+      - title: "Checkout fails with error 502 for all EU customers"
+        subtitle: "#48213 · open · urgent · updated 19m ago"
+        tags: ["checkout", "eu", "outage"]
+        status: "error"
+        action: { type: "open_url", url: "https://acme.zendesk.com/agent/tickets/48213" }
+      - title: "Invoice shows the wrong VAT number"
+        subtitle: "#48190 · pending · high · updated 3h ago"
+        tags: ["billing"]
+        status: "warn"
+        action: { type: "open_url", url: "https://acme.zendesk.com/agent/tickets/48190" }
+      - title: "Export of all orders for 2025 as CSV"
+        subtitle: "#48102 · hold · updated 1d ago"
+        tags: []
+        action: { type: "open_url", url: "https://acme.zendesk.com/agent/tickets/48102" }
+    empty_text: "no tickets"

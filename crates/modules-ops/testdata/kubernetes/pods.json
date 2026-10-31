@@ -1,0 +1,75 @@
+{
+  "apiVersion": "v1",
+  "kind": "List",
+  "items": [
+    {
+      "metadata": { "name": "web-7d9f8b6c5d-2kq8x", "namespace": "shop", "creationTimestamp": "2026-10-25T09:00:00Z" },
+      "status": {
+        "phase": "Running",
+        "containerStatuses": [
+          { "name": "web", "ready": true, "restartCount": 0, "state": { "running": { "startedAt": "2026-10-25T09:00:05Z" } } },
+          { "name": "envoy", "ready": true, "restartCount": 1, "state": { "running": { "startedAt": "2026-10-25T09:00:06Z" } } }
+        ]
+      }
+    },
+    {
+      "metadata": { "name": "worker-5c6b7d8f9-mn4zt", "namespace": "shop", "creationTimestamp": "2026-10-27T10:30:00Z" },
+      "status": {
+        "phase": "Running",
+        "containerStatuses": [
+          { "name": "worker", "ready": false, "restartCount": 14,
+            "state": { "waiting": { "reason": "CrashLoopBackOff", "message": "back-off 5m0s restarting failed container" } },
+            "lastState": { "terminated": { "reason": "Error", "exitCode": 1 } } }
+        ]
+      }
+    },
+    {
+      "metadata": { "name": "migrate-29384756-xk2pl", "namespace": "shop", "creationTimestamp": "2026-10-27T11:00:00Z" },
+      "status": {
+        "phase": "Succeeded",
+        "containerStatuses": [
+          { "name": "migrate", "ready": false, "restartCount": 0, "state": { "terminated": { "reason": "Completed", "exitCode": 0 } } }
+        ]
+      }
+    },
+    {
+      "metadata": { "name": "coredns-76f75df574-8zq2w", "namespace": "kube-system", "creationTimestamp": "2026-09-01T08:00:00Z" },
+      "status": {
+        "phase": "Running",
+        "containerStatuses": [
+          { "name": "coredns", "ready": true, "restartCount": 2, "state": { "running": { "startedAt": "2026-10-01T08:00:00Z" } } }
+        ]
+      }
+    },
+    {
+      "metadata": { "name": "metrics-server-6d94bc8694-h7r5j", "namespace": "kube-system", "creationTimestamp": "2026-10-27T11:58:30Z" },
+      "status": {
+        "phase": "Pending",
+        "containerStatuses": [
+          { "name": "metrics-server", "ready": false, "restartCount": 0, "state": { "waiting": { "reason": "ContainerCreating" } } }
+        ]
+      }
+    },
+    {
+      "metadata": { "name": "api-0", "namespace": "staging", "creationTimestamp": "2026-10-27T07:00:00Z", "deletionTimestamp": "2026-10-27T11:59:00Z" },
+      "status": {
+        "phase": "Running",
+        "containerStatuses": [
+          { "name": "api", "ready": true, "restartCount": 0, "state": { "running": { "startedAt": "2026-10-27T07:00:10Z" } } }
+        ]
+      }
+    },
+    {
+      "metadata": { "name": "api-1", "namespace": "staging", "creationTimestamp": "2026-10-27T07:00:00Z" },
+      "status": {
+        "phase": "Pending",
+        "initContainerStatuses": [
+          { "name": "wait-for-db", "ready": false, "restartCount": 0, "state": { "waiting": { "reason": "ImagePullBackOff" } } }
+        ],
+        "containerStatuses": [
+          { "name": "api", "ready": false, "restartCount": 0, "state": { "waiting": { "reason": "PodInitializing" } } }
+        ]
+      }
+    }
+  ]
+}

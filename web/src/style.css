@@ -193,6 +193,8 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 .w-list li[data-status='warn'] { border-left-color: var(--warn); }
 .w-list li[data-status='error'] { border-left-color: var(--error); }
 .w-list li[data-status='unknown'] { border-left-color: var(--muted); }
+/* Line breaks in the text are kept (a text file, a multi-line note). */
+.w-text { white-space: pre-wrap; }
 .w-text code { font-size: 0.85em; background: var(--track); border-radius: 3px; padding: 0 4px; }
 .w-list .sub { color: var(--muted); font-size: 0.8rem; }
 

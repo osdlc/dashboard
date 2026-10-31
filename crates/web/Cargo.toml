@@ -7,8 +7,8 @@ license.workspace = true
 [dependencies]
 anyhow = "1.0.104"
 axum = { version = "0.8.9", features = ["ws"] }
-dashboard-contract = { version = "0.4.0", path = "../contract" }
-dashboard-host = { version = "0.4.0", path = "../host" }
+dashboard-contract = { version = "0.5.0", path = "../contract" }
+dashboard-host = { version = "0.5.0", path = "../host" }
 futures-util = "0.3.34"
 getrandom = "0.4.3"
 rust-embed = { version = "8.13.0", features = ["mime-guess"] }

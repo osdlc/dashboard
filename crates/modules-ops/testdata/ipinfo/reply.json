@@ -1,0 +1,12 @@
+{
+  "ip": "203.0.113.42",
+  "hostname": "p203-0-113-42.example-isp.net",
+  "city": "Berlin",
+  "region": "Berlin",
+  "country": "DE",
+  "loc": "52.5244,13.4105",
+  "org": "AS3320 Deutsche Telekom AG",
+  "postal": "10178",
+  "timezone": "Europe/Berlin",
+  "readme": "https://ipinfo.io/missingauth"
+}

@@ -1,0 +1,69 @@
+id: trello
+version: 0.1.0
+name: Trello
+description: >-
+  The open cards on a Trello board, soonest due first, with a bar per list.
+  Overdue cards are red and cards due within a day are yellow. Untested live:
+  built from Trello's REST API docs and a sample response.
+tags: [tasks, trello, cards, productivity, untested-live]
+run: [python3, main.py]
+runtime: python3>=3.9
+env: [TRELLO_KEY, TRELLO_TOKEN]
+hosts: [api.trello.com]
+size: medium
+config_schema:
+  type: object
+  additionalProperties: false
+  required: [board]
+  properties:
+    board: { type: string, description: "The board's ID, or the short ID in its URL (trello.com/b/<id>/...)." }
+    lists: { type: array, items: { type: string }, description: Only cards in these lists (by name). Default every list. }
+    limit: { type: integer, minimum: 1, description: How many cards to list. }
+    key_env: { type: string, description: "Variable holding your Trello API key. Default TRELLO_KEY." }
+    key_command: { type: [array, "null"], items: { type: string }, description: Command that prints the API key. }
+    token_env: { type: string, description: "Variable holding your Trello token. Default TRELLO_TOKEN." }
+    token_command: { type: [array, "null"], items: { type: string }, description: Command that prints the token. }
+demo:
+  status: error
+  summary: "6 cards · 1 overdue · 1 due soon"
+  root:
+    type: column
+    children:
+      - type: bars
+        label: Cards per list
+        format: count
+        bars:
+          - { label: Backlog, value: 3 }
+          - { label: Doing, value: 2 }
+          - { label: Review, value: 1 }
+          - { label: Done, value: 0 }
+      - type: list
+        empty_text: No open cards
+        items:
+          - title: Fix the flaky login test
+            subtitle: "Doing · overdue 20h"
+            status: error
+            tags: [bug]
+            action: { type: open_url, url: "https://trello.com/c/Mn34Op56" }
+          - title: Write the migration guide
+            subtitle: "Doing · due in 21h"
+            status: warn
+            tags: [docs]
+            action: { type: open_url, url: "https://trello.com/c/Qr78St90" }
+          - title: Audit third-party scripts
+            subtitle: "Backlog · due in 10d"
+            tags: [red]
+            action: { type: open_url, url: "https://trello.com/c/Ij90Kl12" }
+          - title: Dark mode for the settings page
+            subtitle: Backlog
+            tags: [design]
+            action: { type: open_url, url: "https://trello.com/c/Ab12Cd34" }
+          - title: Export reports as CSV
+            subtitle: Backlog
+            tags: []
+            action: { type: open_url, url: "https://trello.com/c/Ef56Gh78" }
+          - title: New onboarding emails
+            subtitle: "Review · done"
+            status: ok
+            tags: []
+            action: { type: open_url, url: "https://trello.com/c/Uv12Wx34" }

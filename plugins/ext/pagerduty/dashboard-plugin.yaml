@@ -1,0 +1,60 @@
+# A plugin package: this file plus the plugin's own files. See docs/plugins.md.
+id: pagerduty
+version: 0.1.0
+name: PagerDuty
+description: >-
+  Open PagerDuty incidents, triggered first, with service, assignee and age,
+  each linking to the incident; and who is first on call now. Filter by
+  service, team, urgency or escalation policy. Counts cover the newest 100
+  incidents. Built from PagerDuty's public
+  REST API v2 docs (GET /incidents, GET /oncalls) and untested live.
+tags: [ops, incidents, oncall, alerts, pagerduty]
+# Run in this folder.
+run: [python3, main.py]
+runtime: python3>=3.9
+env: [PAGERDUTY_TOKEN]
+hosts: [api.pagerduty.com]
+size: medium
+config_schema:
+  type: object
+  additionalProperties: false
+  properties:
+    base_url: { type: string, description: "API address. Default https://api.pagerduty.com." }
+    service_ids: { type: [array, "null"], items: { type: string }, description: "Only incidents on these services (IDs such as PSVC001)." }
+    team_ids: { type: [array, "null"], items: { type: string }, description: "Only incidents for these teams." }
+    urgencies: { type: [array, "null"], items: { type: string, enum: [high, low] }, description: "Only these urgencies." }
+    escalation_policy_ids: { type: [array, "null"], items: { type: string }, description: "Whose on-call to show. Default: every policy." }
+    oncall: { type: boolean, description: "Show who is first on call. Default true." }
+    limit: { type: integer, minimum: 1, description: "Incidents listed. Default 10." }
+    token_env: { type: string, description: "Environment variable holding a REST API key. Default PAGERDUTY_TOKEN." }
+    token_command: { type: [array, "null"], items: { type: string }, description: "Command that prints the API key." }
+# Made-up incidents, the same as sample/incidents.json and sample/oncalls.json.
+demo:
+  status: error
+  summary: "1 triggered · 2 acknowledged · on call: Ana Ruiz"
+  root:
+    type: column
+    children:
+      - type: row
+        children:
+          - { type: stat, label: Triggered, value: "1", status: error }
+          - { type: stat, label: Acknowledged, value: "2", status: warn }
+          - { type: stat, label: On call, value: "Ana Ruiz, Sam Lee" }
+      - type: list
+        empty_text: No open incidents
+        items:
+          - title: "#1842 Payments API returning 502s"
+            subtitle: payments-api · Ana Ruiz · 14m ago
+            status: error
+            tags: [triggered, high]
+            action: { type: open_url, url: "https://acme.pagerduty.com/incidents/Q1A2B3C4D5E6F7" }
+          - title: "#1839 Search index lagging behind"
+            subtitle: search · Sam Lee · 2h ago
+            status: warn
+            tags: [acked]
+            action: { type: open_url, url: "https://acme.pagerduty.com/incidents/Q9Z8Y7X6W5V4U3" }
+          - title: "#1836 Nightly export failed"
+            subtitle: data-jobs · unassigned · 8h ago
+            status: warn
+            tags: [acked]
+            action: { type: open_url, url: "https://acme.pagerduty.com/incidents/Q5T6R7E8W9Q0P1" }

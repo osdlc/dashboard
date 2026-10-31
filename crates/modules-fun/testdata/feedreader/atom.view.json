@@ -1,0 +1,57 @@
+{
+  "status": "ok",
+  "summary": "5 items from 1 feed",
+  "root": {
+    "type": "list",
+    "items": [
+      {
+        "title": "v1.9.3 & hotfix notes © &bogus;",
+        "subtitle": "Release notes · 2026-10-26 14:00",
+        "status": null,
+        "tags": [],
+        "action": {
+          "type": "open_url",
+          "url": "https://releases.example.org/1.9.3"
+        }
+      },
+      {
+        "title": "v2.0.0",
+        "subtitle": "Release notes · 2026-10-26 12:00",
+        "status": null,
+        "tags": [],
+        "action": {
+          "type": "open_url",
+          "url": "https://releases.example.org/2.0.0"
+        }
+      },
+      {
+        "title": "A relative link",
+        "subtitle": "Release notes · 2026-10-25 18:45",
+        "status": null,
+        "tags": [],
+        "action": null
+      },
+      {
+        "title": "Docs moved to a new home",
+        "subtitle": "Release notes · 2026-10-24 04:00",
+        "status": null,
+        "tags": [],
+        "action": {
+          "type": "open_url",
+          "url": "https://releases.example.org/docs"
+        }
+      },
+      {
+        "title": "(no title)",
+        "subtitle": "Release notes",
+        "status": null,
+        "tags": [],
+        "action": {
+          "type": "open_url",
+          "url": "https://releases.example.org/untitled"
+        }
+      }
+    ],
+    "empty_text": "No items in these feeds."
+  }
+}

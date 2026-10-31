@@ -1,0 +1,51 @@
+{
+  "fees": {
+    "fastestFee": 12,
+    "halfHourFee": 9,
+    "hourFee": 6,
+    "economyFee": 3,
+    "minimumFee": 1
+  },
+  "mempool": {
+    "count": 46629,
+    "vsize": 19883849,
+    "total_fee": 2754680
+  },
+  "blocks": [
+    {
+      "id": "00000000000000000001a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f7",
+      "height": 973386,
+      "timestamp": 1793101800,
+      "tx_count": 2329,
+      "size": 1467383,
+      "weight": 3996044,
+      "extras": { "medianFee": 8.42, "pool": { "id": 142, "name": "OCEAN", "slug": "ocean" } }
+    },
+    {
+      "id": "00000000000000000000b1c2d3e4f5061728394a5b6c7d8e9f00112233445566",
+      "height": 973385,
+      "timestamp": 1793100900,
+      "tx_count": 3811,
+      "size": 1612004,
+      "weight": 3993120,
+      "extras": { "medianFee": 5.0, "pool": { "id": 44, "name": "Foundry USA", "slug": "foundryusa" } }
+    },
+    {
+      "id": "0000000000000000000099887766554433221100ffeeddccbbaa998877665544",
+      "height": 973384,
+      "timestamp": 1793097000,
+      "tx_count": 1,
+      "size": 285,
+      "weight": 1140,
+      "extras": { "medianFee": 0, "pool": { "id": 0, "name": "Unknown", "slug": "unknown" } }
+    },
+    {
+      "id": "000000000000000000013579bdf02468ace13579bdf02468ace13579bdf02468",
+      "height": 973383,
+      "timestamp": 1793096400,
+      "tx_count": 4102,
+      "size": 1702113,
+      "weight": 3998211
+    }
+  ]
+}

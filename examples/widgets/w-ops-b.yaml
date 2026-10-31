@@ -1,0 +1,77 @@
+# Ops widgets: Pi-hole and Transmission (built in, in the ops bundle), and
+# Rollbar, Airbrake, UptimeRobot, DigitalOcean and Zendesk (Python plugin
+# packages in plugins/ext/; examples/widgets/plugins links there, so
+# `package: <id>` finds them). From the repository root:
+#
+#   cargo run -p dashboard -- serve --config examples/widgets/w-ops-b.yaml
+#   cargo run -p dashboard -- tui   --config examples/widgets/w-ops-b.yaml
+#
+# None of these were run against the real service ("untested live"), so
+# nothing here calls one:
+# - the "ops" screen shows each widget's demo view (`demo: true`: no process
+#   starts, no network);
+# - the "sample" screen runs each plugin for real with `--sample`, which reads
+#   its sample.json (a hand-written API reply) instead of the network.
+#
+# To run one for real, drop `demo: true`, fill in its config and set its token
+# variable (PIHOLE_PASSWORD and TRANSMISSION_PASSWORD only if the service has a
+# password; ROLLBAR_TOKEN, AIRBRAKE_USER_KEY, UPTIMEROBOT_API_KEY,
+# DIGITALOCEAN_TOKEN, ZENDESK_API_TOKEN), or use token_command. The plugins
+# need Python 3.9 or newer.
+
+modules:
+  pihole:
+    demo: true
+    config: { url: "http://pi.hole", top: 5 }
+  transmission:
+    demo: true
+    config: { url: "http://localhost:9091", limit: 10 }
+  rollbar:
+    package: rollbar
+    demo: true
+    config: { account: acme, project: web, level: warning }
+  airbrake:
+    package: airbrake
+    demo: true
+    config: { project_id: 95123 }
+  uptimerobot:
+    package: uptimerobot
+    demo: true
+  droplets:
+    package: digitalocean
+    demo: true
+    config: { tag: prod }
+  zendesk:
+    package: zendesk
+    demo: true
+    config: { subdomain: acme, email: me@acme.com }
+
+  # The same plugins, running, on their sample data.
+  rollbar-sample:
+    plugin: [python3, plugins/rollbar/main.py, --sample]
+  airbrake-sample:
+    plugin: [python3, plugins/airbrake/main.py, --sample]
+  uptimerobot-sample:
+    plugin: [python3, plugins/uptimerobot/main.py, --sample]
+  droplets-sample:
+    plugin: [python3, plugins/digitalocean/main.py, --sample]
+  zendesk-sample:
+    plugin: [python3, plugins/zendesk/main.py, --sample]
+
+screens:
+  - name: ops
+    tiles:
+      - { module: uptimerobot, size: medium }
+      - { module: rollbar, size: medium }
+      - { module: airbrake, size: medium }
+      - { module: droplets, size: medium }
+      - { module: zendesk, size: medium }
+      - { module: pihole, size: medium }
+      - { module: transmission, size: medium }
+  - name: sample
+    tiles:
+      - { module: uptimerobot-sample, size: medium }
+      - { module: rollbar-sample, size: medium }
+      - { module: airbrake-sample, size: medium }
+      - { module: droplets-sample, size: medium }
+      - { module: zendesk-sample, size: medium }

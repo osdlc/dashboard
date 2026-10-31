@@ -1,0 +1,41 @@
+# AI agent usage widgets from the agents bundle. From the repository root:
+#
+#   cargo run -p dashboard -- serve --config examples/widgets/w-agents.yaml
+#
+# Tiles marked `demo: true` show made-up data from the module's catalog entry:
+# nothing runs for them. Remove the line to run the module for real.
+#
+# - cursor: reads the Cursor app's login from its local database and calls
+#   cursor.com. Checked live with a free account; paid plans untested live.
+# - antigravity: asks the Antigravity app's local language server; shows
+#   "not running" while the app is closed.
+# - gemini, opencode, pi: read each agent's local logs. No network.
+
+theme: auto
+
+modules:
+  cursor:
+    demo: true            # real: Cursor installed and signed in, sqlite3 on PATH
+  antigravity: {}         # real: says "not running" unless the app is open
+  antigravity-demo:
+    builtin: antigravity
+    demo: true
+  gemini:
+    demo: true            # real: Gemini CLI installed and used
+    config: { daily_limit: 1000 }
+  opencode:
+    demo: true            # real: OpenCode installed and used
+  pi:
+    demo: true            # real: reads ~/.pi/agent/sessions
+
+screens:
+  - name: limits
+    tiles:
+      - { module: cursor, size: medium }
+      - { module: antigravity-demo, size: medium }
+      - { module: antigravity, size: small }
+      - { module: gemini, size: medium }
+  - name: tokens
+    tiles:
+      - { module: opencode, size: medium }
+      - { module: pi, size: medium }

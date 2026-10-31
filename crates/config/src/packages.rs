@@ -332,17 +332,130 @@ demo:
     #[test]
     fn example_packages_load() {
         let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../examples/plugins");
-        let found = Packages::load_from(&[dir]);
+        let found = Packages::load_from(std::slice::from_ref(&dir));
         assert!(found.errors.is_empty(), "{:?}", found.errors);
-        let ids: Vec<&str> = found
-            .installed
-            .iter()
-            .map(|p| p.package.id.as_str())
-            .collect();
-        assert_eq!(ids, ["gh-actions", "git-repos", "hello", "latency"]);
+        // The four examples are folders here. Everything else is a link to a
+        // token-API package in plugins/ext, so examples/try.yaml can show its demo.
+        let examples = ["gh-actions", "git-repos", "hello", "latency"];
+        for id in examples {
+            assert!(found.get(id).is_some(), "{id}");
+        }
+        for p in &found.installed {
+            let id = p.package.id.as_str();
+            if examples.contains(&id) {
+                continue;
+            }
+            let link = std::fs::read_link(dir.join(id))
+                .unwrap_or_else(|_| panic!("{id}: not an example, so it should be a link"));
+            assert_eq!(link, Path::new("../../plugins/ext").join(id), "{id}");
+        }
         // examples/plugins.yaml finds them next to itself.
         let config = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../examples/plugins.yaml");
         let found = Packages::load(&config);
         assert!(found.get("latency").is_some());
+    }
+
+    #[test]
+    fn clock_packages_match_native_demo() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+        let found = Packages::load_from(&[root.join("plugins/ext")]);
+        assert!(found.errors.is_empty(), "{:?}", found.errors);
+        // The clock plugins' demo is the native module's view of the same sample.
+        let text =
+            std::fs::read_to_string(root.join("crates/modules-fun/testdata/clock/demo.view.json"))
+                .unwrap();
+        let expected: dashboard_contract::View = serde_json::from_str(&text).unwrap();
+        for id in ["clock-ts", "clock-py"] {
+            let p = found.get(id).unwrap_or_else(|| panic!("{id} not found"));
+            assert_eq!(p.package.demo, expected, "{id}");
+        }
+    }
+
+    #[test]
+    fn textfile_packages_match_native_demo() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+        let found = Packages::load_from(&[root.join("plugins/ext")]);
+        assert!(found.errors.is_empty(), "{:?}", found.errors);
+        // The textfile plugins' demo is the native module's view of the same sample.
+        let text = std::fs::read_to_string(
+            root.join("crates/modules-system/testdata/textfile/notes.md.view.json"),
+        )
+        .unwrap();
+        let expected: dashboard_contract::View = serde_json::from_str(&text).unwrap();
+        for id in ["textfile-ts", "textfile-py"] {
+            let p = found.get(id).unwrap_or_else(|| panic!("{id} not found"));
+            assert_eq!(p.package.demo, expected, "{id}");
+        }
+    }
+
+    #[test]
+    fn battery_packages_match_native_demo() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+        let found = Packages::load_from(&[root.join("plugins/ext")]);
+        assert!(found.errors.is_empty(), "{:?}", found.errors);
+        // The battery plugins' demo is the native module's view of the same sample.
+        let text = std::fs::read_to_string(
+            root.join("crates/modules-system/testdata/battery/pmset-discharging.view.json"),
+        )
+        .unwrap();
+        let expected: dashboard_contract::View = serde_json::from_str(&text).unwrap();
+        for id in ["battery-ts", "battery-py"] {
+            let p = found.get(id).unwrap_or_else(|| panic!("{id} not found"));
+            assert_eq!(p.package.demo, expected, "{id}");
+        }
+    }
+
+    #[test]
+    fn feedreader_packages_match_native_demo() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+        let found = Packages::load_from(&[root.join("plugins/ext")]);
+        assert!(found.errors.is_empty(), "{:?}", found.errors);
+        // The feed reader plugins' demo is the native module's view of the same sample.
+        let text = std::fs::read_to_string(
+            root.join("crates/modules-fun/testdata/feedreader/demo.view.json"),
+        )
+        .unwrap();
+        let expected: dashboard_contract::View = serde_json::from_str(&text).unwrap();
+        for id in ["feedreader-ts", "feedreader-py"] {
+            let p = found.get(id).unwrap_or_else(|| panic!("{id} not found"));
+            assert_eq!(p.package.demo, expected, "{id}");
+        }
+    }
+
+    #[test]
+    fn hackernews_packages_match_native_demo() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+        let found = Packages::load_from(&[root.join("plugins/ext")]);
+        assert!(found.errors.is_empty(), "{:?}", found.errors);
+        // The hackernews plugins' demo is the native module's demo view.
+        let text = std::fs::read_to_string(
+            root.join("crates/modules-fun/testdata/hackernews/demo.view.json"),
+        )
+        .unwrap();
+        let expected: dashboard_contract::View = serde_json::from_str(&text).unwrap();
+        for id in ["hackernews-ts", "hackernews-py"] {
+            let p = found.get(id).unwrap_or_else(|| panic!("{id} not found"));
+            assert_eq!(p.package.demo, expected, "{id}");
+        }
+    }
+
+    #[test]
+    fn ext_packages_load() {
+        let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../plugins/ext");
+        let found = Packages::load_from(&[dir]);
+        assert!(found.errors.is_empty(), "{:?}", found.errors);
+        for id in ["docker-py", "docker-ts"] {
+            assert!(found.get(id).is_some(), "{id}");
+        }
+    }
+
+    #[test]
+    fn ext_weather_packages_load() {
+        let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../plugins/ext");
+        let found = Packages::load_from(&[dir]);
+        assert!(found.errors.is_empty(), "{:?}", found.errors);
+        for id in ["weather-py", "weather-ts"] {
+            assert!(found.get(id).is_some(), "{id}");
+        }
     }
 }

@@ -7,26 +7,34 @@ license.workspace = true
 # One feature per module, named after its id. dashboard-modules turns them on
 # through its `bundle-system` and `module-<id>` features.
 [features]
-default = ["cpu", "memory", "network", "disk", "processes", "log", "uptime"]
+default = ["cpu", "memory", "gpu", "network", "disk", "processes", "log", "uptime", "textfile", "battery", "cmdrunner", "security"]
 cpu = ["dep:sysinfo"]
 memory = ["dep:sysinfo"]
+gpu = ["dep:sysinfo"]
 network = ["dep:sysinfo"]
 disk = ["dep:sysinfo"]
 processes = ["dep:sysinfo"]
 log = []
 uptime = []
+textfile = []
+battery = []
+cmdrunner = []
+security = []
 
 [dependencies]
 anyhow = "1.0.104"
 async-trait = "0.1.92"
-dashboard-contract = { version = "0.4.0", path = "../contract" }
-dashboard-host = { version = "0.4.0", path = "../host" }
-dashboard-modules-common = { version = "0.4.0", path = "../modules-common" }
+dashboard-contract = { version = "0.5.0", path = "../contract" }
+dashboard-host = { version = "0.5.0", path = "../host" }
+dashboard-modules-common = { version = "0.5.0", path = "../modules-common" }
 schemars = "1.2.3"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.154"
 sysinfo = { version = "0.39.6", optional = true }
 tokio = { version = "1.54.1", features = ["io-util", "process", "rt", "time"] }
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2.191"
 
 [dev-dependencies]
 tokio = { version = "1.54.1", features = ["macros", "rt"] }

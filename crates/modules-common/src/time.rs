@@ -46,7 +46,11 @@ pub fn parse_time(ts: &str) -> Option<i64> {
 /// RFC 3339 time `secs_ago` seconds before now, for demo data whose ages
 /// should read the same whenever it is shown.
 pub fn demo_time(secs_ago: i64) -> String {
-    let t = dashboard_host::now_ms() / 1000 - secs_ago;
+    rfc3339(dashboard_host::now_ms() / 1000 - secs_ago)
+}
+
+/// RFC 3339 time (UTC) from seconds since the epoch.
+pub fn rfc3339(t: i64) -> String {
     let (days, secs) = (t.div_euclid(86_400), t.rem_euclid(86_400));
     // Civil date from days (Howard Hinnant's algorithm).
     let z = days + 719_468;

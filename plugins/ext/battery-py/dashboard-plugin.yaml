@@ -1,0 +1,36 @@
+# The Python version of the battery widget, for the native-vs-plugin benchmark.
+# It shows the same view as the built-in `battery` module for the same input.
+id: battery-py
+version: 0.1.0
+name: Battery (Python)
+description: >-
+  Battery charge as a gauge, with the power source and the time left (or to
+  full). Reads pmset on macOS and /sys/class/power_supply on Linux. Python
+  version of the built-in battery module.
+tags: [system, local, power, benchmark]
+run: [python3, main.py]
+runtime: python3>=3.9
+size: small
+config_schema:
+  type: object
+  additionalProperties: false
+  properties:
+    low: { type: number, description: "At or below this percent, on battery, the tile turns yellow." }
+    critical: { type: number, description: "At or below this percent, on battery, the tile turns red." }
+    sample:
+      type: [string, "null"]
+      description: >-
+        Read this instead of the machine: a file with saved pmset -g batt output,
+        or a folder laid out like /sys/class/power_supply. For tests and demos.
+demo:
+  status: ok
+  summary: 76% · discharging · 4:12 left
+  root:
+    type: column
+    children:
+      - { type: gauge, label: Battery, percent: 76, caption: on battery }
+      - type: row
+        children:
+          - { type: stat, label: Power, value: battery }
+          - { type: stat, label: State, value: discharging }
+          - { type: stat, label: Time left, value: "4:12" }

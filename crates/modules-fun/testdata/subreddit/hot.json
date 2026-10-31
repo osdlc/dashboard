@@ -1,0 +1,100 @@
+{
+  "kind": "Listing",
+  "data": {
+    "after": "t3_1ab0005",
+    "before": null,
+    "dist": 6,
+    "children": [
+      {
+        "kind": "t3",
+        "data": {
+          "id": "1ab0001",
+          "title": "Weekly questions thread: ask anything",
+          "author": "AutoModerator",
+          "score": 12,
+          "num_comments": 48,
+          "created_utc": 1793030400.0,
+          "permalink": "/r/rust/comments/1ab0001/weekly_questions_thread/",
+          "url": "https://www.reddit.com/r/rust/comments/1ab0001/weekly_questions_thread/",
+          "domain": "self.rust",
+          "is_self": true,
+          "stickied": true,
+          "over_18": false,
+          "link_flair_text": null
+        }
+      },
+      {
+        "kind": "t3",
+        "data": {
+          "id": "1ab0002",
+          "title": "Announcing a faster terminal UI crate",
+          "author": "ferris_dev",
+          "score": 1534,
+          "num_comments": 212,
+          "created_utc": 1793095200.0,
+          "permalink": "/r/rust/comments/1ab0002/announcing_a_faster_terminal_ui_crate/",
+          "url": "https://github.com/example/tui-fast",
+          "domain": "github.com",
+          "is_self": false,
+          "stickied": false,
+          "over_18": false,
+          "link_flair_text": "🛠️ project"
+        }
+      },
+      {
+        "kind": "t3",
+        "data": {
+          "id": "1ab0003",
+          "title": "How do I share state between async tasks without a Mutex?",
+          "author": "new_to_async",
+          "score": 87,
+          "num_comments": 1,
+          "created_utc": 1793100600.0,
+          "permalink": "/r/rust/comments/1ab0003/how_do_i_share_state/",
+          "url": "https://www.reddit.com/r/rust/comments/1ab0003/how_do_i_share_state/",
+          "domain": "self.rust",
+          "is_self": true,
+          "stickied": false,
+          "over_18": false,
+          "link_flair_text": "🙋 seeking help & advice"
+        }
+      },
+      {
+        "kind": "t3",
+        "data": {
+          "id": "1ab0004",
+          "title": "Rust in the kernel: a year later",
+          "author": "kernel_watcher",
+          "score": 1,
+          "num_comments": 0,
+          "created_utc": 1793102380.0,
+          "permalink": "/r/rust/comments/1ab0004/rust_in_the_kernel_a_year_later/",
+          "url": "https://lwn.net/Articles/999999/",
+          "domain": "lwn.net",
+          "is_self": false,
+          "stickied": false,
+          "over_18": false,
+          "link_flair_text": ""
+        }
+      },
+      {
+        "kind": "t3",
+        "data": {
+          "id": "1ab0005",
+          "title": "Benchmarks of five allocators on a busy web server",
+          "author": "[deleted]",
+          "score": 402,
+          "num_comments": 96,
+          "created_utc": 1792929600.0,
+          "permalink": "/r/rust/comments/1ab0005/benchmarks_of_five_allocators/",
+          "url": "https://blog.example.com/allocators",
+          "domain": "blog.example.com",
+          "is_self": false,
+          "stickied": false,
+          "over_18": true,
+          "link_flair_text": "📡 official blog"
+        }
+      }
+    ]
+  }
+}

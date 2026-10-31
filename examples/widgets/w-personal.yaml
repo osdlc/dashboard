@@ -1,0 +1,77 @@
+# Personal widgets: a calendar from an .ics feed, and tasks from org-mode,
+# Markdown (Obsidian Tasks), todo.txt, Taskwarrior and an osdlc sdlc vault.
+#
+#   cargo run -p dashboard -- serve --config examples/widgets/w-personal.yaml
+#
+# Run it from the repository root: paths are read from where the dashboard
+# was started. The "day" screen reads the sample files under
+# crates/modules-personal/testdata, so it works with no setup. Their dates are
+# fixed (late October 2026), so later on most tasks show as overdue.
+#
+# The calendar sample's standup repeats every weekday, so the agenda always
+# has something. For your own calendar, use the private .ics address that
+# Google, Outlook or iCloud gives you, through an environment variable:
+#   calendar:
+#     config: { url_env: WORK_CALENDAR_ICS }
+#
+# taskwarrior needs the `task` program; it shows its demo view here
+# (`demo: true`). The "demo" screen shows every widget's demo view.
+
+theme: auto
+
+modules:
+  calendar:
+    config: { path: crates/modules-personal/testdata/calendar/team.ics, days: 2 }
+  org-agenda:
+    config:
+      paths: [crates/modules-personal/testdata/org]
+      days: 14
+      undated: true
+      link: "https://github.com/osdlc/dashboard/blob/main/crates/modules-personal/testdata/org/{path}#L{line}"
+  markdown-tasks:
+    config:
+      paths: [crates/modules-personal/testdata/markdown]
+      link: "https://github.com/osdlc/dashboard/blob/main/crates/modules-personal/testdata/markdown/{path}#L{line}"
+  todo-txt:
+    config: { path: crates/modules-personal/testdata/todo-txt/todo.txt }
+  taskwarrior:
+    demo: true            # real: install Taskwarrior and drop this line
+  sdlc:
+    config:
+      path: crates/modules-personal/testdata/sdlc
+      planning: true
+      link: "https://github.com/osdlc/dashboard/blob/main/crates/modules-personal/testdata/sdlc/{path}"
+
+  # ---- the same modules as demo views ----
+  calendar-demo:
+    builtin: calendar
+    demo: true
+  org-demo:
+    builtin: org-agenda
+    demo: true
+  markdown-demo:
+    builtin: markdown-tasks
+    demo: true
+  todo-txt-demo:
+    builtin: todo-txt
+    demo: true
+  sdlc-demo:
+    builtin: sdlc
+    demo: true
+
+screens:
+  - name: day
+    tiles:
+      - { module: calendar, size: tall }
+      - { module: org-agenda, size: medium }
+      - { module: markdown-tasks, size: medium }
+      - { module: todo-txt, size: medium }
+      - { module: sdlc, size: tall }
+  - name: demo
+    tiles:
+      - { module: calendar-demo, size: tall }
+      - { module: org-demo, size: medium }
+      - { module: markdown-demo, size: medium }
+      - { module: todo-txt-demo, size: medium }
+      - { module: taskwarrior, size: medium }
+      - { module: sdlc-demo, size: tall }

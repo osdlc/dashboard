@@ -1,0 +1,52 @@
+# A plugin package: this file plus the plugin's own files. See docs/plugins.md.
+id: weather-py
+version: 0.1.0
+name: Weather (Python)
+description: >-
+  Current weather and a short forecast from Open-Meteo (no key needed), for a
+  place name or a latitude and longitude. The Python copy of the built-in
+  weather module, for the native-vs-plugin benchmark.
+tags: [weather, personal, web, benchmark]
+# Run in this folder.
+run: [python3, main.py]
+runtime: python3>=3.9
+hosts: [api.open-meteo.com, geocoding-api.open-meteo.com]
+size: medium
+config_schema:
+  type: object
+  additionalProperties: false
+  properties:
+    place: { type: [string, "null"], description: "A place name, looked up with Open-Meteo's geocoding API, e.g. \"Berlin\". Set this, or latitude and longitude." }
+    latitude: { type: [number, "null"] }
+    longitude: { type: [number, "null"] }
+    name: { type: [string, "null"], description: "The name shown on the tile. Default: the place's name, or the coordinates." }
+    units: { type: string, enum: [metric, imperial], description: "metric: °C, km/h. imperial: °F, mph." }
+    days: { type: integer, minimum: 1, maximum: 16, description: "Forecast days, today first (1 to 16)." }
+    forecast_url: { type: string, description: "The forecast API, e.g. a self-hosted Open-Meteo." }
+    geocoding_url: { type: string, description: "The geocoding API, used for `place`." }
+# The same sample forecast as the built-in module's demo view.
+demo:
+  status: ok
+  summary: Berlin · 10°C · Overcast
+  root:
+    type: column
+    children:
+      - type: row
+        children:
+          - { type: stat, label: Berlin, value: "10", unit: °C, delta: Overcast }
+          - { type: stat, label: Feels like, value: "7", unit: °C }
+          - { type: stat, label: Wind, value: "11", unit: km/h }
+      - type: table
+        columns:
+          - { key: day, label: Day }
+          - { key: sky, label: Conditions }
+          - { key: high, label: High }
+          - { key: low, label: Low }
+          - { key: rain, label: Rain }
+        rows:
+          - cells: { day: Today, sky: Overcast, high: 14°, low: 7°, rain: 15% }
+          - cells: { day: Wed 28, sky: Light rain, high: 15°, low: 8°, rain: 63% }
+          - cells: { day: Thu 29, sky: Thunderstorm, high: 11°, low: 0°, rain: 80% }
+            status: warn
+          - cells: { day: Fri 30, sky: Fog, high: 3°, low: "-3°", rain: 0% }
+          - cells: { day: Sat 31, sky: "-", high: "-", low: "-", rain: "-" }

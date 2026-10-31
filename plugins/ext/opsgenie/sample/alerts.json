@@ -1,0 +1,65 @@
+{
+  "data": [
+    {
+      "id": "70413a06-38d6-4c85-92b8-5ebc900d42e2",
+      "tinyId": "1791",
+      "alias": "event_573",
+      "message": "Payments API 5xx rate above 2%",
+      "status": "open",
+      "acknowledged": false,
+      "isSeen": true,
+      "tags": ["prod", "payments"],
+      "snoozed": false,
+      "count": 4,
+      "lastOccurredAt": "2026-10-27T08:24:00.000Z",
+      "createdAt": "2026-10-27T08:10:00.000Z",
+      "updatedAt": "2026-10-27T08:24:00.000Z",
+      "source": "Datadog",
+      "owner": "ana@acme.example",
+      "priority": "P1",
+      "responders": [{ "type": "team", "id": "8418d193-2dab-4490-b331-8c02cdd196b7" }],
+      "integration": { "id": "4513b7ea-3b91-438f-b7e4-e3e54af9147c", "name": "Datadog", "type": "Datadog" },
+      "report": { "ackTime": 0, "closeTime": 0, "acknowledgedBy": "", "closedBy": "" }
+    },
+    {
+      "id": "c3a7d1e2-6b2f-4f8e-9a51-2d0c6b7e9f10",
+      "tinyId": "1790",
+      "alias": "disk-db-2",
+      "message": "Disk 91% full on db-2",
+      "status": "open",
+      "acknowledged": true,
+      "isSeen": true,
+      "tags": ["prod", "db"],
+      "snoozed": false,
+      "count": 1,
+      "createdAt": "2026-10-27T05:30:00.000Z",
+      "updatedAt": "2026-10-27T05:45:00.000Z",
+      "source": "Prometheus",
+      "owner": "sam@acme.example",
+      "priority": "P2"
+    },
+    {
+      "id": "e8f9a0b1-c2d3-4e5f-8a9b-0c1d2e3f4a5b",
+      "tinyId": "1788",
+      "alias": "cert-expiry-www",
+      "message": "TLS certificate for www expires in 12 days",
+      "status": "open",
+      "acknowledged": false,
+      "isSeen": false,
+      "tags": ["certs"],
+      "snoozed": false,
+      "count": 1,
+      "createdAt": "2026-10-26T09:00:00.000Z",
+      "updatedAt": "2026-10-26T09:00:00.000Z",
+      "source": "Heartbeat",
+      "owner": "",
+      "priority": "P4"
+    }
+  ],
+  "paging": {
+    "first": "https://api.opsgenie.com/v2/alerts?limit=100&sort=createdAt&offset=0&order=desc",
+    "last": "https://api.opsgenie.com/v2/alerts?limit=100&sort=createdAt&offset=0&order=desc"
+  },
+  "took": 0.051,
+  "requestId": "9ae63dd7-ed00-4c81-86f0-c4ffd33142c9"
+}

@@ -1,0 +1,97 @@
+{
+  "leagues": [{ "id": "46", "name": "National Basketball Association", "abbreviation": "NBA" }],
+  "day": { "date": "2026-10-27" },
+  "events": [
+    {
+      "id": "401900001",
+      "date": "2026-10-27T23:00Z",
+      "name": "Washington Wizards at Charlotte Hornets",
+      "shortName": "WSH @ CHA",
+      "status": {
+        "clock": 0.0,
+        "displayClock": "0.0",
+        "period": 4,
+        "type": { "id": "3", "name": "STATUS_FINAL", "state": "post", "completed": true, "detail": "Final", "shortDetail": "Final" }
+      },
+      "competitions": [
+        {
+          "competitors": [
+            { "homeAway": "home", "score": "110", "winner": true, "team": { "abbreviation": "CHA", "displayName": "Charlotte Hornets" }, "records": [{ "summary": "3-1" }] },
+            { "homeAway": "away", "score": "103", "winner": false, "team": { "abbreviation": "WSH", "displayName": "Washington Wizards" }, "records": [{ "summary": "2-2" }] }
+          ]
+        }
+      ],
+      "links": [
+        { "rel": ["summary", "desktop", "event"], "href": "https://www.espn.com/nba/game/_/gameId/401900001/wizards-hornets" },
+        { "rel": ["boxscore", "desktop", "event"], "href": "https://www.espn.com/nba/boxscore/_/gameId/401900001" }
+      ]
+    },
+    {
+      "id": "401900002",
+      "date": "2026-10-27T23:30Z",
+      "name": "Boston Celtics at New York Knicks",
+      "shortName": "BOS @ NY",
+      "status": {
+        "clock": 312.0,
+        "displayClock": "5:12",
+        "period": 3,
+        "type": { "id": "2", "name": "STATUS_IN_PROGRESS", "state": "in", "completed": false, "detail": "5:12 - 3rd Quarter", "shortDetail": "5:12 - 3rd" }
+      },
+      "competitions": [
+        {
+          "competitors": [
+            { "homeAway": "home", "score": "71", "team": { "abbreviation": "NY", "displayName": "New York Knicks" } },
+            { "homeAway": "away", "score": "78", "team": { "abbreviation": "BOS", "displayName": "Boston Celtics" } }
+          ]
+        }
+      ],
+      "links": [
+        { "rel": ["summary", "desktop", "event"], "href": "https://www.espn.com/nba/game/_/gameId/401900002/celtics-knicks" }
+      ]
+    },
+    {
+      "id": "401900003",
+      "date": "2026-10-28T02:30Z",
+      "name": "Denver Nuggets at Los Angeles Lakers",
+      "shortName": "DEN @ LAL",
+      "status": {
+        "clock": 0.0,
+        "displayClock": "0.0",
+        "period": 0,
+        "type": { "id": "1", "name": "STATUS_SCHEDULED", "state": "pre", "completed": false, "detail": "Mon, October 27th at 10:30 PM EDT", "shortDetail": "10/27 - 10:30 PM EDT" }
+      },
+      "competitions": [
+        {
+          "competitors": [
+            { "homeAway": "home", "score": "0", "team": { "abbreviation": "LAL", "displayName": "Los Angeles Lakers" } },
+            { "homeAway": "away", "score": "0", "team": { "abbreviation": "DEN", "displayName": "Denver Nuggets" } }
+          ]
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "401900004",
+      "date": "2026-10-27T23:00Z",
+      "name": "Minnesota Timberwolves at Cleveland Cavaliers",
+      "shortName": "MIN @ CLE",
+      "status": {
+        "clock": 0.0,
+        "displayClock": "0.0",
+        "period": 5,
+        "type": { "id": "3", "name": "STATUS_FINAL", "state": "post", "completed": true, "detail": "Final/OT", "shortDetail": "Final/OT" }
+      },
+      "competitions": [
+        {
+          "competitors": [
+            { "homeAway": "home", "score": "127", "winner": true, "team": { "abbreviation": "CLE", "displayName": "Cleveland Cavaliers" } },
+            { "homeAway": "away", "score": "125", "winner": false, "team": { "abbreviation": "MIN", "displayName": "Minnesota Timberwolves" } }
+          ]
+        }
+      ],
+      "links": [
+        { "rel": ["summary", "desktop", "event"], "href": "https://www.espn.com/nba/game/_/gameId/401900004/timberwolves-cavaliers" }
+      ]
+    }
+  ]
+}

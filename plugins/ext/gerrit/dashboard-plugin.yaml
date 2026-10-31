@@ -1,0 +1,106 @@
+# Gerrit changes. Logins use an HTTP password, so it ships as a Python plugin
+# (see docs/modules.md). The demo below is `main.py --sample`,
+# the view of sample.json; a test checks they match.
+id: gerrit
+version: 0.1.0
+name: Gerrit
+description: >-
+  Gerrit changes, one list per search query (default: your open changes and
+  the ones waiting for your review), with Code-Review and Verified votes as
+  tags. A -2 or failed Verified shows red, a -1 yellow, a +2 green. Click a
+  change to open it. Untested live with a login: built from the API docs and a
+  sample response. Anonymous queries (auth none) were checked on a public
+  server.
+tags: [dev, gerrit, code-review, pull-requests, token-api]
+run: [python3, main.py]
+runtime: python3>=3.9
+env: [GERRIT_HTTP_PASSWORD]
+size: tall
+config_schema:
+  type: object
+  additionalProperties: false
+  required: [url]
+  properties:
+    url:
+      type: string
+      description: The Gerrit server, e.g. https://review.example.com.
+    auth:
+      type: string
+      enum: [basic, none]
+      description: >-
+        basic (default): your username and HTTP password (Settings > HTTP
+        Credentials). none: anonymous, for public servers; "self" queries
+        need a login.
+    username: { type: [string, "null"], description: "Your Gerrit username, for auth: basic." }
+    token_env:
+      type: [string, "null"]
+      description: Variable holding the HTTP password. Default GERRIT_HTTP_PASSWORD.
+    token_command:
+      type: [array, "null"]
+      items: { type: string }
+      description: A command that prints the HTTP password, e.g. [op, read, "op://dev/gerrit/password"]. Used instead of token_env.
+    limit: { type: integer, minimum: 1, maximum: 100, description: "Changes per section. Default 10." }
+    sections:
+      type: array
+      minItems: 1
+      description: >-
+        One list each, from a Gerrit search query. Default: Mine (is:open
+        owner:self) and To review (is:open reviewer:self -owner:self -is:wip).
+      items:
+        type: object
+        additionalProperties: false
+        required: [label, query]
+        properties:
+          label: { type: string }
+          query: { type: string, description: "A Gerrit search, e.g. \"is:open project:platform/build\"." }
+demo:
+  status: "ok"
+  summary: "3 mine · 2 to review"
+  root:
+    type: "column"
+    children:
+      - type: "text"
+        text: "**Mine**"
+        markdown: true
+      - type: "list"
+        items:
+          - title: "Speed up the incremental link step"
+            subtitle: "platform/build 48213 · main · by Dana Ruiz · updated 1h ago"
+            tags: ["CR+2", "V+1"]
+            action:
+              type: "open_url"
+              url: "https://review.example.com/c/platform/build/+/48213"
+            status: "ok"
+          - title: "Drop the old cache format"
+            subtitle: "platform/build 48190 · main · by Dana Ruiz · 2 unresolved · updated 4h ago"
+            tags: ["CR-1", "V+1"]
+            action:
+              type: "open_url"
+              url: "https://review.example.com/c/platform/build/+/48190"
+            status: "warn"
+          - title: "Backport: fix the tag signing check"
+            subtitle: "tools/release 48237 · stable-2.4 · by Dana Ruiz · updated 7m ago"
+            tags: ["V-1"]
+            action:
+              type: "open_url"
+              url: "https://review.example.com/c/tools/release/+/48237"
+            status: "error"
+        empty_text: "none"
+      - type: "text"
+        text: "**To review**"
+        markdown: true
+      - type: "list"
+        items:
+          - title: "Add a timeout to the health probe"
+            subtitle: "platform/runtime 48201 · main · by Sam Lee · updated 2h ago"
+            tags: ["CR+1", "V+1"]
+            action:
+              type: "open_url"
+              url: "https://review.example.com/c/platform/runtime/+/48201"
+          - title: "Log the slow requests at warn"
+            subtitle: "platform/runtime 48177 · main · by Kim Park · updated 1d ago"
+            tags: []
+            action:
+              type: "open_url"
+              url: "https://review.example.com/c/platform/runtime/+/48177"
+        empty_text: "none"

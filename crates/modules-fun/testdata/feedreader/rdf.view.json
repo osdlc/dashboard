@@ -1,0 +1,30 @@
+{
+  "status": "ok",
+  "summary": "2 items from 1 feed",
+  "root": {
+    "type": "list",
+    "items": [
+      {
+        "title": "First story",
+        "subtitle": "Example News · Café · 2026-10-27 00:00",
+        "status": null,
+        "tags": [],
+        "action": {
+          "type": "open_url",
+          "url": "https://news.example.net/1"
+        }
+      },
+      {
+        "title": "Second story",
+        "subtitle": "Example News · Café · 2026-10-26 23:59",
+        "status": null,
+        "tags": [],
+        "action": {
+          "type": "open_url",
+          "url": "https://news.example.net/2"
+        }
+      }
+    ],
+    "empty_text": "No items in these feeds."
+  }
+}

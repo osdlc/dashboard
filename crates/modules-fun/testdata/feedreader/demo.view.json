@@ -1,0 +1,60 @@
+{
+  "status": "ok",
+  "summary": "5 items from 1 feed",
+  "root": {
+    "type": "list",
+    "items": [
+      {
+        "title": "How we cut our CI time in half",
+        "subtitle": "Example Engineering Blog · 2026-10-27 09:30",
+        "status": null,
+        "tags": [],
+        "action": {
+          "type": "open_url",
+          "url": "https://blog.example.com/ci-time"
+        }
+      },
+      {
+        "title": "Postmortem: the October 20 outage",
+        "subtitle": "Example Engineering Blog · 2026-10-26 16:05",
+        "status": null,
+        "tags": [],
+        "action": {
+          "type": "open_url",
+          "url": "https://blog.example.com/postmortem-oct-20"
+        }
+      },
+      {
+        "title": "Release 4.2: offline mode and faster search",
+        "subtitle": "Example Engineering Blog · 2026-10-23 14:00",
+        "status": null,
+        "tags": [],
+        "action": {
+          "type": "open_url",
+          "url": "https://blog.example.com/release-4-2"
+        }
+      },
+      {
+        "title": "Hiring: two platform engineers",
+        "subtitle": "Example Engineering Blog · 2026-10-21 11:20",
+        "status": null,
+        "tags": [],
+        "action": {
+          "type": "open_url",
+          "url": "https://blog.example.com/hiring"
+        }
+      },
+      {
+        "title": "Notes from RustConf",
+        "subtitle": "Example Engineering Blog · 2026-10-15 08:00",
+        "status": null,
+        "tags": [],
+        "action": {
+          "type": "open_url",
+          "url": "https://blog.example.com/rustconf"
+        }
+      }
+    ],
+    "empty_text": "No items in these feeds."
+  }
+}

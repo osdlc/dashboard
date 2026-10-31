@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- RSS 1.0 (RDF). The items sit next to the channel, not in it. Read as UTF-8 whatever it declares. -->
+<rdf:RDF
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns="http://purl.org/rss/1.0/"
+  xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel rdf:about="https://news.example.net/">
+    <title>Example News · Café</title>
+    <link>https://news.example.net/</link>
+    <items>
+      <rdf:Seq>
+        <rdf:li resource="https://news.example.net/1"/>
+        <rdf:li resource="https://news.example.net/2"/>
+      </rdf:Seq>
+    </items>
+  </channel>
+  <item rdf:about="https://news.example.net/1">
+    <title>First story</title>
+    <link>https://news.example.net/1</link>
+    <dc:date>2026-10-27T00:00:00Z</dc:date>
+  </item>
+  <item rdf:about="https://news.example.net/2">
+    <title>Second story</title>
+    <link>https://news.example.net/2</link>
+    <dc:date>2026-10-26T23:59:59-00:00</dc:date>
+  </item>
+</rdf:RDF>

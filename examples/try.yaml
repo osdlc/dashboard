@@ -12,11 +12,29 @@
 # runs for them: no process, no network calls. Remove the line (and set the
 # token variable named next to it) to run the module for real.
 #
-# Everything else is real: system stats, the gh CLI (read-only, your login),
-# local Codex logs, cswap if installed, and public websites for uptime.
+# Everything else is real: system stats, the battery, local files and git
+# repositories, the gh CLI (read-only, your login), local Codex, pi and Cursor
+# data, docker and cswap if installed, and public no-key APIs (Hacker News,
+# Open-Meteo, feeds, dev.to, CoinGecko, mempool.space, ESPN, ipinfo.io).
 #
-# Bundles: built-in modules come in bundles (system, dev, fun, agents) that are
-# Cargo features of the binary. All are on by default. A smaller build, e.g.
+# Widgets for services that need a token (GitLab, PagerDuty, Sentry, Trello and
+# the rest) are Python plugin packages in plugins/ext, linked into
+# examples/plugins so this file finds them by ID. They are all `demo: true`, and
+# none has been run against the real service yet ("untested live"). To run one
+# for real, install the package (copy its folder to
+# ~/.local/share/dashboard/plugins/), drop `demo: true`, fill in `config:` and
+# set the token variable named next to it.
+#
+# The personal screens read the sample files in crates/modules-personal/testdata;
+# point `path:` / `paths:` at your own files to use them for real.
+#
+# The benchmark screen shows widgets built three ways: a built-in module, a
+# TypeScript plugin and a Python plugin (plugins/ext). Those tiles need node and
+# python3. examples/bench.yaml has one such screen for every benchmark widget.
+# The same screen shows bench/README.md, which says how to measure them.
+#
+# Bundles: built-in modules come in bundles (system, dev, ops, fun, agents,
+# personal) that are Cargo features of the binary. All are on by default. A smaller build, e.g.
 #   cargo run -p dashboard --no-default-features --features bundle-system -- widgets
 # lists only what it has; a config naming a left-out module reports it as an
 # error on its tile. See docs/modules.md.
@@ -43,10 +61,28 @@ modules:
         - name: local dev
           # Nothing listens here, so this shows a failing check.
           curl: 'curl http://127.0.0.1:9/health'
+  battery: {}             # on a desktop, shows that there is no battery
+  gpu: {}
+  security: {}            # firewall, disk encryption, SIP and Gatekeeper
+  disk-usage:
+    builtin: cmdrunner
+    refresh: 30s
+    config: { command: df -h, name: Disk usage, lines: 12 }
+  recent-commits:
+    builtin: cmdrunner
+    refresh: 1m
+    config: { command: git log --oneline -15, name: Recent commits }
+  readme:
+    builtin: textfile
+    # A built-in module reads paths from where the dashboard was started.
+    config: { path: README.md, lines: 40 }
 
   # ---- dev bundle: GitHub is real through gh; the rest need tokens ----
   github-prs: {}
   github-issues: {}
+  git:
+    # Repositories under the folder the dashboard was started in.
+    config: { repos: [.] }
   jira:
     demo: true            # real: set $JIRA_API_TOKEN and config { url, email }
   linear:
@@ -54,13 +90,172 @@ modules:
   forgejo:
     demo: true            # real: set $FORGEJO_TOKEN and config { url }
 
+  # ---- dev: token-API plugin packages (untested live) ----
+  gitlab:
+    package: gitlab
+    demo: true            # real: set $GITLAB_TOKEN
+    config:
+      url: https://gitlab.com
+      sections:
+        - { label: My merge requests, type: merge_requests, params: { scope: created_by_me, state: opened } }
+        - { label: Assigned issues, type: issues, params: { scope: assigned_to_me, state: opened } }
+  gitlab-todos:
+    package: gitlab-todos
+    demo: true            # real: set $GITLAB_TOKEN
+  gerrit:
+    package: gerrit
+    demo: true            # real: set $GERRIT_HTTP_PASSWORD, or `auth: none` for a public server
+    config: { url: "https://review.example.com", username: dana }
+  azure-devops:
+    package: azure-devops
+    demo: true            # real: set $AZURE_DEVOPS_EXT_PAT
+    config: { org: acme, project: Web }
+  circleci:
+    package: circleci
+    demo: true            # real: set $CIRCLECI_TOKEN
+    config: { projects: [gh/acme/api, gh/acme/web], branch: main }
+  buildkite:
+    package: buildkite
+    demo: true            # real: set $BUILDKITE_TOKEN
+    config: { org: acme, branch: main }
+  jenkins:
+    package: jenkins
+    demo: true            # real: set $JENKINS_TOKEN
+    config: { url: "https://ci.example.com", user: dana }
+
+  # ---- ops bundle: docker, real; shows "Docker is not running" when the daemon is down ----
+  docker:
+    config: { stats: true, limit: 10 }
+  ipinfo: {}              # ipinfo.io, public, no key
+  kubernetes:
+    demo: true            # real: kubectl with a reachable cluster
+  pihole:
+    demo: true            # real: a Pi-hole v6 at config { url }, password via $PIHOLE_PASSWORD
+    config: { url: "http://pi.hole", top: 5 }
+  transmission:
+    demo: true            # real: Transmission with its web UI on
+    config: { url: "http://localhost:9091", limit: 10 }
+
+  # ---- ops: token-API plugin packages (untested live) ----
+  pagerduty:
+    package: pagerduty
+    demo: true            # real: set $PAGERDUTY_TOKEN
+    config: { urgencies: [high, low], oncall: true }
+  opsgenie:
+    package: opsgenie
+    demo: true            # real: set $OPSGENIE_API_KEY
+    config: { account: acme, query: "status:open" }
+  datadog:
+    package: datadog
+    demo: true            # real: set $DD_API_KEY and $DD_APP_KEY
+    config: { site: datadoghq.com, tags: ["team:web"] }
+  newrelic:
+    package: newrelic
+    demo: true            # real: set $NEW_RELIC_API_KEY
+    config: { region: us, account_id: 1234567 }
+  sentry:
+    package: sentry
+    demo: true            # real: set $SENTRY_AUTH_TOKEN
+    config: { org: acme, project: web }
+  rollbar:
+    package: rollbar
+    demo: true            # real: set $ROLLBAR_TOKEN
+    config: { account: acme, project: web, level: warning }
+  airbrake:
+    package: airbrake
+    demo: true            # real: set $AIRBRAKE_USER_KEY
+    config: { project_id: 95123 }
+  uptimerobot:
+    package: uptimerobot
+    demo: true            # real: set $UPTIMEROBOT_API_KEY
+  droplets:
+    package: digitalocean
+    demo: true            # real: set $DIGITALOCEAN_TOKEN
+    config: { tag: prod }
+  zendesk:
+    package: zendesk
+    demo: true            # real: set $ZENDESK_API_TOKEN
+    config: { subdomain: acme, email: me@acme.com }
+  healthchecks:
+    package: healthchecks
+    demo: true            # real: set $HEALTHCHECKS_API_KEY
+
+  # ---- personal bundle: Open-Meteo, public, no key ----
+  weather:
+    config: { place: Berlin, days: 5 }
+  lunar: {}
+  # The task and calendar modules below read the sample files in
+  # crates/modules-personal/testdata. Point them at your own files.
+  todo:
+    config: { path: crates/modules-personal/testdata/todo/todo.md }
+  calendar:
+    config: { path: crates/modules-personal/testdata/calendar/team.ics, days: 2 }
+  org-agenda:
+    config:
+      paths: [crates/modules-personal/testdata/org]
+      days: 14
+      undated: true
+  markdown-tasks:
+    config: { paths: [crates/modules-personal/testdata/markdown] }
+  todo-txt:
+    config: { path: crates/modules-personal/testdata/todo-txt/todo.txt }
+  taskwarrior:
+    demo: true            # real: install Taskwarrior (`task`)
+  sdlc:
+    config: { path: crates/modules-personal/testdata/sdlc, planning: true }
+  # Task services that need a token: plugin packages (untested live).
+  asana:
+    package: asana
+    demo: true            # real: set $ASANA_TOKEN
+    config: { workspace: "1208000000000000" }
+  todoist:
+    package: todoist
+    demo: true            # real: set $TODOIST_TOKEN
+    config: { filter: "today | overdue" }
+  trello:
+    package: trello
+    demo: true            # real: set $TRELLO_KEY and $TRELLO_TOKEN
+    config: { board: 6710a1b2c3d4e5f600000000, lists: [Doing, Review] }
+
   # ---- agents bundle and the bundled cswap plugin ----
   codex: {}               # reads local Codex session logs
   copilot:
     demo: true            # real: needs a Copilot plan on your gh login
+  cursor: {}              # reads Cursor's local login (sqlite3) and asks cursor.com
+  antigravity: {}         # says "not running" unless the app is open
+  antigravity-demo:
+    builtin: antigravity
+    demo: true
+  gemini:
+    demo: true            # real: Gemini CLI installed and used
+  opencode:
+    demo: true            # real: OpenCode installed and used
+  pi: {}                  # reads ~/.pi/agent/sessions
   cswap: {}               # real when cswap is installed; else the tile shows an error
 
-  # ---- fun bundle: the demo module in a few styles ----
+  # ---- fun bundle: the demo module in a few styles, a clock, Hacker News and a
+  # feed reader ----
+  clock:
+    config: { zones: [local, UTC, America/New_York, Asia/Tokyo] }
+  hackernews:
+    config: { limit: 8 }
+  feedreader:
+    config: { feeds: [https://blog.rust-lang.org/feed.xml, https://hnrss.org/frontpage] }
+  # Public APIs, no key.
+  devto:
+    config: { tag: rust, top: 7, limit: 10 }
+  subreddit:
+    demo: true            # reddit.com refuses clients without an account (HTTP 403)
+    config: { subreddit: rust, sort: hot, limit: 10 }
+  crypto:
+    config: { coins: [bitcoin, ethereum, solana, dogecoin], currency: usd, warn_drop: 5 }
+  mempool:
+    config: { blocks: 6, warn_fee: 50 }
+  scores:
+    config: { league: basketball/nba }
+  football:
+    builtin: scores
+    config: { league: soccer/eng.1 }
   hero:
     builtin: demo
     config: { show: mixed, title: Hero, color: sunset, style: area, signal: pulse }
@@ -94,6 +289,31 @@ modules:
         - { name: github, host: github.com }
         - { name: cloudflare dns, host: 1.1.1.1, port: 53 }
 
+  # ---- benchmark: one widget as a built-in, a TypeScript and a Python plugin ----
+  # A plugin started with `plugin:` runs in this file's folder (examples/).
+  clock-native:
+    builtin: clock
+    config: { zones: [local, UTC, Asia/Kolkata], seconds: true }
+  clock-ts:
+    plugin: [node, ../plugins/ext/clock-ts/main.ts]
+    config: { zones: [local, UTC, Asia/Kolkata], seconds: true }
+  clock-py:
+    plugin: [python3, ../plugins/ext/clock-py/main.py]
+    config: { zones: [local, UTC, Asia/Kolkata], seconds: true }
+  battery-native:
+    builtin: battery
+    config: { sample: crates/modules-system/testdata/battery/pmset-discharging.txt }
+  battery-ts:
+    plugin: [node, ../plugins/ext/battery-ts/main.ts]
+    config: { sample: ../crates/modules-system/testdata/battery/pmset-discharging.txt }
+  battery-py:
+    plugin: [python3, ../plugins/ext/battery-py/main.py]
+    config: { sample: ../crates/modules-system/testdata/battery/pmset-discharging.txt }
+  # How the benchmark is run.
+  bench-report:
+    builtin: textfile
+    config: { path: bench/README.md, lines: 120 }
+
   # ---- demo mode: the same modules shown with `demo: true` ----
   cpu-demo:
     builtin: cpu
@@ -107,6 +327,9 @@ modules:
   cswap-demo:
     builtin: cswap
     demo: true
+  docker-demo:
+    builtin: docker
+    demo: true
 
 # Sizes on the 12-column grid: small 3x1, medium 4x2, large 6x3, wide 8x2, tall 4x4.
 screens:
@@ -117,23 +340,67 @@ screens:
       - { module: network, size: medium }
       - { module: disk, size: medium }
       - { module: processes, size: medium }
+      - { module: battery, size: medium }
+      - { module: readme, size: tall }
+  - name: machine
+    tiles:
+      - { module: gpu, size: wide }
+      - { module: security, size: medium }
+      - { module: disk-usage, size: wide }
+      - { module: recent-commits, size: medium }
   - name: ops
     tiles:
       - { module: uptime, size: large }
       - { module: latency, size: large }
       - { module: install-log, size: wide }
+      - { module: docker, size: wide }
+      - { module: ipinfo, size: small }
+      - { module: kubernetes, size: wide }
+  - name: incidents
+    tiles:
+      - { module: pagerduty, size: medium }
+      - { module: opsgenie, size: medium }
+      - { module: datadog, size: medium }
+      - { module: newrelic, size: medium }
+      - { module: sentry, size: wide }
+      - { module: rollbar, size: medium }
+      - { module: airbrake, size: medium }
+  - name: services
+    tiles:
+      - { module: uptimerobot, size: medium }
+      - { module: healthchecks, size: medium }
+      - { module: droplets, size: medium }
+      - { module: zendesk, size: medium }
+      - { module: pihole, size: medium }
+      - { module: transmission, size: medium }
   - name: dev
     tiles:
       - { module: github-prs, size: large }
       - { module: github-issues, size: large }
+      - { module: git, size: large }
       - { module: jira, size: medium }
       - { module: linear, size: medium }
       - { module: forgejo, size: medium }
+  - name: review & ci
+    tiles:
+      - { module: gitlab, size: tall }
+      - { module: gerrit, size: tall }
+      - { module: gitlab-todos, size: medium }
+      - { module: circleci, size: medium }
+      - { module: azure-devops, size: tall }
+      - { module: buildkite, size: medium }
+      - { module: jenkins, size: medium }
   - name: agents
     tiles:
       - { module: cswap, size: wide }
       - { module: codex, size: medium }
       - { module: copilot, size: medium }
+      - { module: cursor, size: medium }
+      - { module: antigravity-demo, size: medium }
+      - { module: antigravity, size: small }
+      - { module: gemini, size: medium }
+      - { module: opencode, size: medium }
+      - { module: pi, size: medium }
   - name: plugins
     tiles:
       - { module: git-repos, size: wide }
@@ -145,9 +412,46 @@ screens:
       - { module: prs-demo, size: medium }
       - { module: ci-demo, size: medium }
       - { module: cswap-demo, size: medium }
+      - { module: docker-demo, size: wide }
   - name: fun
     tiles:
       - { module: hero, size: large }
       - { module: heatwall, size: large }
       - { module: events, size: wide }
       - { module: fleet, size: medium }
+      - { module: feedreader, size: medium }
+      - { module: clock, size: wide }
+      - { module: hackernews, size: tall }
+  - name: public
+    tiles:
+      - { module: devto, size: tall }
+      - { module: subreddit, size: tall }
+      - { module: crypto, size: medium }
+      - { module: mempool, size: medium }
+      - { module: scores, size: medium }
+      - { module: football, size: medium }
+  - name: personal
+    tiles:
+      - { module: weather, size: large }
+      - { module: lunar, size: small }
+      - { module: calendar, size: tall }
+      - { module: todo, size: medium }
+  - name: tasks
+    tiles:
+      - { module: org-agenda, size: medium }
+      - { module: markdown-tasks, size: medium }
+      - { module: todo-txt, size: medium }
+      - { module: sdlc, size: tall }
+      - { module: taskwarrior, size: medium }
+      - { module: asana, size: medium }
+      - { module: todoist, size: medium }
+      - { module: trello, size: tall }
+  - name: benchmark
+    tiles:
+      - { module: clock-native, size: medium }
+      - { module: clock-ts, size: medium }
+      - { module: clock-py, size: medium }
+      - { module: battery-native, size: medium }
+      - { module: battery-ts, size: medium }
+      - { module: battery-py, size: medium }
+      - { module: bench-report, size: large }

@@ -4,6 +4,30 @@ The dashboard is pre-1.0: the config format, the module contract and the CLI can
 between minor versions. 0.4.0 is the first public release. The earlier versions were not
 released on their own; they record the stages the project was built in.
 
+## 0.5.0
+
+A large set of widgets, most of them built in and grouped in feature-gated bundles.
+
+- **System:** gpu, battery, textfile, cmdrunner, security.
+- **Dev:** git (branch, ahead/behind, changes per repository).
+- **Ops:**
+  - built in: docker, kubernetes, ipinfo, Pi-hole, Transmission;
+  - Python plugin packages: Datadog, New Relic, PagerDuty, Opsgenie, Sentry, Rollbar, Airbrake,
+    UptimeRobot, DigitalOcean, Zendesk and Healthchecks.io.
+- **Fun:** clock, hackernews, feedreader (RSS and Atom), subreddit, dev.to, mempool, crypto prices,
+  sports scores.
+- **Personal:** weather (Open-Meteo), calendar (ICS feeds with recurrence rules), todo, lunar,
+  org-agenda, markdown-tasks (Obsidian Tasks and Dataview formats), todo-txt, taskwarrior, sdlc.
+- **Agents:** cursor, antigravity, gemini, opencode and pi usage.
+- **Dev plugin packages:** GitLab, GitLab to-dos, Gerrit, Azure DevOps, CircleCI, Buildkite,
+  Jenkins, Asana, Todoist and Trello.
+- **Shared token helper:** token-API plugins share one helper (`apitoken.py`). It runs
+  `token_command` once with no stdin and never puts command output in errors.
+- **Native and plugin versions side by side:** clock, textfile, git, docker, hackernews, weather,
+  feedreader and battery also come as TypeScript and Python plugins in `plugins/ext`. Tests check
+  that all three give the same view. There is a harness in `bench/` to compare them.
+- **Example configs** in `examples/widgets/`, and `examples/try.yaml` with every bundle.
+
 ## 0.4.0
 
 First public release.

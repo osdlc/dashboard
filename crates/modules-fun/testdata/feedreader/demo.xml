@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The catalog demo: what the tile looks like before it is set up. -->
+<rss version="2.0">
+  <channel>
+    <title>Example Engineering Blog</title>
+    <link>https://blog.example.com/</link>
+    <item>
+      <title>How we cut our CI time in half</title>
+      <link>https://blog.example.com/ci-time</link>
+      <pubDate>Tue, 27 Oct 2026 09:30:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Postmortem: the October 20 outage</title>
+      <link>https://blog.example.com/postmortem-oct-20</link>
+      <pubDate>Mon, 26 Oct 2026 16:05:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Release 4.2: offline mode and faster search</title>
+      <link>https://blog.example.com/release-4-2</link>
+      <pubDate>Fri, 23 Oct 2026 14:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Hiring: two platform engineers</title>
+      <link>https://blog.example.com/hiring</link>
+      <pubDate>Wed, 21 Oct 2026 11:20:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Notes from RustConf</title>
+      <link>https://blog.example.com/rustconf</link>
+      <pubDate>Thu, 15 Oct 2026 08:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>
