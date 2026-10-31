@@ -356,6 +356,7 @@ export type Widget =
   | TableWidget
   | LogWidget
   | UptimeWidget
+  | ImageWidget
   | RowWidget
   | ColumnWidget;
 
@@ -497,6 +498,19 @@ export interface LogWidget {
 export interface UptimeWidget {
   checks: UptimeCheck[];
   type: "uptime";
+}
+
+/**
+ * A picture from a file on the machine the dashboard runs on. The terminal
+ * draws it with the best graphics it supports (Kitty, iTerm2 or Sixel),
+ * or with colored half blocks. It is scaled to fit and keeps its shape.
+ */
+export interface ImageWidget {
+  /** A line under the picture, e.g. the file name. */
+  caption?: string | null;
+  /** Image file: PNG, JPEG, GIF (first frame), WebP or BMP. */
+  path: string;
+  type: "image";
 }
 
 /** Widgets side by side, sharing the width. */

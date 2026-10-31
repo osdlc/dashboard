@@ -1,0 +1,16 @@
+{
+  "id": "image",
+  "title": "Image",
+  "group": "primitives",
+  "default_size": "large",
+  "description": "A picture from a file on the dashboard's machine (PNG, JPEG, GIF, WebP or BMP), scaled to fit and centered, with an optional caption. The terminal draws it with Kitty, iTerm2 or Sixel graphics when it supports them, and with colored half blocks otherwise. The web view loads it from the dashboard's server, which sends only pictures a tile shows.",
+  "view": {
+    "status": "ok",
+    "summary": "sunset.png",
+    "root": {
+      "type": "image",
+      "path": "crates/modules-system/testdata/screensaver/sunset.png",
+      "caption": "sunset.png"
+    }
+  }
+}

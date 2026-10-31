@@ -117,6 +117,7 @@ pub enum Widget {
     Table  { columns: Vec<Column>, rows: Vec<Row> },
     Log    { label: Option<String>, lines: Vec<LogLine> },               // newest last
     Uptime { checks: Vec<UptimeCheck> },                                 // status strip per check
+    Image  { path: String, caption: Option<String> },                    // a picture file on the dashboard's machine
     Row    { children: Vec<Widget> },
     Column { children: Vec<Widget> },
 }

@@ -372,6 +372,11 @@ A widget is a JSON object with a `type`. Optional fields can be left out.
 {"type":"uptime","checks":[{"name":"api","status":"ok","uptime":99.5,"latency_ms":120,
   "detail":"HTTP 200","history":["ok","ok","error","ok"],"url":"https://api.example.com"}]}
 
+{"type":"image","path":"/home/me/Pictures/sunset.png","caption":"sunset.png"}
+// The terminal draws it with Kitty, iTerm2 or Sixel graphics, or half blocks. The path is
+// on the dashboard's machine; the web view loads it from the server, which sends only
+// pictures that a tile shows now.
+
 {"type":"row","children":[ ... ]}      // side by side (stacks when narrow)
 {"type":"column","children":[ ... ]}   // top to bottom
 ```
