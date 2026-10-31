@@ -1,0 +1,40 @@
+{
+  "results": [
+    {
+      "url": "https://acme.zendesk.com/api/v2/tickets/48213.json", "id": 48213, "external_id": null,
+      "via": { "channel": "email" }, "created_at": "2026-10-27T00:52:00Z", "updated_at": "2026-10-27T01:41:00Z",
+      "type": "incident", "subject": "Checkout fails with error 502 for all EU customers", "raw_subject": "Checkout fails with error 502 for all EU customers",
+      "description": "Since about 01:00 UTC...", "priority": "urgent", "status": "open",
+      "requester_id": 1902233, "submitter_id": 1902233, "assignee_id": 381200, "group_id": 22001,
+      "tags": ["checkout", "eu", "outage"], "result_type": "ticket"
+    },
+    {
+      "url": "https://acme.zendesk.com/api/v2/tickets/48190.json", "id": 48190, "external_id": null,
+      "via": { "channel": "web" }, "created_at": "2026-10-26T15:10:00Z", "updated_at": "2026-10-26T22:05:00Z",
+      "type": "question", "subject": "Invoice shows the wrong VAT number", "raw_subject": "Invoice shows the wrong VAT number",
+      "description": "Hello, our latest invoice...", "priority": "high", "status": "pending",
+      "requester_id": 1902500, "submitter_id": 1902500, "assignee_id": 381200, "group_id": 22002,
+      "tags": ["billing"], "result_type": "ticket"
+    },
+    {
+      "url": "https://acme.zendesk.com/api/v2/tickets/48102.json", "id": 48102, "external_id": null,
+      "via": { "channel": "chat" }, "created_at": "2026-10-24T09:30:00Z", "updated_at": "2026-10-25T11:00:00Z",
+      "type": "task", "subject": "Export of all orders for 2025 as CSV", "raw_subject": "Export of all orders for 2025 as CSV",
+      "description": "Could you send us...", "priority": "normal", "status": "hold",
+      "requester_id": 1901117, "submitter_id": 1901117, "assignee_id": 381200, "group_id": 22002,
+      "tags": [], "result_type": "ticket"
+    },
+    {
+      "url": "https://acme.zendesk.com/api/v2/tickets/48233.json", "id": 48233, "external_id": null,
+      "via": { "channel": "email" }, "created_at": "2026-10-27T01:55:00Z", "updated_at": "2026-10-27T01:55:00Z",
+      "type": null, "subject": "Password reset email never arrives", "raw_subject": "Password reset email never arrives",
+      "description": "I have tried three times...", "priority": null, "status": "new",
+      "requester_id": 1903001, "submitter_id": 1903001, "assignee_id": 381200, "group_id": 22001,
+      "tags": ["login", "email", "account", "web"], "result_type": "ticket"
+    }
+  ],
+  "facets": null,
+  "next_page": null,
+  "previous_page": null,
+  "count": 4
+}

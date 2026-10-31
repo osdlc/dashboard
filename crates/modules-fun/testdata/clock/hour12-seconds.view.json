@@ -1,0 +1,41 @@
+{
+  "status": "ok",
+  "summary": "London office 12:00:07 AM · Los Angeles 5:00:07 PM · Tokyo 9:00:07 AM · Fiji 12:00:07 PM",
+  "root": {
+    "type": "row",
+    "children": [
+      {
+        "type": "stat",
+        "label": "London office",
+        "value": "12:00:07",
+        "unit": "AM",
+        "delta": "Tue 27 Oct",
+        "status": null
+      },
+      {
+        "type": "stat",
+        "label": "Los Angeles",
+        "value": "5:00:07",
+        "unit": "PM",
+        "delta": "Mon 26 Oct",
+        "status": null
+      },
+      {
+        "type": "stat",
+        "label": "Tokyo",
+        "value": "9:00:07",
+        "unit": "AM",
+        "delta": "Tue 27 Oct",
+        "status": null
+      },
+      {
+        "type": "stat",
+        "label": "Fiji",
+        "value": "12:00:07",
+        "unit": "PM",
+        "delta": "Tue 27 Oct",
+        "status": null
+      }
+    ]
+  }
+}

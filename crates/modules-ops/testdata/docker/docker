@@ -1,0 +1,9 @@
+#!/bin/sh
+# Stands in for the docker CLI in tests: prints the recorded output of
+# `docker ps` and `docker stats` from this folder.
+here=$(dirname "$0")
+case "$1" in
+ps) cat "$here/ps.jsonl" ;;
+stats) cat "$here/stats.jsonl" ;;
+*) echo "fake docker: unknown command $1" >&2; exit 1 ;;
+esac

@@ -1,6 +1,6 @@
-//! Built-in modules. They live in bundle crates (system, dev, fun, agents),
-//! each behind cargo features; this crate gathers whatever the build includes.
-//! See docs/modules.md.
+//! Built-in modules. They live in bundle crates (system, dev, ops, fun, agents,
+//! personal), each behind cargo features; this crate gathers whatever the build
+//! includes. See docs/modules.md.
 
 use dashboard_contract::CatalogEntry;
 use dashboard_host::Module;
@@ -13,10 +13,14 @@ fn bundles() -> Vec<&'static [Builtin]> {
         dashboard_modules_system::MODULES,
         #[cfg(feature = "dashboard-modules-dev")]
         dashboard_modules_dev::MODULES,
+        #[cfg(feature = "dashboard-modules-ops")]
+        dashboard_modules_ops::MODULES,
         #[cfg(feature = "dashboard-modules-fun")]
         dashboard_modules_fun::MODULES,
         #[cfg(feature = "dashboard-modules-agents")]
         dashboard_modules_agents::MODULES,
+        #[cfg(feature = "dashboard-modules-personal")]
+        dashboard_modules_personal::MODULES,
     ]
 }
 
@@ -61,8 +65,10 @@ mod tests {
     #[cfg(all(
         feature = "bundle-system",
         feature = "bundle-dev",
+        feature = "bundle-ops",
         feature = "bundle-fun",
-        feature = "bundle-agents"
+        feature = "bundle-agents",
+        feature = "bundle-personal"
     ))]
     #[test]
     fn default_build_has_every_module() {
@@ -71,6 +77,7 @@ mod tests {
             [
                 "cpu",
                 "memory",
+                "gpu",
                 "network",
                 "disk",
                 "processes",
@@ -78,12 +85,44 @@ mod tests {
                 "github-issues",
                 "log",
                 "uptime",
+                "textfile",
+                "battery",
+                "cmdrunner",
+                "security",
                 "jira",
                 "linear",
                 "forgejo",
+                "git",
+                "docker",
+                "kubernetes",
+                "ipinfo",
+                "pihole",
+                "transmission",
                 "demo",
+                "clock",
+                "hackernews",
+                "feedreader",
+                "subreddit",
+                "devto",
+                "mempool",
+                "crypto",
+                "scores",
                 "codex",
                 "copilot",
+                "cursor",
+                "antigravity",
+                "gemini",
+                "opencode",
+                "pi",
+                "weather",
+                "todo",
+                "lunar",
+                "calendar",
+                "org-agenda",
+                "markdown-tasks",
+                "todo-txt",
+                "taskwarrior",
+                "sdlc",
             ]
         );
     }
@@ -91,8 +130,10 @@ mod tests {
     #[cfg(all(
         feature = "bundle-system",
         not(feature = "bundle-dev"),
+        not(feature = "bundle-ops"),
         not(feature = "bundle-fun"),
-        not(feature = "bundle-agents")
+        not(feature = "bundle-agents"),
+        not(feature = "bundle-personal")
     ))]
     #[test]
     fn system_only_build_has_only_system_modules() {
@@ -101,11 +142,16 @@ mod tests {
             [
                 "cpu",
                 "memory",
+                "gpu",
                 "network",
                 "disk",
                 "processes",
                 "log",
-                "uptime"
+                "uptime",
+                "textfile",
+                "battery",
+                "cmdrunner",
+                "security"
             ]
         );
         assert!(builtin("jira").is_none());

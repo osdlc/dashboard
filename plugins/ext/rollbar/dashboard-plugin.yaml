@@ -1,0 +1,63 @@
+# Rollbar's active items for one project. Untested live: built from the API docs
+# with a hand-written sample reply (sample.json); `--sample` shows it.
+id: rollbar
+version: 0.1.0
+name: Rollbar
+description: >-
+  A Rollbar project's active items (errors and messages), most recent first,
+  with level, occurrences, environment and age. Click one to open it in
+  Rollbar. Untested live: built from the API docs with sample data.
+tags: [errors, monitoring, ops, rollbar, untested-live]
+run: [python3, main.py]
+runtime: python3>=3.9
+env: [ROLLBAR_TOKEN]
+hosts: [api.rollbar.com]
+size: medium
+config_schema:
+  type: object
+  additionalProperties: false
+  required: [account, project]
+  properties:
+    account: { type: string, description: "Account slug, from rollbar.com/<account>/<project>. Used for links." }
+    project: { type: string, description: "Project slug, from rollbar.com/<account>/<project>. Used for links." }
+    environment: { type: [string, "null"], description: "Only this environment, e.g. production. Default all." }
+    level:
+      type: string
+      enum: [debug, info, warning, error, critical]
+      description: Lowest level shown. Default warning.
+    limit: { type: integer, minimum: 1, maximum: 50, description: "Items shown. Default 10." }
+    token_env:
+      type: string
+      description: >-
+        Environment variable holding a project access token with read scope.
+        Default ROLLBAR_TOKEN.
+    token_command:
+      type: [array, "null"]
+      items: { type: string }
+      description: Command that prints the token, e.g. [op, read, "op://dev/rollbar/token"].
+demo:
+  status: "error"
+  summary: "4 active items · 1 critical"
+  root:
+    type: "list"
+    items:
+      - title: "OperationalError: could not connect to server: Connection refused"
+        subtitle: "#1192 · 212 occurrences · production · 1m ago"
+        tags: ["critical"]
+        status: "error"
+        action: { type: "open_url", url: "https://rollbar.com/acme/web/items/1192/" }
+      - title: "TypeError: Cannot read properties of undefined (reading 'items')"
+        subtitle: "#1187 · 4.8k occurrences · production · 4m ago"
+        tags: ["error"]
+        status: "warn"
+        action: { type: "open_url", url: "https://rollbar.com/acme/web/items/1187/" }
+      - title: "KeyError: 'currency'"
+        subtitle: "#1164 · 37 occurrences · staging · 4h ago"
+        tags: ["error"]
+        status: "warn"
+        action: { type: "open_url", url: "https://rollbar.com/acme/web/items/1164/" }
+      - title: "Slow response from /api/search (3.2 s)"
+        subtitle: "#1151 · 1 occurrence · production · 19h ago"
+        tags: ["warning"]
+        action: { type: "open_url", url: "https://rollbar.com/acme/web/items/1151/" }
+    empty_text: "no active items"

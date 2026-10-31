@@ -1,0 +1,65 @@
+# UptimeRobot monitors. Untested live: built from the API docs with a
+# hand-written sample reply (sample.json); `--sample` shows it.
+id: uptimerobot
+version: 0.1.0
+name: UptimeRobot
+description: >-
+  Your UptimeRobot monitors: up or down and for how long, why it is down, the
+  uptime over the last 30 days and the latest response time. Click one to
+  open it in UptimeRobot. Untested live: built from the API docs with sample
+  data.
+tags: [uptime, monitoring, ops, uptimerobot, untested-live]
+run: [python3, main.py]
+runtime: python3>=3.9
+env: [UPTIMEROBOT_API_KEY]
+hosts: [api.uptimerobot.com]
+size: medium
+config_schema:
+  type: object
+  additionalProperties: false
+  properties:
+    monitors:
+      type: [array, "null"]
+      items: { type: integer }
+      description: Only these monitor ids. Default all.
+    days: { type: integer, minimum: 1, maximum: 90, description: "Days the uptime % covers. Default 30." }
+    limit: { type: integer, minimum: 1, maximum: 50, description: "Monitors shown. Default 20." }
+    token_env:
+      type: string
+      description: >-
+        Environment variable holding the read-only API key. Default
+        UPTIMEROBOT_API_KEY.
+    token_command:
+      type: [array, "null"]
+      items: { type: string }
+      description: Command that prints the key, e.g. [op, read, "op://dev/uptimerobot/key"].
+demo:
+  status: "error"
+  summary: "4 monitors · 1 down · 1 seem down · 1 paused"
+  root:
+    type: "uptime"
+    checks:
+      - name: "API"
+        status: "error"
+        detail: "down for 23m: Connection Timeout"
+        history: []
+        uptime: 98.712
+        url: "https://dashboard.uptimerobot.com/monitors/793154271"
+      - name: "Mail server"
+        status: "warn"
+        detail: "seems down"
+        history: []
+        uptime: 99.901
+        url: "https://dashboard.uptimerobot.com/monitors/793154272"
+      - name: "Website"
+        status: "ok"
+        detail: "up for 3d"
+        history: []
+        uptime: 99.984
+        latency_ms: 212.0
+        url: "https://dashboard.uptimerobot.com/monitors/793154270"
+      - name: "Old blog"
+        status: "unknown"
+        detail: "paused"
+        history: []
+        url: "https://dashboard.uptimerobot.com/monitors/793154273"

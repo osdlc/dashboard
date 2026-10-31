@@ -1,16 +1,34 @@
 //! The agents bundle: usage of AI coding agents other than Claude Code (that
 //! one is the cswap plugin), meaning how much of each limit is used and when it
-//! resets. Each module sits behind a cargo feature named after its id.
+//! resets, or for agents without limits, tokens and cost per day from their
+//! local logs (see `tally`). Each module sits behind a cargo feature named
+//! after its id.
+//!
+//! These are built in rather than plugins: each reads the agent's own local
+//! state and needs no token in the config (rule 1 in
+//! docs/modules.md). Cursor and Copilot also call a web
+//! API, with the login their own app or CLI already keeps.
 
 use dashboard_contract::{Status, Thresholds, Widget};
 use dashboard_modules_common::Builtin;
 #[allow(unused_imports)]
 pub(crate) use dashboard_modules_common::{entry, schema, strings};
 
+#[cfg(feature = "antigravity")]
+pub mod antigravity;
 #[cfg(feature = "codex")]
 pub mod codex;
 #[cfg(feature = "copilot")]
 pub mod copilot;
+#[cfg(feature = "cursor")]
+pub mod cursor;
+#[cfg(feature = "gemini")]
+pub mod gemini;
+#[cfg(feature = "opencode")]
+pub mod opencode;
+#[cfg(feature = "pi")]
+pub mod pi;
+pub mod tally;
 
 /// The modules this build includes, in display order.
 pub const MODULES: &[Builtin] = &[
@@ -27,6 +45,41 @@ pub const MODULES: &[Builtin] = &[
         core: false,
         new: || Box::new(copilot::Copilot),
         catalog: copilot::catalog,
+    },
+    #[cfg(feature = "cursor")]
+    Builtin {
+        id: "cursor",
+        core: false,
+        new: || Box::new(cursor::Cursor::default()),
+        catalog: cursor::catalog,
+    },
+    #[cfg(feature = "antigravity")]
+    Builtin {
+        id: "antigravity",
+        core: false,
+        new: || Box::new(antigravity::Antigravity),
+        catalog: antigravity::catalog,
+    },
+    #[cfg(feature = "gemini")]
+    Builtin {
+        id: "gemini",
+        core: false,
+        new: || Box::new(gemini::Gemini::default()),
+        catalog: gemini::catalog,
+    },
+    #[cfg(feature = "opencode")]
+    Builtin {
+        id: "opencode",
+        core: false,
+        new: || Box::new(opencode::OpenCode::default()),
+        catalog: opencode::catalog,
+    },
+    #[cfg(feature = "pi")]
+    Builtin {
+        id: "pi",
+        core: false,
+        new: || Box::new(pi::Pi::default()),
+        catalog: pi::catalog,
     },
 ];
 
@@ -111,6 +164,39 @@ pub fn until(secs: i64) -> String {
 
 pub fn now_secs() -> i64 {
     dashboard_host::now_ms() / 1000
+}
+
+/// A one-row list that opens `url`: the way from a tile to the agent's own
+/// usage page or docs.
+pub fn link(title: &str, subtitle: &str, url: &str) -> Widget {
+    Widget::List {
+        items: vec![dashboard_contract::ListItem {
+            title: title.into(),
+            subtitle: Some(subtitle.into()),
+            status: None,
+            tags: vec![],
+            action: Some(dashboard_contract::Action::OpenUrl { url: url.into() }),
+        }],
+        empty_text: None,
+    }
+}
+
+/// Token counts as "4.2M".
+pub fn count(n: u64) -> String {
+    dashboard_contract::format_value(n as f64, dashboard_contract::ValueFormat::Count, None)
+}
+
+/// `2026-10-24` -> `Sat 24`.
+pub fn day_label(date: &str) -> String {
+    const DAYS: [&str; 7] = ["Thu", "Fri", "Sat", "Sun", "Mon", "Tue", "Wed"];
+    match dashboard_modules_common::time::parse_time(&format!("{date}T00:00:00Z")) {
+        Some(t) => format!(
+            "{} {}",
+            DAYS[(t / 86_400).rem_euclid(7) as usize],
+            date.get(8..10).unwrap_or("")
+        ),
+        None => date.to_string(),
+    }
 }
 
 #[cfg(test)]

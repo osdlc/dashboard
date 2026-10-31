@@ -1,0 +1,87 @@
+# CircleCI pipelines. A token API, so it ships as a Python plugin (see
+# docs/modules.md). The demo below is `main.py --sample`, the
+# view of sample.json; a test checks they match.
+id: circleci
+version: 0.1.0
+name: CircleCI
+description: >-
+  The latest CircleCI pipelines of your projects, with each one's commit,
+  branch and workflow result: failed red, on hold yellow, passed green. The
+  tile turns red while a project's newest pipeline is failing, on any branch
+  unless `branch` is set (try `branch: main`). Click one to open it in the
+  CircleCI app. Untested live: built from the API v2 docs and sample responses.
+tags: [dev, ci, circleci, builds, token-api]
+run: [python3, main.py]
+runtime: python3>=3.9
+env: [CIRCLECI_TOKEN]
+hosts: [circleci.com]
+size: medium
+config_schema:
+  type: object
+  additionalProperties: false
+  required: [projects]
+  properties:
+    projects:
+      type: array
+      minItems: 1
+      items: { type: string }
+      description: Project slugs, like gh/acme/api (GitHub), bb/acme/web (Bitbucket) or circleci/<org-id>/<project-id>.
+    branch: { type: [string, "null"], description: "Only pipelines on this branch, like main. Default: all branches, so a failing feature branch turns the tile red." }
+    limit: { type: integer, minimum: 1, maximum: 20, description: "Pipelines per project. Default 3." }
+    url: { type: string, description: "API address. Default https://circleci.com; for CircleCI server, your server." }
+    app_url: { type: string, description: "Where links open. Default https://app.circleci.com." }
+    token_env:
+      type: [string, "null"]
+      description: Variable holding a personal API token. Default CIRCLECI_TOKEN.
+    token_command:
+      type: [array, "null"]
+      items: { type: string }
+      description: A command that prints the token, e.g. [op, read, "op://dev/circleci/token"]. Used instead of token_env.
+demo:
+  status: "error"
+  summary: "6 pipelines · api failing"
+  root:
+    type: "list"
+    items:
+      - title: "Retry the billing webhook on 502"
+        subtitle: "api #1432 · main · build-and-test failed · 1h ago"
+        tags: ["@dana"]
+        action:
+          type: "open_url"
+          url: "https://app.circleci.com/pipelines/github/acme/api/1432/workflows/fda08377-fe7e-46b1-8992-3a7aaecac9c3"
+        status: "error"
+      - title: "Bump the Postgres driver"
+        subtitle: "api #1431 · main · passed · 3h ago"
+        tags: ["@renovate-bot"]
+        action:
+          type: "open_url"
+          url: "https://app.circleci.com/pipelines/github/acme/api/1431/workflows/3c9f1e2d-8b7a-4f6e-9d5c-4b3a2e1f0d9c"
+        status: "ok"
+      - title: "Add the invoices export endpoint"
+        subtitle: "api #1430 · main · passed · 18h ago"
+        tags: ["@sam"]
+        action:
+          type: "open_url"
+          url: "https://app.circleci.com/pipelines/github/acme/api/1430/workflows/6a8c0e2f-4b6d-4f8a-9c1e-3d5f7b9a1c2e"
+        status: "ok"
+      - title: "Cache the pipeline graph between renders"
+        subtitle: "web #877 · main · running · 11m ago"
+        tags: ["@dana"]
+        action:
+          type: "open_url"
+          url: "https://app.circleci.com/pipelines/github/acme/web/877/workflows/4d6f8a0c-2e4b-4d6f-8a1c-5e7b9d1f3a5c"
+      - title: "Try the new chart library"
+        subtitle: "web #876 · main · on hold · 2h ago"
+        tags: ["@kim"]
+        action:
+          type: "open_url"
+          url: "https://app.circleci.com/pipelines/github/acme/web/876/workflows/e1f3a5c7-9b0d-4f2a-8c4e-6a8c0e2b4d6f"
+        status: "warn"
+      - title: "Release 4.12"
+        subtitle: "web #875 · main · passed · 21h ago"
+        tags: ["@sam"]
+        action:
+          type: "open_url"
+          url: "https://app.circleci.com/pipelines/github/acme/web/875/workflows/f0a2c4e6-8b1d-4f3a-9c5e-7b9d1f3a5c7e"
+        status: "ok"
+    empty_text: "no pipelines"

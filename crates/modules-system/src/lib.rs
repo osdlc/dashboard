@@ -1,7 +1,8 @@
-//! The system bundle: CPU, memory, network, disk and processes (one module per
+//! The system bundle: CPU, memory, GPU, network, disk and processes (one module per
 //! area, so each can be placed, sized and refreshed on its own), plus log
-//! tailing and uptime checks. Each module sits behind a cargo feature named
-//! after its id.
+//! tailing, uptime checks, a text file viewer, the battery, a command's output
+//! and the machine's security settings. Each module sits behind a cargo
+//! feature named after its id.
 
 use std::time::Instant;
 
@@ -13,10 +14,16 @@ pub use dashboard_modules_common::manifest;
 #[allow(unused_imports)]
 pub(crate) use dashboard_modules_common::{entry, schema, strings};
 
+#[cfg(feature = "battery")]
+pub mod battery;
+#[cfg(feature = "cmdrunner")]
+pub mod cmdrunner;
 #[cfg(feature = "cpu")]
 pub mod cpu;
 #[cfg(feature = "disk")]
 pub mod disk;
+#[cfg(feature = "gpu")]
+pub mod gpu;
 #[cfg(feature = "log")]
 pub mod log;
 #[cfg(feature = "memory")]
@@ -25,6 +32,10 @@ pub mod memory;
 pub mod network;
 #[cfg(feature = "processes")]
 pub mod processes;
+#[cfg(feature = "security")]
+pub mod security;
+#[cfg(feature = "textfile")]
+pub mod textfile;
 #[cfg(feature = "uptime")]
 pub mod uptime;
 
@@ -43,6 +54,13 @@ pub const MODULES: &[Builtin] = &[
         core: true,
         new: || Box::new(memory::Memory::default()),
         catalog: memory::catalog,
+    },
+    #[cfg(feature = "gpu")]
+    Builtin {
+        id: "gpu",
+        core: true,
+        new: || Box::new(gpu::Gpu::default()),
+        catalog: gpu::catalog,
     },
     #[cfg(feature = "network")]
     Builtin {
@@ -78,6 +96,34 @@ pub const MODULES: &[Builtin] = &[
         core: false,
         new: || Box::new(uptime::Uptime::default()),
         catalog: uptime::catalog,
+    },
+    #[cfg(feature = "textfile")]
+    Builtin {
+        id: "textfile",
+        core: false,
+        new: || Box::new(textfile::TextFile::default()),
+        catalog: textfile::catalog,
+    },
+    #[cfg(feature = "battery")]
+    Builtin {
+        id: "battery",
+        core: false,
+        new: || Box::new(battery::Battery::default()),
+        catalog: battery::catalog,
+    },
+    #[cfg(feature = "cmdrunner")]
+    Builtin {
+        id: "cmdrunner",
+        core: false,
+        new: || Box::new(cmdrunner::CmdRunner::default()),
+        catalog: cmdrunner::catalog,
+    },
+    #[cfg(feature = "security")]
+    Builtin {
+        id: "security",
+        core: false,
+        new: || Box::new(security::Security),
+        catalog: security::catalog,
     },
 ];
 

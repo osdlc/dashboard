@@ -1,0 +1,46 @@
+{
+  "status": "ok",
+  "summary": "40% · charging · 2:00 to full",
+  "root": {
+    "type": "column",
+    "children": [
+      {
+        "type": "gauge",
+        "label": "Battery",
+        "percent": 40.0,
+        "marker": null,
+        "thresholds": null,
+        "caption": "on AC power"
+      },
+      {
+        "type": "row",
+        "children": [
+          {
+            "type": "stat",
+            "label": "Power",
+            "value": "AC power",
+            "unit": null,
+            "delta": null,
+            "status": null
+          },
+          {
+            "type": "stat",
+            "label": "State",
+            "value": "charging",
+            "unit": null,
+            "delta": null,
+            "status": null
+          },
+          {
+            "type": "stat",
+            "label": "To full",
+            "value": "2:00",
+            "unit": null,
+            "delta": null,
+            "status": null
+          }
+        ]
+      }
+    ]
+  }
+}

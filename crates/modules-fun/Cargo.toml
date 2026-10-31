@@ -7,15 +7,48 @@ license.workspace = true
 # One feature per module, named after its id. dashboard-modules turns them on
 # through its `bundle-fun` and `module-<id>` features.
 [features]
-default = ["demo"]
+default = [
+    "demo",
+    "clock",
+    "hackernews",
+    "feedreader",
+    "subreddit",
+    "devto",
+    "mempool",
+    "crypto",
+    "scores",
+]
 demo = []
+clock = ["dep:jiff"]
+# reqwest, to call the HN API; tokio, to fetch the stories at the same time.
+hackernews = ["dashboard-modules-common/http", "dep:tokio"]
+feedreader = [
+    "dashboard-modules-common/http",
+    "dep:reqwest",
+    "dep:roxmltree",
+    "dep:tokio",
+]
+# Reddit's JSON listing, and its Atom feed when Reddit refuses the JSON.
+subreddit = ["dashboard-modules-common/http", "dep:roxmltree"]
+# Public JSON APIs, no key: reqwest only.
+devto = ["dashboard-modules-common/http"]
+mempool = ["dashboard-modules-common/http"]
+crypto = ["dashboard-modules-common/http"]
+scores = ["dashboard-modules-common/http"]
 
 [dependencies]
 anyhow = "1.0.104"
 async-trait = "0.1.92"
-dashboard-contract = { version = "0.4.0", path = "../contract" }
-dashboard-host = { version = "0.4.0", path = "../host" }
-dashboard-modules-common = { version = "0.4.0", path = "../modules-common" }
+dashboard-contract = { version = "0.5.0", path = "../contract" }
+dashboard-host = { version = "0.5.0", path = "../host" }
+dashboard-modules-common = { version = "0.5.0", path = "../modules-common" }
+jiff = { version = "0.2.38", optional = true }
+reqwest = { version = "0.13.5", default-features = false, optional = true }
+roxmltree = { version = "0.21.1", optional = true }
 schemars = "1.2.3"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.154"
+tokio = { version = "1.54.1", features = ["fs", "rt"], optional = true }
+
+[dev-dependencies]
+tokio = { version = "1.54.1", features = ["io-util", "macros", "net", "rt"] }

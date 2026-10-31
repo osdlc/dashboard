@@ -1,0 +1,9 @@
+{
+  "status": "ok",
+  "summary": "plain.txt · 4 lines",
+  "root": {
+    "type": "text",
+    "text": "build 412 passed\n  12 tests, 0 failures\n\nnext: deploy to staging",
+    "markdown": false
+  }
+}

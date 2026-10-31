@@ -1,0 +1,66 @@
+# Dev and task widgets: Buildkite, Jenkins, Asana, Todoist and Trello. Each is a
+# Python plugin package in plugins/ext/ (examples/widgets/plugins links
+# there, so `package: <id>` finds them). From the repository root:
+#
+#   cargo run -p dashboard -- serve --config examples/widgets/w-dev-b.yaml
+#   cargo run -p dashboard -- tui   --config examples/widgets/w-dev-b.yaml
+#
+# All five call token APIs and are untested live, so nothing here calls them:
+# - the "dev & tasks" screen shows each package's demo view (`demo: true`: no
+#   process starts);
+# - the "sample" screen runs each plugin for real with `--sample`, which reads
+#   its sample.json (a hand-written API response) instead of the network.
+#
+# To run one for real, drop `demo: true`, fill in its config and set its token
+# variable (BUILDKITE_TOKEN, JENKINS_TOKEN, ASANA_TOKEN, TODOIST_TOKEN, or
+# TRELLO_KEY and TRELLO_TOKEN), or use token_command. Needs Python 3.9 or newer.
+
+modules:
+  builds:
+    package: buildkite
+    demo: true
+    config: { org: acme, branch: main }
+  jobs:
+    package: jenkins
+    demo: true
+    config: { url: "https://ci.example.com", user: dana }
+  asana-tasks:
+    package: asana
+    demo: true
+    config: { workspace: "1208000000000000" }
+  todo:
+    package: todoist
+    demo: true
+    config: { filter: "today | overdue" }
+  cards:
+    package: trello
+    demo: true
+    config: { board: 6710a1b2c3d4e5f600000000, lists: [Doing, Review] }
+
+  # The same plugins, running, on their sample data.
+  builds-sample:
+    plugin: [python3, plugins/buildkite/main.py, --sample]
+  jobs-sample:
+    plugin: [python3, plugins/jenkins/main.py, --sample]
+  asana-sample:
+    plugin: [python3, plugins/asana/main.py, --sample]
+  todo-sample:
+    plugin: [python3, plugins/todoist/main.py, --sample]
+  cards-sample:
+    plugin: [python3, plugins/trello/main.py, --sample]
+
+screens:
+  - name: dev & tasks
+    tiles:
+      - { module: builds, size: medium }
+      - { module: jobs, size: medium }
+      - { module: cards, size: tall }
+      - { module: asana-tasks, size: medium }
+      - { module: todo, size: medium }
+  - name: sample
+    tiles:
+      - { module: builds-sample, size: medium }
+      - { module: jobs-sample, size: medium }
+      - { module: cards-sample, size: tall }
+      - { module: asana-sample, size: medium }
+      - { module: todo-sample, size: medium }

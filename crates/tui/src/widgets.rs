@@ -39,12 +39,17 @@ pub fn draw_tile(f: &mut Canvas, p: &Palette, area: Rect, tile: &TileUpdate, hit
 fn draw_widget(f: &mut Canvas, p: &Palette, area: Rect, widget: &Widget, hits: &mut Hits) {
     match widget {
         Widget::Text { text, markdown } => {
-            let line = if *markdown {
-                Line::from(inline_markdown(p, text))
-            } else {
-                Line::raw(text.as_str())
-            };
-            f.render_widget(Paragraph::new(line).wrap(Wrap { trim: false }), area);
+            let lines: Vec<Line> = text
+                .split('\n')
+                .map(|l| {
+                    if *markdown {
+                        Line::from(inline_markdown(p, l))
+                    } else {
+                        Line::raw(l)
+                    }
+                })
+                .collect();
+            f.render_widget(Paragraph::new(lines).wrap(Wrap { trim: false }), area);
         }
         Widget::Stat {
             label,
@@ -384,7 +389,7 @@ pub fn tile_min_height(tile: &TileUpdate, width: u16) -> u16 {
 pub fn min_height(widget: &Widget, width: u16) -> u16 {
     let width = width.max(1);
     match widget {
-        Widget::Text { text, .. } => (text.chars().count() as u16).div_ceil(width).clamp(1, 6),
+        Widget::Text { text, .. } => text_rows(text, width).clamp(1, 6),
         Widget::Stat { .. } | Widget::Gauge { .. } => 1,
         // Value line plus a few rows of plot (4 dots each in braille).
         Widget::Series { mirrored, .. } => {
@@ -429,9 +434,7 @@ pub fn min_height(widget: &Widget, width: u16) -> u16 {
 fn height_hint(widget: &Widget, width: u16) -> Constraint {
     match widget {
         Widget::Gauge { .. } | Widget::Stat { .. } => Constraint::Length(1),
-        Widget::Text { text, .. } => {
-            Constraint::Length((text.chars().count() as u16).div_ceil(width.max(1)).max(1))
-        }
+        Widget::Text { text, .. } => Constraint::Length(text_rows(text, width).max(1)),
         Widget::List { items, .. } => Constraint::Length(
             items
                 .iter()
@@ -508,6 +511,14 @@ pub fn draw_waiting(f: &mut Canvas, p: &Palette, area: Rect, tile_id: &str) {
     );
 }
 
+/// Rows a text needs at this width: each of its lines, wrapped.
+fn text_rows(text: &str, width: u16) -> u16 {
+    let width = width.max(1);
+    text.split('\n')
+        .map(|l| (l.chars().count() as u16).div_ceil(width).max(1))
+        .fold(0, u16::saturating_add)
+}
+
 /// The small markdown subset text widgets support: `**bold**` and `` `code` ``.
 fn inline_markdown<'a>(p: &Palette, text: &'a str) -> Vec<Span<'a>> {
     let mut spans = vec![];
@@ -560,6 +571,28 @@ mod tests {
         (0..buf.area.width)
             .map(|x| buf[(x, y)].symbol())
             .collect::<String>()
+    }
+
+    #[test]
+    fn text_keeps_its_line_breaks() {
+        let widget = Widget::Text {
+            text: "**one**\ntwo".into(),
+            markdown: true,
+        };
+        assert_eq!(min_height(&widget, 10), 2);
+        assert_eq!(text_rows("a\n\n123456", 4), 4);
+        let area = Rect::new(0, 0, 10, 2);
+        let mut buf = Buffer::empty(area);
+        let p = Palette::for_theme(Theme::Dark, false);
+        draw_widget(
+            &mut Canvas(&mut buf),
+            &p,
+            area,
+            &widget,
+            &mut Hits::default(),
+        );
+        assert_eq!(text(&buf, 0), "one       ");
+        assert_eq!(text(&buf, 1), "two       ");
     }
 
     #[test]

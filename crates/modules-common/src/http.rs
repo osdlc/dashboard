@@ -4,11 +4,24 @@
 use std::time::Duration;
 
 use anyhow::{Result, bail};
+/// So modules can name these types without depending on reqwest themselves.
+pub use reqwest::{Client, Response};
 
 pub fn client() -> Result<reqwest::Client> {
     Ok(reqwest::Client::builder()
         .timeout(Duration::from_secs(20))
         .user_agent(concat!("dashboard/", env!("CARGO_PKG_VERSION")))
+        .build()?)
+}
+
+/// A client for a server on this machine (127.0.0.1) that uses a self-signed
+/// certificate, such as a desktop app's local language server. Never use it
+/// for a remote host: it accepts any certificate.
+pub fn localhost_client() -> Result<reqwest::Client> {
+    Ok(reqwest::Client::builder()
+        .timeout(Duration::from_secs(10))
+        .user_agent(concat!("dashboard/", env!("CARGO_PKG_VERSION")))
+        .danger_accept_invalid_certs(true)
         .build()?)
 }
 

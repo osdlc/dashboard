@@ -1,0 +1,22 @@
+# dashboard-modules-common's own source, built against the dashboard-host
+# stand-in.
+[package]
+name = "bench-wasm-common"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+publish = false
+
+[lib]
+path = "../../../crates/modules-common/src/lib.rs"
+
+[features]
+# Never on: the HTTP client does not build for WASI.
+http = []
+
+[dependencies]
+anyhow = "1.0.104"
+dashboard-contract = { path = "../../../crates/contract" }
+dashboard-host = { path = "../host", package = "bench-wasm-host" }
+schemars = "1.2.3"
+serde_json = "1.0.154"

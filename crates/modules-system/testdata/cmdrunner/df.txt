@@ -1,0 +1,5 @@
+Filesystem        Size    Used   Avail Capacity  Mounted on
+/dev/disk3s1s1   926Gi    10Gi   512Gi     2%    /
+/dev/disk3s6     926Gi    20Ki   512Gi     1%    /System/Volumes/VM
+/dev/disk3s5     926Gi   392Gi   512Gi    44%    /System/Volumes/Data
+/dev/disk1s2     500Mi   6.0Mi   480Mi     2%    /System/Volumes/xarts

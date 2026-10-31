@@ -1,0 +1,57 @@
+id: jenkins
+version: 0.1.0
+name: Jenkins
+description: >-
+  The jobs on a Jenkins server, or one of its views, with each job's last
+  build: failing first, then unstable, passing and the rest. Click a row to
+  open the build. Jobs inside folders and multibranch pipelines are not
+  shown yet. Untested live: built from Jenkins' remote access API docs
+  and a sample response.
+tags: [dev, ci, jenkins, builds, jobs, untested-live]
+run: [python3, main.py]
+runtime: python3>=3.9
+env: [JENKINS_TOKEN]
+size: medium
+config_schema:
+  type: object
+  additionalProperties: false
+  required: [url]
+  properties:
+    url: { type: string, description: "The Jenkins address, e.g. https://ci.example.com. Use https when user is set: over http the token is sent in clear text." }
+    view: { type: [string, "null"], description: Only the jobs in this Jenkins view. }
+    user: { type: [string, "null"], description: Your Jenkins user name. Leave out for anonymous read access. }
+    token_env: { type: string, description: "Variable holding your Jenkins API token (used with user). Default JENKINS_TOKEN." }
+    token_command: { type: [array, "null"], items: { type: string }, description: Command that prints the token. }
+demo:
+  status: error
+  summary: "failing: web-e2e"
+  root:
+    type: column
+    children:
+      - type: row
+        children:
+          - { type: stat, label: Passing, value: "2", status: ok }
+          - { type: stat, label: Failing, value: "1", status: error }
+          - { type: stat, label: Unstable, value: "1", status: warn }
+      - type: table
+        columns:
+          - { key: job, label: Job }
+          - { key: build, label: Build }
+          - { key: result, label: Result }
+          - { key: when, label: When }
+        rows:
+          - cells: { job: web-e2e, build: "#1544", result: failure, when: "30m ago · 12m 12s" }
+            status: error
+            action: { type: open_url, url: "https://ci.example.com/job/web-e2e/1544/" }
+          - cells: { job: lint, build: "#931", result: unstable, when: "3h ago · 41s" }
+            status: warn
+            action: { type: open_url, url: "https://ci.example.com/job/lint/931/" }
+          - cells: { job: api-tests, build: "#2210", result: success, when: "1h ago · 4m 14s" }
+            status: ok
+            action: { type: open_url, url: "https://ci.example.com/job/api-tests/2210/" }
+          - cells: { job: deploy-staging, build: "#388", result: running, when: "2m ago" }
+            status: warn
+            action: { type: open_url, url: "https://ci.example.com/job/deploy-staging/388/" }
+          - cells: { job: legacy-reports, build: "", result: disabled, when: "" }
+            status: unknown
+            action: { type: open_url, url: "https://ci.example.com/job/legacy-reports/" }

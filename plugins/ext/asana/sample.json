@@ -1,0 +1,56 @@
+{
+  "data": [
+    {
+      "gid": "1208000000000101",
+      "resource_type": "task",
+      "name": "Write the Q4 roadmap draft",
+      "due_on": "2026-10-24",
+      "permalink_url": "https://app.asana.com/0/1208000000000001/1208000000000101",
+      "projects": [{ "gid": "1208000000000001", "resource_type": "project", "name": "Planning" }]
+    },
+    {
+      "gid": "1208000000000102",
+      "resource_type": "task",
+      "name": "Review onboarding checklist",
+      "due_on": "2026-10-27",
+      "permalink_url": "https://app.asana.com/0/1208000000000002/1208000000000102",
+      "projects": [{ "gid": "1208000000000002", "resource_type": "project", "name": "People" }]
+    },
+    {
+      "gid": "1208000000000103",
+      "resource_type": "task",
+      "name": "Book venue for the team offsite",
+      "due_on": null,
+      "permalink_url": "https://app.asana.com/0/0/1208000000000103",
+      "projects": []
+    },
+    {
+      "gid": "1208000000000104",
+      "resource_type": "task",
+      "name": "Send launch notes to support",
+      "due_on": "2026-10-28",
+      "permalink_url": "https://app.asana.com/0/1208000000000003/1208000000000104",
+      "projects": [{ "gid": "1208000000000003", "resource_type": "project", "name": "Launch" }]
+    },
+    {
+      "gid": "1208000000000105",
+      "resource_type": "task",
+      "name": "Approve design for the pricing page",
+      "due_on": "2026-10-27",
+      "permalink_url": "https://app.asana.com/0/1208000000000003/1208000000000105",
+      "projects": [
+        { "gid": "1208000000000003", "resource_type": "project", "name": "Launch" },
+        { "gid": "1208000000000004", "resource_type": "project", "name": "Design" }
+      ]
+    },
+    {
+      "gid": "1208000000000106",
+      "resource_type": "task",
+      "name": "Renew the domain certificates",
+      "due_on": "2026-11-03",
+      "permalink_url": "https://app.asana.com/0/1208000000000005/1208000000000106",
+      "projects": [{ "gid": "1208000000000005", "resource_type": "project", "name": "Ops" }]
+    }
+  ],
+  "next_page": null
+}

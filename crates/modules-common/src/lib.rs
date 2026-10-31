@@ -13,6 +13,7 @@ use schemars::JsonSchema;
 
 #[cfg(feature = "http")]
 pub mod http;
+pub mod secret;
 pub mod time;
 
 /// One built-in module, as a bundle lists it.

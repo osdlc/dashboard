@@ -1,0 +1,50 @@
+# The Python version of the clock widget, for the native-vs-plugin benchmark.
+# It shows the same view as the built-in `clock` module for the same input.
+id: clock-py
+version: 0.1.0
+name: Clock (Python)
+description: >-
+  The local time in one or more time zones, as a row of stats. Uses the
+  system's time zone database; no network. Python version of the built-in
+  clock module.
+tags: [time, local, fun, benchmark]
+run: [python3, main.py]
+runtime: python3>=3.9
+size: small
+config_schema:
+  type: object
+  additionalProperties: false
+  properties:
+    zones:
+      type: array
+      minItems: 1
+      description: >-
+        The time zones to show, in order: IANA names such as Europe/Berlin or
+        UTC, or local for this machine's zone. An entry can also be
+        { zone, label } to name the stat.
+      items:
+        oneOf:
+          - { type: string }
+          - type: object
+            additionalProperties: false
+            required: [zone]
+            properties:
+              zone: { type: string }
+              label: { type: [string, "null"], description: "Shown above the time. By default the last part of the zone name." }
+    hour12: { type: boolean, description: "12-hour time with AM and PM instead of 24-hour time." }
+    seconds: { type: boolean, description: "Show seconds too (the tile then refreshes every second)." }
+    now:
+      type: [string, "null"]
+      description: >-
+        Show this time instead of the current one, written as
+        2026-10-27T14:05:00Z or 2026-10-27T19:35:00+05:30 (years 1970 to
+        2999). For tests and demos.
+demo:
+  status: ok
+  summary: UTC 14:05 · New York 10:05 · Tokyo 23:05
+  root:
+    type: row
+    children:
+      - { type: stat, label: UTC, value: "14:05", delta: Tue 27 Oct }
+      - { type: stat, label: New York, value: "10:05", delta: Tue 27 Oct }
+      - { type: stat, label: Tokyo, value: "23:05", delta: Tue 27 Oct }

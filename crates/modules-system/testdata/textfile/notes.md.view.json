@@ -1,0 +1,9 @@
+{
+  "status": "ok",
+  "summary": "notes.md · 11 lines",
+  "root": {
+    "type": "text",
+    "text": "# Release notes\n\nThings to finish **before Friday**:\n\n- [x] ship the config editor\n- [ ] write the plugin guide\n- [ ] check `dashboard plugin-check` on Windows\n\n> The web view and the TUI read the same file.\n\nSee [docs/plugins.md](docs/plugins.md) for the protocol.",
+    "markdown": true
+  }
+}

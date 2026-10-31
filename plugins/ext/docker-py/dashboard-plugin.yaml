@@ -1,0 +1,42 @@
+# A plugin package: this file plus the plugin's own files. See docs/plugins.md.
+id: docker-py
+version: 0.1.0
+name: Docker (Python)
+description: >-
+  Running Docker containers: name, image, status, CPU and memory. Shows an
+  error tile when the Docker daemon is not running. The Python copy of the
+  built-in docker module, for the native-vs-plugin benchmark.
+tags: [docker, containers, ops, local, benchmark]
+# Run in this folder.
+run: [python3, main.py]
+runtime: python3>=3.9
+binaries: [docker]
+size: wide
+config_schema:
+  type: object
+  additionalProperties: false
+  properties:
+    stats: { type: boolean, description: "Show CPU and memory, from `docker stats` (about 2 s per refresh)." }
+    limit: { type: integer, minimum: 0, description: Rows shown. }
+    docker: { type: string, description: "The docker program, e.g. a full path." }
+# The same made-up containers as the built-in module's demo view.
+demo:
+  status: warn
+  summary: 4 containers · 1 unhealthy · 1 restarting
+  root:
+    type: table
+    columns:
+      - { key: name, label: Name }
+      - { key: image, label: Image }
+      - { key: status, label: Status }
+      - { key: cpu, label: CPU }
+      - { key: mem, label: Memory }
+    rows:
+      - cells: { name: web, image: "nginx:1.27", status: Up 2 hours, cpu: 0.02%, mem: 10.2MiB }
+        status: ok
+      - cells: { name: db, image: "postgres:17", status: Up 25 hours (healthy), cpu: 1.37%, mem: 83.1MiB }
+        status: ok
+      - cells: { name: worker, image: "acme/worker:2.4.1", status: Up 4 minutes (unhealthy), cpu: 87.41%, mem: 512.4MiB }
+        status: warn
+      - cells: { name: cache, image: "redis:7", status: Restarting (1) 10 seconds ago, cpu: "-", mem: "-" }
+        status: warn

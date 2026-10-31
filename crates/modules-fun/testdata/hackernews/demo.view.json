@@ -1,0 +1,56 @@
+{
+  "status": "ok",
+  "summary": "4 top stories",
+  "root": {
+    "type": "list",
+    "items": [
+      {
+        "title": "A tiny terminal dashboard written in Rust",
+        "subtitle": "412 points · 128 comments · by ferris · 2h ago",
+        "status": null,
+        "tags": [
+          "github.com"
+        ],
+        "action": {
+          "type": "open_url",
+          "url": "https://github.com/example/dash"
+        }
+      },
+      {
+        "title": "Ask HN: What do you keep on your second monitor?",
+        "subtitle": "187 points · 243 comments · by curious · 5h ago",
+        "status": null,
+        "tags": [],
+        "action": {
+          "type": "open_url",
+          "url": "https://news.ycombinator.com/item?id=41000002"
+        }
+      },
+      {
+        "title": "How we cut our build times in half",
+        "subtitle": "96 points · 31 comments · by buildbot · 40m ago",
+        "status": null,
+        "tags": [
+          "example.com"
+        ],
+        "action": {
+          "type": "open_url",
+          "url": "https://www.example.com/blog/faster-builds"
+        }
+      },
+      {
+        "title": "The history of the status bar",
+        "subtitle": "1 point · 0 comments · by historian · just now",
+        "status": null,
+        "tags": [
+          "example.org"
+        ],
+        "action": {
+          "type": "open_url",
+          "url": "https://example.org/status-bars"
+        }
+      }
+    ],
+    "empty_text": "no stories"
+  }
+}

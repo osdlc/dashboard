@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!DOCTYPE rss PUBLIC "-//Netscape Communications//DTD RSS 0.91//EN"
+  "http://my.netscape.com/publish/formats/rss-0.91.dtd">
+<rss version="0.91">
+  <channel>
+    <title></title>
+    <item><title>Old style item</title><link>http://old.example.com/a</link></item>
+    <item><title>Another one</title><link>http://old.example.com/b</link></item>
+  </channel>
+</rss>

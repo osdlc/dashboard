@@ -21,11 +21,16 @@ bundle-system = [
     "dashboard-modules/bundle-system",
     "module-cpu",
     "module-memory",
+    "module-gpu",
     "module-network",
     "module-disk",
     "module-processes",
     "module-log",
     "module-uptime",
+    "module-textfile",
+    "module-battery",
+    "module-cmdrunner",
+    "module-security",
 ]
 bundle-dev = [
     "dashboard-modules/bundle-dev",
@@ -34,37 +39,109 @@ bundle-dev = [
     "module-jira",
     "module-linear",
     "module-forgejo",
+    "module-git",
 ]
-bundle-ops = ["dashboard-modules/bundle-ops"]
-bundle-fun = ["dashboard-modules/bundle-fun", "module-demo"]
-bundle-agents = ["dashboard-modules/bundle-agents", "module-codex", "module-copilot"]
-bundle-personal = ["dashboard-modules/bundle-personal"]
+bundle-ops = [
+    "dashboard-modules/bundle-ops",
+    "module-docker",
+    "module-kubernetes",
+    "module-ipinfo",
+    "module-pihole",
+    "module-transmission",
+]
+bundle-fun = [
+    "dashboard-modules/bundle-fun",
+    "module-demo",
+    "module-clock",
+    "module-hackernews",
+    "module-feedreader",
+    "module-subreddit",
+    "module-devto",
+    "module-mempool",
+    "module-crypto",
+    "module-scores",
+]
+bundle-agents = [
+    "dashboard-modules/bundle-agents",
+    "module-codex",
+    "module-copilot",
+    "module-cursor",
+    "module-antigravity",
+    "module-gemini",
+    "module-opencode",
+    "module-pi",
+]
+bundle-personal = [
+    "dashboard-modules/bundle-personal",
+    "module-weather",
+    "module-todo",
+    "module-lunar",
+    "module-calendar",
+    "module-org-agenda",
+    "module-markdown-tasks",
+    "module-todo-txt",
+    "module-taskwarrior",
+    "module-sdlc",
+]
 module-cpu = ["dashboard-modules/module-cpu"]
 module-memory = ["dashboard-modules/module-memory"]
+module-gpu = ["dashboard-modules/module-gpu"]
 module-network = ["dashboard-modules/module-network"]
 module-disk = ["dashboard-modules/module-disk"]
 module-processes = ["dashboard-modules/module-processes"]
 module-log = ["dashboard-modules/module-log"]
 module-uptime = ["dashboard-modules/module-uptime"]
+module-textfile = ["dashboard-modules/module-textfile"]
+module-battery = ["dashboard-modules/module-battery"]
+module-cmdrunner = ["dashboard-modules/module-cmdrunner"]
+module-security = ["dashboard-modules/module-security"]
 module-github-prs = ["dashboard-modules/module-github-prs"]
 module-github-issues = ["dashboard-modules/module-github-issues"]
 module-jira = ["dashboard-modules/module-jira"]
 module-linear = ["dashboard-modules/module-linear"]
 module-forgejo = ["dashboard-modules/module-forgejo"]
+module-git = ["dashboard-modules/module-git"]
 module-demo = ["dashboard-modules/module-demo"]
+module-clock = ["dashboard-modules/module-clock"]
+module-hackernews = ["dashboard-modules/module-hackernews"]
+module-feedreader = ["dashboard-modules/module-feedreader"]
+module-subreddit = ["dashboard-modules/module-subreddit"]
+module-devto = ["dashboard-modules/module-devto"]
+module-mempool = ["dashboard-modules/module-mempool"]
+module-crypto = ["dashboard-modules/module-crypto"]
+module-scores = ["dashboard-modules/module-scores"]
 module-codex = ["dashboard-modules/module-codex"]
 module-copilot = ["dashboard-modules/module-copilot"]
+module-cursor = ["dashboard-modules/module-cursor"]
+module-antigravity = ["dashboard-modules/module-antigravity"]
+module-gemini = ["dashboard-modules/module-gemini"]
+module-opencode = ["dashboard-modules/module-opencode"]
+module-pi = ["dashboard-modules/module-pi"]
+module-docker = ["dashboard-modules/module-docker"]
+module-kubernetes = ["dashboard-modules/module-kubernetes"]
+module-ipinfo = ["dashboard-modules/module-ipinfo"]
+module-pihole = ["dashboard-modules/module-pihole"]
+module-transmission = ["dashboard-modules/module-transmission"]
+module-weather = ["dashboard-modules/module-weather"]
+module-todo = ["dashboard-modules/module-todo"]
+module-lunar = ["dashboard-modules/module-lunar"]
+module-calendar = ["dashboard-modules/module-calendar"]
+module-org-agenda = ["dashboard-modules/module-org-agenda"]
+module-markdown-tasks = ["dashboard-modules/module-markdown-tasks"]
+module-todo-txt = ["dashboard-modules/module-todo-txt"]
+module-taskwarrior = ["dashboard-modules/module-taskwarrior"]
+module-sdlc = ["dashboard-modules/module-sdlc"]
 
 [dependencies]
 anyhow = "1.0.104"
 clap = { version = "4.6.7", features = ["derive"] }
-dashboard-config = { version = "0.4.0", path = "../config" }
-dashboard-contract = { version = "0.4.0", path = "../contract" }
-dashboard-cswap = { version = "0.4.0", path = "../../plugins/cswap" }
-dashboard-host = { version = "0.4.0", path = "../host" }
-dashboard-modules = { version = "0.4.0", path = "../modules", default-features = false }
-dashboard-tui = { version = "0.4.0", path = "../tui" }
-dashboard-web = { version = "0.4.0", path = "../web" }
+dashboard-config = { version = "0.5.0", path = "../config" }
+dashboard-contract = { version = "0.5.0", path = "../contract" }
+dashboard-cswap = { version = "0.5.0", path = "../../plugins/cswap" }
+dashboard-host = { version = "0.5.0", path = "../host" }
+dashboard-modules = { version = "0.5.0", path = "../modules", default-features = false }
+dashboard-tui = { version = "0.5.0", path = "../tui" }
+dashboard-web = { version = "0.5.0", path = "../web" }
 schemars = "1.2.3"
 serde_json = "1.0.154"
 tokio = { version = "1.54.1", features = ["full"] }

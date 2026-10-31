@@ -1,0 +1,131 @@
+{
+  "_apis/wit/wiql": {
+    "queryType": "flat",
+    "queryResultType": "workItem",
+    "asOf": "2026-10-27T11:59:58.12Z",
+    "columns": [
+      { "referenceName": "System.Id", "name": "ID", "url": "https://dev.azure.com/acme/_apis/wit/fields/System.Id" }
+    ],
+    "sortColumns": [
+      { "field": { "referenceName": "System.ChangedDate", "name": "Changed Date" }, "descending": true }
+    ],
+    "workItems": [
+      { "id": 4127, "url": "https://dev.azure.com/acme/_apis/wit/workItems/4127" },
+      { "id": 4090, "url": "https://dev.azure.com/acme/_apis/wit/workItems/4090" },
+      { "id": 3988, "url": "https://dev.azure.com/acme/_apis/wit/workItems/3988" }
+    ]
+  },
+  "_apis/wit/workitems": {
+    "count": 3,
+    "value": [
+      {
+        "id": 3988,
+        "rev": 7,
+        "fields": {
+          "System.Id": 3988,
+          "System.WorkItemType": "User Story",
+          "System.State": "New",
+          "System.Title": "Export the report as CSV",
+          "System.ChangedDate": "2026-10-23T14:02:11.483Z",
+          "Microsoft.VSTS.Common.Priority": 3
+        },
+        "url": "https://dev.azure.com/acme/_apis/wit/workItems/3988"
+      },
+      {
+        "id": 4127,
+        "rev": 3,
+        "fields": {
+          "System.Id": 4127,
+          "System.WorkItemType": "Bug",
+          "System.State": "Active",
+          "System.Title": "Checkout fails when the cart has a gift card",
+          "System.ChangedDate": "2026-10-27T10:41:56.37Z",
+          "System.Tags": "checkout; customer-reported",
+          "Microsoft.VSTS.Common.Priority": 1
+        },
+        "url": "https://dev.azure.com/acme/_apis/wit/workItems/4127"
+      },
+      {
+        "id": 4090,
+        "rev": 12,
+        "fields": {
+          "System.Id": 4090,
+          "System.WorkItemType": "Task",
+          "System.State": "Active",
+          "System.Title": "Move the image service to the new storage account",
+          "System.ChangedDate": "2026-10-26T18:20:00.1234567Z",
+          "System.Tags": "infra",
+          "Microsoft.VSTS.Common.Priority": 2
+        },
+        "url": "https://dev.azure.com/acme/_apis/wit/workItems/4090"
+      }
+    ]
+  },
+  "_apis/git/pullrequests": {
+    "count": 3,
+    "value": [
+      {
+        "repository": {
+          "id": "3411ebc1-d5aa-464f-9615-0b527bc66719",
+          "name": "storefront",
+          "url": "https://dev.azure.com/acme/_apis/git/repositories/3411ebc1-d5aa-464f-9615-0b527bc66719",
+          "project": { "id": "a7573007-bbb3-4341-b726-0c4148a07853", "name": "Web" }
+        },
+        "pullRequestId": 812,
+        "codeReviewId": 812,
+        "status": "active",
+        "createdBy": { "displayName": "Dana Ruiz", "uniqueName": "dana@acme.example" },
+        "creationDate": "2026-10-27T08:55:12.4566667Z",
+        "title": "Handle gift cards in checkout totals",
+        "sourceRefName": "refs/heads/fix/gift-card-total",
+        "targetRefName": "refs/heads/main",
+        "mergeStatus": "succeeded",
+        "isDraft": false,
+        "reviewers": [
+          { "displayName": "Sam Lee", "vote": 10, "isRequired": true },
+          { "displayName": "Kim Park", "vote": 0 }
+        ]
+      },
+      {
+        "repository": {
+          "id": "9b1c6a1e-7f5e-4c58-9d8b-2d1d1b8e7c11",
+          "name": "image-service",
+          "url": "https://dev.azure.com/acme/_apis/git/repositories/9b1c6a1e-7f5e-4c58-9d8b-2d1d1b8e7c11",
+          "project": { "id": "a7573007-bbb3-4341-b726-0c4148a07853", "name": "Web" }
+        },
+        "pullRequestId": 805,
+        "codeReviewId": 805,
+        "status": "active",
+        "createdBy": { "displayName": "Kim Park", "uniqueName": "kim@acme.example" },
+        "creationDate": "2026-10-26T15:30:00Z",
+        "title": "Switch uploads to the new storage account",
+        "sourceRefName": "refs/heads/storage-v2",
+        "targetRefName": "refs/heads/main",
+        "mergeStatus": "conflicts",
+        "isDraft": false,
+        "reviewers": [
+          { "displayName": "Dana Ruiz", "vote": -5 }
+        ]
+      },
+      {
+        "repository": {
+          "id": "3411ebc1-d5aa-464f-9615-0b527bc66719",
+          "name": "storefront",
+          "url": "https://dev.azure.com/acme/_apis/git/repositories/3411ebc1-d5aa-464f-9615-0b527bc66719",
+          "project": { "id": "a7573007-bbb3-4341-b726-0c4148a07853", "name": "Web" }
+        },
+        "pullRequestId": 819,
+        "codeReviewId": 819,
+        "status": "active",
+        "createdBy": { "displayName": "Sam Lee", "uniqueName": "sam@acme.example" },
+        "creationDate": "2026-10-27T11:20:41Z",
+        "title": "Try the new date picker",
+        "sourceRefName": "refs/heads/date-picker",
+        "targetRefName": "refs/heads/main",
+        "mergeStatus": "succeeded",
+        "isDraft": true,
+        "reviewers": []
+      }
+    ]
+  }
+}

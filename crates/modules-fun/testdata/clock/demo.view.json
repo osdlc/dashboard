@@ -1,0 +1,33 @@
+{
+  "status": "ok",
+  "summary": "UTC 14:05 · New York 10:05 · Tokyo 23:05",
+  "root": {
+    "type": "row",
+    "children": [
+      {
+        "type": "stat",
+        "label": "UTC",
+        "value": "14:05",
+        "unit": null,
+        "delta": "Tue 27 Oct",
+        "status": null
+      },
+      {
+        "type": "stat",
+        "label": "New York",
+        "value": "10:05",
+        "unit": null,
+        "delta": "Tue 27 Oct",
+        "status": null
+      },
+      {
+        "type": "stat",
+        "label": "Tokyo",
+        "value": "23:05",
+        "unit": null,
+        "delta": "Tue 27 Oct",
+        "status": null
+      }
+    ]
+  }
+}

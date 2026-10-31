@@ -1,0 +1,64 @@
+[
+  {
+    "id": 2481001,
+    "name": "API p95 latency above 800ms",
+    "type": "metric alert",
+    "query": "avg(last_5m):p95:trace.http.request.duration{service:api} > 0.8",
+    "overall_state": "Alert",
+    "overall_state_modified": "2026-10-27T08:12:00+00:00",
+    "tags": ["team:web", "service:api", "env:prod"],
+    "priority": 1,
+    "created": "2025-03-02T10:00:00.000000+00:00",
+    "modified": "2026-09-14T09:30:00.000000+00:00"
+  },
+  {
+    "id": 2481002,
+    "name": "Checkout error rate",
+    "type": "query alert",
+    "query": "sum(last_10m):sum:checkout.errors{env:prod}.as_count() > 50",
+    "overall_state": "Warn",
+    "overall_state_modified": "2026-10-27T07:40:00+00:00",
+    "tags": ["team:web", "service:checkout"],
+    "priority": 2
+  },
+  {
+    "id": 2481003,
+    "name": "Worker heartbeat",
+    "type": "service check",
+    "query": "\"datadog.agent.up\".over(\"role:worker\").by(\"host\").last(2).count_by_status()",
+    "overall_state": "No Data",
+    "overall_state_modified": "2026-10-26T22:05:00+00:00",
+    "tags": ["team:platform"],
+    "priority": null
+  },
+  {
+    "id": 2481004,
+    "name": "Disk usage on db hosts",
+    "type": "metric alert",
+    "query": "avg(last_15m):avg:system.disk.in_use{role:db} by {host} > 0.9",
+    "overall_state": "OK",
+    "overall_state_modified": "2026-10-20T03:00:00+00:00",
+    "tags": ["team:platform", "role:db"],
+    "priority": 3
+  },
+  {
+    "id": 2481005,
+    "name": "Login synthetic test",
+    "type": "synthetics alert",
+    "query": "",
+    "overall_state": "OK",
+    "overall_state_modified": "2026-10-25T11:00:00+00:00",
+    "tags": ["team:web"],
+    "priority": null
+  },
+  {
+    "id": 2481006,
+    "name": "Queue depth",
+    "type": "metric alert",
+    "query": "avg(last_5m):avg:rabbitmq.queue.messages{queue:jobs} > 10000",
+    "overall_state": "OK",
+    "overall_state_modified": "2026-10-24T16:20:00+00:00",
+    "tags": ["team:platform", "service:jobs"],
+    "priority": 4
+  }
+]

@@ -1,0 +1,9 @@
+{
+  "status": "ok",
+  "summary": "UPS power · no battery",
+  "root": {
+    "type": "text",
+    "text": "No battery found. Running on UPS power.",
+    "markdown": false
+  }
+}

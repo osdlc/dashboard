@@ -1,0 +1,2 @@
+Now drawing from 'UPS Power'
+ -CP1500PFCLCD (id=1234567)	85%; discharging; 0:45 remaining present: true

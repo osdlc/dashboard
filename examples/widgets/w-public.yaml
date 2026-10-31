@@ -1,0 +1,46 @@
+# Public-API widgets: subreddit, dev.to, mempool, crypto prices, sports scores
+# (built in, no key), and Healthchecks.io (a plugin package). From the
+# repository root:
+#
+#   cargo run -p dashboard -- serve --config examples/widgets/w-public.yaml
+#
+# - subreddit, devto, mempool, crypto, scores: live calls to public APIs, no
+#   key. Reddit usually refuses its JSON without an account, so the subreddit
+#   tile reads the feed instead and shows posts without points or comments.
+# - healthchecks: needs an API key, so it runs with --sample and shows its
+#   sample checks. Untested live. For real: drop --sample and set
+#   $HEALTHCHECKS_API_KEY. A plugin runs in this file's folder, hence ../../.
+
+theme: auto
+
+modules:
+  subreddit:
+    config: { subreddit: rust, sort: hot, limit: 10 }
+  devto:
+    config: { tag: rust, top: 7, limit: 10 }
+  crypto:
+    config: { coins: [bitcoin, ethereum, solana, dogecoin], currency: usd, warn_drop: 5 }
+  mempool:
+    config: { blocks: 6, warn_fee: 50 }
+  scores:
+    config: { league: basketball/nba }
+  football:
+    builtin: scores
+    config: { league: soccer/eng.1 }
+  healthchecks:
+    plugin: [python3, ../../plugins/ext/healthchecks/main.py, --sample]
+
+screens:
+  - name: reading
+    tiles:
+      - { module: subreddit, size: tall }
+      - { module: devto, size: tall }
+  - name: markets
+    tiles:
+      - { module: crypto, size: medium }
+      - { module: mempool, size: medium }
+  - name: scores and checks
+    tiles:
+      - { module: scores, size: medium }
+      - { module: football, size: medium }
+      - { module: healthchecks, size: medium }
