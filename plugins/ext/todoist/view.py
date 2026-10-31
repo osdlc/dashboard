@@ -12,12 +12,28 @@ from dashboard_plugin import ListItem, Status, View
 SAMPLE_TODAY = "2026-10-27"
 
 
+# The time zone due times are shown in; None is the system's. Set by the tests.
+TZ: Optional[datetime.tzinfo] = None
+
+
+def local_date(task: Dict[str, Any]) -> str:
+    """The task's `due.date` as local YYYY-MM-DD, or YYYY-MM-DDTHH:MM:SS with a time. A
+    floating date or time is local already. A task with a fixed time zone has a UTC time
+    ending in Z (2026-10-28T04:00:00.000000Z), which is turned into local time here."""
+    date = task["due"]["date"]
+    if not date.endswith("Z"):
+        return date
+    # Python before 3.11 reads neither "Z" nor fractions that aren't 3 or 6 digits.
+    when = datetime.datetime.fromisoformat(date[:19] + "+00:00")
+    return when.astimezone(TZ).strftime("%Y-%m-%dT%H:%M:%S")
+
+
 def days(task: Dict[str, Any], today: str) -> Optional[int]:
     """Whole days from `today` to the task's due date: negative when overdue, None with no
-    date. `due.date` is YYYY-MM-DD, or YYYY-MM-DDTHH:MM:SS for a task with a time."""
+    date."""
     if not task.get("due"):
         return None
-    date = datetime.date.fromisoformat(task["due"]["date"][:10])
+    date = datetime.date.fromisoformat(local_date(task)[:10])
     return (date - datetime.date.fromisoformat(today)).days
 
 
@@ -30,7 +46,7 @@ def due(task: Dict[str, Any], today: str) -> str:
     d = days(task, today)
     if d is None:
         return "no due date"
-    date = task["due"]["date"]
+    date = local_date(task)
     time = f" {date[11:16]}" if len(date) > 10 else ""
     if d < 0:
         return f"overdue {-d}d"

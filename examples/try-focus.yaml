@@ -1,0 +1,21 @@
+# A saved dashboard to try with examples/try.yaml: its screens replace that
+# file's screens, and it uses the modules that file defines (a dashboard may
+# also add its own under modules:). See the header of examples/try.yaml.
+#
+#   cargo run -p dashboard -- import examples/try-focus.yaml
+#   cargo run -p dashboard -- serve --config examples/try.yaml --dashboard try-focus
+
+description: Focus - the machine, open work and the news
+
+screens:
+  - name: focus
+    tiles:
+      - { module: cpu, size: wide }
+      - { module: memory, size: medium }
+      - { module: github-prs, size: large }
+      - { module: todo, size: medium }
+  - name: news
+    tiles:
+      - { module: hackernews, size: tall }
+      - { module: feedreader, size: tall }
+      - { module: weather, size: medium }

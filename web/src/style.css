@@ -387,3 +387,11 @@ main.grid { animation: screen-in 0.25s ease-out; }
   .preview-grid .tile[data-size] { grid-column: 1 / -1; }
   .add-form { max-height: none; }
 }
+
+/* Ambient mode (?mode=ambient): large type, full width, nothing to click. */
+:root[data-mode='ambient'] { font-size: clamp(16px, 1.25vw, 36px); cursor: none; }
+:root[data-mode='ambient'] body { overflow: hidden; }
+:root[data-mode='ambient'] #app { max-width: none; min-height: 100vh; padding: 2vw; pointer-events: none; user-select: none; }
+:root[data-mode='ambient'] .grid { gap: 1.5vw; grid-auto-rows: minmax(8rem, auto); }
+:root[data-mode='ambient'] .tile h2 { font-size: 1.1rem; }
+.ambient-foot { position: fixed; right: 2vw; bottom: 1vw; background: var(--bg); padding: 0 0.5em; border-radius: 4px; display: flex; gap: 1em; color: var(--muted); font-size: 0.8rem; }

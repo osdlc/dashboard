@@ -96,16 +96,12 @@ impl Module for CmdRunner {
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .kill_on_drop(true);
-        // Its own process group, so a timeout stops the whole pipeline, not
-        // only `sh`.
-        #[cfg(unix)]
-        cmd.process_group(0);
+        // Its own process group (a job object on Windows), so a timeout stops
+        // the whole pipeline, not only `sh`, and children it left behind.
+        dashboard_host::process::own_group(&mut cmd);
         let child = cmd
             .spawn()
             .map_err(|e| anyhow::anyhow!("running the command: {e}"))?;
-        let _group = Group(child.id());
-        // Windows has no process groups: a job object does the same.
-        #[cfg(windows)]
         let _tree = dashboard_host::process::KillTree::new(&child);
         let timeout = Duration::from_secs(self.config.timeout_secs);
         let run = match tokio::time::timeout(timeout, child.wait_with_output()).await {
@@ -118,24 +114,6 @@ impl Module for CmdRunner {
             Err(_) => bail!("the command ran longer than {}s", self.config.timeout_secs),
         };
         Ok(view(&run, self.config.lines, self.config.tail))
-    }
-}
-
-/// The command's process group. Dropping it kills what is left of the group:
-/// after a timeout, or children the command left behind.
-#[cfg_attr(not(unix), allow(dead_code))]
-struct Group(Option<u32>);
-
-impl Drop for Group {
-    fn drop(&mut self) {
-        #[cfg(unix)]
-        if let Some(pid) = self.0.and_then(|p| libc::pid_t::try_from(p).ok()) {
-            // SAFETY: killpg takes plain integers. The group id is the pid of
-            // the child we spawned as a group leader; ESRCH when it is gone.
-            unsafe {
-                libc::killpg(pid, libc::SIGKILL);
-            }
-        }
     }
 }
 

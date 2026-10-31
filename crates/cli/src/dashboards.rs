@@ -11,7 +11,7 @@ use dashboard_config::layers::{Sources, find_project};
 use dashboard_config::packages::{Packages, data_dir};
 use dashboard_config::{Config, parse};
 
-use crate::runtime::{known_modules, registry};
+use dashboard_runtime::{known_modules, registry};
 
 /// Print the saved dashboards, and the project file if one applies here.
 pub fn list(sources: &Sources) -> Result<()> {

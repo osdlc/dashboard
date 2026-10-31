@@ -1,4 +1,5 @@
-//! Network: download/upload graph (all interfaces except loopback).
+//! Network: download/upload graph (physical interfaces: not loopback, VPN
+//! tunnels or container bridges, whose traffic also crosses a physical one).
 
 use anyhow::Result;
 use async_trait::async_trait;
@@ -24,6 +25,35 @@ impl Default for Network {
     }
 }
 
+/// Interfaces whose traffic is counted again on a physical one: loopback, VPN
+/// tunnels (utun, wg, tailscale), and bridges and veth pairs for containers
+/// and VMs. A tunnel's packets go out encrypted on en0 or eth0 as well.
+const VIRTUAL: &[&str] = &[
+    "lo",
+    "utun",
+    "tun",
+    "tap",
+    "wg",
+    "ipsec",
+    "gif",
+    "stf",
+    "tailscale",
+    "zt",
+    "docker",
+    // Linux br0 and Docker's br-<id>, and macOS bridge100.
+    "br",
+    "veth",
+    "virbr",
+    "vmnet",
+    "vboxnet",
+    "vEthernet",
+    "Loopback",
+];
+
+fn is_virtual(name: &str) -> bool {
+    VIRTUAL.iter().any(|prefix| name.starts_with(prefix))
+}
+
 #[async_trait]
 impl Module for Network {
     async fn init(&mut self, _config: serde_json::Value) -> Result<Manifest> {
@@ -35,7 +65,7 @@ impl Module for Network {
         let (rx, tx) = self
             .networks
             .iter()
-            .filter(|(name, _)| !name.starts_with("lo"))
+            .filter(|(name, _)| !is_virtual(name))
             .fold((0u64, 0u64), |(r, t), (_, n)| {
                 (r + n.received(), t + n.transmitted())
             });
@@ -94,5 +124,34 @@ pub fn catalog() -> CatalogEntry {
         description: "Download and upload speed across all network interfaces.".into(),
         tags: crate::strings(&["system", "local", "network"]),
         ..crate::entry("network", "Network", Size::Medium, demo)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn counts_physical_interfaces_only() {
+        for name in [
+            "en0", "en1", "eth0", "wlan0", "wlp2s0", "enp3s0", "Ethernet", "Wi-Fi",
+        ] {
+            assert!(!is_virtual(name), "{name}");
+        }
+        for name in [
+            "lo0",
+            "utun17",
+            "tun0",
+            "wg0",
+            "tailscale0",
+            "docker0",
+            "veth1a2b",
+            "br-4f2e",
+            "br0",
+            "bridge100",
+            "vEthernet (WSL)",
+        ] {
+            assert!(is_virtual(name), "{name}");
+        }
     }
 }

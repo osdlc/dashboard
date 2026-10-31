@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { runAction } from './actions'
+import { addSeq, isOutcomeOf, type PendingAdd } from './adds'
 import type { ClientMessage, ScreenLayout } from './contract'
 import HelpPanel from './components/HelpPanel.vue'
 import ScreenEditor from './components/ScreenEditor.vue'
@@ -133,10 +134,14 @@ function switchDashboard(e: Event) {
 }
 
 /** An add sent from the editor, and whether the editor's base was the file as it was then. */
-let pendingAdd: { moduleId: string; onBase: boolean } | null = null
+let pendingAdd: (PendingAdd & { onBase: boolean }) | null = null
 function addModule(msg: ClientMessage) {
   if (msg.type === 'add_module') {
-    pendingAdd = { moduleId: msg.module_id, onBase: settings.value?.config.etag === editBase }
+    pendingAdd = {
+      moduleId: msg.module_id,
+      before: addSeq(settings.value?.config.added),
+      onBase: settings.value?.config.etag === editBase,
+    }
   }
   send(msg)
 }
@@ -145,7 +150,7 @@ function addModule(msg: ClientMessage) {
 watch(
   () => settings.value?.config,
   (c) => {
-    if (!c || !pendingAdd || c.added?.module_id !== pendingAdd.moduleId) return
+    if (!c || !pendingAdd || !isOutcomeOf(c.added, pendingAdd)) return
     if (!c.added.error && pendingAdd.onBase) editBase = c.etag ?? null
     pendingAdd = null
   },

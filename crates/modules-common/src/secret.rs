@@ -2,9 +2,14 @@
 //! config file: a module names an environment variable (`token_env`) or a
 //! command that prints the secret (`token_command`, e.g. a password manager CLI).
 
-use anyhow::{Context, Result, bail};
+use std::time::Duration;
+
+use anyhow::{Context, Result, anyhow, bail};
 use schemars::JsonSchema;
 use serde::Deserialize;
+
+/// How long `token_command` may run.
+const COMMAND_TIMEOUT: Duration = Duration::from_secs(30);
 
 /// Where a module gets its API token (or password).
 #[derive(Debug, Default, Deserialize, JsonSchema)]
@@ -36,11 +41,21 @@ impl Secret {
     pub async fn token_opt(&self, default_env: &str) -> Result<Option<String>> {
         if let Some(argv) = &self.token_command {
             let (program, args) = argv.split_first().context("token_command is empty")?;
-            let out = tokio::process::Command::new(program)
+            // Killed if it hangs (a locked password manager waiting on a
+            // prompt) or if the module is stopped while it runs.
+            let run = tokio::process::Command::new(program)
                 .args(args)
                 .stdin(std::process::Stdio::null())
-                .output()
+                .kill_on_drop(true)
+                .output();
+            let out = tokio::time::timeout(COMMAND_TIMEOUT, run)
                 .await
+                .map_err(|_| {
+                    anyhow!(
+                        "token_command {program:?} did not finish within {}s",
+                        COMMAND_TIMEOUT.as_secs()
+                    )
+                })?
                 .with_context(|| format!("running token_command {program:?}"))?;
             if !out.status.success() {
                 bail!(
@@ -85,5 +100,16 @@ mod tests {
             token_command: Some(vec!["echo".into(), " abc ".into()]),
         };
         assert_eq!(s.token("X").await.unwrap(), "abc");
+    }
+
+    #[cfg(unix)]
+    #[tokio::test(start_paused = true)]
+    async fn hung_command_times_out() {
+        let s = Secret {
+            token_env: None,
+            token_command: Some(vec!["sleep".into(), "600".into()]),
+        };
+        let err = s.token("X").await.unwrap_err().to_string();
+        assert!(err.contains("did not finish"), "{err}");
     }
 }

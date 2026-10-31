@@ -3,9 +3,9 @@
 //! On Windows a program name is looked up the way a shell does it: in `PATH`,
 //! with each `PATHEXT` extension, so `npx` finds `npx.cmd`. `python3` is the
 //! first `python3` or `python` in `PATH`, or `py -3` when that is only the
-//! Microsoft Store alias. A child can also be put in a job object
-//! ([`KillTree`]), so stopping it stops everything it started too (`npx` ->
-//! `node`, `cmd` -> `curl`).
+//! Microsoft Store alias. A child can also be put in a process group (Unix)
+//! or a job object (Windows), a [`KillTree`], so stopping it stops everything
+//! it started too (`npx` -> `node`, `sh` -> `curl`).
 
 use std::path::{Path, PathBuf};
 
@@ -142,6 +142,43 @@ fn with_ext(base: &Path, lookup: &Lookup) -> Option<PathBuf> {
         let path = PathBuf::from(name);
         (lookup.exists)(&path).then_some(path)
     })
+}
+
+/// Unix: start the child as the leader of a process group of its own, so a
+/// [`KillTree`] can stop all of it. Nothing on Windows, where the job object
+/// is made after the start.
+pub fn own_group(cmd: &mut tokio::process::Command) {
+    #[cfg(unix)]
+    cmd.process_group(0);
+    #[cfg(not(unix))]
+    let _ = cmd;
+}
+
+/// Unix: the process group of a child started with [`own_group`]. Dropping it
+/// kills what is left of the group: the child and every process it started
+/// that is still in the group, which killing the child alone would leave
+/// running (`npx`'s `node`, a wrapper script's program).
+#[cfg(unix)]
+pub struct KillTree(libc::pid_t);
+
+#[cfg(unix)]
+impl KillTree {
+    /// `None` once the child has been waited on.
+    pub fn new(child: &tokio::process::Child) -> Option<Self> {
+        let pid = libc::pid_t::try_from(child.id()?).ok()?;
+        Some(Self(pid))
+    }
+}
+
+#[cfg(unix)]
+impl Drop for KillTree {
+    fn drop(&mut self) {
+        // SAFETY: killpg takes plain integers. The group id is the pid of the
+        // child started as a group leader; ESRCH when the group is empty.
+        unsafe {
+            libc::killpg(self.0, libc::SIGKILL);
+        }
+    }
 }
 
 /// Windows: a job object holding a child. Dropping it ends the child and
@@ -354,6 +391,30 @@ mod tests {
             out.read_to_end(&mut buf),
         );
         assert!(read.await.is_ok(), "ping still running");
+    }
+
+    /// Dropping the tree ends what the child started: the `sleep` here holds
+    /// the stdout pipe open, so reading to the end only finishes once it is gone.
+    #[cfg(unix)]
+    #[tokio::test]
+    async fn kill_tree_ends_grandchildren_unix() {
+        use tokio::io::AsyncReadExt;
+        let mut cmd = tokio::process::Command::new("sh");
+        cmd.args(["-c", "sleep 30; true"])
+            .stdout(std::process::Stdio::piped())
+            .kill_on_drop(true);
+        own_group(&mut cmd);
+        let mut child = cmd.spawn().unwrap();
+        let tree = KillTree::new(&child).expect("a group");
+        let mut out = child.stdout.take().unwrap();
+        drop(child);
+        drop(tree);
+        let mut buf = vec![];
+        let read = tokio::time::timeout(
+            std::time::Duration::from_secs(10),
+            out.read_to_end(&mut buf),
+        );
+        assert!(read.await.is_ok(), "sleep still running");
     }
 
     #[test]

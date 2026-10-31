@@ -377,8 +377,10 @@ WebSocket:
 The host writes `modules.<module_id>` (with `builtin:` when `module_id` differs from a
 built-in's ID, `package:` for a package) and a tile at the end of `screen`, editing the file in
 place so comments stay. The reload that follows starts the module. The next settings carry
-`config.added`: the `module_id` and, if the add was refused, an `error` (the file is then left
-as it was). A module that was added but fails to start shows as the config error, like any
+`config.added`: the `module_id`, if the add was refused an `error` (the file is then left
+as it was), and `seq`, which counts the adds the server has handled. Every later settings
+message carries the same `added`, so a renderer waits for a `seq` higher than the one it saw
+when it sent the add. A module that was added but fails to start shows as the config error, like any
 other.
 
 Marketplace index entries get the same `check_view` as installed packages. An entry whose demo

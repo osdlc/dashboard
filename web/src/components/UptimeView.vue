@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { webUrl } from '../actions'
 import type { UptimeCheck, Widget } from '../contract'
 
 type Uptime = Extract<Widget, { type: 'uptime' }>
@@ -30,7 +31,7 @@ function last(c: UptimeCheck): string {
   <div class="w-uptime">
     <div v-for="c in widget.checks" :key="c.name" class="up-row" :data-status="c.status" data-nav-item>
       <span class="up-dot" />
-      <a v-if="c.url" class="up-name" :href="c.url" target="_blank" rel="noopener">{{ c.name }}</a>
+      <a v-if="webUrl(c.url)" class="up-name" :href="webUrl(c.url)" target="_blank" rel="noopener">{{ c.name }}</a>
       <span v-else class="up-name">{{ c.name }}</span>
       <span class="up-strip" :title="`Last ${Math.min(c.history?.length ?? 0, SHOWN)} checks, newest on the right`">
         <span v-for="(s, i) in cells(c)" :key="i" class="up-cell" :data-status="s ?? undefined" />
