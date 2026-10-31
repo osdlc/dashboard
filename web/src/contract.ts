@@ -496,6 +496,12 @@ export interface ConfigInfo {
 export interface AddOutcome {
   error?: string | null;
   module_id: string;
+  /**
+   * Counts the adds the server has handled, so a renderer can tell the
+   * outcome of its add from an earlier one, which every later settings
+   * message still carries.
+   */
+  seq?: number;
 }
 /**
  * A saved dashboard, for the switcher.

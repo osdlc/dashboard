@@ -11,7 +11,10 @@ cargo run -p dashboard -- tui      # terminal UI (q to quit)
 cargo run -p dashboard -- serve    # web UI: opens http://127.0.0.1:7878/?boot=… in the browser (--no-open to skip)
 cargo run -p dashboard -- serve -d # the same in the background; `dashboard status` / `dashboard stop`
 cargo run -p dashboard -- open     # sign another browser tab in to the running server
+cargo run -p dashboard-desktop     # desktop app: a window, --wallpaper or --screensaver (docs/desktop.md)
 ```
+
+Add `mode=ambient` to the web page's URL (`?mode=ambient`) for ambient mode: no controls, large type, screens rotating.
 
 ### Keys
 

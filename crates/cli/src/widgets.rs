@@ -7,7 +7,7 @@ use dashboard_contract::catalog::search;
 use dashboard_contract::{CatalogEntry, EntryKind};
 
 pub fn run(config_paths: &[PathBuf], query: &str, tag: Option<&str>, json: bool) -> Result<()> {
-    let (entries, errors) = crate::runtime::catalog(config_paths);
+    let (entries, errors) = dashboard_runtime::catalog(config_paths);
     for err in &errors {
         crate::warn(&format!("skipped a plugin package: {err}"));
     }

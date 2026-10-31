@@ -61,12 +61,14 @@ pub fn write_record(url: &str, token: &str) -> Result<()> {
     written.with_context(|| format!("writing {}", path.display()))
 }
 
-/// The running background server, if any. A record whose process is gone is removed.
+/// The running background server, if any. A record whose process is gone, or
+/// is no longer a dashboard (a pid reused after a crash or reboot), is removed.
 pub fn running() -> Result<Option<Record>> {
-    let path = record_path()?;
-    let Ok(text) = std::fs::read_to_string(&path) else {
-        return Ok(None);
-    };
+    Ok(running_at(&record_path()?))
+}
+
+fn running_at(path: &Path) -> Option<Record> {
+    let text = std::fs::read_to_string(path).ok()?;
     let value: serde_json::Value = serde_json::from_str(&text).unwrap_or_default();
     let record = value["pid"]
         .as_u64()
@@ -77,11 +79,27 @@ pub fn running() -> Result<Option<Record>> {
             token: value["token"].as_str().map(str::to_string),
         });
     match record {
-        Some(r) if alive(r.pid) => Ok(Some(r)),
+        Some(r) if ours(r.pid) => Some(r),
         _ => {
-            let _ = std::fs::remove_file(&path);
-            Ok(None)
+            let _ = std::fs::remove_file(path);
+            None
         }
+    }
+}
+
+/// Remove the record if this process wrote it. A foreground `serve` calls
+/// this as it exits, so the record doesn't outlive it.
+pub fn forget() {
+    if let Ok(path) = record_path() {
+        forget_at(&path, std::process::id());
+    }
+}
+
+fn forget_at(path: &Path, pid: u32) {
+    let text = std::fs::read_to_string(path).unwrap_or_default();
+    let value: serde_json::Value = serde_json::from_str(&text).unwrap_or_default();
+    if value["pid"].as_u64() == Some(pid as u64) {
+        let _ = std::fs::remove_file(path);
     }
 }
 
@@ -151,17 +169,18 @@ pub fn stop() -> Result<Option<Record>> {
     let Some(record) = running()? else {
         return Ok(None);
     };
-    // The server leads its own process group (see `detach`), so this also
-    // ends its plugins and the commands they run. Only when the pid is still
-    // a dashboard, not a reused pid that leads some other group. A plain kill
-    // otherwise, or if that fails.
+    // The server leads its own process group (see `detach`). Plugins lead
+    // groups of their own, so this reaches only the server: it catches
+    // SIGTERM (`shutdown_signal`), and its runtime shutdown drops the plugins'
+    // kill trees, which ends them and the commands they run. `running` has
+    // checked the pid is still a dashboard. A plain kill if the group kill
+    // fails (a foreground server doesn't lead its group).
     #[cfg(unix)]
-    let group = is_dashboard(record.pid)
-        && Command::new("kill")
-            .args(["-TERM", "--", &format!("-{}", record.pid)])
-            .stderr(Stdio::null())
-            .status()?
-            .success();
+    let group = Command::new("kill")
+        .args(["-TERM", "--", &format!("-{}", record.pid)])
+        .stderr(Stdio::null())
+        .status()?
+        .success();
     #[cfg(unix)]
     let status = match group {
         true => std::process::ExitStatus::default(),
@@ -218,6 +237,15 @@ pub fn sign_in_link(record: &Record) -> Result<String> {
         .as_str()
         .context("the server's answer has no boot token")?;
     Ok(format!("{}?boot={boot}", record.url))
+}
+
+/// Whether `pid` is a live dashboard process. On Windows, only that it is live.
+fn ours(pid: u32) -> bool {
+    #[cfg(unix)]
+    let ours = alive(pid) && is_dashboard(pid);
+    #[cfg(windows)]
+    let ours = alive(pid);
+    ours
 }
 
 fn alive(pid: u32) -> bool {
@@ -290,6 +318,32 @@ fn tail(path: &Path, lines: usize) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[cfg(unix)]
+    #[test]
+    fn drops_a_record_whose_pid_is_another_program() {
+        let dir = std::env::temp_dir().join(format!("dashboard-bg-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("serve.json");
+        let mut other = Command::new("sleep").arg("30").spawn().unwrap();
+        let record = |pid: u32| json!({ "pid": pid, "url": "http://127.0.0.1:1/" }).to_string();
+
+        std::fs::write(&path, record(other.id())).unwrap();
+        assert!(running_at(&path).is_none());
+        assert!(!path.exists());
+        let _ = other.kill();
+        let _ = other.wait();
+
+        // This test binary counts as "this same program".
+        std::fs::write(&path, record(std::process::id())).unwrap();
+        assert_eq!(running_at(&path).unwrap().pid, std::process::id());
+
+        forget_at(&path, std::process::id() + 1);
+        assert!(path.exists());
+        forget_at(&path, std::process::id());
+        assert!(!path.exists());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
 
     #[test]
     fn matches_ps_comm() {

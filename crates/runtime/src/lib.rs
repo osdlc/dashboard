@@ -2,6 +2,10 @@
 //! config file changes, only modules whose settings changed are restarted, and
 //! renderers get new `UiSettings`. The config is the merge of its layers
 //! (see `dashboard_config::layers`); any of their files changing reloads it.
+//!
+//! Shared by the `dashboard` CLI and the `dashboard-desktop` app. Bundled
+//! plugins run as `<current exe> plugin <id>`, so every binary that links this
+//! crate must handle that command (see `run_bundled`).
 
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
@@ -12,13 +16,62 @@ use anyhow::Result;
 use dashboard_config::dashboards::Registry;
 use dashboard_config::layers::{self, LayerKind, Layered, Sources};
 use dashboard_config::packages::{Packages, market_entries, market_index_path};
-use dashboard_config::{Config, ModuleConfig, NewModule};
+use dashboard_config::{Config, Missing, ModuleConfig, NewModule};
 use dashboard_contract::{
     AddOutcome, CatalogEntry, ClientMessage, ConfigInfo, DashboardSummary, EntryKind,
     ModuleSummary, Size, UiSettings,
 };
-use dashboard_host::{Demo, Host, Module, Plugin, SpawnOptions};
+pub use dashboard_host::Host;
+use dashboard_host::{Demo, Module, Plugin, SpawnOptions};
 use tokio::sync::{Mutex, mpsc, watch};
+
+/// The config files in use, kept current across reloads and switches. The
+/// web server's catalog lists the packages installed next to each of them.
+pub type LayerPaths = Arc<std::sync::Mutex<Vec<PathBuf>>>;
+
+/// Start modules from the config, follow config changes, and take renderer
+/// actions. Returns what a renderer needs: the host, the settings and the
+/// sender for its actions, plus the config files in use.
+pub async fn start(
+    sources: Sources,
+) -> Result<(
+    Host,
+    watch::Receiver<UiSettings>,
+    mpsc::UnboundedSender<ClientMessage>,
+    LayerPaths,
+)> {
+    let (runtime, settings) = Runtime::start(sources).await?;
+    // Say which files are in use, so a project file never applies unnoticed.
+    for line in runtime.describe() {
+        eprintln!("{line}");
+    }
+    let host = runtime.host.clone();
+    let layer_paths = runtime.layer_paths();
+    let runtime = Arc::new(Mutex::new(runtime));
+    watch_config(runtime.clone());
+    let actions = handle_actions(runtime);
+    Ok((host, settings, actions, layer_paths))
+}
+
+/// The web server's catalog source: everything [`catalog`] lists for the
+/// config files in use at the time of each request.
+pub fn catalog_source(
+    layer_paths: LayerPaths,
+) -> impl Fn() -> (Vec<CatalogEntry>, Vec<String>) + Send + Sync + 'static {
+    move || {
+        let paths = layer_paths.lock().expect("layer paths lock").clone();
+        catalog(&paths)
+    }
+}
+
+/// Run bundled plugin `id` over stdio, for `<exe> plugin <id>`. `None` when
+/// there is no bundled plugin of that name.
+pub fn run_bundled(id: &str) -> Option<Result<()>> {
+    match id {
+        "cswap" => Some(dashboard_cswap::run()),
+        _ => None,
+    }
+}
 
 pub struct Runtime {
     pub host: Host,
@@ -32,7 +85,7 @@ pub struct Runtime {
     notice: Option<String>,
     /// The files in use, shared with the web server's catalog, which lists
     /// the packages installed next to each of them.
-    layer_paths: Arc<std::sync::Mutex<Vec<PathBuf>>>,
+    layer_paths: LayerPaths,
     settings: watch::Sender<UiSettings>,
 }
 
@@ -63,13 +116,23 @@ impl Runtime {
     }
 
     /// The config files in use, kept current across reloads and switches.
-    pub fn layer_paths(&self) -> Arc<std::sync::Mutex<Vec<PathBuf>>> {
+    pub fn layer_paths(&self) -> LayerPaths {
         self.layer_paths.clone()
     }
 
     /// The file settings from a renderer are written to.
     fn path(&self) -> &Path {
         self.loaded.write_path()
+    }
+
+    /// What a write starts from if that file doesn't exist yet: the demo
+    /// only when it is what's on screen, with no config file at all. Not
+    /// when a project file alone makes up the config.
+    fn missing(&self) -> Missing {
+        match self.loaded.exists {
+            true => Missing::Empty,
+            false => Missing::Demo,
+        }
     }
 
     /// The files to watch: every layer, the saved-dashboards folder so the
@@ -152,7 +215,12 @@ impl Runtime {
     pub async fn handle(&mut self, msg: ClientMessage) {
         match msg {
             ClientMessage::SetTheme { theme, etag } => {
-                let result = dashboard_config::write_theme(self.path(), theme, etag.as_deref());
+                let result = dashboard_config::write_theme(
+                    self.path(),
+                    self.missing(),
+                    theme,
+                    etag.as_deref(),
+                );
                 self.after_write("saving theme", result).await;
             }
             ClientMessage::SaveScreens { screens, etag } => {
@@ -168,7 +236,12 @@ impl Runtime {
                 let result = dashboard_config::screens_json(&own).and_then(|mut json| {
                     // Screens of this file that a project screen hides stay in it.
                     self.loaded.restore_shadowed(&mut json);
-                    dashboard_config::write_screen_values(self.path(), json, etag.as_deref())
+                    dashboard_config::write_screen_values(
+                        self.path(),
+                        self.missing(),
+                        json,
+                        etag.as_deref(),
+                    )
                 });
                 let project_file = self.loaded.layer(LayerKind::Project).map(Path::to_path_buf);
                 let saved = result.is_ok();
@@ -204,9 +277,11 @@ impl Runtime {
                 });
                 // Reported on its own, not as the config error: a refused add
                 // leaves the config as it was.
+                let seq = self.added.as_ref().map_or(0, |a| a.seq) + 1;
                 self.added = Some(AddOutcome {
                     module_id,
                     error: result.as_ref().err().map(|e| format!("{e:#}")),
+                    seq,
                 });
                 match result {
                     Ok(()) => self.reload().await,
@@ -227,7 +302,7 @@ impl Runtime {
             Some(name) if !self.config.screens.is_empty() => Some((name.as_str(), req.size)),
             _ => None,
         };
-        dashboard_config::add_module(self.path(), &module, tile)
+        dashboard_config::add_module(self.path(), self.missing(), &module, tile)
     }
 
     /// Reload right after writing the config, rather than waiting for the
@@ -243,7 +318,9 @@ impl Runtime {
 
     /// Start, stop or restart modules so the running set matches the config.
     /// With `old`, modules whose settings are unchanged keep running. A module
-    /// that fails to start doesn't stop the others; the errors are returned together.
+    /// that fails to start doesn't stop the others; the errors are returned
+    /// together. The modules' `init` calls run at the same time, so a slow
+    /// or hung plugin costs its own timeout once, not once per module before it.
     async fn sync_modules(&self, old: Option<&Config>) -> Result<()> {
         let new = &self.config;
         let wanted = wanted_modules(new);
@@ -263,6 +340,7 @@ impl Runtime {
         }
         let mut errors = vec![];
         let mut packages = None;
+        let mut starting = vec![];
         for id in &wanted {
             let module_config = new.module(id);
             if !module_config.enabled || (running.contains(id) && !changed(id)) {
@@ -322,12 +400,24 @@ impl Runtime {
                 refresh: module_config.refresh,
                 demo: module_config.demo,
             };
-            if let Err(err) = self
-                .host
-                .spawn(id, module, module_config.config, options)
-                .await
-            {
-                errors.push(format!("starting module {id:?}: {err:#}"));
+            let mut module = module;
+            let config = module_config.config;
+            let init = tokio::spawn(async move {
+                let manifest = module.init(config).await;
+                (module, manifest)
+            });
+            starting.push((id, init, options));
+        }
+        // Started in config order once all have answered.
+        for (id, init, options) in starting {
+            match init.await {
+                Ok((module, Ok(manifest))) => {
+                    self.host
+                        .spawn_initialized(id, module, manifest, options)
+                        .await
+                }
+                Ok((_, Err(err))) => errors.push(format!("starting module {id:?}: {err:#}")),
+                Err(err) => errors.push(format!("starting module {id:?}: {err}")),
             }
         }
         if errors.is_empty() {
@@ -711,6 +801,86 @@ mod tests {
         );
     }
 
+    /// Three plugins that each take a second to fail start in about one
+    /// second, not three, and their errors stay in config order.
+    #[cfg(unix)]
+    #[tokio::test]
+    async fn modules_init_at_the_same_time() {
+        let dir = std::env::temp_dir().join(format!("dashboard-init-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let machine = dir.join("config.yaml");
+        let slow = "plugin: [sh, -c, 'sleep 1; exit 1']";
+        std::fs::write(
+            &machine,
+            format!("modules:\n  a: {{ {slow} }}\n  b: {{ {slow} }}\n  c: {{ {slow} }}\n"),
+        )
+        .unwrap();
+        let sources = Sources {
+            machine: Some(machine),
+            dashboard: None,
+            project_from: None,
+            registry: Some(dir.join("dashboards")),
+            trust: Some(dir.join("trusted-projects")),
+        };
+        let started = std::time::Instant::now();
+        let (runtime, _rx) = Runtime::start(sources).await.unwrap();
+        let took = started.elapsed();
+        std::fs::remove_dir_all(&dir).ok();
+        assert!(took < Duration::from_millis(2500), "took {took:?}");
+        let error = runtime.error.unwrap();
+        let order: Vec<&str> = error
+            .lines()
+            .filter_map(|l| l.strip_prefix("starting module \""))
+            .map(|l| &l[..1])
+            .collect();
+        assert_eq!(order, ["a", "b", "c"], "{error}");
+    }
+
+    /// With only a project file, saving a setting creates the machine file
+    /// with that setting alone, not the demo config.
+    #[tokio::test]
+    async fn first_save_beside_a_project_file_leaves_out_the_demo() {
+        let dir = std::env::temp_dir().join(format!("dashboard-nodemo-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(dir.join("repo")).unwrap();
+        let project = dir.join("repo/.dashboard.yaml");
+        std::fs::write(
+            &project,
+            "modules:\n  cswap: { demo: true }\nscreens:\n  - name: proj\n    tiles: [{ module: cswap }]\n",
+        )
+        .unwrap();
+        let trust = dir.join("trusted-projects");
+        dashboard_config::trust::Trust::new(&trust)
+            .allow(&project)
+            .unwrap();
+        let machine = dir.join("config.yaml");
+        let (mut runtime, rx) = Runtime::start(Sources {
+            machine: Some(machine.clone()),
+            dashboard: None,
+            project_from: Some(dir.join("repo")),
+            registry: Some(dir.join("dashboards")),
+            trust: Some(trust),
+        })
+        .await
+        .unwrap();
+        runtime
+            .handle(ClientMessage::SetTheme {
+                theme: dashboard_contract::Theme::Light,
+                etag: None,
+            })
+            .await;
+        let written = std::fs::read_to_string(&machine).unwrap();
+        let s = rx.borrow().clone();
+        std::fs::remove_dir_all(&dir).ok();
+        assert_eq!(written.trim(), "theme: light");
+        assert_eq!(s.config.error, None);
+        let screens: Vec<_> = s.screens.iter().map(|x| x.name.as_str()).collect();
+        assert_eq!(screens, ["proj"]);
+        let modules: Vec<_> = s.modules.iter().map(|m| m.tile_id.as_str()).collect();
+        assert_eq!(modules, ["cswap"]);
+    }
+
     /// Machine file, a saved dashboard and a project file, in a temp folder.
     #[tokio::test]
     async fn switches_dashboards_and_writes_to_the_right_file() {
@@ -919,7 +1089,7 @@ modules:
         let catalog = builtin_catalog();
         // github-prs is only in builds with its feature; cswap is always bundled.
         let mut cases = vec![("cswap", "cswap")];
-        if cfg!(feature = "module-github-prs") {
+        if dashboard_modules::ids().contains(&"github-prs") {
             cases.push(("prs", "github-prs"));
         }
         for (id, name) in cases {
@@ -1017,7 +1187,8 @@ modules:
             s.config.added,
             Some(AddOutcome {
                 module_id: "cswap".into(),
-                error: None
+                error: None,
+                seq: 1,
             })
         );
         assert_eq!(s.config.error, None);
@@ -1040,6 +1211,7 @@ modules:
         let s = settings.borrow().clone();
         let added = s.config.added.unwrap();
         assert_eq!(added.module_id, "cswap");
+        assert_eq!(added.seq, 2);
         assert!(added.error.unwrap().contains("already in the config"));
         assert_eq!(s.config.error, None);
         assert_eq!(std::fs::read_to_string(&path).unwrap(), text);

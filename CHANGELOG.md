@@ -4,6 +4,28 @@ The dashboard is pre-1.0: the config format, the module contract and the CLI can
 between minor versions. 0.4.0 is the first public release. The earlier versions were not
 released on their own; they record the stages the project was built in.
 
+## 0.7.0
+
+- **Desktop app** (`apps/desktop`, Tauri 2): window, wallpaper and screensaver modes and a tray
+  icon. On macOS the screensaver window sits above the menu bar and Dock. There is also an
+  experimental macOS `.saver`.
+- **Ambient mode** in the web view (`?mode=ambient`): no header or editor, large type, every
+  screen rotating, nothing to click.
+- **The config runtime moved into its own crate** (`dashboard-runtime`), shared by the CLI and the
+  desktop app.
+- **Processes and signals:**
+  - plugins and the codex app-server run in their own process group on Unix, and stopping one
+    stops the whole group;
+  - `token_command` gets 30 s and is killed if it hangs;
+  - stop cleanly on SIGHUP, and on signals during start-up.
+- **Modules start at the same time** on start and reload.
+- **Fixes:**
+  - disk rates count each device once;
+  - network totals leave out VPN tunnels and container bridges;
+  - a stopped tile's last view is sent once more, marked stale;
+  - an empty `modules:` or `screens:` in a config layer changes nothing;
+  - Todoist due times in a fixed time zone show in local time.
+
 ## 0.6.0
 
 - **Catalog in the web editor:** the add list is a searchable catalog (built-ins, installed

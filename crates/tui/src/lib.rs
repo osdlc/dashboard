@@ -227,7 +227,9 @@ fn init_terminal() -> Result<ratatui::DefaultTerminal> {
     Ok(terminal)
 }
 
-fn restore_terminal() {
+/// Leave raw mode and the alternate screen; for a caller that stops `run`
+/// early, such as on a signal.
+pub fn restore_terminal() {
     let _ = execute!(std::io::stdout(), DisableMouseCapture);
     ratatui::restore();
 }
