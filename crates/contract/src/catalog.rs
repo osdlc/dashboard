@@ -81,6 +81,43 @@ impl CatalogEntry {
     }
 }
 
+/// The `source` of a marketplace entry: listed in the cached index but not
+/// installed, so it can't be added yet.
+pub const MARKETPLACE: &str = "marketplace";
+
+impl CatalogEntry {
+    /// False for a marketplace entry that isn't installed.
+    pub fn installed(&self) -> bool {
+        self.source != MARKETPLACE
+    }
+}
+
+/// What `GET /api/catalog` returns to the web editor.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+pub struct CatalogResponse {
+    /// Entries matching the request's `q` and `tag`.
+    pub entries: Vec<CatalogEntry>,
+    /// Every tag in the whole catalog, sorted, for the filter buttons.
+    pub tags: Vec<String>,
+    /// Problems reading packages or the marketplace index, to show.
+    #[serde(default)]
+    pub errors: Vec<String>,
+}
+
+impl CatalogResponse {
+    /// Search `all` for `query` and `tag`, and list every tag.
+    pub fn new(all: &[CatalogEntry], query: &str, tag: Option<&str>, errors: Vec<String>) -> Self {
+        let mut tags: Vec<String> = all.iter().flat_map(|e| e.tags.iter().cloned()).collect();
+        tags.sort();
+        tags.dedup();
+        Self {
+            entries: search(all, query, tag).into_iter().cloned().collect(),
+            tags,
+            errors,
+        }
+    }
+}
+
 /// Entries matching `query` and `tag`, in the order given.
 pub fn search<'a>(
     entries: &'a [CatalogEntry],
@@ -218,5 +255,17 @@ mod tests {
         assert_eq!(e.default_size, Size::Medium);
         assert_eq!(e.requirements.binaries, ["node>=22", "gh"]);
         assert_eq!(e.source, "/plugins/ci");
+    }
+
+    #[test]
+    fn response_lists_every_tag_but_only_matching_entries() {
+        let all = vec![
+            entry("cpu", "CPU", "Usage per core", &["system"]),
+            entry("jira", "Jira", "Issues", &["issues", "dev"]),
+        ];
+        let r = CatalogResponse::new(&all, "", Some("dev"), vec![]);
+        assert_eq!(r.tags, ["dev", "issues", "system"]);
+        assert_eq!(r.entries.len(), 1);
+        assert_eq!(r.entries[0].id, "jira");
     }
 }

@@ -91,7 +91,11 @@ fn check_name(name: &str) -> Result<()> {
             .chars()
             .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-');
     if !ok {
-        bail!("{name:?}: use lowercase letters, digits and dashes, starting with a letter");
+        // A bad argument: exit 2, like a clap error.
+        return Err(dashboard_cli_kit::Failure::usage(format!(
+            "{name:?}: use lowercase letters, digits and dashes, starting with a letter"
+        ))
+        .into());
     }
     Ok(())
 }

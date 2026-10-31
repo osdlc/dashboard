@@ -146,19 +146,41 @@ pub fn catalog() -> CatalogEntry {
     }
 }
 
-/// The last `bytes` of a file, starting at a line boundary.
+/// The last `bytes` of a file, starting at a line boundary. UTF-16 files
+/// (with a BOM, as Windows tools often write them) are decoded; anything else
+/// is read as UTF-8.
 fn tail(path: &PathBuf, bytes: u64) -> Result<String> {
     let mut file = std::fs::File::open(path)?;
     let len = file.metadata()?.len();
-    let start = len.saturating_sub(bytes);
+    let mut bom = [0u8; 2];
+    let utf16 = match file.read_exact(&mut bom) {
+        Ok(()) if bom == [0xFF, 0xFE] => Some(u16::from_le_bytes as fn([u8; 2]) -> u16),
+        Ok(()) if bom == [0xFE, 0xFF] => Some(u16::from_be_bytes as fn([u8; 2]) -> u16),
+        _ => None,
+    };
+    let mut start = len.saturating_sub(bytes);
+    if utf16.is_some() {
+        // Past the BOM, on a character boundary.
+        start = start.max(2).next_multiple_of(2);
+    }
     file.seek(SeekFrom::Start(start))?;
     let mut buf = Vec::new();
     file.read_to_end(&mut buf)?;
-    let text = String::from_utf8_lossy(&buf).into_owned();
+    let text = match utf16 {
+        Some(read) => {
+            let units = buf.as_chunks::<2>().0.iter().map(|b| read(*b));
+            char::decode_utf16(units)
+                .map(|c| c.unwrap_or(char::REPLACEMENT_CHARACTER))
+                .collect()
+        }
+        None => String::from_utf8_lossy(&buf).into_owned(),
+    };
+    let from_start = start == 0 || (utf16.is_some() && start == 2);
+    let text = text.strip_prefix('\u{feff}').unwrap_or(&text);
     // Drop a partial first line, unless we read from the start.
-    Ok(match (start > 0, text.find('\n')) {
+    Ok(match (!from_start, text.find('\n')) {
         (true, Some(i)) => text[i + 1..].to_string(),
-        _ => text,
+        _ => text.to_string(),
     })
 }
 
@@ -188,6 +210,48 @@ mod tests {
         assert_eq!(guess_level("2026 ERROR db down"), Some(LogLevel::Error));
         assert_eq!(guess_level("[warn] slow"), Some(LogLevel::Warn));
         assert_eq!(guess_level("plain line"), None);
+    }
+
+    #[test]
+    fn tails_utf16_and_crlf() {
+        let dir = std::env::temp_dir().join(format!("dashboard-log-utf16-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let text: String = (0..20).map(|i| format!("línea {i}\r\n")).collect();
+        for (name, bom, unit) in [
+            (
+                "le.log",
+                [0xFF, 0xFE],
+                u16::to_le_bytes as fn(u16) -> [u8; 2],
+            ),
+            (
+                "be.log",
+                [0xFE, 0xFF],
+                u16::to_be_bytes as fn(u16) -> [u8; 2],
+            ),
+        ] {
+            let path = dir.join(name);
+            let mut bytes = bom.to_vec();
+            bytes.extend(text.encode_utf16().flat_map(unit));
+            std::fs::write(&path, bytes).unwrap();
+            // An odd count, so the start has to be moved to a character.
+            let got = tail(&path, 41).unwrap();
+            let lines: Vec<&str> = got.lines().collect();
+            assert_eq!(lines.last(), Some(&"línea 19"), "{name}");
+            assert!(
+                lines.iter().all(|l| l.starts_with("línea ")),
+                "{name}: {got:?}"
+            );
+            let all = tail(&path, 10_000).unwrap();
+            assert_eq!(all.lines().next(), Some("línea 0"), "{name}");
+        }
+        // A UTF-8 BOM is dropped too.
+        let path = dir.join("bom8.log");
+        std::fs::write(&path, "\u{feff}first\r\nsecond\r\n").unwrap();
+        assert_eq!(
+            tail(&path, 1000).unwrap().lines().collect::<Vec<_>>(),
+            ["first", "second"]
+        );
+        std::fs::remove_dir_all(&dir).unwrap();
     }
 
     #[tokio::test]

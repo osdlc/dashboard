@@ -9,9 +9,13 @@ use serde::{Deserialize, Serialize};
 
 pub mod catalog;
 pub mod check;
+pub mod marketplace;
 pub mod rpc;
 
-pub use catalog::{CatalogEntry, EntryKind, PACKAGE_FILE, Package, Requirements};
+pub use catalog::{
+    CatalogEntry, CatalogResponse, EntryKind, MARKETPLACE, PACKAGE_FILE, Package, Requirements,
+};
+pub use marketplace::{Index, IndexEntry};
 
 pub const CONTRACT_VERSION: &str = "0.1";
 
@@ -441,6 +445,41 @@ pub struct ConfigInfo {
     /// config stays in effect.
     #[serde(default)]
     pub error: Option<String>,
+    /// How the last `add_module` went, so the editor that sent it can tell.
+    #[serde(default)]
+    pub added: Option<AddOutcome>,
+    /// The saved dashboard in use, by name. `None`: `config.yaml` alone.
+    #[serde(default)]
+    pub dashboard: Option<String>,
+    /// Saved dashboards to switch to.
+    #[serde(default)]
+    pub dashboards: Vec<DashboardSummary>,
+    /// The files merged into the config, lowest precedence first, e.g.
+    /// "machine: ~/.config/dashboard/config.yaml".
+    #[serde(default)]
+    pub layers: Vec<String>,
+    /// The version of the file at `path`, which changes are written to (a sha256 etag),
+    /// `None` when there is no file. Send it back with a change: a change
+    /// based on an older version is refused.
+    #[serde(default)]
+    pub etag: Option<String>,
+}
+
+/// The result of an `add_module`. With no error the config was written; the
+/// module may still fail to start, which shows as the config error.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+pub struct AddOutcome {
+    pub module_id: String,
+    #[serde(default)]
+    pub error: Option<String>,
+}
+
+/// A saved dashboard, for the switcher.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+pub struct DashboardSummary {
+    pub name: String,
+    #[serde(default)]
+    pub description: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
@@ -487,10 +526,45 @@ pub struct ModuleSummary {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum ClientMessage {
-    /// Write `theme:` into the config file.
-    SetTheme { theme: Theme },
-    /// Replace `screens:` in the config file (from the screen editor).
-    SaveScreens { screens: Vec<ScreenLayout> },
+    /// Write `theme:` into the config file. `etag` is `config.etag` from the
+    /// settings the change was made on.
+    SetTheme {
+        theme: Theme,
+        #[serde(default)]
+        etag: Option<String>,
+    },
+    /// Replace `screens:` in the config file (from the screen editor). `etag`
+    /// as for `SetTheme`.
+    SaveScreens {
+        screens: Vec<ScreenLayout>,
+        #[serde(default)]
+        etag: Option<String>,
+    },
+    /// Add a catalog entry to the config (from the screen editor's catalog):
+    /// a `modules:` entry and, with `screen`, a tile at the end of that screen.
+    AddModule {
+        /// The new module's ID in the config (its key under `modules:`),
+        /// usually the catalog ID.
+        module_id: String,
+        /// The catalog entry's ID and kind.
+        entry: String,
+        kind: EntryKind,
+        /// The module's `config:` block. Null or `{}` writes none.
+        #[serde(default)]
+        config: serde_json::Value,
+        /// Show the demo view instead of running it.
+        #[serde(default)]
+        demo: bool,
+        /// The screen to put a tile on. Ignored when the config has no `screens:`.
+        #[serde(default)]
+        screen: Option<String>,
+        size: Size,
+    },
+    /// Show another saved dashboard; `None` for `config.yaml` alone.
+    SwitchDashboard {
+        #[serde(default)]
+        name: Option<String>,
+    },
 }
 
 /// Messages the host sends to the web view over its WebSocket.

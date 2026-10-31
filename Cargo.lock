@@ -3,6 +3,12 @@
 version = 4
 
 [[package]]
+name = "adler2"
+version = "2.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa"
+
+[[package]]
 name = "aho-corasick"
 version = "1.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -492,6 +498,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "crc32fast"
+version = "1.5.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0ba106e844045ddc02c20768ac4b0b7cb45f2cc2ecbd833ac9f5dacb183c2055"
+dependencies = [
+ "cfg-if",
+]
+
+[[package]]
 name = "critical-section"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -589,10 +604,11 @@ dependencies = [
 
 [[package]]
 name = "dashboard"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "anyhow",
  "clap",
+ "dashboard-cli-kit",
  "dashboard-config",
  "dashboard-contract",
  "dashboard-cswap",
@@ -600,8 +616,14 @@ dependencies = [
  "dashboard-modules",
  "dashboard-tui",
  "dashboard-web",
+ "etag-write",
+ "flate2",
+ "path-guard",
+ "reqwest",
  "schemars",
+ "serde",
  "serde_json",
+ "tar",
  "tokio",
  "tracing",
  "tracing-subscriber",
@@ -609,7 +631,7 @@ dependencies = [
 
 [[package]]
 name = "dashboard-bench"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "anyhow",
  "dashboard-contract",
@@ -620,23 +642,36 @@ dependencies = [
 ]
 
 [[package]]
+name = "dashboard-cli-kit"
+version = "0.6.0"
+dependencies = [
+ "clap",
+ "getrandom 0.4.3",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "dashboard-config"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "anyhow",
  "config-layers",
  "dashboard-contract",
+ "etag-write",
  "humantime-serde",
  "schemars",
  "serde",
  "serde-saphyr",
  "serde_json",
+ "sha2 0.10.9",
+ "slug-collate",
  "yaml-splice",
 ]
 
 [[package]]
 name = "dashboard-contract"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "schemars",
  "serde",
@@ -645,7 +680,7 @@ dependencies = [
 
 [[package]]
 name = "dashboard-cswap"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "anyhow",
  "dashboard-contract",
@@ -655,7 +690,7 @@ dependencies = [
 
 [[package]]
 name = "dashboard-host"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -664,11 +699,12 @@ dependencies = [
  "serde_json",
  "tokio",
  "tracing",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
 name = "dashboard-modules"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "dashboard-contract",
  "dashboard-host",
@@ -684,7 +720,7 @@ dependencies = [
 
 [[package]]
 name = "dashboard-modules-agents"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -699,7 +735,7 @@ dependencies = [
 
 [[package]]
 name = "dashboard-modules-common"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "anyhow",
  "dashboard-contract",
@@ -713,7 +749,7 @@ dependencies = [
 
 [[package]]
 name = "dashboard-modules-dev"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -728,7 +764,7 @@ dependencies = [
 
 [[package]]
 name = "dashboard-modules-fun"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -746,7 +782,7 @@ dependencies = [
 
 [[package]]
 name = "dashboard-modules-ops"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -762,7 +798,7 @@ dependencies = [
 
 [[package]]
 name = "dashboard-modules-personal"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -780,7 +816,7 @@ dependencies = [
 
 [[package]]
 name = "dashboard-modules-system"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -797,7 +833,7 @@ dependencies = [
 
 [[package]]
 name = "dashboard-tui"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "anyhow",
  "dashboard-config",
@@ -811,18 +847,19 @@ dependencies = [
 
 [[package]]
 name = "dashboard-web"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "anyhow",
  "axum",
+ "dashboard-cli-kit",
  "dashboard-contract",
  "dashboard-host",
  "futures-util",
- "getrandom 0.4.3",
  "rust-embed",
  "serde",
  "serde_json",
  "tokio",
+ "tower",
  "tracing",
 ]
 
@@ -1027,6 +1064,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "etag-write"
+version = "0.2.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "16a7352801302969f6b33fd0a8252ceb3f4ec53e5d7f2ce2497cfc8407b26bf2"
+dependencies = [
+ "sha2 0.10.9",
+ "thiserror 2.0.21",
+]
+
+[[package]]
 name = "euclid"
 version = "0.22.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1057,6 +1104,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "filetime"
+version = "0.2.29"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5c287a33c7f0a620c38e641e7f60827713987b3c0f26e8ddc9462cc69cf75759"
+dependencies = [
+ "cfg-if",
+ "libc",
+]
+
+[[package]]
 name = "find-msvc-tools"
 version = "0.1.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1073,6 +1130,17 @@ name = "fixedbitset"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0ce7134b9999ecaf8bcd65542e436736ef32ddca1b3e06094cb6ec5755203b80"
+
+[[package]]
+name = "flate2"
+version = "1.1.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6e634e2e0ebac1ee034020da1ca582e17ffe4e0f5e985823721e168928136dcb"
+dependencies = [
+ "crc32fast",
+ "miniz_oxide",
+ "zlib-rs",
+]
 
 [[package]]
 name = "fnv"
@@ -1841,6 +1909,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "68354c5c6bd36d73ff3feceb05efa59b6acb7626617f4962be322a825e61f79a"
 
 [[package]]
+name = "miniz_oxide"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b63fbc4a50860e98e7b2aa7804ded1db5cbc3aff9193adaff57a6931bf7c4b4c"
+dependencies = [
+ "adler2",
+ "simd-adler32",
+]
+
+[[package]]
 name = "mio"
 version = "1.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2090,6 +2168,15 @@ dependencies = [
  "redox_syscall",
  "smallvec",
  "windows-link",
+]
+
+[[package]]
+name = "path-guard"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2a1007b092e15068cd406be0dbdf41daa37f1449b77195aa4d00f84d4abd0853"
+dependencies = [
+ "thiserror 2.0.21",
 ]
 
 [[package]]
@@ -3063,6 +3150,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "simd-adler32"
+version = "0.3.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3a219298ac11a56ea9a6d2120044824d6f01aeb034955e7af7bc16858527deea"
+
+[[package]]
 name = "simd_cesu8"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3089,6 +3182,15 @@ name = "slab"
 version = "0.4.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0c790de23124f9ab44544d7ac05d60440adc586479ce501c1d6d7da3cd8c9cf5"
+
+[[package]]
+name = "slug-collate"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2f76aeebff259347be3d82d3dbbdcc1159325f31fccc8d73f0897aa10a8dc3f9"
+dependencies = [
+ "unicode-normalization",
+]
 
 [[package]]
 name = "smallvec"
@@ -3251,6 +3353,17 @@ checksum = "8e1d1b10ced5ca923a1fcb8d03e96b8d3268065d724548c0211415ff6ac6bac4"
 dependencies = [
  "core-foundation-sys",
  "libc",
+]
+
+[[package]]
+name = "tar"
+version = "0.4.46"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3f6221d9a6003c78398e3b239969f352578258df48c8eb051caadae0015bc840"
+dependencies = [
+ "filetime",
+ "libc",
+ "xattr",
 ]
 
 [[package]]
@@ -3664,6 +3777,15 @@ name = "unicode-ident"
 version = "1.0.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2c754d6c33795a1c324727428e5a7dedb5b06195f9890bdbcba760d3e246563"
+
+[[package]]
+name = "unicode-normalization"
+version = "0.1.26"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "75cd3fb03d5288b3ba9a1ee103ac7e9cbb59f0b03d64f8ddfcc04dd42758a85d"
+dependencies = [
+ "tinyvec",
+]
 
 [[package]]
 name = "unicode-segmentation"
@@ -4189,6 +4311,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3ad82d2a33cdc9674dc7465672f271e096168fcdbe0f799d9e6db8c5892679dc"
 
 [[package]]
+name = "xattr"
+version = "1.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "32e45ad4206f6d2479085147f02bc2ef834ac85886624a23575ae137c8aa8156"
+dependencies = [
+ "libc",
+ "rustix",
+]
+
+[[package]]
 name = "xterm-color"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4196,9 +4328,9 @@ checksum = "7008a9d8ba97a7e47d9b2df63fcdb8dade303010c5a7cd5bf2469d4da6eba673"
 
 [[package]]
 name = "yaml-splice"
-version = "0.3.1"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "91e39bf395c3512e0a189adbd4b7fa1e396c7238752dbe07a4f10cf1aee6a544"
+checksum = "5b7f7104a4af3f2dce67f3a3fa525c58a586e321f7c49f0e3c8992762d625aa9"
 dependencies = [
  "saphyr-parser",
  "serde_json",
@@ -4307,6 +4439,12 @@ dependencies = [
  "quote",
  "syn 3.0.9",
 ]
+
+[[package]]
+name = "zlib-rs"
+version = "0.6.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b268e58e7c693d7c271f93ffc4ba3b380412554231c85bf61ca7af91042a4112"
 
 [[package]]
 name = "zmij"

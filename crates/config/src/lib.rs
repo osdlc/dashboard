@@ -15,7 +15,13 @@ use dashboard_contract::{LayoutHints, RotateSettings, ScreenLayout, Size, Theme,
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
+pub mod add;
+pub mod dashboards;
+pub mod layers;
 pub mod packages;
+pub mod trust;
+
+pub use add::{NewModule, add_module};
 
 pub const TOOL: &str = "dashboard";
 const VENDOR: &str = "dev.sksizer";
@@ -23,6 +29,9 @@ const VENDOR: &str = "dev.sksizer";
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(default, deny_unknown_fields)]
 pub struct Config {
+    /// What this dashboard is for, in a few words. Shown by `dashboard
+    /// dashboards list` and in the web view's dashboard switcher.
+    pub description: Option<String>,
     pub theme: Theme,
     /// Per-module settings, keyed by tile ID. A built-in module runs when it
     /// is listed here or placed on a screen; plugins must be listed here.
@@ -113,6 +122,10 @@ pub struct Loaded {
     pub path: PathBuf,
     /// False when no file exists and `DEFAULT_CONFIG` is in use.
     pub exists: bool,
+    /// The etag of the bytes read (see `etag_write`), `None` when there is no
+    /// file. A renderer sends it back with a change, so a write based on an
+    /// older version of the file is refused.
+    pub etag: Option<String>,
 }
 
 /// Used when there is no config file: the demo, so a first run shows what
@@ -123,22 +136,22 @@ pub const DEFAULT_CONFIG: &str = include_str!("../../../examples/demo.yaml");
 /// every OS (`~/.config/dashboard/config.yaml` on macOS too). Moved by
 /// `DASHBOARD_MACHINE_CONFIG`.
 pub fn default_path() -> Result<PathBuf> {
-    let dirs = TieredDirs::from_env(
+    Ok(MachineConfigFile::<Config>::new(TOOL, &tiered_dirs()?)?.path())
+}
+
+/// The OS homes, XDG layout on every OS, moved by `XDG_*` or `DASHBOARD_*_DIR`.
+fn tiered_dirs() -> Result<TieredDirs> {
+    Ok(TieredDirs::from_env(
         VENDOR,
         &env_vars!("DASHBOARD"),
         ResolveOptions::new().with_convention(Convention::Xdg),
-    )?;
-    Ok(MachineConfigFile::<Config>::new(TOOL, &dirs)?.path())
+    )?)
 }
 
 /// Where a background `serve` keeps its record (the runtime dir: pidfiles,
 /// locks) and its log (the logs dir), e.g. `~/.local/state/dashboard/...`.
 pub fn run_dirs() -> Result<(PathBuf, PathBuf)> {
-    let dirs = TieredDirs::from_env(
-        VENDOR,
-        &env_vars!("DASHBOARD"),
-        ResolveOptions::new().with_convention(Convention::Xdg),
-    )?;
+    let dirs = tiered_dirs()?;
     let tool = dirs.standalone(TOOL)?;
     Ok((tool.runtime().into_path(), tool.logs().into_path()))
 }
@@ -154,15 +167,18 @@ pub fn load(path: Option<&Path>) -> Result<Loaded> {
             config: parse(DEFAULT_CONFIG).context("parsing the built-in default config")?,
             path,
             exists: false,
+            etag: None,
         });
     }
-    let text =
-        std::fs::read_to_string(&path).with_context(|| format!("reading {}", path.display()))?;
-    let config = parse(&text).with_context(|| format!("in {}", path.display()))?;
+    let bytes = std::fs::read(&path).with_context(|| format!("reading {}", path.display()))?;
+    let text = std::str::from_utf8(&bytes)
+        .with_context(|| format!("reading {}: not UTF-8", path.display()))?;
+    let config = parse(text).with_context(|| format!("in {}", path.display()))?;
     Ok(Loaded {
         config,
         path,
         exists: true,
+        etag: Some(etag_write::etag(&bytes)),
     })
 }
 
@@ -276,18 +292,39 @@ impl Config {
 
 /// Set `theme:` in the config file, changing only that key's bytes so the
 /// user's comments and layout stay. Creates the file if it doesn't exist.
-pub fn write_theme(path: &Path, theme: Theme) -> Result<()> {
+/// `etag` is the version the change is based on (see [`set_top_level`]).
+pub fn write_theme(path: &Path, theme: Theme, etag: Option<&str>) -> Result<()> {
     let value = match theme {
         Theme::Auto => "auto",
         Theme::Light => "light",
         Theme::Dark => "dark",
     };
-    set_top_level(path, "theme", yaml_splice::Value::from(value))
+    set_top_level(path, "theme", yaml_splice::Value::from(value), etag)
 }
 
 /// Replace `screens:` with these, keeping the rest of the file as written.
 /// Comments inside the old `screens:` block are lost.
-pub fn write_screens(path: &Path, screens: &[ScreenLayout]) -> Result<()> {
+pub fn write_screens(path: &Path, screens: &[ScreenLayout], etag: Option<&str>) -> Result<()> {
+    write_screen_values(path, screens_json(screens)?, etag)
+}
+
+/// Set `screens:` to these screens, as they are written in a config file.
+/// `etag` as for [`set_top_level`].
+pub fn write_screen_values(
+    path: &Path,
+    screens: Vec<serde_json::Value>,
+    etag: Option<&str>,
+) -> Result<()> {
+    set_top_level(
+        path,
+        "screens",
+        yaml_splice::Value::from(&serde_json::Value::Array(screens)),
+        etag,
+    )
+}
+
+/// Screens from the editor as config-file entries. Each needs a name, used once.
+pub fn screens_json(screens: &[ScreenLayout]) -> Result<Vec<serde_json::Value>> {
     let mut names = std::collections::BTreeSet::new();
     for s in screens {
         if s.name.trim().is_empty() {
@@ -297,7 +334,7 @@ pub fn write_screens(path: &Path, screens: &[ScreenLayout]) -> Result<()> {
             bail!("screen name {:?} is used twice", s.name);
         }
     }
-    let json: serde_json::Value = screens
+    Ok(screens
         .iter()
         .map(|s| {
             let tiles: Vec<serde_json::Value> = s
@@ -307,19 +344,20 @@ pub fn write_screens(path: &Path, screens: &[ScreenLayout]) -> Result<()> {
                 .collect();
             serde_json::json!({ "name": s.name, "tiles": tiles })
         })
-        .collect();
-    set_top_level(path, "screens", yaml_splice::Value::from(&json))
+        .collect())
 }
 
-fn set_top_level(path: &Path, key: &str, value: yaml_splice::Value) -> Result<()> {
-    let (source, missing) = match std::fs::read(path) {
-        Ok(bytes) => (bytes, false),
-        // Start from what's on screen, so saving a setting keeps the demo layout.
-        Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
-            (DEFAULT_CONFIG.as_bytes().to_vec(), true)
-        }
-        Err(e) => return Err(e).with_context(|| format!("reading {}", path.display())),
-    };
+/// Set one top-level key. A compare-and-swap write: `etag` is the version of
+/// the file the change is based on (`Loaded::etag`), and the write is refused
+/// when the file has changed since, or exists and no etag was sent, so a
+/// stale view never overwrites newer edits. A missing file is created.
+fn set_top_level(
+    path: &Path,
+    key: &str,
+    value: yaml_splice::Value,
+    etag: Option<&str>,
+) -> Result<()> {
+    let (source, missing) = read_source(path)?;
     let edit = yaml_splice::FieldEdit::Set {
         key: key.into(),
         value,
@@ -327,21 +365,54 @@ fn set_top_level(path: &Path, key: &str, value: yaml_splice::Value) -> Result<()
     // Empty and comment-only files work: the key is appended.
     let out = yaml_splice::edit_yaml(&source, &[edit])
         .map_err(|e| anyhow::anyhow!("{e} in {}", path.display()))?;
-    if out.changed || missing {
-        write_atomic(path, &out.bytes)?;
+    // Checked against the bytes the edit was made on, then again by
+    // `write_cas` against the file as it is when written.
+    let based_on = (!missing).then(|| etag_write::etag(&source));
+    if let (Some(current), Some(sent)) = (&based_on, etag)
+        && current != sent
+    {
+        return Err(stale(path));
     }
-    Ok(())
+    // No etag means the view read no file; one exists now, so it is stale too.
+    if based_on.is_some() && etag.is_none() {
+        return Err(stale(path));
+    }
+    if !(out.changed || missing) {
+        return Ok(());
+    }
+    write_over(path, &source, missing, &out.bytes)
 }
 
-/// Write via a temporary file and rename, so readers never see a half-written file.
-fn write_atomic(path: &Path, bytes: &[u8]) -> Result<()> {
-    if let Some(dir) = path.parent() {
-        std::fs::create_dir_all(dir).with_context(|| format!("creating {}", dir.display()))?;
+/// The config file's bytes, or the default config when there is no file
+/// (true), so saving a setting keeps the demo layout that was on screen.
+fn read_source(path: &Path) -> Result<(Vec<u8>, bool)> {
+    match std::fs::read(path) {
+        Ok(bytes) => Ok((bytes, false)),
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+            Ok((DEFAULT_CONFIG.as_bytes().to_vec(), true))
+        }
+        Err(e) => Err(e).with_context(|| format!("reading {}", path.display())),
     }
-    let tmp = path.with_extension("yaml.tmp");
-    std::fs::write(&tmp, bytes).with_context(|| format!("writing {}", tmp.display()))?;
-    std::fs::rename(&tmp, path).with_context(|| format!("replacing {}", path.display()))?;
-    Ok(())
+}
+
+/// Write `bytes` over the file read as `source` (`missing`: there was none),
+/// refusing if it changed in between.
+fn write_over(path: &Path, source: &[u8], missing: bool, bytes: &[u8]) -> Result<()> {
+    let based_on = (!missing).then(|| etag_write::etag(source));
+    match etag_write::write_cas(path, bytes, based_on.as_deref()) {
+        Ok(_) => Ok(()),
+        Err(etag_write::WriteError::Conflict { .. }) => Err(stale(path)),
+        Err(etag_write::WriteError::ExistsWithoutEtag { .. }) => Err(stale(path)),
+        Err(err) => Err(err.into()),
+    }
+}
+
+fn stale(path: &Path) -> anyhow::Error {
+    anyhow::anyhow!(
+        "{} changed since this view read it, so nothing was saved. \
+         The view now shows the file as it is; make the change again.",
+        path.display()
+    )
 }
 
 #[cfg(test)]
@@ -459,7 +530,7 @@ rotate:
                 size: Size::Wide,
             }],
         }];
-        write_screens(&path, &screens).unwrap();
+        write_screens(&path, &screens, etag_of(&path).as_deref()).unwrap();
         let text = std::fs::read_to_string(&path).unwrap();
         assert!(text.starts_with("# mine\ntheme: dark  # keep\n"), "{text}");
         let c = parse(&text).unwrap();
@@ -468,7 +539,7 @@ rotate:
         assert_eq!(c.screens[0].tiles[0].size, Some(Size::Wide));
 
         let dup = vec![screens[0].clone(), screens[0].clone()];
-        assert!(write_screens(&path, &dup).is_err());
+        assert!(write_screens(&path, &dup, etag_of(&path).as_deref()).is_err());
         std::fs::remove_dir_all(&dir).unwrap();
     }
 
@@ -491,7 +562,7 @@ rotate:
             "# My dashboard\ntheme: dark   # night mode\nscreens: []\n",
         )
         .unwrap();
-        write_theme(&path, Theme::Light).unwrap();
+        write_theme(&path, Theme::Light, etag_of(&path).as_deref()).unwrap();
         assert_eq!(
             std::fs::read_to_string(&path).unwrap(),
             "# My dashboard\ntheme: light   # night mode\nscreens: []\n"
@@ -499,7 +570,7 @@ rotate:
 
         // Key missing: appended.
         std::fs::write(&path, "# only a comment\nscreens: []\n").unwrap();
-        write_theme(&path, Theme::Dark).unwrap();
+        write_theme(&path, Theme::Dark, etag_of(&path).as_deref()).unwrap();
         assert_eq!(
             std::fs::read_to_string(&path).unwrap(),
             "# only a comment\nscreens: []\ntheme: dark\n"
@@ -507,7 +578,7 @@ rotate:
 
         // No file yet: created from the default config, even if the value matches.
         std::fs::remove_file(&path).unwrap();
-        write_theme(&path, Theme::Auto).unwrap();
+        write_theme(&path, Theme::Auto, None).unwrap();
         assert_eq!(std::fs::read_to_string(&path).unwrap(), DEFAULT_CONFIG);
         assert_eq!(
             parse(&std::fs::read_to_string(&path).unwrap())
@@ -516,6 +587,45 @@ rotate:
             Theme::Auto
         );
 
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    fn etag_of(path: &Path) -> Option<String> {
+        load(Some(path)).unwrap().etag
+    }
+
+    #[test]
+    fn stale_writes_are_refused() {
+        let dir = std::env::temp_dir().join(format!("dashboard-cas-test-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("config.yaml");
+        std::fs::write(&path, "theme: dark\n").unwrap();
+        let seen = etag_of(&path);
+
+        // Someone edits the file after the view read it.
+        std::fs::write(&path, "theme: dark  # edited\n").unwrap();
+        let err = write_theme(&path, Theme::Light, seen.as_deref()).unwrap_err();
+        assert!(
+            err.to_string().contains("changed since this view read it"),
+            "{err}"
+        );
+        // No etag (the view read no file) is refused too, once a file exists.
+        let err = write_theme(&path, Theme::Light, None).unwrap_err();
+        assert!(
+            err.to_string().contains("changed since this view read it"),
+            "{err}"
+        );
+        assert_eq!(
+            std::fs::read_to_string(&path).unwrap(),
+            "theme: dark  # edited\n"
+        );
+
+        // With the current etag it goes through.
+        write_theme(&path, Theme::Light, etag_of(&path).as_deref()).unwrap();
+        assert_eq!(
+            std::fs::read_to_string(&path).unwrap(),
+            "theme: light  # edited\n"
+        );
         std::fs::remove_dir_all(&dir).unwrap();
     }
 

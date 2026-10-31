@@ -3,13 +3,17 @@
 //!
 //! - `plugins/<id>/` next to the config file, for packages kept with a config;
 //! - `<data home>/dashboard/plugins/<id>/`, e.g. `~/.local/share/dashboard/plugins/`.
+//!
+//! Also the cached marketplace index, `<data home>/dashboard/marketplace/index.json`:
+//! packages that can be installed but aren't yet.
 
 use std::path::{Component, Path, PathBuf};
 
 use anyhow::{Context, Result, bail};
 use config_layers::tiered_dirs::{Convention, ResolveOptions, TieredDirs, env_vars};
 use dashboard_contract::check::check_view;
-use dashboard_contract::{CatalogEntry, PACKAGE_FILE, Package};
+use dashboard_contract::marketplace::INDEX_FORMAT;
+use dashboard_contract::{CatalogEntry, Index, PACKAGE_FILE, Package};
 
 use crate::{TOOL, VENDOR};
 
@@ -51,9 +55,18 @@ impl Packages {
     /// Packages for the config file at `config_path`: next to it, then in
     /// the data home.
     pub fn load(config_path: &Path) -> Self {
-        let mut dirs = vec![];
-        if let Some(dir) = config_path.parent() {
-            dirs.push(dir.join("plugins"));
+        Self::load_for(&[config_path.to_path_buf()])
+    }
+
+    /// Packages for several config files (the layers, see `layers`): next to
+    /// each, the last file first, then in the data home.
+    pub fn load_for(config_paths: &[PathBuf]) -> Self {
+        let mut dirs: Vec<PathBuf> = vec![];
+        for dir in config_paths.iter().rev().filter_map(|p| p.parent()) {
+            let dir = dir.join("plugins");
+            if !dirs.contains(&dir) {
+                dirs.push(dir);
+            }
         }
         // Without a data home, the packages next to the config still load.
         let data = data_dir();
@@ -102,12 +115,77 @@ impl Packages {
 /// `<data home>/dashboard/plugins`, e.g. `~/.local/share/dashboard/plugins`.
 /// Moved by `XDG_DATA_HOME`.
 pub fn data_dir() -> Result<PathBuf> {
+    Ok(data_home()?.join("plugins"))
+}
+
+/// The cached marketplace index: `<data home>/dashboard/marketplace/index.json`.
+pub fn market_index_path() -> Result<PathBuf> {
+    Ok(data_home()?.join("marketplace").join("index.json"))
+}
+
+fn data_home() -> Result<PathBuf> {
     let dirs = TieredDirs::from_env(
         VENDOR,
         &env_vars!("DASHBOARD"),
         ResolveOptions::new().with_convention(Convention::Xdg),
     )?;
-    Ok(dirs.standalone(TOOL)?.durable().into_path().join("plugins"))
+    Ok(dirs.standalone(TOOL)?.durable().into_path())
+}
+
+/// Catalog entries for the marketplace packages in the index at `path` that
+/// aren't in `installed`, and the problems with entries left out. No file
+/// means no entries; a bad file is an error. Each demo view is checked like an
+/// installed package's, since the index comes from the network.
+pub fn market_entries(
+    path: &Path,
+    installed: &Packages,
+) -> Result<(Vec<CatalogEntry>, Vec<String>)> {
+    let text = match std::fs::read_to_string(path) {
+        Ok(text) => text,
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok((vec![], vec![])),
+        Err(e) => return Err(e).with_context(|| format!("reading {}", path.display())),
+    };
+    let index: Index =
+        serde_json::from_str(&text).with_context(|| format!("in {}", path.display()))?;
+    if index.format != INDEX_FORMAT {
+        bail!(
+            "{}: index format {}; this dashboard reads format {INDEX_FORMAT}",
+            path.display(),
+            index.format
+        );
+    }
+    let mut entries = vec![];
+    let mut errors = vec![];
+    for p in index
+        .plugins
+        .iter()
+        .filter(|p| installed.get(&p.id).is_none())
+    {
+        let Some(entry) = p.entry() else {
+            errors.push(format!(
+                "{}: package {:?}: no demo view",
+                path.display(),
+                p.id
+            ));
+            continue;
+        };
+        let problems: Vec<String> = check_view(&entry.demo)
+            .into_iter()
+            .filter(|f| f.problem)
+            .map(|f| f.text)
+            .collect();
+        if problems.is_empty() {
+            entries.push(entry);
+        } else {
+            errors.push(format!(
+                "{}: package {:?}: demo: {}",
+                path.display(),
+                p.id,
+                problems.join("; ")
+            ));
+        }
+    }
+    Ok((entries, errors))
 }
 
 /// Read and check the package in `dir`. Its folder name must be its ID.
@@ -146,6 +224,18 @@ pub fn parse_package(text: &str) -> Result<Package> {
             bail!("{field} is empty");
         }
     }
+    // It names the packed file, so nothing that could make a path.
+    if !p.version.starts_with(|c: char| c.is_ascii_alphanumeric())
+        || !p
+            .version
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || ".-+".contains(c))
+    {
+        bail!(
+            "version {:?}: use letters, digits, dots, dashes and plus, e.g. 1.2.0",
+            p.version
+        );
+    }
     let Some(program) = p.run.first() else {
         bail!("run: needs at least a program name");
     };
@@ -174,7 +264,8 @@ pub fn parse_package(text: &str) -> Result<Package> {
     Ok(p)
 }
 
-fn valid_id(id: &str) -> bool {
+/// Lowercase letters, digits and dashes, starting with a letter.
+pub fn valid_id(id: &str) -> bool {
     id.starts_with(|c: char| c.is_ascii_lowercase())
         && !id.ends_with('-')
         && id
@@ -244,6 +335,8 @@ demo:
         assert!(bad("id: hello", "id: Hello").contains("lowercase"));
         assert!(bad("id: hello", "id: -x").contains("lowercase"));
         assert!(bad("version: 0.1.0", "version: ''").contains("version"));
+        assert!(bad("version: 0.1.0", "version: ../../x").contains("version"));
+        assert!(bad("version: 0.1.0", "version: 1/2").contains("version"));
         assert!(bad("run: [python3, hello.py]", "run: []").contains("program"));
         assert!(bad("run: [python3", "run: [/usr/bin/python3").contains("inside"));
         assert!(bad("run: [python3", "run: [../x/python3").contains("inside"));
@@ -457,5 +550,62 @@ demo:
         for id in ["weather-py", "weather-ts"] {
             assert!(found.get(id).is_some(), "{id}");
         }
+    }
+
+    #[test]
+    fn market_entries_skip_installed_packages() {
+        let dir =
+            std::env::temp_dir().join(format!("dashboard-market-test-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("index.json");
+        assert!(
+            market_entries(&path, &Packages::default())
+                .unwrap()
+                .0
+                .is_empty()
+        );
+        let demo = r#"{"status": "ok", "summary": "hi", "root": {"type": "text", "text": "hi"}}"#;
+        std::fs::write(
+            &path,
+            format!(
+                r#"{{"format": 1, "plugins": [
+                    {{"id": "hello", "version": "1", "name": "Hello", "description": "d", "url": "x.tar.gz", "sha256": "00", "demo": {demo}}},
+                    {{"id": "ci", "version": "1", "name": "CI", "description": "d", "url": "x.tar.gz", "sha256": "00", "demo": {demo}}}
+                ]}}"#
+            ),
+        )
+        .unwrap();
+        let installed = Packages::load_from(&[
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("../../examples/plugins")
+        ]);
+        let (found, errors) = market_entries(&path, &installed).unwrap();
+        assert!(errors.is_empty(), "{errors:?}");
+        assert_eq!(found.len(), 1);
+        assert_eq!(found[0].id, "ci");
+        assert!(!found[0].installed());
+        // A demo link that isn't http(s) leaves the entry out, with the reason.
+        let bad = r#"{"status": "ok", "summary": "x", "root": {"type": "list", "items": [
+            {"title": "x", "action": {"type": "open_url", "url": "javascript:alert(1)"}}]}}"#;
+        std::fs::write(
+            &path,
+            format!(
+                r#"{{"format": 1, "plugins": [
+                    {{"id": "ci", "version": "1", "name": "CI", "description": "d", "url": "x.tar.gz", "sha256": "00", "demo": {demo}}},
+                    {{"id": "evil", "version": "1", "name": "E", "description": "d", "url": "x.tar.gz", "sha256": "00", "demo": {bad}}}
+                ]}}"#
+            ),
+        )
+        .unwrap();
+        let (found, errors) = market_entries(&path, &installed).unwrap();
+        assert_eq!(found.len(), 1);
+        assert_eq!(found[0].id, "ci");
+        assert_eq!(errors.len(), 1);
+        assert!(
+            errors[0].contains("\"evil\"") && errors[0].contains("not http(s)"),
+            "{errors:?}"
+        );
+        std::fs::write(&path, "not json").unwrap();
+        assert!(market_entries(&path, &installed).is_err());
+        std::fs::remove_dir_all(&dir).unwrap();
     }
 }

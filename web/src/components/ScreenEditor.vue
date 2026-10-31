@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
-import type { ScreenLayout, TilePlacement, TileUpdate, UiSettings } from '../contract'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import type { CatalogEntry, ClientMessage, ScreenLayout, TilePlacement, TileUpdate, UiSettings } from '../contract'
+import AddModuleDialog from './AddModuleDialog.vue'
+import CatalogPalette from './CatalogPalette.vue'
 import TileCard from './TileCard.vue'
 
 type Size = TilePlacement['size']
@@ -13,7 +15,7 @@ const SIZES: ReadonlyArray<readonly [Size, string]> = [
 ]
 
 const props = defineProps<{ settings: UiSettings; tiles: Record<string, TileUpdate>; start: number }>()
-const emit = defineEmits<{ save: [screens: ScreenLayout[]]; close: [] }>()
+const emit = defineEmits<{ save: [screens: ScreenLayout[]]; add: [msg: ClientMessage]; close: [] }>()
 
 // Work on a copy; nothing changes until Save.
 const draft = ref<ScreenLayout[]>(JSON.parse(JSON.stringify(props.settings.screens)))
@@ -27,7 +29,6 @@ const error = computed(() => {
   return ''
 })
 
-const modules = computed(() => [...props.settings.modules].sort((a, b) => a.tile_id.localeCompare(b.tile_id)))
 const onScreen = computed(() => new Set(screen.value?.tiles.map((t) => t.tile_id)))
 
 function addScreen() {
@@ -53,6 +54,58 @@ function move(from: number, to: number) {
   const [t] = tiles.splice(from, 1)
   if (t) tiles.splice(to, 0, t)
 }
+
+// ---- adding from the catalog ----
+const picked = ref<CatalogEntry | null>(null)
+/** Module IDs in use: running, or placed on a screen. */
+const taken = computed(() => {
+  const ids = new Set(props.settings.modules.map((m) => m.tile_id))
+  for (const s of [...props.settings.screens, ...draft.value]) for (const t of s.tiles) ids.add(t.tile_id)
+  return ids
+})
+/** The saved screen the tile goes on: the one being edited, if it is saved under that name. */
+const savedScreen = computed(() => {
+  const name = screen.value?.name.trim()
+  return props.settings.screens.some((s) => s.name === name) ? (name ?? null) : null
+})
+/** Sent to the host, waiting for its answer. One at a time: Add is off meanwhile. */
+const pending = ref<{ moduleId: string; screen: number; size: Size } | null>(null)
+const addError = ref('')
+
+function pick(entry: CatalogEntry) {
+  picked.value = entry
+  addError.value = ''
+}
+
+function addFromCatalog(msg: Extract<ClientMessage, { type: 'add_module' }>) {
+  if (pending.value) return
+  emit('add', msg)
+  pending.value = { moduleId: msg.module_id, screen: selected.value, size: msg.size }
+  addError.value = ''
+  picked.value = null
+}
+
+// The host writes the config, reloads, and says how the add went in
+// `config.added`. Once written, the tile goes in the draft even if the module
+// fails to start, so the next Save keeps it in the file.
+watch(
+  () => props.settings,
+  (s) => {
+    const p = pending.value
+    const added = s.config.added
+    if (!p || added?.module_id !== p.moduleId) return
+    pending.value = null
+    if (added.error) {
+      addError.value = added.error.split('\n')[0] ?? ''
+      return
+    }
+    const target = draft.value[p.screen]
+    if (target && !target.tiles.some((t) => t.tile_id === p.moduleId)) {
+      const placed = s.screens.flatMap((x) => x.tiles).find((t) => t.tile_id === p.moduleId)
+      target.tiles.push({ tile_id: p.moduleId, size: placed?.size ?? p.size })
+    }
+  },
+)
 
 // ---- right-click menu ----
 const menu = ref<{ index: number; x: number; y: number } | null>(null)
@@ -93,6 +146,7 @@ function onKey(e: KeyboardEvent) {
   if (e.key !== 'Escape') return
   e.stopPropagation()
   if (menu.value) menu.value = null
+  else if (picked.value) picked.value = null
   else emit('close')
 }
 onMounted(() => window.addEventListener('keydown', onKey, true))
@@ -117,6 +171,8 @@ onUnmounted(() => window.removeEventListener('keydown', onKey, true))
       </nav>
       <span class="spacer" />
       <span v-if="error" class="editor-error">{{ error }}</span>
+      <span v-else-if="addError" class="editor-error" role="alert">Not added: {{ addError }}</span>
+      <span v-else-if="pending" class="muted">Adding {{ pending.moduleId }}…</span>
       <button type="button" @click="emit('close')">Cancel</button>
       <button type="button" class="primary" :disabled="!dirty || !!error" @click="save">Save</button>
     </div>
@@ -155,22 +211,19 @@ onUnmounted(() => window.removeEventListener('keydown', onKey, true))
         <p v-if="screen.tiles.length === 0" class="notice">Empty screen. Add components from the list on the right.</p>
       </main>
 
-      <aside class="palette" aria-label="Add a component">
-        <h3>Add component</h3>
-        <button
-          v-for="m in modules"
-          :key="m.tile_id"
-          type="button"
-          class="palette-item"
-          :data-used="onScreen.has(m.tile_id) || undefined"
-          :title="`Add ${m.tile_id} (${m.default_size})`"
-          @click="addTile(m.tile_id)"
-        >
-          <span>{{ m.tile_id }}</span>
-          <small>{{ m.name }} · {{ m.default_size }}</small>
-        </button>
-      </aside>
+      <CatalogPalette :modules="settings.modules" :on-screen="onScreen" @add-tile="addTile" @pick="pick" />
     </div>
+
+    <AddModuleDialog
+      v-if="picked"
+      :key="`${picked.kind}:${picked.id}`"
+      :entry="picked"
+      :screen="savedScreen"
+      :taken="taken"
+      :busy="!!pending"
+      @add="addFromCatalog"
+      @close="picked = null"
+    />
 
     <div v-if="menu" class="ctx-menu" :style="{ left: `${menu.x}px`, top: `${menu.y}px` }" role="menu" @click.stop>
       <div class="ctx-label">Size</div>
