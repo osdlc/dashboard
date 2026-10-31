@@ -7,9 +7,9 @@ use anyhow::Result;
 use clap::{Parser, Subcommand, ValueEnum};
 use dashboard_cli_kit::Failure;
 use dashboard_cli_kit::output::{Reporter, write_json};
-use dashboard_config::Config;
 use dashboard_config::layers::Sources;
 use dashboard_config::packages::Packages;
+use dashboard_config::{Config, Part};
 use dashboard_contract::{CatalogEntry, Index, Manifest, Package, ServerMessage, View, rpc};
 use dashboard_runtime::{load_valid, missing_packages, start};
 use serde_json::json;
@@ -26,8 +26,9 @@ const NAME: &str = "dashboard";
 #[derive(Parser)]
 #[command(
     name = NAME,
+    version,
     about = "Modular developer dashboard",
-    after_long_help = EXIT_CODES
+    after_long_help = exit_codes()
 )]
 struct Cli {
     /// Config file. Default: ~/.config/dashboard/config.yaml (or $DASHBOARD_MACHINE_CONFIG).
@@ -49,8 +50,24 @@ struct Cli {
     command: Command,
 }
 
-const EXIT_CODES: &str = "Exit codes: 0 ok, 1 failed, 2 the command can't run as typed, \
-22 a program it needs is not installed.";
+/// The exit codes, for the end of `--help`: every code in
+/// `dashboard_cli_kit::exit` (docs/cli.md).
+fn exit_codes() -> String {
+    use dashboard_cli_kit::exit;
+    format!(
+        "Exit codes: {} ok, {} failed, {} the command can't run as typed, \
+         {} a program it needs is not installed, {} a service refused the request or gave \
+         an unusable answer, {} no repository or remote to work on, {} a service could not \
+         be reached or limited the request.",
+        exit::OK,
+        exit::ERROR,
+        exit::USAGE,
+        exit::MISSING_TOOL,
+        exit::SERVICE,
+        exit::REPOSITORY,
+        exit::UNREACHABLE,
+    )
+}
 
 #[derive(Subcommand)]
 enum Command {
@@ -77,13 +94,13 @@ enum Command {
     Stop,
     /// Show whether a web server is running, and its URL.
     Status,
-    /// Show the config files in use and whether they are valid.
     /// Open the running web server in the browser with a new sign-in link.
     Open {
         /// Print the link instead of opening a browser.
         #[arg(long)]
         no_open: bool,
     },
+    /// Show the config files in use and whether they are valid.
     Config,
     /// Saved dashboards: `dashboard dashboards list`.
     Dashboards {
@@ -150,7 +167,8 @@ enum Command {
         /// Width of the printed tile.
         #[arg(long, default_value_t = 80)]
         width: u16,
-        /// Height of the printed tile. Default: what the tile needs.
+        /// Height of the printed tile. Default: what the whole view needs. On a
+        /// dashboard a small tile is 5 rows, medium and wide 10, large 15, tall 20.
         #[arg(long)]
         height: Option<u16>,
         /// The plugin's program and arguments, after `--`.
@@ -472,7 +490,11 @@ async fn run(cli: Cli) -> Result<()> {
             let loaded = load_valid(&sources)?;
             let packages = Packages::load_for(&loaded.paths());
             let (missing, skipped) = if loaded.exists {
-                (missing_packages(&loaded.config, &packages), packages.errors)
+                let missing = missing_packages(&loaded.config, &packages)
+                    .into_iter()
+                    .map(|(id, message)| loaded.locate(&Part::Module(id), &message))
+                    .collect();
+                (missing, packages.errors)
             } else {
                 (vec![], vec![])
             };
@@ -717,5 +739,35 @@ fn server_json(flag: &str, record: Option<&background::Record>) -> serde_json::V
     match record {
         Some(r) => json!({ flag: true, "url": r.url, "pid": r.pid }),
         None => json!({ flag: false }),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use clap::CommandFactory;
+
+    /// Every subcommand, at any depth, has its own one-line description: not
+    /// empty, and sharing no sentence with another command's.
+    #[test]
+    fn every_subcommand_has_its_own_about() {
+        fn walk(cmd: &clap::Command, path: &str, seen: &mut Vec<(String, String)>) {
+            for sub in cmd.get_subcommands() {
+                let path = format!("{path} {}", sub.get_name());
+                let about = sub.get_about().map(|a| a.to_string()).unwrap_or_default();
+                assert!(!about.trim().is_empty(), "`{path}` has no description");
+                for sentence in about.split(". ").map(|s| s.trim().trim_end_matches('.')) {
+                    if sentence.is_empty() {
+                        continue;
+                    }
+                    if let Some((other, _)) = seen.iter().find(|(_, s)| s == sentence) {
+                        panic!("`{path}` and `{other}` share \"{sentence}\"");
+                    }
+                    seen.push((path.clone(), sentence.to_string()));
+                }
+                walk(sub, &path, seen);
+            }
+        }
+        walk(&Cli::command(), NAME, &mut vec![]);
     }
 }

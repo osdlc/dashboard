@@ -23,6 +23,7 @@ const DOCS: &str = "https://github.com/badlogic/pi-mono";
 #[serde(default, deny_unknown_fields)]
 struct Config {
     /// Pi's agent folder; default `$PI_CODING_AGENT_DIR` or `~/.pi/agent`.
+    #[schemars(extend("x-path" = true))]
     home: Option<String>,
 }
 

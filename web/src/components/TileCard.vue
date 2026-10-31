@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, ref, useId, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, useId, watch } from 'vue'
 import type { TilePlacement, TileUpdate } from '../contract'
+import { fitTile } from '../fit'
 import { reducedMotion } from '../motion'
 import { focusedTile, itemIndex, items, type Focus } from '../nav'
 import WidgetView from './WidgetView.vue'
@@ -44,6 +45,23 @@ function mark() {
   active.value = selected.value === null ? undefined : els[selected.value]?.id
 }
 watch([selected, () => props.tile], mark, { flush: 'post', immediate: true })
+
+/**
+ * Fits the view to the tile's box (fit.ts) after every update and whenever
+ * the tile changes size. The tile's size comes from the grid, not from
+ * what is cut inside it, so fitting never triggers itself.
+ */
+function fit() {
+  if (root.value) fitTile(root.value)
+}
+let resized: ResizeObserver | undefined
+onMounted(() => {
+  resized = new ResizeObserver(fit)
+  if (root.value) resized.observe(root.value)
+  void document.fonts?.ready.then(fit)
+})
+onBeforeUnmount(() => resized?.disconnect())
+watch([() => props.tile, () => props.size], fit, { flush: 'post' })
 
 // Scroll the selection into view when it moves, not on every data update.
 watch(

@@ -1,0 +1,46 @@
+{
+  "id": "gauges",
+  "title": "Column of gauges",
+  "group": "compositions",
+  "default_size": "small",
+  "description": "Several limits at once: a column of gauges, each with its own thresholds. The marker on the first two shows where usage should be by now, so \"ahead of pace\" is easy to see.",
+  "view": {
+    "status": "warn",
+    "summary": "5 hours 81% · week 40%",
+    "root": {
+      "type": "column",
+      "children": [
+        {
+          "type": "gauge",
+          "label": "5 hours",
+          "percent": 81,
+          "marker": 60,
+          "thresholds": {
+            "warn": 75,
+            "error": 90
+          }
+        },
+        {
+          "type": "gauge",
+          "label": "7 days",
+          "percent": 40,
+          "marker": 52,
+          "thresholds": {
+            "warn": 75,
+            "error": 90
+          }
+        },
+        {
+          "type": "gauge",
+          "label": "Disk",
+          "percent": 93,
+          "thresholds": {
+            "warn": 80,
+            "error": 90
+          },
+          "caption": "1721 of 1858 GiB used"
+        }
+      ]
+    }
+  }
+}

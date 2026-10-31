@@ -1,0 +1,55 @@
+{
+  "id": "pie-stats",
+  "title": "Pie next to stats",
+  "group": "compositions",
+  "default_size": "medium",
+  "description": "A donut beside the numbers it stands for: a row holding a pie and a column of stats. The pie gives the shape at a glance, the stats the exact values.",
+  "view": {
+    "status": "ok",
+    "summary": "Disk 60% used",
+    "root": {
+      "type": "row",
+      "children": [
+        {
+          "type": "pie",
+          "label": "Disk",
+          "format": "bytes",
+          "slices": [
+            {
+              "label": "used",
+              "value": 300000000000
+            },
+            {
+              "label": "free",
+              "value": 200000000000
+            }
+          ]
+        },
+        {
+          "type": "column",
+          "children": [
+            {
+              "type": "stat",
+              "label": "Used",
+              "value": "279",
+              "unit": "GiB"
+            },
+            {
+              "type": "stat",
+              "label": "Free",
+              "value": "186",
+              "unit": "GiB",
+              "status": "ok"
+            },
+            {
+              "type": "stat",
+              "label": "Snapshots",
+              "value": "14",
+              "delta": "+2 today"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

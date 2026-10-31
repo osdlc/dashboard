@@ -1,0 +1,103 @@
+{
+  "id": "checks-log",
+  "title": "Checks over a log",
+  "group": "compositions",
+  "default_size": "tall",
+  "description": "What is down, then why: a column with uptime checks on top and the log of the failing service under them.",
+  "view": {
+    "status": "error",
+    "summary": "api down",
+    "root": {
+      "type": "column",
+      "children": [
+        {
+          "type": "uptime",
+          "checks": [
+            {
+              "name": "web",
+              "status": "ok",
+              "uptime": 100,
+              "latency_ms": 88,
+              "history": [
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "ok"
+              ]
+            },
+            {
+              "name": "api",
+              "status": "error",
+              "uptime": 85,
+              "detail": "HTTP 503",
+              "history": [
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "ok",
+                "error",
+                "error",
+                "error",
+                "error"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "log",
+          "label": "api",
+          "lines": [
+            {
+              "time": "04:16:58",
+              "level": "info",
+              "text": "deploy v2.4.0 started"
+            },
+            {
+              "time": "04:17:01",
+              "level": "warn",
+              "text": "pool size 2 below minimum 4"
+            },
+            {
+              "time": "04:17:02",
+              "level": "error",
+              "text": "connection reset by peer"
+            },
+            {
+              "time": "04:17:04",
+              "level": "error",
+              "text": "health check failed: 503"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

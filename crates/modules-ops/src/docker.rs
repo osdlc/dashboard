@@ -280,6 +280,7 @@ fn column(key: &str, label: &str) -> Column {
     Column {
         key: key.into(),
         label: label.into(),
+        priority: None,
     }
 }
 

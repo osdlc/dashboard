@@ -31,6 +31,7 @@ const DASHBOARD: &str = "https://cursor.com/dashboard?tab=usage";
 #[serde(default, deny_unknown_fields)]
 struct Config {
     /// Cursor's `state.vscdb`; default the app's own, per OS.
+    #[schemars(extend("x-path" = true))]
     db: Option<String>,
 }
 

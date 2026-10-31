@@ -1,0 +1,36 @@
+{
+  "id": "row",
+  "title": "Row",
+  "group": "primitives",
+  "default_size": "medium",
+  "description": "Widgets side by side, sharing the width. A row has only `children`; it is how a tile puts things next to each other. In a narrow space the children get narrow too, so keep rows short.",
+  "view": {
+    "status": "ok",
+    "summary": "3451 req/s · 0.4% errors · p99 107 ms",
+    "root": {
+      "type": "row",
+      "children": [
+        {
+          "type": "stat",
+          "label": "Requests",
+          "value": "3451",
+          "unit": "/s",
+          "delta": "+2.8%"
+        },
+        {
+          "type": "stat",
+          "label": "Errors",
+          "value": "0.4",
+          "unit": "%",
+          "status": "ok"
+        },
+        {
+          "type": "stat",
+          "label": "p99",
+          "value": "107",
+          "unit": "ms"
+        }
+      ]
+    }
+  }
+}

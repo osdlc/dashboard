@@ -1,0 +1,18 @@
+{
+  "status": "warn",
+  "summary": "Backup 6 h ago · 2 of 3 targets",
+  "root": {
+    "type": "column",
+    "children": [
+      {
+        "type": "row",
+        "children": [
+          { "type": "stat", "label": "Last run", "value": "6", "unit": "h ago" },
+          { "type": "stat", "label": "Targets", "value": "2/3", "status": "warn" }
+        ]
+      },
+      { "type": "gauge", "label": "Backup disk", "percent": 64, "caption": "1.2 of 1.9 TB used" },
+      { "type": "text", "text": "**nas-offsite** failed: host unreachable", "markdown": true }
+    ]
+  }
+}

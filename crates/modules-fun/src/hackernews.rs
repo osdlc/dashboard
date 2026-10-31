@@ -77,6 +77,7 @@ struct Config {
     limit: usize,
     /// Read this file instead of calling the API: a JSON array of HN items
     /// (`/v0/item/<id>.json` replies, in feed order). For tests and demos.
+    #[schemars(extend("x-path" = true))]
     sample: Option<String>,
 }
 
@@ -188,6 +189,7 @@ fn story(item: &Value, now: i64) -> Option<ListItem> {
         (None, None) => "https://news.ycombinator.com/".to_string(),
     };
     Some(ListItem {
+        tone: None,
         title: title.to_string(),
         subtitle: (!sub.is_empty()).then(|| sub.join(" · ")),
         status: None,

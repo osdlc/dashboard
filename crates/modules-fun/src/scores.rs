@@ -43,6 +43,7 @@ struct Config {
     limit: usize,
     /// Read this file instead of calling ESPN: a saved scoreboard reply. For
     /// tests and demos.
+    #[schemars(extend("x-path" = true))]
     sample: Option<String>,
 }
 
@@ -246,6 +247,7 @@ fn game(e: &Event, home_first: bool) -> ListItem {
     };
     let live = state == "in";
     ListItem {
+        tone: None,
         title,
         subtitle: Some(e.status.kind.short_detail.clone()).filter(|s| !s.is_empty()),
         status: live.then_some(Status::Ok),

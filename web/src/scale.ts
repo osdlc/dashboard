@@ -2,7 +2,7 @@ import type { Widget } from './contract'
 
 export type ColorScale = NonNullable<Extract<Widget, { type: 'series' }>['color']>
 
-/** Color for `t` in 0..1 on a color scale, mixed from the theme's three stops (CSS vars). */
+/** Color for `t` in 0..1 on a color scale, mixed from the color theme's three stop tokens (CSS vars, see colors.ts). */
 export function scaleColor(scale: ColorScale | undefined, t: number): string {
   if (!scale || scale === 'accent') return 'var(--accent)'
   const c = Math.min(1, Math.max(0, t))

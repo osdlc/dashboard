@@ -1,0 +1,135 @@
+{
+  "id": "table-widgets",
+  "title": "Table with widgets in cells",
+  "group": "compositions",
+  "default_size": "wide",
+  "description": "A table whose cells hold widgets: a gauge per limit, a pie of what the usage went to and a stat with its status. Stat, gauge and pie draw inline in a cell; other widgets fall back to text. In the terminal a pie cell shows its largest slice.",
+  "view": {
+    "status": "warn",
+    "summary": "2 accounts, 1 near its limit",
+    "root": {
+      "type": "table",
+      "columns": [
+        {
+          "key": "account",
+          "label": "Account"
+        },
+        {
+          "key": "five",
+          "label": "5 hours"
+        },
+        {
+          "key": "week",
+          "label": "Week"
+        },
+        {
+          "key": "mix",
+          "label": "Models"
+        },
+        {
+          "key": "cost",
+          "label": "Cost"
+        }
+      ],
+      "rows": [
+        {
+          "status": "warn",
+          "cells": {
+            "account": "work@example.com",
+            "five": {
+              "type": "gauge",
+              "label": "5h",
+              "percent": 81,
+              "thresholds": {
+                "warn": 75,
+                "error": 90
+              }
+            },
+            "week": {
+              "type": "gauge",
+              "label": "week",
+              "percent": 40,
+              "marker": 52
+            },
+            "mix": {
+              "type": "pie",
+              "slices": [
+                {
+                  "label": "large",
+                  "value": 70
+                },
+                {
+                  "label": "small",
+                  "value": 30
+                }
+              ]
+            },
+            "cost": {
+              "type": "stat",
+              "label": "today",
+              "value": "$41",
+              "status": "warn"
+            }
+          }
+        },
+        {
+          "status": "ok",
+          "cells": {
+            "account": "personal@example.com",
+            "five": {
+              "type": "gauge",
+              "label": "5h",
+              "percent": 12,
+              "thresholds": {
+                "warn": 75,
+                "error": 90
+              }
+            },
+            "week": {
+              "type": "gauge",
+              "label": "week",
+              "percent": 23,
+              "marker": 52
+            },
+            "mix": {
+              "type": "pie",
+              "slices": [
+                {
+                  "label": "large",
+                  "value": 25
+                },
+                {
+                  "label": "small",
+                  "value": 75
+                }
+              ]
+            },
+            "cost": {
+              "type": "stat",
+              "label": "today",
+              "value": "$3",
+              "status": "ok"
+            }
+          }
+        },
+        {
+          "cells": {
+            "account": "team@example.com",
+            "five": 0,
+            "week": {
+              "type": "gauge",
+              "label": "week",
+              "percent": 5
+            },
+            "mix": "none yet",
+            "cost": {
+              "type": "stat",
+              "label": "today",
+              "value": "$0"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

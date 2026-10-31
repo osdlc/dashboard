@@ -1,0 +1,41 @@
+{
+  "id": "pie",
+  "title": "Pie",
+  "group": "primitives",
+  "default_size": "small",
+  "description": "Shares of a whole, as a full disc with `donut: false`. Slices go clockwise from twelve o'clock in the order given and take the theme's series colors in turn; the legend shows each value and its percent.",
+  "view": {
+    "status": "ok",
+    "summary": "Rust 61%",
+    "root": {
+      "type": "pie",
+      "label": "Languages",
+      "donut": false,
+      "unit": " lines",
+      "format": "count",
+      "slices": [
+        {
+          "label": "Rust",
+          "value": 48210
+        },
+        {
+          "label": "TypeScript",
+          "value": 17330
+        },
+        {
+          "label": "Vue",
+          "value": 8120
+        },
+        {
+          "label": "Python",
+          "value": 3260
+        },
+        {
+          "label": "other",
+          "value": 1870,
+          "tone": "muted"
+        }
+      ]
+    }
+  }
+}

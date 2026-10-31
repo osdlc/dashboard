@@ -45,6 +45,7 @@ struct Config {
     /// Read this file instead of calling the API: a JSON object with the
     /// `fees` (`/api/v1/fees/recommended`), `mempool` (`/api/mempool`) and
     /// `blocks` (`/api/v1/blocks`) replies. For tests and demos.
+    #[schemars(extend("x-path" = true))]
     sample: Option<String>,
 }
 
@@ -246,6 +247,7 @@ fn view(data: &Data, c: &Config, now: i64) -> View {
         let col = |key: &str, label: &str| Column {
             key: key.into(),
             label: label.into(),
+            priority: None,
         };
         children.push(Widget::Table {
             columns: vec![

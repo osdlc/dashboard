@@ -217,6 +217,7 @@ fn build_view(list: &CswapList) -> View {
     .map(|(key, label)| Column {
         key: key.into(),
         label: label.into(),
+        priority: None,
     })
     .to_vec();
 

@@ -32,6 +32,7 @@ use tokio::process::Command;
 #[serde(default, deny_unknown_fields)]
 struct Config {
     /// Repositories to show, by path. `~` is your home folder.
+    #[schemars(extend("x-path" = true))]
     repos: Vec<String>,
 }
 
@@ -232,6 +233,7 @@ fn view(found: Vec<Found>) -> View {
                 .map(|(key, label)| Column {
                     key: key.into(),
                     label: label.into(),
+                    priority: None,
                 })
                 .collect(),
             rows,

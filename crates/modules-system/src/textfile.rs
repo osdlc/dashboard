@@ -32,6 +32,7 @@ const MAX_BYTES: u64 = 1024 * 1024;
 #[serde(default, deny_unknown_fields)]
 struct Config {
     /// File to show. `~/` is expanded.
+    #[schemars(extend("x-path" = true))]
     path: Option<String>,
     /// Render as markdown. Default: true for `.md` and `.markdown` files.
     markdown: Option<bool>,

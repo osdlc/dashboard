@@ -51,6 +51,7 @@ fn pacific_dst(t: i64) -> bool {
 #[serde(default, deny_unknown_fields)]
 struct Config {
     /// Gemini CLI's folder; default `$GEMINI_CLI_HOME/.gemini` or `~/.gemini`.
+    #[schemars(extend("x-path" = true))]
     home: Option<String>,
     /// Requests per day of your plan; default 1000 (Google account sign-in).
     daily_limit: Option<u32>,

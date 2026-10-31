@@ -36,6 +36,7 @@ const DAYS: usize = 7;
 #[serde(default, deny_unknown_fields)]
 struct Config {
     /// Codex's home; default `$CODEX_HOME` or `~/.codex`.
+    #[schemars(extend("x-path" = true))]
     home: Option<String>,
     /// `live` (default: ask `codex app-server`, else read the logs) or `logs`.
     source: Option<String>,
@@ -406,6 +407,7 @@ fn view(s: &Snapshot, now: i64) -> View {
             bars: shown
                 .iter()
                 .map(|(date, tokens)| Bar {
+                    tone: None,
                     label: day_label(date),
                     value: *tokens as f64,
                     status: None,

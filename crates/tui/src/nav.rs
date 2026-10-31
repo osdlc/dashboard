@@ -250,6 +250,7 @@ mod tests {
             items: titles
                 .iter()
                 .map(|t| ListItem {
+                    tone: None,
                     title: t.to_string(),
                     subtitle: None,
                     status: None,

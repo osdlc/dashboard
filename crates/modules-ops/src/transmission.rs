@@ -287,6 +287,7 @@ fn item(t: &Torrent, web: &str) -> ListItem {
         subtitle = format!("{} · {subtitle}", t.error_string);
     }
     ListItem {
+        tone: None,
         title: t.name.clone(),
         subtitle: Some(subtitle),
         status: Some(match (t.error, t.status) {

@@ -115,6 +115,7 @@ fn stat(label: &str, value: String, delta: Option<String>) -> Widget {
 /// A line for the next new or full moon; it opens a table of exact times.
 fn next(title: &str, secs: i64, tz: &TimeZone) -> ListItem {
     ListItem {
+        tone: None,
         title: title.into(),
         subtitle: Some(day(secs, tz)),
         status: None,

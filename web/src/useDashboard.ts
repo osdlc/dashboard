@@ -1,6 +1,7 @@
 import { onUnmounted, ref } from 'vue'
 import { setSessionToken } from './session'
-import type { ClientMessage, ServerMessage, Theme, TileUpdate, UiSettings } from './contract'
+import type { ClientMessage, ServerMessage, TileUpdate, UiSettings } from './contract'
+import { applyColorTheme, applyMode, DEFAULT_THEME } from './colors'
 
 export type ConnectionState = 'signing in' | 'connecting' | 'open' | 'closed' | 'signed out'
 
@@ -44,7 +45,8 @@ export function useDashboard() {
         tiles.value[msg.tile.tile_id] = msg.tile
       } else if (msg.type === 'settings') {
         settings.value = msg.settings
-        applyTheme(msg.settings.theme)
+        applyMode(msg.settings.theme)
+        applyColorTheme(msg.settings.color_theme ?? DEFAULT_THEME)
       }
     }
     socket.onclose = async () => {
@@ -134,11 +136,4 @@ function forget() {
   } catch {
     // Nothing to forget.
   }
-}
-
-/** `auto` removes the attribute so the CSS follows prefers-color-scheme. */
-function applyTheme(theme: Theme) {
-  const root = document.documentElement
-  if (theme === 'auto') delete root.dataset.theme
-  else root.dataset.theme = theme
 }

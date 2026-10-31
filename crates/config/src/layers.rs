@@ -19,7 +19,7 @@ use serde_json::{Map, Value};
 
 use crate::dashboards::Registry;
 use crate::trust::Trust;
-use crate::{Config, DEFAULT_CONFIG, parse};
+use crate::{Config, DEFAULT_CONFIG, Part, parse};
 
 /// The project file's name.
 pub const PROJECT_FILE: &str = ".dashboard.yaml";
@@ -87,6 +87,9 @@ pub struct Layered {
     /// For each module, the folder of the file that set it last: a plugin's
     /// relative paths start there.
     pub module_dirs: BTreeMap<String, PathBuf>,
+    /// The file that set each module, screen and top-level key last, to
+    /// name in an error (see `file_of`).
+    pub origins: Origins,
     /// Names of the screens the project file added.
     pub project_screens: BTreeSet<String>,
     /// Screens below the project file that one of its screens replaced, with
@@ -100,7 +103,37 @@ pub struct Layered {
     pub etag: Option<String>,
 }
 
+/// Which file set each part of the merged config last.
+#[derive(Debug, Clone, Default)]
+pub struct Origins {
+    pub modules: BTreeMap<String, PathBuf>,
+    pub screens: BTreeMap<String, PathBuf>,
+    /// Top-level keys, such as `rotate`.
+    pub keys: BTreeMap<String, PathBuf>,
+}
+
 impl Layered {
+    /// The file that set this part of the config, for an error message.
+    /// `None` for the built-in demo, or a module only named on a screen.
+    pub fn file_of(&self, part: &Part) -> Option<&Path> {
+        let o = &self.origins;
+        match part {
+            Part::Module(id) => o.modules.get(id),
+            Part::Screen(name) => o.screens.get(name),
+            Part::Rotate => o.keys.get("rotate"),
+            Part::Key(key) => o.keys.get(key),
+        }
+        .map(PathBuf::as_path)
+    }
+
+    /// `message`, after the file that set `part`: "in <file>: <message>".
+    pub fn locate(&self, part: &Part, message: &str) -> String {
+        match self.file_of(part) {
+            Some(file) => format!("in {}: {message}", file.display()),
+            None => message.to_string(),
+        }
+    }
+
     /// The file settings changed from a renderer are written to: the saved
     /// dashboard in use, else the machine file. Never the project file,
     /// which is usually checked in.
@@ -208,6 +241,7 @@ pub fn load(sources: &Sources) -> Result<Layered> {
             exists: false,
             layers: vec![],
             dashboard: None,
+            origins: Origins::default(),
             project_screens: BTreeSet::new(),
             shadowed: vec![],
             untrusted,
@@ -217,6 +251,7 @@ pub fn load(sources: &Sources) -> Result<Layered> {
 
     let mut merged = Map::new();
     let mut module_dirs = BTreeMap::new();
+    let mut origins = Origins::default();
     let mut project_screens = BTreeSet::new();
     let mut shadowed = vec![];
     let write_kind = if files.iter().any(|l| l.kind == LayerKind::Dashboard) {
@@ -241,6 +276,17 @@ pub fn load(sources: &Sources) -> Result<Layered> {
         if let Some(Value::Object(modules)) = map.get("modules") {
             for id in modules.keys() {
                 module_dirs.insert(id.clone(), dir.clone());
+                origins.modules.insert(id.clone(), layer.path.clone());
+            }
+        }
+        if let Some(Value::Array(screens)) = map.get("screens") {
+            for name in screens.iter().filter_map(screen_name) {
+                origins.screens.insert(name.to_string(), layer.path.clone());
+            }
+        }
+        for (key, value) in &map {
+            if !value.is_null() {
+                origins.keys.insert(key.clone(), layer.path.clone());
             }
         }
         if layer.kind == LayerKind::Project
@@ -275,6 +321,7 @@ pub fn load(sources: &Sources) -> Result<Layered> {
         dashboard: sources.dashboard.clone(),
         layers: files,
         module_dirs,
+        origins,
         project_screens,
         shadowed,
         untrusted,
@@ -296,7 +343,8 @@ fn parse_layer(path: &Path, text: &str) -> Result<Map<String, Value>> {
 }
 
 /// Lay `top` over `base`. `modules:` merges per module ID (a module's
-/// settings come whole from the last file that sets it). `screens:` from a
+/// settings come whole from the last file that sets it), and
+/// `color_themes:` per theme name the same way. `screens:` from a
 /// project file go in front, replacing any screen of the same name; from any
 /// other file they replace the screens below. Every other key: the later
 /// file wins. An empty `modules:` or `screens:` changes nothing. Returns the
@@ -311,11 +359,9 @@ fn merge(
         match (key.as_str(), value) {
             // An empty `modules:` or `screens:` (YAML null) parses as none on
             // its own; here too it adds nothing and keeps what is below.
-            ("modules" | "screens", Value::Null) => {}
-            ("modules", Value::Object(modules)) => {
-                let entry = base
-                    .entry("modules")
-                    .or_insert_with(|| Value::Object(Map::new()));
+            ("modules" | "screens" | "color_themes", Value::Null) => {}
+            ("modules" | "color_themes", Value::Object(modules)) => {
+                let entry = base.entry(key).or_insert_with(|| Value::Object(Map::new()));
                 if !entry.is_object() {
                     *entry = Value::Object(Map::new());
                 }

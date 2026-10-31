@@ -126,7 +126,10 @@ fn install_list_update_remove_from_a_local_index() {
     let shown = text(&out);
     assert!(shown.contains("runs     python3 hello.py"), "{shown}");
     assert!(shown.contains("checked against the index"), "{shown}");
-    assert!(shown.contains("not installed"), "{shown}");
+    assert!(
+        shown.contains("cancelled; nothing was installed"),
+        "{shown}"
+    );
     assert!(!s.plugins().join("hello").exists());
     let err = s.fails(&["plugin", "install", "hello", "--index", &index]);
     assert!(err.contains("--yes"), "{err}");
@@ -170,6 +173,15 @@ fn install_list_update_remove_from_a_local_index() {
     assert!(yaml.contains("version: 0.2.0"));
     assert!(s.ok(&["plugin", "update"]).contains("up to date"));
 
+    // "n" keeps it.
+    let out = s.run(&["plugin", "remove", "hello"], "n\n");
+    assert!(out.status.success(), "{}", text(&out));
+    assert!(
+        text(&out).contains("cancelled; nothing was removed"),
+        "{}",
+        text(&out)
+    );
+    assert!(installed.exists());
     s.ok(&["plugin", "remove", "hello", "--yes"]);
     assert!(!installed.exists());
     let record = std::fs::read_to_string(s.plugins().join("installed.json")).unwrap();

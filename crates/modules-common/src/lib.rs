@@ -2,7 +2,7 @@
 //! makes, catalog entry helpers, manifests, times and (with the `http`
 //! feature) HTTP helpers.
 
-use std::path::PathBuf;
+use std::path::{Component, Path, PathBuf};
 
 use dashboard_contract::{
     CONTRACT_VERSION, CatalogEntry, EntryKind, LayoutHints, Manifest, Refresh, Requirements, Size,
@@ -46,7 +46,29 @@ pub fn entry(id: &str, name: &str, default_size: Size, demo: View) -> CatalogEnt
 
 /// JSON Schema for a module's `config:` block.
 pub fn schema<T: JsonSchema>() -> Option<serde_json::Value> {
-    serde_json::to_value(schemars::schema_for!(T)).ok()
+    let mut schema = serde_json::to_value(schemars::schema_for!(T)).ok()?;
+    // A flattened helper's description lands on the module's schema when the
+    // module's `Config` has none of its own; it describes the helper, not the
+    // module.
+    let helpers: Vec<serde_json::Value> = flattened_helpers()
+        .iter()
+        .filter_map(|h| h.get("description").cloned())
+        .collect();
+    if let Some(obj) = schema.as_object_mut()
+        && obj.get("description").is_some_and(|d| helpers.contains(d))
+    {
+        obj.remove("description");
+    }
+    Some(schema)
+}
+
+/// Schemas of the types modules flatten into their `Config`
+/// (`#[serde(flatten)]`). Add any new one here.
+pub fn flattened_helpers() -> Vec<serde_json::Value> {
+    [serde_json::to_value(schemars::schema_for!(secret::Secret))]
+        .into_iter()
+        .filter_map(Result::ok)
+        .collect()
 }
 
 pub fn strings(items: &[&str]) -> Vec<String> {
@@ -98,10 +120,104 @@ fn expand_home_in(path: &str, home: Option<PathBuf>, windows: bool) -> PathBuf {
     }
 }
 
+/// The schema keyword that marks a setting as a file or folder path: a
+/// string, or a list of strings. Put it on the field with
+/// `#[schemars(extend("x-path" = true))]`. Before a built-in starts, the
+/// runtime makes the relative ones start from the folder of the config file
+/// that set them (see `resolve_paths`).
+pub const PATH_KEYWORD: &str = "x-path";
+
+/// Make the relative paths in `config` start from `dir`: every top-level
+/// setting that `schema` marks with `PATH_KEYWORD`. Absolute paths, `~/`
+/// paths and URLs stay as they are. An empty `dir` changes nothing.
+pub fn resolve_paths(config: &mut serde_json::Value, schema: &serde_json::Value, dir: &Path) {
+    use serde_json::Value;
+    if dir.as_os_str().is_empty() {
+        return;
+    }
+    let (Some(config), Some(Value::Object(props))) =
+        (config.as_object_mut(), schema.get("properties"))
+    else {
+        return;
+    };
+    for (key, prop) in props {
+        if prop.get(PATH_KEYWORD) != Some(&Value::Bool(true)) {
+            continue;
+        }
+        match config.get_mut(key) {
+            Some(Value::String(s)) => resolve_path(s, dir),
+            Some(Value::Array(items)) => {
+                for item in items {
+                    if let Value::String(s) = item {
+                        resolve_path(s, dir);
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
+fn resolve_path(path: &mut String, dir: &Path) {
+    if path.is_empty()
+        || path.starts_with('~')
+        || path.contains("://")
+        || Path::new(path.as_str()).is_absolute()
+    {
+        return;
+    }
+    let mut out = dir.to_path_buf();
+    for part in Path::new(path.as_str()).components() {
+        if part != Component::CurDir {
+            out.push(part);
+        }
+    }
+    *path = out.to_string_lossy().into_owned();
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::path::Path;
+    use serde_json::json;
+
+    #[test]
+    fn resolves_marked_relative_paths_from_the_folder() {
+        let schema = json!({ "properties": {
+            "path": { "type": "string", "x-path": true },
+            "repos": { "type": "array", "x-path": true },
+            "name": { "type": "string" },
+        }});
+        let tmp = std::env::temp_dir();
+        let dir = tmp.as_path();
+        let abs = dir.join("abs").to_string_lossy().into_owned();
+        let mut config = json!({
+            "path": "notes/TODO.md",
+            "repos": [".", "../other", abs, "~/code/x", "https://example.com/feed"],
+            "name": "TODO.md",
+        });
+        resolve_paths(&mut config, &schema, dir);
+        assert_eq!(
+            config["path"],
+            json!(dir.join("notes").join("TODO.md").to_string_lossy())
+        );
+        assert_eq!(
+            config["repos"],
+            json!([
+                dir.to_string_lossy(),
+                dir.join("..").join("other").to_string_lossy(),
+                abs,
+                "~/code/x",
+                "https://example.com/feed",
+            ])
+        );
+        // Not marked: left alone.
+        assert_eq!(config["name"], "TODO.md");
+
+        // No folder: nothing changes.
+        let mut config = json!({ "path": "TODO.md" });
+        resolve_paths(&mut config, &schema, Path::new(""));
+        assert_eq!(config["path"], "TODO.md");
+    }
 
     #[test]
     fn expands_the_home_folder() {

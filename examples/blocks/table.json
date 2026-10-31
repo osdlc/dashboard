@@ -1,0 +1,74 @@
+{
+  "id": "table",
+  "title": "Table",
+  "group": "primitives",
+  "default_size": "medium",
+  "description": "Rows and columns. Columns have a key and a heading; each row's `cells` are keyed by column. A cell is text or a number, and a row can have a status and an action. Cells can also hold a stat, a gauge or a pie (see the table with widgets).",
+  "view": {
+    "status": "warn",
+    "summary": "4 services, 1 slow",
+    "root": {
+      "type": "table",
+      "columns": [
+        {
+          "key": "service",
+          "label": "Service"
+        },
+        {
+          "key": "version",
+          "label": "Version"
+        },
+        {
+          "key": "rps",
+          "label": "Req/s"
+        },
+        {
+          "key": "p99",
+          "label": "p99"
+        }
+      ],
+      "rows": [
+        {
+          "cells": {
+            "service": "atlas",
+            "version": "v1.4.0",
+            "rps": 1220,
+            "p99": "96 ms"
+          },
+          "status": "ok",
+          "action": {
+            "type": "open_url",
+            "url": "https://example.com/services/atlas"
+          }
+        },
+        {
+          "cells": {
+            "service": "ember",
+            "version": "v1.5.8",
+            "rps": 845,
+            "p99": "412 ms"
+          },
+          "status": "warn"
+        },
+        {
+          "cells": {
+            "service": "fjord",
+            "version": "v1.6.5",
+            "rps": 310,
+            "p99": "71 ms"
+          },
+          "status": "ok"
+        },
+        {
+          "cells": {
+            "service": "iris",
+            "version": "v0.9.2",
+            "rps": 57,
+            "p99": "120 ms"
+          },
+          "status": "ok"
+        }
+      ]
+    }
+  }
+}

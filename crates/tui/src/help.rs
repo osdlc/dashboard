@@ -18,7 +18,10 @@ pub const KEYS: &[(&str, &str)] = &[
     ("←↑↓→ hjkl", "move between tiles, or items inside one"),
     ("Enter", "go into a tile; on an item, open its link"),
     ("PgUp PgDn", "scroll a tall page (also Space, Home, End)"),
-    ("s", "show or hide settings (t theme, e edit config)"),
+    (
+        "s",
+        "show or hide settings (t theme, c colors, e edit config)",
+    ),
     ("r", "start or stop screen rotation (when configured)"),
     ("Esc", "close help or settings, or step back out"),
     ("mouse", "click tabs, links and buttons; wheel scrolls"),

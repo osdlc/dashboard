@@ -1,0 +1,35 @@
+{
+  "id": "donut",
+  "title": "Pie: donut",
+  "group": "primitives",
+  "default_size": "small",
+  "description": "The same widget as a ring, which is the default. `format: bytes` writes the legend in GiB. A slice's status (here warn on the free space) overrides its color.",
+  "view": {
+    "status": "warn",
+    "summary": "Disk 93% used",
+    "root": {
+      "type": "pie",
+      "label": "Disk",
+      "format": "bytes",
+      "slices": [
+        {
+          "label": "photos",
+          "value": 64424509440
+        },
+        {
+          "label": "apps",
+          "value": 32212254720
+        },
+        {
+          "label": "system",
+          "value": 21474836480
+        },
+        {
+          "label": "free",
+          "value": 8589934592,
+          "status": "warn"
+        }
+      ]
+    }
+  }
+}

@@ -12,6 +12,9 @@ Designed here but not built yet: push mode
 `run_command` action. The Rust types in `crates/contract` are the source of truth;
 `dashboard schema view` prints the current JSON Schema.
 
+**Every widget, by example:** [examples/blocks/](../examples/blocks/) has a view for each widget
+type and ways to combine them, checked against this contract by `cargo test -p dashboard-contract`.
+
 ## Overview
 
 ```text
@@ -106,6 +109,10 @@ pub enum Widget {
              series: Vec<SeriesData> },
     MeterGrid { label: Option<String>, meters: Vec<Meter>, color: ColorScale },   // e.g. per-core CPU
     Bars   { label: Option<String>, unit: Option<String>, format: ValueFormat, max: Option<f64>, bars: Vec<Bar> },
+    Pie    { label: Option<String>, slices: Vec<Slice>,                 // shares of a whole, see below
+             donut: bool,             // default true; false draws a full disc
+             format: ValueFormat, unit: Option<String>,
+             color: ColorScale },     // accent: a color per slice; heat | cool | sunset: spread along the scale
     List   { items: Vec<ListItem>, empty_text: Option<String> },
     Table  { columns: Vec<Column>, rows: Vec<Row> },
     Log    { label: Option<String>, lines: Vec<LogLine> },               // newest last
@@ -116,20 +123,35 @@ pub enum Widget {
 
 pub struct Thresholds { pub warn: f64, pub error: f64 }   // percent values
 
+// A color theme token, e.g. "ok" or "series-2". Widgets never carry raw colors.
+pub enum Tone { Accent, Ok, Warn, Error, Info, Muted, Series1, .., Series6 }
+// as JSON: "accent" | "ok" | "warn" | "error" | "info" | "muted" | "series-1" .. "series-6"
+
+pub struct Slice { pub label: String, pub value: f64, pub status: Option<Status>,   // value >= 0
+                   pub tone: Option<Tone> }                                         // color when no status
+
 pub struct SeriesData {
     pub name: String,
     pub points: Vec<(i64, f64)>,       // (unix ms, value)
+    pub tone: Option<Tone>,            // this series' color; default: the widget's `color` for
+                                       // area and bars, `series-1`, `series-2`, ... for lines
 }
+
+pub struct Meter { pub label: String, pub percent: f64, pub tone: Option<Tone> }   // tone: fixed color instead of the scale
+pub struct Bar   { pub label: String, pub value: f64, pub status: Option<Status>,
+                   pub tone: Option<Tone> }                                         // fill when no status; default accent
 
 pub struct ListItem {
     pub title: String,
     pub subtitle: Option<String>,
     pub status: Option<Status>,
+    pub tone: Option<Tone>,            // marker color when there is no status
     pub tags: Vec<String>,             // short labels: "draft", "review requested"
     pub action: Option<Action>,
 }
 
-pub struct Column { pub key: String, pub label: String }
+pub struct Column { pub key: String, pub label: String,
+                    pub priority: Option<i32> }    // which to drop first when narrow, see below
 
 pub struct Row {
     pub cells: BTreeMap<String, Cell>, // keyed by Column.key
@@ -141,7 +163,7 @@ pub struct Row {
 pub enum Cell {
     Text(String),
     Number(f64),
-    Widget(Widget),                    // only Stat and Gauge are rendered inline; others fall back to text
+    Widget(Widget),                    // Stat, Gauge and Pie are rendered inline; others fall back to text
 }
 
 // ---- Actions ----
@@ -166,6 +188,10 @@ pub trait Module: Send {
     /// Push-mode only: keep running and send views when they change.
     async fn start(&mut self, _tx: ViewSender) -> Result<()> { Ok(()) }
 }
+
+/// Each view as it changes, or an error. An error shows like a failed poll:
+/// the last good view, marked stale (or the error, before the first view).
+pub type ViewSender = mpsc::Sender<Result<View>>;
 ```
 
 ### Series history
@@ -173,6 +199,84 @@ pub trait Module: Send {
 A module that sets `id` on a `Series` widget sends only **new** samples in each update. The host appends them to a buffer per (tile, `id`, series name), keeps the last `history` points (default 300), drops samples older than the last one kept, and hands renderers the full history. Without `id`, `points` is taken as the complete series.
 
 Renderers currently receive the full series on every update. On localhost this is cheap; sending only the new points to renderers is a possible later optimization and doesn't change what modules send.
+
+### Pie
+
+A `pie` shows shares of a whole. Each slice's share is its value over the sum of all values, and
+slices go clockwise from twelve o'clock in the order given. The legend shows each slice's label,
+its value (with `format` and `unit`) and its percent.
+
+```json
+{"type": "pie", "label": "Disk", "format": "bytes",
+ "slices": [
+   {"label": "photos", "value": 64424509440},
+   {"label": "apps",   "value": 32212254720},
+   {"label": "free",   "value": 10737418240, "status": "warn"}
+ ]}
+```
+
+- `donut` defaults to true (a ring); `false` draws a full disc.
+- `color: accent` (the default) gives the slices the theme's `series-1` to `series-6` colors in
+  order. `heat`, `cool` and `sunset` spread the slices along that scale in order. A slice's
+  `status`, else its `tone`, overrides its color.
+- Values must be finite and 0 or more (`dashboard plugin-check` reports others). A pie with no
+  slices, or only zeros, shows "no data".
+- The web view draws an SVG with the legend beside it, or below it in a narrow tile. The TUI draws
+  a braille disc with the legend beside it when there is room, and otherwise one bar split into
+  the slices, with the legend packed below. In a table cell the web view shows a small disc and the
+  TUI the largest slice as text ("photos 60%").
+
+Pies compose like the other widgets. A donut next to two stats:
+
+```json
+{"type": "row", "children": [
+  {"type": "pie", "label": "Disk", "format": "bytes", "slices": [
+    {"label": "used", "value": 300000000000},
+    {"label": "free", "value": 200000000000}]},
+  {"type": "column", "children": [
+    {"type": "stat", "label": "Used", "value": "279", "unit": "GiB"},
+    {"type": "stat", "label": "Free", "value": "186", "unit": "GiB"}]}
+]}
+```
+
+### When a view doesn't fit
+
+A tile's size comes from its size class and the screen, never from its view. On the 12-column
+grid a row unit is 120px in the web view (84px compact) and 5 lines in a 120-column terminal, so
+a small tile (3x1) is 120px or 5 lines tall and a tall one (4x4) 528px or 20 lines. A long view
+never makes its tile taller or pushes other tiles around. The renderer fits the view to the tile
+instead, the same way in both views:
+
+- **Top to bottom, a widget at a time.** A `column` (and a `row` stacked because it is narrow)
+  gives its children the room they want in order. The first child that doesn't fit gets what
+  is left if it can show something there (below), and the children after it are left out. A
+  one-line `text` just before the cut is a heading: it is left out too, and (web) its room goes
+  to the section it heads. A list or table that would show only "+N more" is left out.
+  Gaps between children go first when room is short (terminal).
+- **The child at the cut shows a shorter form.** A `list` shows the items that fit whole and
+  "+N more" in the last line (in one terminal line: the first title and "+N"). A `table`,
+  `bars`, `uptime`, a pie's legend and a meter grid do the same with their rows. A `series`
+  shrinks to its value line and a strip of graph; a `log` shows its newest lines.
+- **Text is cut at the edge with "…"**, counting wide characters (CJK, emoji) as two cells:
+  list titles and subtitles, table cells, bar and legend labels, log lines.
+- **Too narrow for a table:** columns are dropped, lowest `priority` first (default 0; of equal
+  ones the rightmost), until the rest fit at their least width (terminal: 12 cells for the
+  first column, 6 for others, or less if the column is narrower). The first column is always
+  kept. The widest columns then give up room and their cells end with "…".
+- **Too small for anything:** the tile shows the view's `summary`. The web view always shows the
+  summary next to the tile's name, on one line.
+- A `row` side by side gives each child the full height and the same share of the width; it
+  stacks (terminal) or wraps (web) when a child would get less than about 24 cells or 140px
+  (90px for a stat). In a narrow web list (under 300px) item tags are left out.
+- The fullscreen (double-click) view isn't fitted: it shows the whole view and scrolls.
+
+**How a module adapts.** Modules aren't told their tile's size: the same view goes to every
+renderer and screen (see "Not in v0.1"). So put what matters most first: the cut is always at the
+bottom, the right of a row, and the end of a list. A typical tile leads with one or two stats or a
+gauge, then a graph or list, then detail. Give table columns a `priority` so a narrow tile keeps
+the useful ones (the kubernetes tile keeps pod, status and ready). Keep the `summary` short: it
+is what a tile too small for the view shows. `dashboard plugin-check --width W --height H`
+shows the view fitted to a tile of that size.
 
 ## Stdio plugin protocol
 
@@ -241,6 +345,8 @@ On connect, the web view first gets renderer settings, then a tile message per t
 ```json
 { "type": "settings", "settings": {
     "theme": "auto",
+    "color_theme": { "name": "default", "light": { "bg": "#f6f7f9", "accent": "#2f6fde", ... }, "dark": { ... } },
+    "color_themes": ["default", "contrast", "paper", "ember"],
     "screens": [{ "name": "main", "tiles": [{ "tile_id": "sysperf", "size": "large" }] }],
     "modules": [{ "tile_id": "sysperf", "name": "System", "refresh_ms": 1000, "refresh_overridden": false, "commands": [] }],
     "rotate": null,
@@ -253,9 +359,15 @@ The web view sends actions back as `ClientMessage`s (the TUI sends the same valu
 
 ```json
 { "type": "set_theme", "theme": "dark" }
+{ "type": "set_color_theme", "name": "paper" }
 ```
 
-The host writes `theme:` into the config file with yaml-splice (only that key's bytes change) and reloads. Running commands will be added here as `run_command`.
+The host writes `theme:` (or `color_theme:`) into the config file with yaml-splice (only that key's bytes change) and reloads.
+
+`color_theme` holds every token of the theme in use, for both variants; `theme` picks the variant.
+The web view turns the tokens into CSS variables of the same names (`--accent`, `--series-1`).
+Token names and the built-in themes are in `crates/contract/src/theme.rs` and in the README's Themes
+section. Running commands will be added here as `run_command`.
 
 ## Example: cswap plugin
 
@@ -396,4 +508,5 @@ and a demo view that passes `check_view`.
 - WASM plugins. The same types will be mirrored in a WIT file once the contract is stable.
 - Plugin-defined events or callbacks (clicks sent to the plugin).
 - Data passed between modules.
-- Per-size rendering (a different view for each size class).
+- Per-size rendering (a different view for each size class). `view/render` has no size: a
+  module is fitted to its tile by the renderer, as above.

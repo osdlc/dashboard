@@ -81,6 +81,7 @@ mod tests {
                     mirrored: false,
                     format: Default::default(),
                     series: vec![SeriesData {
+                        tone: None,
                         name: "total".into(),
                         points,
                     }],

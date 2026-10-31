@@ -13,7 +13,7 @@ Built-in modules are grouped into bundles, one crate per bundle:
 
 | Bundle | Crate | Modules |
 |---|---|---|
-| system | `crates/modules-system` | cpu, memory, gpu, network, disk, processes, log, uptime, textfile, battery, cmdrunner, security |
+| system | `crates/modules-system` | cpu, memory, gpu, network, disk, processes, log, uptime, textfile, battery, cmdrunner, security, http, file |
 | dev | `crates/modules-dev` | github-prs, github-issues, jira, linear, forgejo, git |
 | fun | `crates/modules-fun` | demo, clock, hackernews, feedreader, subreddit, devto, mempool, crypto, scores |
 | agents | `crates/modules-agents` | codex, copilot, cursor, antigravity, gemini, opencode, pi |
@@ -144,3 +144,8 @@ in `bundles()` in `crates/modules/src/lib.rs`.
 
 Tokens never go in the config file or the code: read them through `token_env` /
 `token_command` (see `Secret` in `crates/modules-common/src/secret.rs`).
+
+A setting that is a file or folder path gets `#[schemars(extend("x-path" = true))]` on its field
+(a string or a list of strings). Before the module starts, the runtime makes relative paths in it
+start from the folder of the config file that set them, so the module only expands `~/` with
+`expand_home`. `path_settings_are_marked` in `crates/modules/src/lib.rs` checks the usual names.

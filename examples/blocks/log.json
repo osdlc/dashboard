@@ -1,0 +1,51 @@
+{
+  "id": "log",
+  "title": "Log",
+  "group": "primitives",
+  "default_size": "medium",
+  "description": "Log lines, oldest first; renderers show the newest that fit. Each line can have a time, shown before it, and a level (error, warn, info, debug) that colors it.",
+  "view": {
+    "status": "error",
+    "summary": "1 error in the last minute",
+    "root": {
+      "type": "log",
+      "label": "api",
+      "lines": [
+        {
+          "time": "04:16:52",
+          "level": "debug",
+          "text": "cache hit ratio 0.93"
+        },
+        {
+          "time": "04:16:58",
+          "level": "info",
+          "text": "worker 409 picked up job 18233"
+        },
+        {
+          "time": "04:16:59",
+          "level": "warn",
+          "text": "slow query took 540ms: SELECT * FROM runs"
+        },
+        {
+          "time": "04:16:59",
+          "level": "error",
+          "text": "connection reset by peer (10.0.4.12:5432)"
+        },
+        {
+          "time": "04:17:00",
+          "level": "info",
+          "text": "POST /api/runs 201 in 293ms"
+        },
+        {
+          "time": "04:17:02",
+          "level": "info",
+          "text": "GET /api/health 200 in 3ms"
+        },
+        {
+          "time": "04:17:05",
+          "text": "retrying connection, attempt 2"
+        }
+      ]
+    }
+  }
+}

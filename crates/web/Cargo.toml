@@ -7,9 +7,9 @@ license.workspace = true
 [dependencies]
 anyhow = "1.0.104"
 axum = { version = "0.8.9", features = ["ws"] }
-dashboard-cli-kit = { version = "0.7.0", path = "../cli-kit" }
-dashboard-contract = { version = "0.7.0", path = "../contract" }
-dashboard-host = { version = "0.7.0", path = "../host" }
+dashboard-cli-kit = { version = "0.8.0", path = "../cli-kit" }
+dashboard-contract = { version = "0.8.0", path = "../contract" }
+dashboard-host = { version = "0.8.0", path = "../host" }
 futures-util = "0.3.34"
 rust-embed = { version = "8.13.0", features = ["mime-guess"] }
 serde = { version = "1.0.229", features = ["derive"] }

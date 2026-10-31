@@ -1,0 +1,19 @@
+{
+  "id": "stat",
+  "title": "Stat",
+  "group": "primitives",
+  "default_size": "small",
+  "description": "One number with a label. The value is a string, already formatted, so the module decides how it reads (\"3451\", \"1.2k\", \"4:12\"). A unit, a change since last time (delta) and a status (ok, warn, error) are optional; the status colors the value.",
+  "view": {
+    "status": "warn",
+    "summary": "p99 184 ms",
+    "root": {
+      "type": "stat",
+      "label": "p99 latency",
+      "value": "184",
+      "unit": "ms",
+      "delta": "+41 ms",
+      "status": "warn"
+    }
+  }
+}

@@ -107,15 +107,15 @@ modules:
     config: { command: git log --oneline -15, name: Recent commits }
   readme:
     builtin: textfile
-    # A built-in module reads paths from where the dashboard was started.
-    config: { path: README.md, lines: 40 }
+    # Relative paths start from this file's folder.
+    config: { path: ../README.md, lines: 40 }
 
   # ---- dev bundle: GitHub is real through gh; the rest need tokens ----
   github-prs: {}
   github-issues: {}
   git:
-    # Repositories under the folder the dashboard was started in.
-    config: { repos: [.] }
+    # This repository: relative paths start from this file's folder.
+    config: { repos: [..] }
   jira:
     demo: true            # real: set $JIRA_API_TOKEN and config { url, email }
   linear:
@@ -220,22 +220,22 @@ modules:
   # The task and calendar modules below read the sample files in
   # crates/modules-personal/testdata. Point them at your own files.
   todo:
-    config: { path: crates/modules-personal/testdata/todo/todo.md }
+    config: { path: ../crates/modules-personal/testdata/todo/todo.md }
   calendar:
-    config: { path: crates/modules-personal/testdata/calendar/team.ics, days: 2 }
+    config: { path: ../crates/modules-personal/testdata/calendar/team.ics, days: 2 }
   org-agenda:
     config:
-      paths: [crates/modules-personal/testdata/org]
+      paths: [../crates/modules-personal/testdata/org]
       days: 14
       undated: true
   markdown-tasks:
-    config: { paths: [crates/modules-personal/testdata/markdown] }
+    config: { paths: [../crates/modules-personal/testdata/markdown] }
   todo-txt:
-    config: { path: crates/modules-personal/testdata/todo-txt/todo.txt }
+    config: { path: ../crates/modules-personal/testdata/todo-txt/todo.txt }
   taskwarrior:
     demo: true            # real: install Taskwarrior (`task`)
   sdlc:
-    config: { path: crates/modules-personal/testdata/sdlc, planning: true }
+    config: { path: ../crates/modules-personal/testdata/sdlc, planning: true }
   # Task services that need a token: plugin packages (untested live).
   asana:
     package: asana
@@ -335,7 +335,7 @@ modules:
     config: { zones: [local, UTC, Asia/Kolkata], seconds: true }
   battery-native:
     builtin: battery
-    config: { sample: crates/modules-system/testdata/battery/pmset-discharging.txt }
+    config: { sample: ../crates/modules-system/testdata/battery/pmset-discharging.txt }
   battery-ts:
     plugin: [node, ../plugins/ext/battery-ts/main.ts]
     config: { sample: ../crates/modules-system/testdata/battery/pmset-discharging.txt }
@@ -345,7 +345,7 @@ modules:
   # How the benchmark is run.
   bench-report:
     builtin: textfile
-    config: { path: bench/README.md, lines: 120 }
+    config: { path: ../bench/README.md, lines: 120 }
 
   # ---- demo mode: the same modules shown with `demo: true` ----
   cpu-demo:
