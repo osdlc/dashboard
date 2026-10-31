@@ -247,6 +247,16 @@ pub enum Widget {
     },
     /// Availability checks, one row each with a strip of recent results.
     Uptime { checks: Vec<UptimeCheck> },
+    /// A picture from a file on the machine the dashboard runs on. The terminal
+    /// draws it with the best graphics it supports (Kitty, iTerm2 or Sixel),
+    /// or with colored half blocks. It is scaled to fit and keeps its shape.
+    Image {
+        /// Image file: PNG, JPEG, GIF (first frame), WebP or BMP.
+        path: String,
+        /// A line under the picture, e.g. the file name.
+        #[serde(default)]
+        caption: Option<String>,
+    },
     /// Widgets side by side, sharing the width.
     Row { children: Vec<Widget> },
     /// Widgets stacked top to bottom.

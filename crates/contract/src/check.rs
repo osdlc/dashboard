@@ -206,6 +206,11 @@ fn widget(w: &Widget, at: &str, out: &mut Vec<Finding>) {
                 widget(child, &format!("{at}.children[{i}]"), out);
             }
         }
+        Widget::Image { path, .. } => {
+            if path.trim().is_empty() {
+                problem(out, format!("{at}: image path is empty"));
+            }
+        }
         Widget::Text { .. } | Widget::Stat { .. } | Widget::Bars { .. } | Widget::Log { .. } => {}
     }
 }

@@ -288,6 +288,9 @@ fn draw_widget(f: &mut Canvas, p: &Palette, area: Rect, widget: &Widget, hits: &
             }
             draw_more(f, p, area, shown as u16, more);
         }
+        Widget::Image { path, caption } => {
+            crate::images::draw(f, p, area, path, caption.as_deref());
+        }
         Widget::Row { children } if stack(children.len(), area.width) => {
             draw_stack(f, p, area, children, 0, hits);
         }
@@ -632,6 +635,7 @@ fn want(widget: &Widget, width: u16) -> Want {
         Widget::Table { rows, .. } => fixed(1 + rows.len().max(1) as u16),
         Widget::Log { label, .. } => grows(5 + label.is_some() as u16),
         Widget::Uptime { checks } => fixed(checks.len().max(1) as u16),
+        Widget::Image { caption, .. } => grows(4 + caption.is_some() as u16),
         Widget::Row { children } if stack(children.len(), width) => {
             let wants = children.iter().map(|c| want(c, width));
             wants.fold(fixed(0), |a, w| Want {

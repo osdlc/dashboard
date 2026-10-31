@@ -28,7 +28,9 @@ use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
 use axum::{Json, Router};
 use dashboard_cli_kit::boot::{self, Redeem, SignIn};
-use dashboard_contract::{CatalogEntry, CatalogResponse, ClientMessage, ServerMessage, UiSettings};
+use dashboard_contract::{
+    CatalogEntry, CatalogResponse, ClientMessage, ServerMessage, UiSettings, Widget,
+};
 use dashboard_host::Host;
 use futures_util::{SinkExt, StreamExt};
 use rust_embed::RustEmbed;
@@ -141,6 +143,7 @@ fn router(state: AppState) -> Router {
     let api = Router::new()
         .route("/api/tiles", get(tiles))
         .route("/api/catalog", get(catalog))
+        .route("/api/image", get(image))
         .route("/api/ws", get(ws))
         .route("/api/boot", post(new_boot))
         .layer(middleware::from_fn_with_state(state.clone(), require_token));
@@ -280,6 +283,66 @@ async fn new_boot(State(state): State<AppState>) -> Json<BootResponse> {
 
 async fn tiles(State(state): State<AppState>) -> impl IntoResponse {
     Json(state.host.snapshot().await)
+}
+
+/// Larger pictures are refused; they would be slow to send and to draw.
+const MAX_IMAGE_BYTES: u64 = 32 * 1024 * 1024;
+
+#[derive(Deserialize)]
+struct ImageQuery {
+    path: String,
+}
+
+/// Sends a picture that an `image` widget shows now. Only those: a path no
+/// tile's current view names is refused, so this can't read other files.
+async fn image(State(state): State<AppState>, Query(q): Query<ImageQuery>) -> Response {
+    let shown = state
+        .host
+        .snapshot()
+        .await
+        .iter()
+        .any(|t| shows_image(&t.view.root, &q.path));
+    if !shown {
+        return StatusCode::NOT_FOUND.into_response();
+    }
+    let ext = std::path::Path::new(&q.path)
+        .extension()
+        .and_then(|e| e.to_str())
+        .map(str::to_ascii_lowercase);
+    let mime = match ext.as_deref() {
+        Some("png") => "image/png",
+        Some("jpg" | "jpeg") => "image/jpeg",
+        Some("gif") => "image/gif",
+        Some("webp") => "image/webp",
+        Some("bmp") => "image/bmp",
+        _ => return StatusCode::UNSUPPORTED_MEDIA_TYPE.into_response(),
+    };
+    match tokio::fs::metadata(&q.path).await {
+        Ok(m) if m.is_file() && m.len() <= MAX_IMAGE_BYTES => {}
+        Ok(m) if m.is_file() => return StatusCode::PAYLOAD_TOO_LARGE.into_response(),
+        _ => return StatusCode::NOT_FOUND.into_response(),
+    }
+    match tokio::fs::read(&q.path).await {
+        Ok(bytes) => (
+            [
+                (header::CONTENT_TYPE, mime),
+                (header::CACHE_CONTROL, "private, no-cache"),
+            ],
+            bytes,
+        )
+            .into_response(),
+        Err(_) => StatusCode::NOT_FOUND.into_response(),
+    }
+}
+
+fn shows_image(widget: &Widget, path: &str) -> bool {
+    match widget {
+        Widget::Image { path: p, .. } => p == path,
+        Widget::Row { children } | Widget::Column { children } => {
+            children.iter().any(|c| shows_image(c, path))
+        }
+        _ => false,
+    }
 }
 
 #[derive(Deserialize)]
@@ -472,6 +535,107 @@ mod tests {
             .body(Body::empty())
             .unwrap();
         assert_eq!(call(&state, query).await.0, StatusCode::UNAUTHORIZED);
+    }
+
+    struct Picture(String);
+
+    #[async_trait::async_trait]
+    impl dashboard_host::Module for Picture {
+        async fn init(
+            &mut self,
+            _: serde_json::Value,
+        ) -> anyhow::Result<dashboard_contract::Manifest> {
+            Ok(dashboard_contract::Manifest {
+                id: "picture".into(),
+                name: "picture".into(),
+                contract_version: dashboard_contract::CONTRACT_VERSION.into(),
+                refresh: dashboard_contract::Refresh::Poll {
+                    interval_ms: 60_000,
+                    min_interval_ms: None,
+                },
+                layout: dashboard_contract::LayoutHints {
+                    size: dashboard_contract::Size::Medium,
+                    priority: 0,
+                    min_size: None,
+                },
+                commands: vec![],
+                config_schema: None,
+            })
+        }
+        async fn render(&mut self) -> anyhow::Result<dashboard_contract::View> {
+            Ok(dashboard_contract::View {
+                status: dashboard_contract::Status::Ok,
+                summary: "a picture".into(),
+                root: Widget::Column {
+                    children: vec![Widget::Image {
+                        path: self.0.clone(),
+                        caption: None,
+                    }],
+                },
+            })
+        }
+    }
+
+    /// A picture a tile shows is served; any other file, or no token, is not.
+    #[tokio::test]
+    async fn serves_only_pictures_a_tile_shows() {
+        let dir = std::env::temp_dir().join(format!("dashboard-web-image-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let shown = dir.join("shown.png");
+        let other = dir.join("other.png");
+        std::fs::write(&shown, b"png bytes").unwrap();
+        std::fs::write(&other, b"secret").unwrap();
+
+        let state = state();
+        state
+            .host
+            .spawn(
+                "picture",
+                Box::new(Picture(shown.to_string_lossy().into_owned())),
+                serde_json::Value::Null,
+                Default::default(),
+            )
+            .await
+            .unwrap();
+        while state.host.snapshot().await.is_empty() {
+            tokio::task::yield_now().await;
+        }
+        let get = |path: &std::path::Path, auth: bool| {
+            let mut req = Request::get(format!(
+                "/api/image?path={}",
+                urlencode(&path.to_string_lossy())
+            ))
+            .header(header::HOST, "127.0.0.1:1");
+            if auth {
+                req = req.header(header::AUTHORIZATION, "Bearer session");
+            }
+            req.body(Body::empty()).unwrap()
+        };
+        assert_eq!(
+            call(&state, get(&shown, true)).await,
+            (StatusCode::OK, "png bytes".to_string())
+        );
+        assert_eq!(
+            call(&state, get(&other, true)).await.0,
+            StatusCode::NOT_FOUND
+        );
+        assert_eq!(
+            call(&state, get(&shown, false)).await.0,
+            StatusCode::UNAUTHORIZED
+        );
+        state.host.stop_all().await;
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    fn urlencode(s: &str) -> String {
+        s.bytes()
+            .map(|b| match b {
+                b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'.' | b'_' | b'~' => {
+                    (b as char).to_string()
+                }
+                _ => format!("%{b:02X}"),
+            })
+            .collect()
     }
 
     /// The page's WebSocket carries the token as a subprotocol, since a

@@ -47,6 +47,12 @@ modules:
   events:
     builtin: demo
     config: { show: feed, count: 8 }
+  # Not a demo tile: the screensaver's built-in sample pictures, one per format.
+  # The terminal draws them with Kitty, iTerm2 or Sixel graphics, or half
+  # blocks; the web view loads them from the server.
+  pictures:
+    builtin: screensaver
+    refresh: 8s
 
   # ---- charts ----
   heat-area:
@@ -169,6 +175,7 @@ screens:
       - { module: storage, size: medium }
       - { module: events, size: wide }
       - { module: readme, size: medium }
+      - { module: pictures, size: large }
   - name: charts
     tiles:
       - { module: heat-area, size: wide }

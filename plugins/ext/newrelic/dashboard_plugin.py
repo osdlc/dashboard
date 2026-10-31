@@ -517,6 +517,20 @@ class UptimeWidget(TypedDict):
     type: Literal["uptime"]
 
 
+class _ImageWidgetRequired(TypedDict):
+    # Image file: PNG, JPEG, GIF (first frame), WebP or BMP.
+    path: str
+    type: Literal["image"]
+
+
+# A picture from a file on the machine the dashboard runs on. The terminal
+# draws it with the best graphics it supports (Kitty, iTerm2 or Sixel),
+# or with colored half blocks. It is scaled to fit and keeps its shape.
+class ImageWidget(_ImageWidgetRequired, total=False):
+    # A line under the picture, e.g. the file name.
+    caption: Optional[str]
+
+
 # Widgets side by side, sharing the width.
 class RowWidget(TypedDict):
     children: List["Widget"]
@@ -562,6 +576,6 @@ SeriesStyle = Union[Literal["line"], Literal["area"], Literal["bars"]]
 
 ValueFormat = Union[Literal["plain"], Literal["bytes"], Literal["count"]]
 
-Widget = Union["TextWidget", "StatWidget", "GaugeWidget", "SeriesWidget", "MeterGridWidget", "BarsWidget", "PieWidget", "ListWidget", "TableWidget", "LogWidget", "UptimeWidget", "RowWidget", "ColumnWidget"]
+Widget = Union["TextWidget", "StatWidget", "GaugeWidget", "SeriesWidget", "MeterGridWidget", "BarsWidget", "PieWidget", "ListWidget", "TableWidget", "LogWidget", "UptimeWidget", "ImageWidget", "RowWidget", "ColumnWidget"]
 
 # ---- END GENERATED ----

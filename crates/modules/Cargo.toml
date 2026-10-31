@@ -31,6 +31,7 @@ bundle-system = [
     "module-security",
     "module-http",
     "module-file",
+    "module-screensaver",
 ]
 bundle-dev = [
     "module-github-prs",
@@ -93,6 +94,7 @@ module-cmdrunner = ["dashboard-modules-system/cmdrunner"]
 module-security = ["dashboard-modules-system/security"]
 module-http = ["dashboard-modules-system/http"]
 module-file = ["dashboard-modules-system/file"]
+module-screensaver = ["dashboard-modules-system/screensaver"]
 module-github-prs = ["dashboard-modules-dev/github-prs"]
 module-github-issues = ["dashboard-modules-dev/github-issues"]
 module-jira = ["dashboard-modules-dev/jira"]
