@@ -41,6 +41,18 @@ fn interesting(mount: &Path, total: u64) -> bool {
             || !(m.starts_with("/System") || m.starts_with("/private") || m.starts_with("/dev")))
 }
 
+/// Bytes read and written, counting each device once: on macOS the APFS
+/// volumes of one disk (`/` and `/System/Volumes/Data`) share a name and
+/// report the same I/O counters, so a plain sum counts them twice. Two
+/// different devices with the same name (two disk images mounted under one
+/// name) are counted once, as the gauges show them; the total errs low.
+fn io_sum<'a>(disks: impl Iterator<Item = (&'a std::ffi::OsStr, u64, u64)>) -> (u64, u64) {
+    let mut seen = BTreeSet::new();
+    disks
+        .filter(|(name, ..)| seen.insert(*name))
+        .fold((0, 0), |(r, w), (_, read, written)| (r + read, w + written))
+}
+
 #[async_trait]
 impl Module for Disk {
     async fn init(&mut self, _config: serde_json::Value) -> Result<Manifest> {
@@ -49,13 +61,10 @@ impl Module for Disk {
 
     async fn render(&mut self) -> Result<View> {
         self.disks.refresh(true);
-        let (read, written) = self
-            .disks
-            .iter()
-            .map(|d| d.usage())
-            .fold((0u64, 0u64), |(r, w), u| {
-                (r + u.read_bytes, w + u.written_bytes)
-            });
+        let (read, written) = io_sum(self.disks.iter().map(|d| {
+            let u = d.usage();
+            (d.name(), u.read_bytes, u.written_bytes)
+        }));
 
         let mut seen = BTreeSet::new();
         let mut gauges = vec![];
@@ -143,5 +152,19 @@ pub fn catalog() -> CatalogEntry {
         description: "Disk reads and writes over time, and space used per volume.".into(),
         tags: crate::strings(&["system", "local", "storage"]),
         ..crate::entry("disk", "Disk", Size::Medium, demo)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::ffi::OsStr;
+
+    #[test]
+    fn io_counts_each_device_once() {
+        let hd = OsStr::new("Macintosh HD");
+        let usb = OsStr::new("Backup");
+        let disks = [(hd, 100, 10), (hd, 100, 10), (usb, 5, 1)];
+        assert_eq!(io_sum(disks.into_iter()), (105, 11));
     }
 }

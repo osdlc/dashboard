@@ -290,33 +290,57 @@ impl Config {
     }
 }
 
+/// What a write starts from when the config file doesn't exist yet.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Missing {
+    /// The default config: no config file was found at all, so the demo
+    /// layout was on screen, and saving a setting keeps it.
+    Demo,
+    /// An empty file: other files (a project file) make up the config, so
+    /// the demo was not on screen and must not be written in.
+    Empty,
+}
+
 /// Set `theme:` in the config file, changing only that key's bytes so the
 /// user's comments and layout stay. Creates the file if it doesn't exist.
 /// `etag` is the version the change is based on (see [`set_top_level`]).
-pub fn write_theme(path: &Path, theme: Theme, etag: Option<&str>) -> Result<()> {
+pub fn write_theme(path: &Path, missing: Missing, theme: Theme, etag: Option<&str>) -> Result<()> {
     let value = match theme {
         Theme::Auto => "auto",
         Theme::Light => "light",
         Theme::Dark => "dark",
     };
-    set_top_level(path, "theme", yaml_splice::Value::from(value), etag)
+    set_top_level(
+        path,
+        missing,
+        "theme",
+        yaml_splice::Value::from(value),
+        etag,
+    )
 }
 
 /// Replace `screens:` with these, keeping the rest of the file as written.
 /// Comments inside the old `screens:` block are lost.
-pub fn write_screens(path: &Path, screens: &[ScreenLayout], etag: Option<&str>) -> Result<()> {
-    write_screen_values(path, screens_json(screens)?, etag)
+pub fn write_screens(
+    path: &Path,
+    missing: Missing,
+    screens: &[ScreenLayout],
+    etag: Option<&str>,
+) -> Result<()> {
+    write_screen_values(path, missing, screens_json(screens)?, etag)
 }
 
 /// Set `screens:` to these screens, as they are written in a config file.
 /// `etag` as for [`set_top_level`].
 pub fn write_screen_values(
     path: &Path,
+    missing: Missing,
     screens: Vec<serde_json::Value>,
     etag: Option<&str>,
 ) -> Result<()> {
     set_top_level(
         path,
+        missing,
         "screens",
         yaml_splice::Value::from(&serde_json::Value::Array(screens)),
         etag,
@@ -353,11 +377,12 @@ pub fn screens_json(screens: &[ScreenLayout]) -> Result<Vec<serde_json::Value>> 
 /// stale view never overwrites newer edits. A missing file is created.
 fn set_top_level(
     path: &Path,
+    start: Missing,
     key: &str,
     value: yaml_splice::Value,
     etag: Option<&str>,
 ) -> Result<()> {
-    let (source, missing) = read_source(path)?;
+    let (source, missing) = read_source(path, start)?;
     let edit = yaml_splice::FieldEdit::Set {
         key: key.into(),
         value,
@@ -383,14 +408,14 @@ fn set_top_level(
     write_over(path, &source, missing, &out.bytes)
 }
 
-/// The config file's bytes, or the default config when there is no file
-/// (true), so saving a setting keeps the demo layout that was on screen.
-fn read_source(path: &Path) -> Result<(Vec<u8>, bool)> {
+/// The config file's bytes, or what `start` says when there is no file (true).
+fn read_source(path: &Path, start: Missing) -> Result<(Vec<u8>, bool)> {
     match std::fs::read(path) {
         Ok(bytes) => Ok((bytes, false)),
-        Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
-            Ok((DEFAULT_CONFIG.as_bytes().to_vec(), true))
-        }
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => match start {
+            Missing::Demo => Ok((DEFAULT_CONFIG.as_bytes().to_vec(), true)),
+            Missing::Empty => Ok((vec![], true)),
+        },
         Err(e) => Err(e).with_context(|| format!("reading {}", path.display())),
     }
 }
@@ -530,7 +555,7 @@ rotate:
                 size: Size::Wide,
             }],
         }];
-        write_screens(&path, &screens, etag_of(&path).as_deref()).unwrap();
+        write_screens(&path, Missing::Demo, &screens, etag_of(&path).as_deref()).unwrap();
         let text = std::fs::read_to_string(&path).unwrap();
         assert!(text.starts_with("# mine\ntheme: dark  # keep\n"), "{text}");
         let c = parse(&text).unwrap();
@@ -539,7 +564,7 @@ rotate:
         assert_eq!(c.screens[0].tiles[0].size, Some(Size::Wide));
 
         let dup = vec![screens[0].clone(), screens[0].clone()];
-        assert!(write_screens(&path, &dup, etag_of(&path).as_deref()).is_err());
+        assert!(write_screens(&path, Missing::Demo, &dup, etag_of(&path).as_deref()).is_err());
         std::fs::remove_dir_all(&dir).unwrap();
     }
 
@@ -562,7 +587,13 @@ rotate:
             "# My dashboard\ntheme: dark   # night mode\nscreens: []\n",
         )
         .unwrap();
-        write_theme(&path, Theme::Light, etag_of(&path).as_deref()).unwrap();
+        write_theme(
+            &path,
+            Missing::Demo,
+            Theme::Light,
+            etag_of(&path).as_deref(),
+        )
+        .unwrap();
         assert_eq!(
             std::fs::read_to_string(&path).unwrap(),
             "# My dashboard\ntheme: light   # night mode\nscreens: []\n"
@@ -570,7 +601,7 @@ rotate:
 
         // Key missing: appended.
         std::fs::write(&path, "# only a comment\nscreens: []\n").unwrap();
-        write_theme(&path, Theme::Dark, etag_of(&path).as_deref()).unwrap();
+        write_theme(&path, Missing::Demo, Theme::Dark, etag_of(&path).as_deref()).unwrap();
         assert_eq!(
             std::fs::read_to_string(&path).unwrap(),
             "# only a comment\nscreens: []\ntheme: dark\n"
@@ -578,7 +609,7 @@ rotate:
 
         // No file yet: created from the default config, even if the value matches.
         std::fs::remove_file(&path).unwrap();
-        write_theme(&path, Theme::Auto, None).unwrap();
+        write_theme(&path, Missing::Demo, Theme::Auto, None).unwrap();
         assert_eq!(std::fs::read_to_string(&path).unwrap(), DEFAULT_CONFIG);
         assert_eq!(
             parse(&std::fs::read_to_string(&path).unwrap())
@@ -604,13 +635,13 @@ rotate:
 
         // Someone edits the file after the view read it.
         std::fs::write(&path, "theme: dark  # edited\n").unwrap();
-        let err = write_theme(&path, Theme::Light, seen.as_deref()).unwrap_err();
+        let err = write_theme(&path, Missing::Demo, Theme::Light, seen.as_deref()).unwrap_err();
         assert!(
             err.to_string().contains("changed since this view read it"),
             "{err}"
         );
         // No etag (the view read no file) is refused too, once a file exists.
-        let err = write_theme(&path, Theme::Light, None).unwrap_err();
+        let err = write_theme(&path, Missing::Demo, Theme::Light, None).unwrap_err();
         assert!(
             err.to_string().contains("changed since this view read it"),
             "{err}"
@@ -621,7 +652,13 @@ rotate:
         );
 
         // With the current etag it goes through.
-        write_theme(&path, Theme::Light, etag_of(&path).as_deref()).unwrap();
+        write_theme(
+            &path,
+            Missing::Demo,
+            Theme::Light,
+            etag_of(&path).as_deref(),
+        )
+        .unwrap();
         assert_eq!(
             std::fs::read_to_string(&path).unwrap(),
             "theme: light  # edited\n"

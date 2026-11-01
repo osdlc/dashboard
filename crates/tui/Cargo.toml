@@ -6,8 +6,8 @@ license.workspace = true
 
 [dependencies]
 anyhow = "1.0.104"
-dashboard-contract = { version = "0.6.0", path = "../contract" }
-dashboard-host = { version = "0.6.0", path = "../host" }
+dashboard-contract = { version = "0.7.0", path = "../contract" }
+dashboard-host = { version = "0.7.0", path = "../host" }
 ratatui = "0.30.2"
 terminal-colorsaurus = "1.0.3"
 tokio = { version = "1.54.1", features = ["full"] }

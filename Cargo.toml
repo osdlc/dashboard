@@ -1,13 +1,16 @@
 [workspace]
 resolver = "3"
-members = ["crates/*", "plugins/*", "bench"]
+members = ["crates/*", "plugins/*", "bench", "apps/*"]
+# Plain `cargo build` / `cargo test` leave out the desktop app (Tauri: slow to
+# build, and on Linux it needs WebKitGTK). `--workspace` or `-p` include it.
+default-members = ["crates/*", "plugins/*", "bench"]
 # Plugins in other languages and the WASM plugins (the native-vs-plugin
 # benchmark): not workspace crates.
 exclude = ["plugins/ext", "bench/wasm"]
 
 [workspace.package]
 edition = "2024"
-version = "0.6.0"
+version = "0.7.0"
 license = "MIT OR Apache-2.0"
 
 # Smallest binary: `cargo build --profile small`. Slower to build.

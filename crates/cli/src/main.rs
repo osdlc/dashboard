@@ -11,19 +11,14 @@ use dashboard_config::Config;
 use dashboard_config::layers::Sources;
 use dashboard_config::packages::Packages;
 use dashboard_contract::{CatalogEntry, Index, Manifest, Package, ServerMessage, View, rpc};
-use dashboard_contract::{ClientMessage, UiSettings};
-use dashboard_host::Host;
-use runtime::{Runtime, handle_actions, load_valid, missing_packages, watch_config};
+use dashboard_runtime::{load_valid, missing_packages, start};
 use serde_json::json;
-use tokio::sync::Mutex;
-use tokio::sync::{mpsc, watch};
 
 mod background;
 mod dashboards;
 mod marketplace;
 mod plugin_check;
 mod plugin_new;
-mod runtime;
 mod widgets;
 
 const NAME: &str = "dashboard";
@@ -232,9 +227,10 @@ enum PluginCommand {
         #[arg(long)]
         out: PathBuf,
     },
-    /// Run the bundled cswap plugin over stdio (the dashboard starts it itself).
-    #[command(hide = true)]
-    Cswap,
+    /// `plugin <id>` runs a bundled plugin over stdio (the dashboard starts it
+    /// itself; see dashboard_runtime::run_bundled).
+    #[command(external_subcommand)]
+    Bundled(Vec<String>),
 }
 
 #[derive(clap::Args)]
@@ -279,7 +275,13 @@ fn main() -> ExitCode {
     };
     let result = tokio::runtime::Runtime::new()
         .map_err(anyhow::Error::from)
-        .and_then(|rt| rt.block_on(run(cli)));
+        .and_then(|rt| {
+            let result = rt.block_on(run(cli));
+            // Dropping the tasks kills the plugins they own; don't wait long
+            // on a blocking call that won't finish.
+            rt.shutdown_timeout(std::time::Duration::from_secs(2));
+            result
+        });
     match result {
         Ok(()) => ExitCode::SUCCESS,
         Err(err) => {
@@ -340,8 +342,23 @@ async fn run(cli: Cli) -> Result<()> {
         Command::Trust { .. } if json => Err(no_json("trust", "has no JSON form yet")),
         Command::Tui => {
             // Logs would corrupt the TUI; keep them off until there's a log file.
-            let (host, settings, actions, _) = start(sources).await?;
-            dashboard_tui::run(host, settings, actions).await
+            // Plugins run in process groups of their own, so a closed terminal
+            // (SIGHUP) or `kill` reaches only us: stop cleanly so dropping the
+            // host ends them. Listen from the start, since plugin inits can
+            // take a while. Once the TUI runs, Ctrl-C is a key, not a signal.
+            let shutdown = shutdown_signal();
+            tokio::pin!(shutdown);
+            let (host, settings, actions, _) = tokio::select! {
+                started = start(sources) => started?,
+                () = &mut shutdown => return Ok(()),
+            };
+            tokio::select! {
+                result = dashboard_tui::run(host, settings, actions) => result,
+                () = &mut shutdown => {
+                    dashboard_tui::restore_terminal();
+                    Ok(())
+                }
+            }
         }
         Command::Serve {
             port,
@@ -374,7 +391,14 @@ async fn run(cli: Cli) -> Result<()> {
             tracing_subscriber::fmt()
                 .with_writer(std::io::stderr)
                 .init();
-            let (host, settings, actions, layer_paths) = start(sources).await?;
+            // Listen for signals before the plugins start, so one that comes
+            // during their inits still stops them.
+            let shutdown = shutdown_signal();
+            tokio::pin!(shutdown);
+            let (host, settings, actions, layer_paths) = tokio::select! {
+                started = start(sources) => started?,
+                () = &mut shutdown => return Ok(()),
+            };
             let on_ready = move |ready: &dashboard_web::Ready| {
                 // A foreground server is recorded too, unless another one is,
                 // so `dashboard open` can sign in another tab.
@@ -386,7 +410,7 @@ async fn run(cli: Cli) -> Result<()> {
                     background::open_browser(&ready.sign_in);
                 }
             };
-            dashboard_web::serve(
+            let served = dashboard_web::serve(
                 host,
                 settings,
                 actions,
@@ -394,13 +418,17 @@ async fn run(cli: Cli) -> Result<()> {
                     port,
                     dev_origin,
                     on_ready: Some(Box::new(on_ready)),
-                    catalog: Some(Arc::new(move || {
-                        let paths = layer_paths.lock().expect("layer paths lock").clone();
-                        runtime::catalog(&paths)
-                    })),
+                    catalog: Some(Arc::new(dashboard_runtime::catalog_source(layer_paths))),
                 },
-            )
-            .await
+            );
+            // Stopped by Ctrl-C or `dashboard stop`: remove the record on the
+            // way out, so a later run never trusts it once the pid is reused.
+            let result = tokio::select! {
+                result = served => result,
+                () = &mut shutdown => Ok(()),
+            };
+            background::forget();
+            result
         }
         Command::Stop => {
             let stopped = background::stop()?;
@@ -546,7 +574,7 @@ async fn run(cli: Cli) -> Result<()> {
                 .with_writer(std::io::stderr)
                 .without_time()
                 .init();
-            plugin_check::run(plugin_check::Options {
+            let checked = plugin_check::run(plugin_check::Options {
                 config: plugin_config,
                 renders,
                 wait_ms,
@@ -554,8 +582,13 @@ async fn run(cli: Cli) -> Result<()> {
                 height,
                 json,
                 argv,
-            })
-            .await
+            });
+            // The plugin is in its own process group, so Ctrl-C or a closed
+            // terminal reaches only us: stop cleanly so dropping it kills it.
+            tokio::select! {
+                result = checked => result,
+                () = shutdown_signal() => Err(anyhow::anyhow!("interrupted")),
+            }
         }
         Command::Plugin { command } => match command {
             PluginCommand::New { lang, name, dir } => plugin_new::run(lang, &name, dir.as_deref()),
@@ -587,7 +620,11 @@ async fn run(cli: Cli) -> Result<()> {
             }
             PluginCommand::Remove { id, yes } => marketplace::remove(&id, yes),
             PluginCommand::Pack { dirs, out } => marketplace::pack(&dirs, &out),
-            PluginCommand::Cswap => dashboard_cswap::run(),
+            PluginCommand::Bundled(args) => match args.as_slice() {
+                [id] => dashboard_runtime::run_bundled(id)
+                    .unwrap_or_else(|| Err(anyhow::anyhow!("no bundled plugin {id:?}"))),
+                _ => Err(anyhow::anyhow!("usage: dashboard plugin <bundled-id>")),
+            },
         },
     }
 }
@@ -630,6 +667,29 @@ fn trust(sources: &Sources, file: Option<PathBuf>, remove: bool) -> Result<()> {
     Ok(())
 }
 
+/// Resolves on Ctrl-C, on SIGTERM (what `dashboard stop` sends), or on SIGHUP
+/// (the terminal closed).
+async fn shutdown_signal() {
+    #[cfg(unix)]
+    {
+        use tokio::signal::unix::{SignalKind, signal};
+        let (Ok(mut term), Ok(mut hangup)) = (
+            signal(SignalKind::terminate()),
+            signal(SignalKind::hangup()),
+        ) else {
+            let _ = tokio::signal::ctrl_c().await;
+            return;
+        };
+        tokio::select! {
+            _ = tokio::signal::ctrl_c() => {}
+            _ = term.recv() => {}
+            _ = hangup.recv() => {}
+        }
+    }
+    #[cfg(not(unix))]
+    let _ = tokio::signal::ctrl_c().await;
+}
+
 /// The global options to pass on to a background `serve`, with the config
 /// path made absolute.
 fn cli_args(cli: &Cli) -> Vec<std::ffi::OsString> {
@@ -658,27 +718,4 @@ fn server_json(flag: &str, record: Option<&background::Record>) -> serde_json::V
         Some(r) => json!({ flag: true, "url": r.url, "pid": r.pid }),
         None => json!({ flag: false }),
     }
-}
-
-/// Start modules from the config, follow config changes, and take renderer
-/// actions. Also returns the config files in use, kept current.
-async fn start(
-    sources: Sources,
-) -> Result<(
-    Host,
-    watch::Receiver<UiSettings>,
-    mpsc::UnboundedSender<ClientMessage>,
-    Arc<std::sync::Mutex<Vec<PathBuf>>>,
-)> {
-    let (runtime, settings) = Runtime::start(sources).await?;
-    // Say which files are in use, so a project file never applies unnoticed.
-    for line in runtime.describe() {
-        eprintln!("{line}");
-    }
-    let host = runtime.host.clone();
-    let layer_paths = runtime.layer_paths();
-    let runtime = Arc::new(Mutex::new(runtime));
-    watch_config(runtime.clone());
-    let actions = handle_actions(runtime);
-    Ok((host, settings, actions, layer_paths))
 }

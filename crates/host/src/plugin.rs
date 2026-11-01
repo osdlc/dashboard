@@ -32,9 +32,8 @@ pub struct Plugin {
 struct Proc {
     // Held so the process is killed when this is dropped.
     _child: Child,
-    // Windows: held so what the plugin started (a `.cmd` shim's `node`) is
-    // killed too. Declared after the child, so it is dropped after it.
-    #[cfg(windows)]
+    // Held so what the plugin started (`npx`'s `node`, a `.cmd` shim's
+    // `node`) is killed too. Declared after the child, so it is dropped after it.
     _tree: Option<crate::process::KillTree>,
     stdin: ChildStdin,
     stdout: Lines<BufReader<ChildStdout>>,
@@ -67,15 +66,16 @@ impl Plugin {
         if let Some(dir) = &self.dir {
             command.current_dir(dir);
         }
-        let mut child = command
+        command
             .args(args)
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
-            .kill_on_drop(true)
+            .kill_on_drop(true);
+        crate::process::own_group(&mut command);
+        let mut child = command
             .spawn()
             .with_context(|| format!("starting plugin {program:?}"))?;
-        #[cfg(windows)]
         let tree = crate::process::KillTree::new(&child);
         let stdin = child.stdin.take().expect("piped stdin");
         let stdout = BufReader::new(child.stdout.take().expect("piped stdout")).lines();
@@ -89,7 +89,6 @@ impl Plugin {
         });
         self.proc = Some(Proc {
             _child: child,
-            #[cfg(windows)]
             _tree: tree,
             stdin,
             stdout,
@@ -199,5 +198,33 @@ impl Module for Plugin {
             self.start_process().await.context("restarting plugin")?;
         }
         self.call(method::VIEW_RENDER, None).await
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// A plugin that fails is dropped with everything it started, not only
+    /// its own process: here the `sh` exits at once and leaves a `sleep`.
+    #[cfg(unix)]
+    #[tokio::test]
+    async fn failed_plugin_takes_its_children_with_it() {
+        let dir = std::env::temp_dir().join(format!("plugin-tree-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let script = "sleep 30 </dev/null >/dev/null 2>&1 & echo $! > pid";
+        let mut plugin =
+            Plugin::new("t", vec!["sh".into(), "-c".into(), script.into()]).in_dir(&dir);
+        assert!(plugin.init(serde_json::Value::Null).await.is_err());
+        let pid: libc::pid_t = std::fs::read_to_string(dir.join("pid"))
+            .unwrap()
+            .trim()
+            .parse()
+            .unwrap();
+        std::fs::remove_dir_all(&dir).ok();
+        tokio::time::sleep(Duration::from_millis(200)).await;
+        // SAFETY: signal 0 only checks that the process exists.
+        let alive = unsafe { libc::kill(pid, 0) } == 0;
+        assert!(!alive, "sleep {pid} still running");
     }
 }

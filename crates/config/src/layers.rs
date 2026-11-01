@@ -299,7 +299,8 @@ fn parse_layer(path: &Path, text: &str) -> Result<Map<String, Value>> {
 /// settings come whole from the last file that sets it). `screens:` from a
 /// project file go in front, replacing any screen of the same name; from any
 /// other file they replace the screens below. Every other key: the later
-/// file wins. Returns the screens a project file replaced, with their places.
+/// file wins. An empty `modules:` or `screens:` changes nothing. Returns the
+/// screens a project file replaced, with their places.
 fn merge(
     base: &mut Map<String, Value>,
     top: Map<String, Value>,
@@ -308,6 +309,9 @@ fn merge(
     let mut shadowed = vec![];
     for (key, value) in top {
         match (key.as_str(), value) {
+            // An empty `modules:` or `screens:` (YAML null) parses as none on
+            // its own; here too it adds nothing and keeps what is below.
+            ("modules" | "screens", Value::Null) => {}
             ("modules", Value::Object(modules)) => {
                 let entry = base
                     .entry("modules")
@@ -515,6 +519,33 @@ screens:
         l.restore_shadowed(&mut own);
         let own: Vec<_> = own.iter().filter_map(screen_name).collect();
         assert_eq!(own, ["main", "system"]);
+    }
+
+    /// `modules:` or `screens:` with nothing under it loads as it parses on
+    /// its own, and keeps the layer below's.
+    #[test]
+    fn an_empty_key_changes_nothing() {
+        let t = Temp::new("empty-key");
+        let machine = t.write("home/config.yaml", "modules:\ntheme: dark\n");
+        let l = load(&Sources {
+            machine: Some(machine.clone()),
+            ..Default::default()
+        })
+        .unwrap();
+        assert!(l.config.modules.is_empty());
+
+        std::fs::write(&machine, MACHINE).unwrap();
+        t.trusted("repo/.dashboard.yaml", "modules:\nscreens:\n");
+        let l = load(&Sources {
+            machine: Some(machine),
+            project_from: Some(t.0.join("repo")),
+            trust: Some(t.trust_file()),
+            ..Default::default()
+        })
+        .unwrap();
+        assert_eq!(l.layers.len(), 2);
+        assert_eq!(l.config.modules, parse(MACHINE).unwrap().modules);
+        assert_eq!(l.config.screens, parse(MACHINE).unwrap().screens);
     }
 
     #[test]

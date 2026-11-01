@@ -472,6 +472,11 @@ pub struct AddOutcome {
     pub module_id: String,
     #[serde(default)]
     pub error: Option<String>,
+    /// Counts the adds the server has handled, so a renderer can tell the
+    /// outcome of its add from an earlier one, which every later settings
+    /// message still carries.
+    #[serde(default)]
+    pub seq: u64,
 }
 
 /// A saved dashboard, for the switcher.

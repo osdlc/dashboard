@@ -14,7 +14,7 @@ use dashboard_contract::Size;
 use yaml_splice::parse::parse_with_spans;
 use yaml_splice::{FieldEdit, Mapping, Value, edit_yaml};
 
-use crate::{parse, read_source, write_over};
+use crate::{Missing, parse, read_source, write_over};
 
 /// A `modules:` entry to add.
 #[derive(Debug, Clone, PartialEq)]
@@ -34,14 +34,20 @@ pub struct NewModule {
 
 /// Add `module` under `modules:` and, with `tile`, a tile at the end of that
 /// screen (by name). Fails if the ID is already under `modules:`.
-pub fn add_module(path: &Path, module: &NewModule, tile: Option<(&str, Size)>) -> Result<()> {
+/// `missing` says what to start from when the file doesn't exist yet.
+pub fn add_module(
+    path: &Path,
+    missing: Missing,
+    module: &NewModule,
+    tile: Option<(&str, Size)>,
+) -> Result<()> {
     if !valid_id(&module.id) {
         bail!(
             "module ID {:?}: use letters, digits, `-` and `_`, starting with a letter",
             module.id
         );
     }
-    let (bytes, missing) = read_source(path)?;
+    let (bytes, missing) = read_source(path, missing)?;
     let source = String::from_utf8(bytes.clone())
         .with_context(|| format!("{} is not UTF-8", path.display()))?;
     let mut out = insert_module(&source, &module.id, module_value(module))?;
@@ -444,7 +450,7 @@ mod tests {
         .unwrap();
         let mut m = module("prs");
         m.builtin = Some("github-prs".into());
-        add_module(&path, &m, Some(("main", Size::Wide))).unwrap();
+        add_module(&path, Missing::Demo, &m, Some(("main", Size::Wide))).unwrap();
         let text = std::fs::read_to_string(&path).unwrap();
         assert!(
             text.starts_with(
@@ -454,9 +460,9 @@ mod tests {
         );
         let c = parse(&text).unwrap();
         assert_eq!(c.screens[0].tiles[1].module, "prs");
-        assert!(add_module(&path, &m, None).is_err());
-        assert!(add_module(&path, &module("true"), None).is_err());
-        assert!(add_module(&path, &module("a b"), None).is_err());
+        assert!(add_module(&path, Missing::Demo, &m, None).is_err());
+        assert!(add_module(&path, Missing::Demo, &module("true"), None).is_err());
+        assert!(add_module(&path, Missing::Demo, &module("a b"), None).is_err());
         std::fs::remove_dir_all(&dir).unwrap();
     }
 
@@ -483,7 +489,7 @@ mod tests {
             .screens
             .first()
             .map(|s| (s.name.as_str(), Size::Small));
-        add_module(&path, &module("extra"), tile).unwrap();
+        add_module(&path, Missing::Demo, &module("extra"), tile).unwrap();
         let c = parse(&std::fs::read_to_string(&path).unwrap()).unwrap();
         assert!(c.modules.contains_key("extra"));
         // What the default config had is still there.

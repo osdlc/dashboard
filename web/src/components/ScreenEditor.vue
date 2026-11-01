@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import type { CatalogEntry, ClientMessage, ScreenLayout, TilePlacement, TileUpdate, UiSettings } from '../contract'
+import { addSeq, isOutcomeOf, type PendingAdd } from '../adds'
 import AddModuleDialog from './AddModuleDialog.vue'
 import CatalogPalette from './CatalogPalette.vue'
 import TileCard from './TileCard.vue'
@@ -69,7 +70,7 @@ const savedScreen = computed(() => {
   return props.settings.screens.some((s) => s.name === name) ? (name ?? null) : null
 })
 /** Sent to the host, waiting for its answer. One at a time: Add is off meanwhile. */
-const pending = ref<{ moduleId: string; screen: number; size: Size } | null>(null)
+const pending = ref<(PendingAdd & { screen: number; size: Size }) | null>(null)
 const addError = ref('')
 
 function pick(entry: CatalogEntry) {
@@ -80,7 +81,12 @@ function pick(entry: CatalogEntry) {
 function addFromCatalog(msg: Extract<ClientMessage, { type: 'add_module' }>) {
   if (pending.value) return
   emit('add', msg)
-  pending.value = { moduleId: msg.module_id, screen: selected.value, size: msg.size }
+  pending.value = {
+    moduleId: msg.module_id,
+    before: addSeq(props.settings.config.added),
+    screen: selected.value,
+    size: msg.size,
+  }
   addError.value = ''
   picked.value = null
 }
@@ -93,7 +99,7 @@ watch(
   (s) => {
     const p = pending.value
     const added = s.config.added
-    if (!p || added?.module_id !== p.moduleId) return
+    if (!p || !isOutcomeOf(added, p)) return
     pending.value = null
     if (added.error) {
       addError.value = added.error.split('\n')[0] ?? ''
