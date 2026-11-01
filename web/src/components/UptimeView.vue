@@ -28,7 +28,7 @@ function last(c: UptimeCheck): string {
 
 <template>
   <div class="w-uptime">
-    <div v-for="c in widget.checks" :key="c.name" class="up-row" :data-status="c.status">
+    <div v-for="c in widget.checks" :key="c.name" class="up-row" :data-status="c.status" data-nav-item>
       <span class="up-dot" />
       <a v-if="c.url" class="up-name" :href="c.url" target="_blank" rel="noopener">{{ c.name }}</a>
       <span v-else class="up-name">{{ c.name }}</span>

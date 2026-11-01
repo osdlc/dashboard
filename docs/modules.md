@@ -63,9 +63,11 @@ Binary size, `--profile small` on macOS arm64:
 
 | Build | Size |
 |---|---|
-| every bundle (default) | 6.2 MB (6,204,048 bytes) |
-| `bundle-system` only | 3.5 MB (3,476,208 bytes) |
-| no bundles | 3.3 MB (3,322,592 bytes) |
+| every bundle (default) | 7.6 MB (7,562,432 bytes) |
+| `bundle-system` only | 3.5 MB (3,542,688 bytes) |
+| no bundles | 3.3 MB (3,339,184 bytes) |
+
+Each bundle alone, and the same builds for Windows: [windows.md](windows.md#size).
 
 Most of the gap between "every bundle" and "system only" is reqwest and its TLS stack, which
 only the web-API modules (jira, linear, forgejo, copilot, cursor, antigravity, hackernews,

@@ -110,14 +110,19 @@ impl Module for Codex {
 // ---- live: codex app-server ----
 
 async fn live() -> Result<Snapshot> {
-    let mut child = Command::new("codex")
-        .arg("app-server")
+    // On Windows npm installs `codex.cmd`, which needs the PATHEXT lookup.
+    let argv = dashboard_host::process::resolve_argv(&["codex".into(), "app-server".into()], None);
+    let mut child = Command::new(&argv[0])
+        .args(&argv[1..])
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::null())
         .kill_on_drop(true)
         .spawn()
         .context("running codex (is the Codex CLI installed?)")?;
+    // Killing the `.cmd` shim alone would leave its `node` running.
+    #[cfg(windows)]
+    let _tree = dashboard_host::process::KillTree::new(&child);
     let mut rpc = Rpc {
         stdin: child.stdin.take().context("codex stdin")?,
         stdout: BufReader::new(child.stdout.take().context("codex stdout")?).lines(),

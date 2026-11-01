@@ -9,7 +9,7 @@
 use crate::{Action, CONTRACT_VERSION, Cell, Manifest, Refresh, View, Widget};
 
 /// One thing found, with where it is.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub struct Finding {
     pub problem: bool,
     pub text: String,

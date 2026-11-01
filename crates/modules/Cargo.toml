@@ -127,15 +127,15 @@ module-taskwarrior = ["dashboard-modules-personal/taskwarrior"]
 module-sdlc = ["dashboard-modules-personal/sdlc"]
 
 [dependencies]
-dashboard-contract = { version = "0.5.0", path = "../contract" }
-dashboard-host = { version = "0.5.0", path = "../host" }
-dashboard-modules-common = { version = "0.5.0", path = "../modules-common" }
-dashboard-modules-agents = { version = "0.5.0", path = "../modules-agents", default-features = false, optional = true }
-dashboard-modules-dev = { version = "0.5.0", path = "../modules-dev", default-features = false, optional = true }
-dashboard-modules-ops = { version = "0.5.0", path = "../modules-ops", default-features = false, optional = true }
-dashboard-modules-personal = { version = "0.5.0", path = "../modules-personal", default-features = false, optional = true }
-dashboard-modules-fun = { version = "0.5.0", path = "../modules-fun", default-features = false, optional = true }
-dashboard-modules-system = { version = "0.5.0", path = "../modules-system", default-features = false, optional = true }
+dashboard-contract = { version = "0.6.0", path = "../contract" }
+dashboard-host = { version = "0.6.0", path = "../host" }
+dashboard-modules-common = { version = "0.6.0", path = "../modules-common" }
+dashboard-modules-agents = { version = "0.6.0", path = "../modules-agents", default-features = false, optional = true }
+dashboard-modules-dev = { version = "0.6.0", path = "../modules-dev", default-features = false, optional = true }
+dashboard-modules-ops = { version = "0.6.0", path = "../modules-ops", default-features = false, optional = true }
+dashboard-modules-personal = { version = "0.6.0", path = "../modules-personal", default-features = false, optional = true }
+dashboard-modules-fun = { version = "0.6.0", path = "../modules-fun", default-features = false, optional = true }
+dashboard-modules-system = { version = "0.6.0", path = "../modules-system", default-features = false, optional = true }
 
 [dev-dependencies]
 serde_json = "1.0.154"

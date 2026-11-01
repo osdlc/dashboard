@@ -4,6 +4,33 @@ The dashboard is pre-1.0: the config format, the module contract and the CLI can
 between minor versions. 0.4.0 is the first public release. The earlier versions were not
 released on their own; they record the stages the project was built in.
 
+## 0.6.0
+
+- **Catalog in the web editor:** the add list is a searchable catalog (built-ins, installed
+  packages and a cached marketplace index) with tag filters. Picking an entry shows its demo view
+  and the settings it needs.
+- **Keyboard focus** on tiles and their items in the TUI and the web view; Enter opens links.
+- **Marketplace, local first:** `dashboard plugin install`, `list`, `update`, `remove` and `pack`.
+- **Saved dashboards and config layers:** `--dashboard`, `dashboards list`, `import`, `export`,
+  and a project `.dashboard.yaml`. A project file must be trusted with `dashboard trust` before it
+  is used. `trust` and `import` list the programs a config would run.
+- **Web dashboard switcher,** and config layers shown in settings.
+- **CLI conventions:**
+  - fixed exit codes (2 usage, 22 missing tool, 23–25 service errors);
+  - a single `dashboard: message` error line with a hint;
+  - `--json` documents for every command.
+- **Safer config writes:**
+  - writes from the web view and the TUI are compare-and-swap, so a change based on an older file
+    is refused;
+  - the trust list and the serve record are written atomically.
+- **Web sign-in:** a one-time boot token in the opened URL is traded for a session token. The
+  server checks the Host header as well as the Origin.
+- **Windows support:**
+  - plugin programs are resolved through PATHEXT, `.cmd` shims and `py -3`;
+  - process trees end with job objects;
+  - cmdrunner and codex work on Windows;
+  - `docs/windows.md` covers what differs.
+
 ## 0.5.0
 
 A large set of widgets, most of them built in and grouped in feature-gated bundles.

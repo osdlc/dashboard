@@ -32,6 +32,10 @@ pub struct Plugin {
 struct Proc {
     // Held so the process is killed when this is dropped.
     _child: Child,
+    // Windows: held so what the plugin started (a `.cmd` shim's `node`) is
+    // killed too. Declared after the child, so it is dropped after it.
+    #[cfg(windows)]
+    _tree: Option<crate::process::KillTree>,
     stdin: ChildStdin,
     stdout: Lines<BufReader<ChildStdout>>,
 }
@@ -57,10 +61,8 @@ impl Plugin {
 
     /// Start the process and run the handshake.
     async fn start_process(&mut self) -> Result<Manifest> {
-        let (program, args) = self
-            .argv
-            .split_first()
-            .context("plugin needs a program name")?;
+        let argv = crate::process::resolve_argv(&self.argv, self.dir.as_deref());
+        let (program, args) = argv.split_first().context("plugin needs a program name")?;
         let mut command = Command::new(program);
         if let Some(dir) = &self.dir {
             command.current_dir(dir);
@@ -73,6 +75,8 @@ impl Plugin {
             .kill_on_drop(true)
             .spawn()
             .with_context(|| format!("starting plugin {program:?}"))?;
+        #[cfg(windows)]
+        let tree = crate::process::KillTree::new(&child);
         let stdin = child.stdin.take().expect("piped stdin");
         let stdout = BufReader::new(child.stdout.take().expect("piped stdout")).lines();
         // stderr goes to the log, so it can't corrupt the TUI.
@@ -85,6 +89,8 @@ impl Plugin {
         });
         self.proc = Some(Proc {
             _child: child,
+            #[cfg(windows)]
+            _tree: tree,
             stdin,
             stdout,
         });

@@ -89,7 +89,8 @@ as the terminal UI would draw it. Those mistakes include:
 - links that aren't http(s).
 
 It exits non-zero on a problem. Notes (things this host ignores for now) don't fail it.
-`--json` also prints the last view.
+With `--json` it prints one JSON document instead of the report: the manifest, each render, the
+last view and the findings.
 
 ## Add it to a config
 
@@ -108,8 +109,10 @@ screens:
 ```
 
 A plugin started with `plugin:` runs in the config file's folder, so relative paths resolve
-from there. Changes to the file apply while the dashboard runs; the plugin restarts only if its
-own settings changed.
+from there. On Windows the program is looked up in `PATH` with `PATHEXT` (so `npx` finds
+`npx.cmd`), and `python3` is the first Python in `PATH`, or `py -3` instead of the Microsoft
+Store alias; see [windows.md](windows.md). Changes to the file apply while the dashboard runs;
+the plugin restarts only if its own settings changed.
 
 Or, once it is a package, by its ID:
 
@@ -164,6 +167,7 @@ demo:                            # a view with made-up data, shown before it is 
 Rules the loader checks:
 - `id` matches the folder name;
 - `version`, `name` and `description` are not empty;
+- `version` holds only letters, digits, dots, dashes and plus (`1.2.0`, `1.0.0-beta.1`);
 - `run:` names a program on PATH, or a path inside the package. A program given as a path
   (`./plugin`, `bin/plugin`) is relative to the folder;
 - `runtime:` is a program name with an optional minimum, `name>=1.2`;
@@ -177,21 +181,31 @@ The dashboard looks for packages in two places, first match wins:
 - `<data home>/dashboard/plugins/<id>/`: `~/.local/share/dashboard/plugins/` by default,
   moved by `XDG_DATA_HOME`.
 
-To install one by hand, copy its folder there. A folder that isn't a valid package is skipped
-with a message; it doesn't stop the others.
+To install one, use `dashboard plugin install` (see [marketplace.md](marketplace.md)), or copy
+its folder there by hand. A folder that isn't a valid package is skipped with a message; it
+doesn't stop the others.
 
 ## Find widgets
 
 ```sh
-dashboard widgets                 # everything: built-ins, bundled plugins, installed packages
+dashboard widgets                 # everything: built-ins, bundled plugins, packages, marketplace
 dashboard widgets pull requests   # every word must appear in the ID, name, description or tags
 dashboard widgets --tag dev
-dashboard widgets jira --json     # full entries, with config schema and demo view
+dashboard widgets jira --json     # {"schemaVersion", "kind": "widgets", "entries": [...]}: full entries, with config schema and demo view
 ```
 
 Search ignores case. `--tag` keeps entries with exactly that tag. Built-in modules are added
 under `modules:` by their ID (or with `builtin: <id>` for a second copy); packages with
 `package: <id>`.
+
+The web editor's "Add component" list shows the same catalog (`GET /api/catalog?q=&tag=`) and
+writes these entries for you.
+
+Marketplace packages that are listed but not installed come from a cached index,
+`<data home>/dashboard/marketplace/index.json` (e.g. `~/.local/share/dashboard/marketplace/`):
+a copy of the last index `dashboard plugin install`, `list` or `update` read. They show as
+`market` in `dashboard widgets` and can't be added until installed. The index format is in
+[marketplace.md](marketplace.md#the-index).
 
 ## The protocol
 
@@ -344,7 +358,7 @@ dashboard schema manifest     # JSON Schema for the manifest
 dashboard schema view         # ... for a view (all widgets)
 dashboard schema initialize-params
 dashboard schema package      # ... for dashboard-plugin.yaml
-dashboard schema catalog-entry  # ... for one entry of `dashboard widgets --json`
+dashboard schema catalog-entry  # ... for one of the entries of `dashboard widgets --json`
 ```
 
 The SDKs' types are generated from these by `node sdk/gen-types.mjs`; a test fails when they
@@ -356,6 +370,4 @@ Rust plugins can use the `dashboard-contract` crate directly.
 - **Push mode:** a plugin sending `view/update` on its own schedule. The host rejects it today.
 - **Running declared commands:** with confirmation in the UI.
 - **Clicks sent back to the plugin.**
-- **Installing packages:** `dashboard plugin install`, from a folder, a URL with a hash, or a
-  reviewed index. Today, copy the folder.
 - **WASM plugins:** sandboxed.

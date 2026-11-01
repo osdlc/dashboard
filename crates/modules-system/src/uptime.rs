@@ -8,6 +8,7 @@
 //!         - { name: github, url: https://github.com }
 //!         - name: api health
 //!           # Run through `sh`, so $VARS expand: keep tokens in the environment.
+//!           # On Windows there is no shell: see `split_words`.
 //!           curl: 'curl -H "Authorization: Bearer $API_TOKEN" https://api.example.com/health'
 //!           expect: 200          # one code or a list; default any 2xx or 3xx
 //!           slow_ms: 800         # slower than this counts as a warning
@@ -32,6 +33,9 @@ use dashboard_modules_common::manifest;
 
 /// Appended to every request: discard the body, print the code and time last.
 const WRITE_OUT: &str = "\n%{http_code} %{time_total}";
+
+/// Where curl writes the body.
+const NULL_DEVICE: &str = if cfg!(windows) { "NUL" } else { "/dev/null" };
 
 #[derive(Debug, Deserialize, JsonSchema)]
 #[serde(default, deny_unknown_fields)]
@@ -59,7 +63,9 @@ struct CheckConfig {
     name: String,
     /// Checked with `curl -L <url>`.
     url: Option<String>,
-    /// A full `curl ...` command, run with `sh -c`.
+    /// A full `curl ...` command, run with `sh -c`. On Windows it is split
+    /// into words and run without a shell: quotes group words, and `$VAR`,
+    /// `${VAR}` and `%VAR%` expand.
     curl: Option<String>,
     #[serde(default)]
     expect: Option<Expect>,
@@ -227,9 +233,22 @@ async fn run(c: &CheckConfig, timeout: u64) -> Outcome {
     let mut cmd = match (&c.url, &c.curl) {
         (Some(url), _) => {
             let mut cmd = Command::new("curl");
-            cmd.args(["-sS", "-L", "-o", "/dev/null", "-w", WRITE_OUT])
+            cmd.args(["-sS", "-L", "-o", NULL_DEVICE, "-w", WRITE_OUT])
                 .args(&limit)
                 .arg(url);
+            cmd
+        }
+        // No `sh` on Windows, and `cmd /C` would mangle quotes and `%`: run
+        // curl itself with the words of the line.
+        (None, Some(line)) if cfg!(windows) => {
+            let words = match split_words(line, |name| std::env::var(name).ok()) {
+                Ok(words) => words,
+                Err(e) => return failed(e),
+            };
+            let mut cmd = Command::new("curl");
+            cmd.args(&words[1..])
+                .args(["-sS", "-o", NULL_DEVICE, "-w", WRITE_OUT])
+                .args(&limit);
             cmd
         }
         (None, Some(line)) => {
@@ -252,6 +271,88 @@ async fn run(c: &CheckConfig, timeout: u64) -> Outcome {
     };
     let stderr = String::from_utf8_lossy(&out.stderr);
     judge(c, &String::from_utf8_lossy(&out.stdout), stderr.trim())
+}
+
+/// A command line split into words the way `sh` would, for the cases a curl
+/// line needs: `'...'` keeps text as it is; `"..."` groups words and still
+/// expands variables (`\"` is a quote inside it); `$VAR`, `${VAR}` and
+/// `%VAR%` outside single quotes become the variable's value (`$VAR` is empty
+/// if unset, `%VAR%` stays).
+/// A backslash elsewhere is kept, so Windows paths work.
+fn split_words(line: &str, var: impl Fn(&str) -> Option<String>) -> Result<Vec<String>, String> {
+    let mut words = vec![];
+    let mut word = String::new();
+    // A word has started, even if it is empty (`""`).
+    let mut started = false;
+    let mut quote: Option<char> = None;
+    let mut chars = line.chars().peekable();
+    let name_char = |c: &char| c.is_ascii_alphanumeric() || *c == '_';
+    while let Some(c) = chars.next() {
+        match (quote, c) {
+            (Some('\''), '\'') | (Some('"'), '"') => quote = None,
+            (Some('\''), _) => word.push(c),
+            (None, '\'' | '"') => {
+                quote = Some(c);
+                started = true;
+            }
+            (Some('"'), '\\') if chars.peek() == Some(&'"') => {
+                word.push('"');
+                chars.next();
+            }
+            (_, '$') if chars.peek() == Some(&'{') => {
+                chars.next();
+                let name: String = chars.by_ref().take_while(|c| *c != '}').collect();
+                word.push_str(&var(&name).unwrap_or_default());
+                started = true;
+            }
+            (_, '$') if chars.peek().is_some_and(name_char) => {
+                let mut name = String::new();
+                while let Some(c) = chars.next_if(name_char) {
+                    name.push(c);
+                }
+                word.push_str(&var(&name).unwrap_or_default());
+                started = true;
+            }
+            (_, '%') => {
+                // `%NAME%` of a set variable, as `cmd` does; anything else
+                // (`%20` in a URL, an unset name) stays as it is.
+                let name: String = chars.clone().take_while(|c| *c != '%').collect();
+                let closed = chars.clone().nth(name.chars().count()) == Some('%');
+                let value = (closed
+                    && name.starts_with(|c: char| c.is_ascii_alphabetic() || c == '_')
+                    && name.chars().all(|c| name_char(&c)))
+                .then(|| var(&name))
+                .flatten();
+                match value {
+                    Some(value) => {
+                        for _ in 0..=name.chars().count() {
+                            chars.next();
+                        }
+                        word.push_str(&value);
+                    }
+                    None => word.push('%'),
+                }
+                started = true;
+            }
+            (None, c) if c.is_whitespace() => {
+                if started {
+                    words.push(std::mem::take(&mut word));
+                    started = false;
+                }
+            }
+            (_, c) => {
+                word.push(c);
+                started = true;
+            }
+        }
+    }
+    if let Some(q) = quote {
+        return Err(format!("the curl command has an unclosed {q}"));
+    }
+    if started {
+        words.push(word);
+    }
+    Ok(words)
 }
 
 /// Reads curl's write-out line (the last line of stdout).
@@ -436,6 +537,47 @@ mod tests {
             ..check(None, None)
         };
         assert_eq!(c.link().as_deref(), Some("https://api.example.com/health"));
+    }
+
+    #[test]
+    fn splits_curl_lines_without_a_shell() {
+        let var = |name: &str| (name == "TOKEN").then(|| "s3cret".to_string());
+        let words = |line: &str| split_words(line, var).unwrap();
+        assert_eq!(
+            words(r#"curl -H "Authorization: Bearer $TOKEN" https://x.test/health"#),
+            [
+                "curl",
+                "-H",
+                "Authorization: Bearer s3cret",
+                "https://x.test/health"
+            ]
+        );
+        assert_eq!(
+            words("curl -H 'A: $TOKEN'  ''"),
+            ["curl", "-H", "A: $TOKEN", ""]
+        );
+        assert_eq!(
+            words("curl -u me:${TOKEN} %TOKEN%"),
+            ["curl", "-u", "me:s3cret", "s3cret"]
+        );
+        assert_eq!(words("curl $MISSING x"), ["curl", "", "x"]);
+        // A `%` that isn't a set variable, a `$` alone and a Windows path stay.
+        assert_eq!(
+            words(r#"curl https://x.test/a%E2%80%99b?p=50% %NOPE% $ --cacert C:\certs\ca.pem"#),
+            [
+                "curl",
+                "https://x.test/a%E2%80%99b?p=50%",
+                "%NOPE%",
+                "$",
+                "--cacert",
+                r"C:\certs\ca.pem"
+            ]
+        );
+        assert_eq!(
+            words(r#"curl -d "say \"hi\"""#),
+            ["curl", "-d", r#"say "hi""#]
+        );
+        assert!(split_words("curl 'oops", var).is_err());
     }
 
     #[tokio::test]

@@ -1,7 +1,7 @@
 //! Mouse support. Drawing records what can be clicked where; a click looks
 //! up the topmost target under the pointer.
 
-use dashboard_contract::Theme;
+use dashboard_contract::{Action, Theme};
 use ratatui::layout::{Position, Rect};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -17,26 +17,41 @@ pub enum Click {
     Close,
     /// Inside an overlay but not on a target: do nothing.
     Inside,
-    /// A list item or table row with an `open_url` action.
-    Open(String),
+    /// A list item, table row or uptime check with an action.
+    Run(Action),
     /// Anywhere else on a tile; a double-click expands it.
     Tile(String),
 }
 
 #[derive(Debug, Default)]
-pub struct Hits(Vec<(Rect, Click)>);
+pub struct Hits {
+    targets: Vec<(Rect, Click)>,
+    /// Where each keyboard-selectable item was drawn, in `nav::items` order.
+    /// Items cut off at the bottom of a tile get an empty rect.
+    pub items: Vec<Rect>,
+}
 
 impl Hits {
     pub fn add(&mut self, area: Rect, click: Click) {
         if area.width > 0 && area.height > 0 {
-            self.0.push((area, click));
+            self.targets.push((area, click));
         }
+    }
+
+    /// Records where the next selectable item is, clipped to `within`.
+    pub fn item(&mut self, area: Rect, within: Rect) {
+        let r = area.intersection(within);
+        self.items.push(if r.height == 0 {
+            Rect { height: 0, ..r }
+        } else {
+            r
+        });
     }
 
     /// Adds `other`'s targets moved by (dx, dy) and cut to `clip`: for
     /// targets drawn on the scrolled page.
     pub fn extend_shifted(&mut self, other: Hits, dx: i32, dy: i32, clip: Rect) {
-        for (r, click) in other.0 {
+        for (r, click) in other.targets {
             let (x, y) = (r.x as i32 + dx, r.y as i32 + dy);
             let (x0, y0) = (x.max(clip.x as i32), y.max(clip.y as i32));
             let x1 = (x + r.width as i32).min(clip.right() as i32);
@@ -50,15 +65,28 @@ impl Hits {
 
     /// Every target containing (x, y), topmost first.
     pub fn all_at(&self, x: u16, y: u16) -> impl Iterator<Item = &(Rect, Click)> {
-        self.0
+        self.targets
             .iter()
             .rev()
             .filter(move |(r, _)| r.contains(Position { x, y }))
     }
 
+    /// The tile under (x, y), unless something other than a tile or its
+    /// items (a tab, an overlay) is on top there.
+    pub fn tile_at(&self, x: u16, y: u16) -> Option<&str> {
+        for (_, click) in self.all_at(x, y) {
+            match click {
+                Click::Tile(id) => return Some(id),
+                Click::Run(_) => continue,
+                _ => return None,
+            }
+        }
+        None
+    }
+
     /// The last-added target containing (x, y); later ones are drawn on top.
     pub fn at(&self, x: u16, y: u16) -> Option<&Click> {
-        self.0
+        self.targets
             .iter()
             .rev()
             .find(|(r, _)| r.contains(Position { x, y }))
@@ -86,23 +114,4 @@ pub fn spans(area: Rect, parts: &[(String, Option<Click>)], hits: &mut Hits) {
         }
         x = x.saturating_add(w);
     }
-}
-
-/// Open a web link in the default browser. Only http(s), so a module can't
-/// make this run something else.
-pub fn open_url(url: &str) {
-    if !(url.starts_with("https://") || url.starts_with("http://")) {
-        return;
-    }
-    let program = if cfg!(target_os = "macos") {
-        "open"
-    } else {
-        "xdg-open"
-    };
-    let _ = std::process::Command::new(program)
-        .arg(url)
-        .stdin(std::process::Stdio::null())
-        .stdout(std::process::Stdio::null())
-        .stderr(std::process::Stdio::null())
-        .spawn();
 }

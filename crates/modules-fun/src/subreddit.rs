@@ -322,7 +322,7 @@ fn view(
         .children
         .iter()
         .map(|c| &c.data)
-        .filter(|p| !(hide_stickied && p.stickied) && !p.title.is_empty())
+        .filter(|p| !(p.title.is_empty() || hide_stickied && p.stickied))
         .take(limit)
         .map(|p| post(p, now))
         .collect();

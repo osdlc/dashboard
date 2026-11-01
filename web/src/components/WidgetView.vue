@@ -77,7 +77,7 @@ const keys = computed(() => {
   <UptimeView v-else-if="w.type === 'uptime'" :widget="w" />
   <TransitionGroup v-else-if="w.type === 'list'" tag="ul" name="row" class="w-list">
     <li v-if="w.items.length === 0" key="__empty" class="empty">{{ w.empty_text ?? 'Nothing here' }}</li>
-    <li v-for="(item, i) in w.items" :key="keys[i]" :data-status="item.status ?? undefined">
+    <li v-for="(item, i) in w.items" :key="keys[i]" :data-status="item.status ?? undefined" data-nav-item>
       <a v-if="item.action?.type === 'open_url'" :href="item.action.url" target="_blank" rel="noopener">{{ item.title }}</a>
       <span v-else>{{ item.title }}</span>
       <span v-for="tag in item.tags ?? []" :key="tag" class="tag">{{ tag }}</span>
@@ -90,7 +90,7 @@ const keys = computed(() => {
       <tr><th v-for="c in w.columns" :key="c.key">{{ c.label }}</th></tr>
     </thead>
     <TransitionGroup tag="tbody" name="row">
-      <tr v-for="(row, i) in w.rows" :key="keys[i]" :data-status="row.status ?? undefined">
+      <tr v-for="(row, i) in w.rows" :key="keys[i]" :data-status="row.status ?? undefined" data-nav-item>
         <td v-for="c in w.columns" :key="c.key">
           <WidgetView v-if="isWidget(row.cells[c.key])" :widget="row.cells[c.key] as Widget" />
           <template v-else>{{ row.cells[c.key] ?? '' }}</template>

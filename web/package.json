@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
+    "test": "node --test test/*.test.ts",
     "gen:types": "cargo run -q -p dashboard-contract --example web_schema > src/contract.schema.tmp.json && json2ts --no-additionalProperties --bannerComment '/* Generated from the Rust contract by pnpm gen:types. Do not edit. */' < src/contract.schema.tmp.json > src/contract.ts.tmp && mv src/contract.ts.tmp src/contract.ts && rm src/contract.schema.tmp.json"
   },
   "dependencies": {

@@ -1,20 +1,20 @@
 //! `dashboard widgets`: search the catalog of everything that can be added.
 
-use std::path::Path;
+use std::path::PathBuf;
 
 use anyhow::Result;
 use dashboard_contract::catalog::search;
 use dashboard_contract::{CatalogEntry, EntryKind};
 
-pub fn run(config_path: &Path, query: &str, tag: Option<&str>, json: bool) -> Result<()> {
-    let (entries, errors) = crate::runtime::catalog(config_path);
+pub fn run(config_paths: &[PathBuf], query: &str, tag: Option<&str>, json: bool) -> Result<()> {
+    let (entries, errors) = crate::runtime::catalog(config_paths);
     for err in &errors {
-        eprintln!("skipped a plugin package: {err}");
+        crate::warn(&format!("skipped a plugin package: {err}"));
     }
     let found = search(&entries, query, tag);
     if json {
-        println!("{}", serde_json::to_string_pretty(&found)?);
-        return Ok(());
+        // The full entries, demo views included.
+        return crate::print_json("widgets", &serde_json::json!({ "entries": found }));
     }
     if found.is_empty() {
         println!("nothing matches");
@@ -32,7 +32,9 @@ fn table(entries: &[&CatalogEntry]) -> String {
     for e in entries {
         let kind = match e.kind {
             EntryKind::Builtin => "builtin",
-            EntryKind::Plugin => "plugin",
+            EntryKind::Plugin if e.installed() => "plugin",
+            // In the marketplace index, not installed.
+            EntryKind::Plugin => "market",
         };
         let line = format!(
             "{:id_width$}  {kind:7}  {:name_width$}  {}",

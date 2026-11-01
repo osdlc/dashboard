@@ -79,10 +79,44 @@ pub fn manifest(
     }
 }
 
-/// `~/x` as `$HOME/x`; other paths as they are.
+/// `~/x` as `$HOME/x`; other paths as they are. On Windows the home is
+/// `%USERPROFILE%` when `HOME` is unset, and `~\x` works too.
 pub fn expand_home(path: &str) -> PathBuf {
-    match (path.strip_prefix("~/"), std::env::var_os("HOME")) {
-        (Some(rest), Some(home)) => PathBuf::from(home).join(rest),
+    let home = std::env::var_os("HOME")
+        .filter(|h| !h.is_empty())
+        .or_else(|| std::env::var_os("USERPROFILE").filter(|_| cfg!(windows)));
+    expand_home_in(path, home.map(PathBuf::from), cfg!(windows))
+}
+
+fn expand_home_in(path: &str, home: Option<PathBuf>, windows: bool) -> PathBuf {
+    let rest = path
+        .strip_prefix("~/")
+        .or_else(|| path.strip_prefix("~\\").filter(|_| windows));
+    match (rest, home) {
+        (Some(rest), Some(home)) => home.join(rest),
         _ => PathBuf::from(path),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::Path;
+
+    #[test]
+    fn expands_the_home_folder() {
+        let home = || Some(PathBuf::from("/home/me"));
+        assert_eq!(
+            expand_home_in("~/x/y", home(), false),
+            Path::new("/home/me/x/y")
+        );
+        assert_eq!(expand_home_in("/abs", home(), false), Path::new("/abs"));
+        assert_eq!(expand_home_in("~/x", None, false), Path::new("~/x"));
+        // `~\` only counts on Windows.
+        assert_eq!(expand_home_in("~\\x", home(), false), Path::new("~\\x"));
+        assert_eq!(
+            expand_home_in("~\\x", home(), true),
+            Path::new("/home/me").join("x")
+        );
     }
 }

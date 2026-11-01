@@ -16,6 +16,8 @@ pub struct Palette {
     pub accent: Color,
     /// Background behind whatever the mouse is over.
     pub hover: Color,
+    /// Background behind the item picked with the keyboard.
+    pub selected: Color,
 }
 
 impl Palette {
@@ -46,6 +48,7 @@ impl Palette {
             error: Color::Red,
             accent: Color::Cyan,
             hover: Color::Rgb(48, 54, 66),
+            selected: Color::Rgb(20, 72, 90),
         }
     }
 
@@ -61,6 +64,7 @@ impl Palette {
             error: Color::Rgb(190, 30, 40),
             accent: Color::Rgb(30, 90, 200),
             hover: Color::Rgb(222, 228, 238),
+            selected: Color::Rgb(196, 218, 248),
         }
     }
 

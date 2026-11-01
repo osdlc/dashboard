@@ -8,9 +8,28 @@ Requires Rust and pnpm. `cargo build` also builds the Vue app in `web/` (only wh
 
 ```sh
 cargo run -p dashboard -- tui      # terminal UI (q to quit)
-cargo run -p dashboard -- serve    # web UI: opens http://127.0.0.1:7878/?token=… in the browser (--no-open to skip)
+cargo run -p dashboard -- serve    # web UI: opens http://127.0.0.1:7878/?boot=… in the browser (--no-open to skip)
 cargo run -p dashboard -- serve -d # the same in the background; `dashboard status` / `dashboard stop`
+cargo run -p dashboard -- open     # sign another browser tab in to the running server
 ```
+
+### Keys
+
+Both views work from the keyboard. Press `?` for the full list.
+
+| Key | What it does |
+| --- | --- |
+| `←` `↑` `↓` `→` or `h` `j` `k` `l` | Move to the nearest tile that way. The focused tile gets an accent border. |
+| `Enter` | Go into the focused tile. Lists, table rows, uptime checks and bars can be picked one by one. |
+| `↑` `↓` / `j` `k` (inside a tile) | Move between items. The picked item is highlighted. |
+| `Enter` (on an item) | Run the item's action: open its link (web: new tab; TUI: default browser). |
+| `Esc` | Step back: out of the item, then out of fullscreen, then focus off. Also closes help and settings. |
+| `1`–`9`, `Tab` (TUI), `[` `]` (web) | Switch screens. Focus is cleared. |
+| `PgUp` `PgDn` `Space` `Home` `End` | Scroll a page that is taller than the window or terminal. |
+
+Focus stays on the same tile and item while data updates; if the item goes away, the nearest one is picked.
+Clicking a tile focuses it. Keyboard focus is off in ambient mode (`?mode=ambient`) and while help,
+settings or the screen editor are open.
 
 ## Demo
 
@@ -22,7 +41,7 @@ Eight screens (`1`–`8` or `[` `]` to switch) using every tile size and widget 
 
 ## Config
 
-Optional. Lives at `~/.config/dashboard/config.yaml` (override with `--config <path>` or `$DASHBOARD_MACHINE_CONFIG`).
+Optional. Lives at `~/.config/dashboard/config.yaml` (`%APPDATA%\dashboard\config.yaml` on Windows; override with `--config <path>` or `$DASHBOARD_MACHINE_CONFIG`).
 
 ```yaml
 theme: auto            # auto | light | dark
@@ -126,7 +145,7 @@ modules:
 
 ### Uptime checks
 
-`uptime` runs `curl` for each check and shows a strip of recent results, the uptime % and the response time. A check is a `url`, or a full `curl` command run with `sh` (so `$VARS` expand; keep tokens in the environment).
+`uptime` runs `curl` for each check and shows a strip of recent results, the uptime % and the response time. A check is a `url`, or a full `curl` command run with `sh` (so `$VARS` expand; keep tokens in the environment). On Windows there is no shell: the line is split into words and `curl.exe` runs directly ([docs/windows.md](docs/windows.md)).
 
 ```yaml
 modules:
@@ -160,10 +179,28 @@ Press `s` (TUI or web) for the settings screen: the config path, any config erro
 
 Changes to the file apply while the dashboard runs. Only modules whose settings changed restart. If the file has an error, the previous config stays in effect and the error is shown in the settings screen.
 
-- `dashboard config` shows the path in use and checks the file.
+### Dashboards and project files
+
+Keep named dashboards in `~/.config/dashboard/dashboards/<name>.yaml` and open one with
+`dashboard --dashboard work serve`, or switch in the web view. A `.dashboard.yaml` in a
+repository adds that repository's modules and screens when you run the dashboard inside it.
+A project file can run programs, so it is only used after you read it and run
+`dashboard trust`, and again after every change to it.
+`dashboard dashboards list`, `dashboard import <file|url>` and `dashboard export NAME [FILE]`
+manage saved dashboards. See [docs/dashboards.md](docs/dashboards.md) for how the files merge.
+
+- `dashboard config` lists the config files in use, in order, and checks them.
 - `dashboard schema config` prints a JSON Schema for editor completion (yaml-language-server).
 - `dashboard widgets [words] [--tag t]` lists what can be added: built-in modules, bundled plugins
   and installed plugin packages (see [docs/plugins.md](docs/plugins.md)).
+- `dashboard plugin install <id|file|url|folder>` installs a plugin package, checking its
+  sha256 and asking first; `plugin list`, `update` and `remove` too (see
+  [docs/marketplace.md](docs/marketplace.md)).
+
+In the web view, `e` opens the screen editor. Its "Add component" list searches the same catalog,
+with tag filters. Pick an entry to see its demo view, what it needs, and a settings form made from
+its config schema. **Add** writes its `modules:` entry and a tile on the screen you are editing
+into the config file, keeping your comments, and the module starts.
 
 ## Develop the web UI with live reload
 
@@ -172,9 +209,12 @@ cargo run -p dashboard -- serve --dev-origin http://localhost:5173   # terminal 
 cd web && pnpm dev                                                   # terminal 2
 ```
 
-Open the printed `http://localhost:5173/?token=…` link.
+Open the printed `http://localhost:5173/?boot=…` link within a minute. `dashboard open` makes a new one,
+but for port 7878; change its start to `http://localhost:5173` by hand.
 
 After changing the Rust contract types, regenerate the TypeScript types with `cd web && pnpm gen:types`.
+
+`cd web && pnpm test` runs the web view's unit tests (keyboard navigation) with `node --test`.
 
 ## Plugins
 
@@ -184,6 +224,10 @@ After changing the Rust contract types, regenerate the TypeScript types with `cd
 cargo build -p dashboard-cswap
 printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"view/render"}' | ./target/debug/dashboard-cswap
 ```
+
+## Windows
+
+The CLI cross-compiles for Windows; it has not been run there yet. See [docs/windows.md](docs/windows.md) for how to build it, its sizes, and what differs.
 
 ## License
 

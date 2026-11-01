@@ -104,6 +104,9 @@ impl Module for CmdRunner {
             .spawn()
             .map_err(|e| anyhow::anyhow!("running the command: {e}"))?;
         let _group = Group(child.id());
+        // Windows has no process groups: a job object does the same.
+        #[cfg(windows)]
+        let _tree = dashboard_host::process::KillTree::new(&child);
         let timeout = Duration::from_secs(self.config.timeout_secs);
         let run = match tokio::time::timeout(timeout, child.wait_with_output()).await {
             Ok(Ok(out)) => Run {
@@ -137,11 +140,17 @@ impl Drop for Group {
 }
 
 fn shell(line: &str) -> Command {
-    if cfg!(windows) {
+    #[cfg(windows)]
+    {
         let mut cmd = Command::new("cmd");
-        cmd.arg("/C").arg(line);
+        // The line as typed: `arg` would quote it with rules `cmd` doesn't use.
+        // With /S, cmd strips exactly the outer quotes added here, so a line
+        // that starts with a quoted program keeps its own quotes.
+        cmd.args(["/S", "/C"]).raw_arg(format!("\"{line}\""));
         cmd
-    } else {
+    }
+    #[cfg(not(windows))]
+    {
         let mut cmd = Command::new("sh");
         cmd.arg("-c").arg(line);
         cmd

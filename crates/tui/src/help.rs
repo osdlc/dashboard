@@ -15,17 +15,13 @@ pub const KEYS: &[(&str, &str)] = &[
     ("?", "show or hide this help"),
     ("1-9", "go to screen"),
     ("Tab / Shift-Tab", "next / previous screen"),
-    (
-        "↑ ↓ j k PgUp PgDn",
-        "scroll when the page is taller than the terminal",
-    ),
+    ("←↑↓→ hjkl", "move between tiles, or items inside one"),
+    ("Enter", "go into a tile; on an item, open its link"),
+    ("PgUp PgDn", "scroll a tall page (also Space, Home, End)"),
     ("s", "show or hide settings (t theme, e edit config)"),
     ("r", "start or stop screen rotation (when configured)"),
-    ("Esc", "close help or settings"),
-    (
-        "mouse",
-        "click tabs, footer, links and settings; wheel scrolls the page",
-    ),
+    ("Esc", "close help or settings, or step back out"),
+    ("mouse", "click tabs, links and buttons; wheel scrolls"),
     (
         "double-click",
         "show a tile fullscreen (Esc or double-click to close)",

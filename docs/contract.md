@@ -329,9 +329,10 @@ Mapping from `cswap list --json`: `usage.fiveHour.pct` → 5-hour gauge, `usage.
 ## Catalog
 
 Everything that can be added to a dashboard has a catalog entry: built-in modules (from the
-binary), bundled plugins (cswap), and installed plugin packages (from their
-`dashboard-plugin.yaml`, see [plugins.md](plugins.md#package-it)). `dashboard widgets` lists and
-searches them; `dashboard schema catalog-entry` prints the JSON Schema.
+binary), bundled plugins (cswap), installed plugin packages (from their
+`dashboard-plugin.yaml`, see [plugins.md](plugins.md#package-it)), and marketplace packages from
+the cached index that aren't installed yet (`source: "marketplace"`). `dashboard widgets` lists
+and searches them; `dashboard schema catalog-entry` prints the JSON Schema.
 
 ```rust
 pub struct CatalogEntry {
@@ -341,7 +342,7 @@ pub struct CatalogEntry {
     pub description: String,
     pub tags: Vec<String>,
     pub kind: EntryKind,         // builtin | plugin
-    pub source: String,          // "builtin", "bundled", or the package's folder
+    pub source: String,          // "builtin", "bundled", the package's folder, or "marketplace"
     pub default_size: Size,
     pub config_schema: Option<serde_json::Value>,  // JSON Schema for the config: block
     pub requirements: Requirements,
@@ -362,6 +363,27 @@ live data. Modules built only from API docs, with no live test yet, carry the ta
 
 Search (`catalog::search`) keeps an entry when every word of the query appears in its ID, name,
 description or tags, ignoring case, and when it has the `--tag` given, if any.
+
+The web view gets the catalog from `GET /api/catalog?q=<words>&tag=<tag>` (with the session
+token), as a `CatalogResponse`: the matching `entries`, every `tags` value in the whole catalog,
+and `errors` from reading packages or the index. Adding one sends `add_module` over the
+WebSocket:
+
+```json
+{"type": "add_module", "module_id": "weather", "entry": "weather", "kind": "builtin",
+ "config": {"place": "Oslo"}, "demo": false, "screen": "main", "size": "medium"}
+```
+
+The host writes `modules.<module_id>` (with `builtin:` when `module_id` differs from a
+built-in's ID, `package:` for a package) and a tile at the end of `screen`, editing the file in
+place so comments stay. The reload that follows starts the module. The next settings carry
+`config.added`: the `module_id` and, if the add was refused, an `error` (the file is then left
+as it was). A module that was added but fails to start shows as the config error, like any
+other.
+
+Marketplace index entries get the same `check_view` as installed packages. An entry whose demo
+fails it (say, a link that isn't http or https) is left out of the catalog and listed in
+`errors`.
 
 A built-in module adds its entry with a `catalog()` function next to the module, named in the
 `Builtin` entry of its bundle's `MODULES` list (see docs/modules.md). A test checks every built-in has one, with a description, tags

@@ -24,6 +24,13 @@ const themes = ['auto', 'light', 'dark'] as const
         <pre>{{ settings.config.error }}</pre>
       </div>
       <p class="muted">Edit the file directly for screens and modules; changes apply while running.</p>
+      <template v-if="settings.config.layers?.length">
+        <h3>Config layers</h3>
+        <p class="muted">Merged in this order; later files win. Settings are saved to the dashboard file, else config.yaml.</p>
+        <ul class="layers">
+          <li v-for="l in settings.config.layers" :key="l"><code>{{ l }}</code></li>
+        </ul>
+      </template>
 
       <h3>Theme</h3>
       <div class="theme-choice" role="radiogroup" aria-label="Theme">
@@ -33,7 +40,7 @@ const themes = ['auto', 'light', 'dark'] as const
           type="button"
           role="radio"
           :aria-checked="settings.theme === t"
-          @click="emit('send', { type: 'set_theme', theme: t })"
+          @click="emit('send', { type: 'set_theme', theme: t, etag: settings.config.etag ?? null })"
         >
           {{ t }}
         </button>
