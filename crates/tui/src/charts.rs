@@ -10,6 +10,7 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::{Axis, Chart, Dataset, GraphType, Paragraph};
 
 use crate::canvas::Canvas;
+use crate::fit;
 use crate::theme::Palette;
 
 /// Width of one meter in a meter grid, including padding.
@@ -74,7 +75,7 @@ pub fn draw_series(f: &mut Canvas, p: &Palette, area: Rect, s: &SeriesSpec) {
             top,
             &visible(&s.series[0]),
             max,
-            s.color,
+            Paint::of(p, &s.series[0], s.color),
             Direction::Up,
         );
         fill_columns(
@@ -83,7 +84,7 @@ pub fn draw_series(f: &mut Canvas, p: &Palette, area: Rect, s: &SeriesSpec) {
             bottom,
             &visible(&s.series[1]),
             max,
-            s.color,
+            Paint::of(p, &s.series[1], s.color),
             Direction::Down,
         );
         return;
@@ -91,17 +92,41 @@ pub fn draw_series(f: &mut Canvas, p: &Palette, area: Rect, s: &SeriesSpec) {
     match s.style {
         SeriesStyle::Area => {
             if let Some(d) = s.series.first() {
-                fill_columns(f, p, body, &visible(d), max, s.color, Direction::Up);
+                let paint = Paint::of(p, d, s.color);
+                fill_columns(f, p, body, &visible(d), max, paint, Direction::Up);
             }
         }
         SeriesStyle::Bars => {
             if let Some(d) = s.series.first() {
                 let values = visible(d);
                 let tail = &values[values.len().saturating_sub(body.width as usize)..];
-                draw_bars_chart(f, p, body, tail, max, s.color);
+                draw_bars_chart(f, p, body, tail, max, Paint::of(p, d, s.color));
             }
         }
         SeriesStyle::Line => draw_lines(f, p, body, s.series, max),
+    }
+}
+
+/// What colors a graph: a color scale by height, or one color from a series' `tone`.
+#[derive(Clone, Copy)]
+enum Paint {
+    Scale(ColorScale),
+    Flat(Color),
+}
+
+impl Paint {
+    fn of(p: &Palette, d: &SeriesData, scale: ColorScale) -> Self {
+        match d.tone {
+            Some(tone) => Paint::Flat(p.tone(tone)),
+            None => Paint::Scale(scale),
+        }
+    }
+
+    fn at(self, p: &Palette, t: f64) -> Color {
+        match self {
+            Paint::Scale(scale) => p.scale(scale, t),
+            Paint::Flat(c) => c,
+        }
     }
 }
 
@@ -121,7 +146,7 @@ fn draw_bars_chart(
     area: Rect,
     values: &[f64],
     max: f64,
-    color: ColorScale,
+    color: Paint,
 ) {
     let rows = area.height as usize;
     let buf = f.buffer_mut();
@@ -130,7 +155,7 @@ fn draw_bars_chart(
         let ratio = (v / max).clamp(0.0, 1.0);
         let units = (ratio * (rows * 8) as f64).round() as usize;
         // Whole column takes the color of its top, so bars read as one value each.
-        let fg = p.scale(color, ratio);
+        let fg = color.at(p, ratio);
         for row in 0..rows {
             let filled = units.saturating_sub(row * 8).min(8);
             if filled == 0 {
@@ -156,7 +181,7 @@ fn fill_columns(
     area: Rect,
     values: &[f64],
     max: f64,
-    color: ColorScale,
+    color: Paint,
     dir: Direction,
 ) {
     let rows = area.height as usize;
@@ -193,7 +218,7 @@ fn fill_columns(
                 Direction::Down => row,
             };
             // Colored by height, so the top of a tall heat column is red.
-            let fg = p.scale(color, (level as f64 + 0.5) / rows as f64);
+            let fg = color.at(p, (level as f64 + 0.5) / rows as f64);
             let ch = char::from_u32(0x2800 + bits as u32).unwrap();
             buf[(area.x + cx as u16, area.y + row as u16)]
                 .set_char(ch)
@@ -203,7 +228,6 @@ fn fill_columns(
 }
 
 fn draw_lines(f: &mut Canvas, p: &Palette, area: Rect, series: &[SeriesData], max: f64) {
-    let colors = [p.accent, p.warn, p.ok, p.error];
     let width = area.width as usize * 2; // braille has two dots per cell
     let data: Vec<Vec<(f64, f64)>> = series
         .iter()
@@ -232,12 +256,15 @@ fn draw_lines(f: &mut Canvas, p: &Palette, area: Rect, series: &[SeriesData], ma
     }
     let datasets = data
         .iter()
-        .zip(colors.iter().cycle())
-        .map(|(d, c)| {
+        .zip(series)
+        .enumerate()
+        .map(|(i, (d, s))| {
+            // Each series its own categorical color unless it names one.
+            let c = s.tone.map(|t| p.tone(t)).unwrap_or(p.series[i % 6]);
             Dataset::default()
                 .marker(Marker::Braille)
                 .graph_type(GraphType::Line)
-                .style(Style::new().fg(*c))
+                .style(Style::new().fg(c))
                 .data(d)
         })
         .collect();
@@ -278,7 +305,7 @@ pub fn draw_meter_grid(
             break;
         }
         let ratio = (m.percent / 100.0).clamp(0.0, 1.0);
-        let fg = p.scale(color, ratio);
+        let fg = m.tone.map(|t| p.tone(t)).unwrap_or(p.scale(color, ratio));
         // "12 ████░░░░  45"
         let bar_width = cell.saturating_sub(9) as usize;
         let line = Line::from(vec![
@@ -315,12 +342,18 @@ pub fn draw_bars(f: &mut Canvas, p: &Palette, area: Rect, s: &BarsSpec) {
         .max(f64::EPSILON);
     let value_width = 10;
     let bar_width = (area.width as usize).saturating_sub(BAR_LABEL_WIDTH + value_width + 2);
-    for b in s.bars {
+    let (_, shown) = bars_fit(s.label.is_some(), s.bars.len(), area.height);
+    for b in &s.bars[..shown] {
         let ratio = (b.value / max).clamp(0.0, 1.0);
-        let fg = b.status.map(|st| p.status(st)).unwrap_or(p.accent);
-        let label: String = b.label.chars().take(BAR_LABEL_WIDTH - 1).collect();
+        let fg = b
+            .status
+            .map(|st| p.status(st))
+            .or(b.tone.map(|t| p.tone(t)))
+            .unwrap_or(p.accent);
+        let label = fit::truncate(&b.label, BAR_LABEL_WIDTH - 1);
+        let pad = BAR_LABEL_WIDTH - fit::width(&label);
         lines.push(Line::from(vec![
-            Span::raw(format!("{label:<BAR_LABEL_WIDTH$}")),
+            Span::raw(format!("{label}{}", " ".repeat(pad))),
             Span::styled(bar(ratio, bar_width), Style::new().fg(fg)),
             Span::raw(format!(
                 " {:>value_width$}",
@@ -328,7 +361,29 @@ pub fn draw_bars(f: &mut Canvas, p: &Palette, area: Rect, s: &BarsSpec) {
             )),
         ]));
     }
+    if shown < s.bars.len() && lines.len() < area.height as usize {
+        lines.push(Line::styled(
+            format!("  +{} more", s.bars.len() - shown),
+            Style::new().fg(p.muted),
+        ));
+    }
     f.render_widget(Paragraph::new(lines), area);
+}
+
+/// Whether a bar list shows its label, and how many bars, in `rows` rows.
+/// The label goes first when there is a single row; when the bars don't all
+/// fit, the last row says how many are left out ("+3 more").
+pub fn bars_fit(labeled: bool, count: usize, rows: u16) -> (bool, usize) {
+    let labeled = labeled && rows >= 2;
+    let rows = (rows - labeled as u16) as usize;
+    let shown = if count <= rows {
+        count
+    } else if rows >= 2 {
+        rows - 1
+    } else {
+        rows
+    };
+    (labeled, shown)
 }
 
 pub struct GaugeSpec<'a> {
@@ -346,10 +401,10 @@ pub fn draw_gauge(f: &mut Canvas, p: &Palette, area: Rect, g: &GaugeSpec) {
     let value = format!(" {:>3.0}%", g.percent);
     let caption = g.caption.map(|c| format!(" · {c}")).unwrap_or_default();
     let label = format!("{} ", g.label);
-    let fixed = label.chars().count() + value.len();
+    let fixed = fit::width(&label) + value.len();
     let width = area.width as usize;
-    let (caption, bar_width) = match width.checked_sub(fixed + caption.chars().count() + 8) {
-        Some(_) => (caption.clone(), width - fixed - caption.chars().count()),
+    let (caption, bar_width) = match width.checked_sub(fixed + fit::width(&caption) + 8) {
+        Some(_) => (caption.clone(), width - fixed - fit::width(&caption)),
         None => (String::new(), width.saturating_sub(fixed)),
     };
 

@@ -170,6 +170,7 @@ impl Module for Uptime {
             let up = h.iter().filter(|s| **s != Status::Error).count();
             if let Some(ms) = o.latency_ms {
                 latency.push(SeriesData {
+                    tone: None,
                     name: c.name.clone(),
                     points: vec![(now, ms)],
                 });

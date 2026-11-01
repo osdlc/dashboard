@@ -319,6 +319,7 @@ fn view(checks: &[Check]) -> View {
     let items = checks
         .iter()
         .map(|c| ListItem {
+            tone: None,
             title: c.name.into(),
             subtitle: Some(c.detail.clone()),
             status: Some(match c.state {

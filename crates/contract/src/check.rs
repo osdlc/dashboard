@@ -4,7 +4,8 @@
 //! line of plain text naming where it is.
 //!
 //! A finding is a problem (the plugin sent something wrong) or a note
-//! (allowed, but this host ignores it for now).
+//! (allowed, but worth knowing: this host ignores it for now, or it shows
+//! nothing useful).
 
 use crate::{Action, CONTRACT_VERSION, Cell, Manifest, Refresh, View, Widget};
 
@@ -136,6 +137,28 @@ fn widget(w: &Widget, at: &str, out: &mut Vec<Finding>) {
                 }
             }
         }
+        Widget::Pie { slices, .. } => {
+            if slices.is_empty() {
+                note(
+                    out,
+                    format!("{at}: pie has no slices, shown as \"no data\""),
+                );
+            }
+            for s in slices {
+                if !s.value.is_finite() || s.value < 0.0 {
+                    problem(
+                        out,
+                        format!(
+                            "{at}: slice {:?} value is {}; use a finite number, 0 or more",
+                            s.label, s.value
+                        ),
+                    );
+                }
+            }
+            if !slices.is_empty() && slices.iter().all(|s| s.value == 0.0) {
+                note(out, format!("{at}: every slice is 0, shown as \"no data\""));
+            }
+        }
         Widget::Uptime { checks } => {
             for c in checks {
                 if let Some(u) = c.uptime {
@@ -159,15 +182,20 @@ fn widget(w: &Widget, at: &str, out: &mut Vec<Finding>) {
                             format!("{here}: cell {key:?} has no column with that key"),
                         );
                     }
-                    if let Cell::Widget(inner) = cell
-                        && !matches!(inner, Widget::Stat { .. } | Widget::Gauge { .. })
-                    {
-                        problem(
-                            out,
-                            format!(
-                                "{here}: cell {key:?} holds a widget other than stat or gauge, shown as text"
-                            ),
-                        );
+                    if let Cell::Widget(inner) = cell {
+                        if matches!(
+                            inner,
+                            Widget::Stat { .. } | Widget::Gauge { .. } | Widget::Pie { .. }
+                        ) {
+                            widget(inner, &format!("{here}.cells[{key:?}]"), out);
+                        } else {
+                            problem(
+                                out,
+                                format!(
+                                    "{here}: cell {key:?} holds a widget other than stat, gauge or pie, shown as text"
+                                ),
+                            );
+                        }
                     }
                 }
                 action(row.action.as_ref(), &here, out);
@@ -212,7 +240,7 @@ fn url(u: Option<&str>, at: &str, out: &mut Vec<Finding>) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Column, Row, SeriesData, Status};
+    use crate::{Column, Row, SeriesData, Slice, Status};
 
     #[test]
     fn finds_common_mistakes() {
@@ -239,6 +267,7 @@ mod tests {
                         mirrored: false,
                         format: Default::default(),
                         series: vec![SeriesData {
+                            tone: None,
                             name: "a".into(),
                             points: vec![(1_793_000_000, 1.0)],
                         }],
@@ -247,6 +276,7 @@ mod tests {
                         columns: vec![Column {
                             key: "name".into(),
                             label: "Name".into(),
+                            priority: None,
                         }],
                         rows: vec![Row {
                             cells: [("nmae".to_string(), Cell::Text("x".into()))].into(),
@@ -265,5 +295,78 @@ mod tests {
         assert!(problems[2].contains("look like seconds"));
         assert!(problems[3].contains("\"nmae\" has no column"));
         assert!(problems[4].contains("not http(s)"));
+    }
+
+    fn pie(values: &[f64]) -> Widget {
+        Widget::Pie {
+            label: None,
+            slices: values
+                .iter()
+                .enumerate()
+                .map(|(i, v)| Slice {
+                    tone: None,
+                    label: format!("s{i}"),
+                    value: *v,
+                    status: None,
+                })
+                .collect(),
+            donut: true,
+            format: Default::default(),
+            unit: None,
+            color: Default::default(),
+        }
+    }
+
+    fn findings(root: Widget) -> Vec<Finding> {
+        check_view(&View {
+            status: Status::Ok,
+            summary: "x".into(),
+            root,
+        })
+    }
+
+    #[test]
+    fn pie_values_must_be_finite_and_not_negative() {
+        assert!(findings(pie(&[3.0, 0.0, 1.5])).is_empty());
+        let found = findings(pie(&[1.0, -2.0, f64::NAN, f64::INFINITY]));
+        assert_eq!(found.len(), 3, "{found:#?}");
+        assert!(found.iter().all(|f| f.problem));
+        assert!(found[0].text.contains("\"s1\" value is -2"));
+    }
+
+    #[test]
+    fn empty_or_all_zero_pie_is_a_note() {
+        for root in [pie(&[]), pie(&[0.0, 0.0])] {
+            let found = findings(root);
+            assert_eq!(found.len(), 1, "{found:#?}");
+            assert!(!found[0].problem);
+            assert!(found[0].text.contains("no data"));
+        }
+    }
+
+    #[test]
+    fn pie_in_a_row_and_a_table_cell_is_checked() {
+        let row = Widget::Row {
+            children: vec![pie(&[-1.0])],
+        };
+        let found = findings(row);
+        assert_eq!(found.len(), 1);
+        assert!(found[0].text.starts_with("root.children[0]: slice"));
+
+        let table = Widget::Table {
+            columns: vec![Column {
+                key: "use".into(),
+                label: "Use".into(),
+                priority: None,
+            }],
+            rows: vec![Row {
+                cells: [("use".to_string(), Cell::Widget(pie(&[-1.0])))].into(),
+                status: None,
+                action: None,
+            }],
+        };
+        let found = findings(table);
+        assert_eq!(found.len(), 1, "{found:#?}");
+        assert!(found[0].text.contains("root.rows[0].cells[\"use\"]"));
     }
 }

@@ -120,6 +120,7 @@ fn view(info: &Info, before: Option<&str>) -> View {
     let mut items = vec![];
     if let Some(p) = &place {
         items.push(ListItem {
+            tone: None,
             title: p.clone(),
             subtitle: info.loc.clone(),
             status: None,
@@ -143,6 +144,7 @@ fn view(info: &Info, before: Option<&str>) -> View {
             .next()
             .filter(|a| a.starts_with("AS"));
         items.push(ListItem {
+            tone: None,
             title: org.clone(),
             subtitle: info.hostname.clone(),
             status: None,
@@ -152,6 +154,7 @@ fn view(info: &Info, before: Option<&str>) -> View {
     }
     if let Some(tz) = info.timezone.as_ref().filter(|t| !t.is_empty()) {
         items.push(ListItem {
+            tone: None,
             title: tz.clone(),
             subtitle: None,
             status: None,

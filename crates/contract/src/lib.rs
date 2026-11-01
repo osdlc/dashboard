@@ -11,11 +11,13 @@ pub mod catalog;
 pub mod check;
 pub mod marketplace;
 pub mod rpc;
+pub mod theme;
 
 pub use catalog::{
     CatalogEntry, CatalogResponse, EntryKind, MARKETPLACE, PACKAGE_FILE, Package, Requirements,
 };
 pub use marketplace::{Index, IndexEntry};
+pub use theme::{ColorTheme, Tokens, Tone};
 
 pub const CONTRACT_VERSION: &str = "0.1";
 
@@ -109,35 +111,51 @@ pub enum Status {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum Widget {
+    /// A paragraph of text.
     Text {
         text: String,
+        /// Read markdown in `text`: `**bold**`, and code between backticks.
         #[serde(default)]
         markdown: bool,
     },
+    /// One number with a label, e.g. "p99 107 ms".
     Stat {
+        /// Shown above or before the value.
         label: String,
+        /// Already formatted, e.g. "3451" or "1.2k".
         value: String,
+        /// Shown after the value, smaller, e.g. "ms" or "/s".
         #[serde(default)]
         unit: Option<String>,
+        /// A change to show beside the value, e.g. "+2.8%".
         #[serde(default)]
         delta: Option<String>,
+        /// Colors the value: ok, warn or error.
         #[serde(default)]
         status: Option<Status>,
     },
+    /// A horizontal meter from 0 to 100%.
     Gauge {
         label: String,
+        /// How full, 0-100.
         percent: f64,
+        /// A tick on the track at this percent, e.g. where usage should be by now.
         #[serde(default)]
         marker: Option<f64>,
+        /// Percents at which the fill turns warn and error colored.
         #[serde(default)]
         thresholds: Option<Thresholds>,
+        /// A line under the meter, e.g. "1721 of 1858 GiB used".
         #[serde(default)]
         caption: Option<String>,
     },
+    /// Values over time, as a line, a filled area or bars.
     Series {
         label: String,
+        /// Shown after values, e.g. "%" or "/s".
         #[serde(default)]
         unit: Option<String>,
+        /// The top of the chart. Default: the largest value.
         #[serde(default)]
         y_max: Option<f64>,
         /// When set, the host keeps history for this widget: each update's
@@ -148,16 +166,20 @@ pub enum Widget {
         /// Points the host keeps per series when `id` is set. Default 300.
         #[serde(default)]
         history: Option<u32>,
+        /// A line, a filled area or one bar per sample.
         #[serde(default)]
         style: SeriesStyle,
+        /// The color of a single series.
         #[serde(default)]
         color: ColorScale,
         /// Draw the first series above the axis and the second below it,
         /// e.g. network download and upload.
         #[serde(default)]
         mirrored: bool,
+        /// How values are written: plain, bytes or count.
         #[serde(default)]
         format: ValueFormat,
+        /// One or more lines, each with its points.
         series: Vec<SeriesData>,
     },
     /// Many small meters in a compact grid, e.g. one per CPU core.
@@ -165,6 +187,7 @@ pub enum Widget {
         #[serde(default)]
         label: Option<String>,
         meters: Vec<Meter>,
+        /// The meters' color: `accent`, or a scale colored by each meter's value.
         #[serde(default)]
         color: ColorScale,
     },
@@ -172,8 +195,10 @@ pub enum Widget {
     Bars {
         #[serde(default)]
         label: Option<String>,
+        /// Shown after each value.
         #[serde(default)]
         unit: Option<String>,
+        /// How values are written: plain, bytes or count.
         #[serde(default)]
         format: ValueFormat,
         /// Value of a full bar. Default: the largest value.
@@ -181,11 +206,35 @@ pub enum Widget {
         max: Option<f64>,
         bars: Vec<Bar>,
     },
+    /// Shares of a whole, as a pie or donut with a legend. Slices keep the
+    /// order given; each one's share is its value over the sum of all values.
+    Pie {
+        #[serde(default)]
+        label: Option<String>,
+        slices: Vec<Slice>,
+        /// A ring with a hole in the middle. Default true; false draws a full disc.
+        #[serde(default = "yes")]
+        donut: bool,
+        /// How values are written in the legend: plain, bytes or count.
+        #[serde(default)]
+        format: ValueFormat,
+        /// Shown after each value in the legend.
+        #[serde(default)]
+        unit: Option<String>,
+        /// `accent` (the default) gives each slice its own color, the theme's
+        /// accent first. The other scales spread the slices along the scale
+        /// in order. A slice's `status` overrides its color.
+        #[serde(default)]
+        color: ColorScale,
+    },
+    /// Items with a title, a subtitle, a status marker and tags.
     List {
         items: Vec<ListItem>,
+        /// Shown when there are no items.
         #[serde(default)]
         empty_text: Option<String>,
     },
+    /// Rows and columns. A cell holds text, a number, or a stat, gauge or pie.
     Table {
         columns: Vec<Column>,
         rows: Vec<Row>,
@@ -197,15 +246,11 @@ pub enum Widget {
         lines: Vec<LogLine>,
     },
     /// Availability checks, one row each with a strip of recent results.
-    Uptime {
-        checks: Vec<UptimeCheck>,
-    },
-    Row {
-        children: Vec<Widget>,
-    },
-    Column {
-        children: Vec<Widget>,
-    },
+    Uptime { checks: Vec<UptimeCheck> },
+    /// Widgets side by side, sharing the width.
+    Row { children: Vec<Widget> },
+    /// Widgets stacked top to bottom.
+    Column { children: Vec<Widget> },
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
@@ -247,15 +292,40 @@ pub enum ValueFormat {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct Meter {
     pub label: String,
+    /// 0-100.
     pub percent: f64,
+    /// A fixed color for this meter instead of the grid's color scale.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tone: Option<Tone>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct Bar {
     pub label: String,
     pub value: f64,
+    /// Colors the bar ok, warn or error.
     #[serde(default)]
     pub status: Option<Status>,
+    /// Fill color when `status` is not set. Default: `accent`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tone: Option<Tone>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+pub struct Slice {
+    pub label: String,
+    /// Zero or more. Shown with the widget's `format` and `unit`.
+    pub value: f64,
+    /// Colors the slice ok, warn or error.
+    #[serde(default)]
+    pub status: Option<Status>,
+    /// Color when `status` is not set. Default: the next `series-N` token.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tone: Option<Tone>,
+}
+
+fn yes() -> bool {
+    true
 }
 
 /// Formats a value for display. Shared so every renderer shows the same text.
@@ -298,15 +368,22 @@ pub fn format_value(value: f64, format: ValueFormat, unit: Option<&str>) -> Stri
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct Thresholds {
+    /// The percent at which the fill turns the warn color.
     pub warn: f64,
+    /// The percent at which the fill turns the error color.
     pub error: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct SeriesData {
+    /// Shown in the legend; also keys the history when the widget has an `id`.
     pub name: String,
     /// (unix ms, value)
     pub points: Vec<(i64, f64)>,
+    /// This series' color, instead of the widget's `color` (one series) or
+    /// the next `series-N` token (several).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tone: Option<Tone>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
@@ -334,6 +411,7 @@ pub struct UptimeCheck {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct LogLine {
     pub text: String,
+    /// error, warn, info or debug: colors the line.
     #[serde(default)]
     pub level: Option<rpc::LogLevel>,
     /// Shown before the text, e.g. "14:02:11".
@@ -344,28 +422,44 @@ pub struct LogLine {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct ListItem {
     pub title: String,
+    /// A second, quieter line.
     #[serde(default)]
     pub subtitle: Option<String>,
+    /// Colors the item's marker ok, warn or error.
     #[serde(default)]
     pub status: Option<Status>,
+    /// Color of the item's marker when `status` is not set.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tone: Option<Tone>,
+    /// Short labels shown as chips.
     #[serde(default)]
     pub tags: Vec<String>,
+    /// What clicking the item does, e.g. open a link.
     #[serde(default)]
     pub action: Option<Action>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct Column {
+    /// Names the cell in each row's `cells`.
     pub key: String,
+    /// The column heading.
     pub label: String,
+    /// Which columns to keep when a table is too narrow for all of them:
+    /// renderers drop the lowest priority first (the rightmost of equal
+    /// ones) and always keep the first column. Default 0.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub priority: Option<i32>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct Row {
-    /// Keyed by `Column::key`.
+    /// Keyed by the column's `key`.
     pub cells: BTreeMap<String, Cell>,
+    /// Colors the row's marker ok, warn or error.
     #[serde(default)]
     pub status: Option<Status>,
+    /// What clicking the row does, e.g. open a link.
     #[serde(default)]
     pub action: Option<Action>,
 }
@@ -375,7 +469,8 @@ pub struct Row {
 pub enum Cell {
     Text(String),
     Number(f64),
-    /// Only `Stat` and `Gauge` are rendered inline; others fall back to text.
+    /// `Stat`, `Gauge` and `Pie` are rendered inline (the TUI shows a pie as
+    /// its largest slice); others fall back to text.
     Widget(Widget),
 }
 
@@ -425,6 +520,12 @@ pub enum Theme {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct UiSettings {
     pub theme: Theme,
+    /// The color theme in use, both variants; `theme` picks one.
+    #[serde(default)]
+    pub color_theme: ColorTheme,
+    /// Color themes to choose from: built-ins, then the config's own.
+    #[serde(default)]
+    pub color_themes: Vec<String>,
     /// At least one screen.
     pub screens: Vec<ScreenLayout>,
     /// Running modules, for the help screen.
@@ -538,6 +639,12 @@ pub enum ClientMessage {
         #[serde(default)]
         etag: Option<String>,
     },
+    /// Write `color_theme:` into the config file. `etag` as for `SetTheme`.
+    SetColorTheme {
+        name: String,
+        #[serde(default)]
+        etag: Option<String>,
+    },
     /// Replace `screens:` in the config file (from the screen editor). `etag`
     /// as for `SetTheme`.
     SaveScreens {
@@ -573,6 +680,9 @@ pub enum ClientMessage {
 }
 
 /// Messages the host sends to the web view over its WebSocket.
+// Settings (with the color theme) are much larger than a tile update, but
+// sent rarely; boxing them would only add noise where they are built.
+#[allow(clippy::large_enum_variant)]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum ServerMessage {
@@ -601,6 +711,36 @@ mod tests {
             "3.0 GiB"
         );
         assert_eq!(format_value(42.4, ValueFormat::Plain, Some("%")), "42%");
+    }
+
+    #[test]
+    fn pie_example_from_docs_defaults_to_a_donut() {
+        let json = r#"{"type": "row", "children": [
+          {"type": "pie", "label": "Disk", "format": "bytes", "slices": [
+            {"label": "used", "value": 300000000000},
+            {"label": "free", "value": 200000000000, "status": "warn"}]},
+          {"type": "stat", "label": "Used", "value": "279", "unit": "GiB"}
+        ]}"#;
+        let w: Widget = serde_json::from_str(json).unwrap();
+        let Widget::Row { children } = &w else {
+            panic!("expected row")
+        };
+        let Widget::Pie {
+            slices,
+            donut,
+            format,
+            color,
+            ..
+        } = &children[0]
+        else {
+            panic!("expected pie")
+        };
+        assert!(*donut);
+        assert_eq!(*format, ValueFormat::Bytes);
+        assert_eq!(*color, ColorScale::Accent);
+        assert_eq!(slices[1].status, Some(Status::Warn));
+        let again: Widget = serde_json::from_value(serde_json::to_value(&w).unwrap()).unwrap();
+        assert_eq!(w, again);
     }
 
     #[test]

@@ -171,6 +171,7 @@ pub fn now_secs() -> i64 {
 pub fn link(title: &str, subtitle: &str, url: &str) -> Widget {
     Widget::List {
         items: vec![dashboard_contract::ListItem {
+            tone: None,
             title: title.into(),
             subtitle: Some(subtitle.into()),
             status: None,

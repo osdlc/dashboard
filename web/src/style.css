@@ -1,73 +1,14 @@
 :root {
-  --bg: #f6f7f9;
-  --surface: #ffffff;
-  --border: #dfe2e7;
-  --text: #1c1f24;
-  --muted: #6b7280;
-  --ok: #1f9d55;
-  --warn: #c98a00;
-  --error: #d1393e;
-  --accent: #2f6fde;
-  --track: #e8ebef;
-  --heat-low: #148c46;
-  --heat-mid: #be8200;
-  --heat-high: #c82832;
-  --cool-low: #008c8c;
-  --cool-mid: #285ad2;
-  --cool-high: #7832be;
-  --sunset-low: #6432be;
-  --sunset-mid: #c82878;
-  --sunset-high: #d26e00;
   color-scheme: light dark;
   font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
-/* theme: auto follows the OS; data-theme="light" / "dark" (from config) overrides it. */
+/* Colors are CSS variables named after the color theme's tokens (--bg, --accent,
+   --series-1, ...), set by colors.ts. theme: auto follows the OS; data-theme="light"
+   / "dark" (from config) overrides it. */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --bg: #111317;
-    --surface: #1a1d23;
-    --border: #2c3038;
-    --text: #e6e8eb;
-    --muted: #9097a1;
-    --ok: #3fbf74;
-    --warn: #e0a826;
-    --error: #ef5b5f;
-    --accent: #6c9cf0;
-    --track: #2a2e35;
-    --heat-low: #50c878;
-    --heat-mid: #e6be3c;
-    --heat-high: #f05050;
-    --cool-low: #3cd2c8;
-    --cool-mid: #5a8cf5;
-    --cool-high: #aa6ef0;
-    --sunset-low: #8c5ae6;
-    --sunset-mid: #eb5aa0;
-    --sunset-high: #faa046;
-    color-scheme: dark;
-  }
+  :root:not([data-theme='light']) { color-scheme: dark; }
 }
-:root[data-theme='dark'] {
-  --bg: #111317;
-  --surface: #1a1d23;
-  --border: #2c3038;
-  --text: #e6e8eb;
-  --muted: #9097a1;
-  --ok: #3fbf74;
-  --warn: #e0a826;
-  --error: #ef5b5f;
-  --accent: #6c9cf0;
-  --track: #2a2e35;
-  --heat-low: #50c878;
-  --heat-mid: #e6be3c;
-  --heat-high: #f05050;
-  --cool-low: #3cd2c8;
-  --cool-mid: #5a8cf5;
-  --cool-high: #aa6ef0;
-  --sunset-low: #8c5ae6;
-  --sunset-mid: #eb5aa0;
-  --sunset-high: #faa046;
-  color-scheme: dark;
-}
+:root[data-theme='dark'] { color-scheme: dark; }
 :root[data-theme='light'] { color-scheme: light; }
 
 * { box-sizing: border-box; }
@@ -117,7 +58,9 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 .notice { color: var(--muted); }
 
 /* 12-column grid; size classes match the TUI (crates/tui/src/layout.rs). */
-.grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); grid-auto-rows: minmax(120px, auto); grid-auto-flow: dense; gap: 16px; }
+/* Rows are a fixed 120px: a tile's height comes from its size, never from its
+   content, which fit.ts fits to the tile instead. */
+.grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); grid-auto-rows: 120px; grid-auto-flow: dense; gap: 16px; }
 .tile[data-size='small'] { grid-column: span 3; grid-row: span 1; }
 .tile[data-size='medium'] { grid-column: span 4; grid-row: span 2; }
 .tile[data-size='large'] { grid-column: span 6; grid-row: span 3; }
@@ -128,16 +71,20 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 }
 @media (max-width: 700px) {
   .grid { grid-template-columns: minmax(0, 1fr); }
-  .tile[data-size] { grid-column: auto; grid-row: auto; }
+  .tile[data-size] { grid-column: auto; }
 }
 
-.tile { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--muted); border-radius: 8px; padding: 12px 14px; min-width: 0; }
+.tile { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--muted); border-radius: 8px; padding: 12px 14px; min-width: 0; min-height: 0; overflow: hidden; }
+.tile[data-size='small'] { padding: 8px 12px; }
+.tile[data-size='small'] header { margin-bottom: 4px; }
 .tile[data-status='ok'] { border-left-color: var(--ok); }
 .tile[data-status='warn'] { border-left-color: var(--warn); }
 .tile[data-status='error'] { border-left-color: var(--error); }
-.tile header { display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
-.tile h2 { font-size: 0.95rem; margin: 0; }
-.tile .summary { color: var(--muted); font-size: 0.8rem; }
+.tile header { display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px; min-width: 0; }
+.tile h2 { font-size: 0.95rem; margin: 0; flex: none; }
+.tile .summary { color: var(--muted); font-size: 0.8rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tile header > span { flex: none; }
+.tile header > .summary { flex: 0 1 auto; }
 .tile .stale { color: var(--warn); font-size: 0.75rem; }
 .tile .demo { color: var(--accent); font-size: 0.75rem; }
 
@@ -146,6 +93,7 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 
 .w-row { display: flex; flex-wrap: wrap; gap: 12px 16px; }
 .w-row > * { flex: 1 1 140px; min-width: 0; }
+.w-row > .w-stat { flex-basis: 90px; }
 .w-column { display: flex; flex-direction: column; gap: 12px; }
 
 .w-gauge .gauge-head { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px; gap: 8px; }
@@ -158,19 +106,18 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 
 /* Tiles are flex columns so graphs can take the height that's left. */
 .tile { display: flex; flex-direction: column; }
-.tile > .w-column, .tile > .w-series { flex: 1; }
+.tile > .w-column, .tile > .w-series { flex: 1; min-height: 0; }
 .w-column > .w-series { flex: 1 1 90px; }
 
-.w-series { margin: 0; display: flex; flex-direction: column; min-height: 90px; }
+/* Graphs shrink to a strip in a short tile. */
+.w-series { margin: 0; display: flex; flex-direction: column; min-height: 48px; }
 .w-series figcaption { font-size: 0.8rem; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 8px; margin-bottom: 4px; }
-.w-series svg { width: 100%; flex: 1; min-height: 60px; max-height: 160px; display: block; }
+.w-series svg { width: 100%; flex: 1; min-height: 24px; max-height: 160px; display: block; }
 .w-series path { fill: none; stroke: var(--accent); stroke-width: 1.5; }
 .w-series[data-style='area'] path, .w-series[data-mirrored] path { fill: var(--fill); fill-opacity: 0.55; stroke: var(--fill); }
 .w-series[data-mirrored] path.b { fill-opacity: 0.3; }
 .w-series .axis { stroke: var(--border); }
-.w-series[data-style='line'] path.s1 { stroke: var(--warn); }
-.w-series[data-style='line'] path.s2 { stroke: var(--ok); }
-.w-series[data-style='line'] path.s3 { stroke: var(--error); }
+.w-series[data-style='line'] path { stroke: var(--line); }
 
 .w-label { font-size: 0.8rem; color: var(--muted); margin-bottom: 4px; }
 .meters { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 4px 12px; }
@@ -180,12 +127,39 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 .m-track, .b-track { height: 6px; background: var(--track); border-radius: 3px; overflow: hidden; }
 .m-fill, .b-fill { display: block; height: 100%; }
 .b-fill { background: var(--accent); }
+.bar-row[data-tone] .b-fill { background: var(--tone); }
 .bar-row[data-status='warn'] .b-fill { background: var(--warn); }
 .bar-row[data-status='error'] .b-fill { background: var(--error); }
 
 .bar-row { display: grid; grid-template-columns: minmax(0, 11em) 1fr 6em; align-items: center; gap: 8px; font-size: 0.8rem; padding: 2px 0; font-variant-numeric: tabular-nums; }
 .b-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .b-value { text-align: right; }
+
+/* Pie: disc beside the legend; in a narrow spot the legend goes below and
+   drops the values, and in the narrowest (or a table cell) only the disc shows. */
+.w-pie { container-type: inline-size; min-width: 0; }
+.pie-body { display: flex; align-items: center; gap: 12px; }
+.pie-disc { flex: 0 0 auto; width: clamp(56px, 38cqi, 160px); aspect-ratio: 1; display: block; }
+.pie-disc path { stroke: var(--surface); stroke-width: 0.6; transition: d 0.5s ease, fill 0.5s ease; }
+.pie-legend { list-style: none; margin: 0; padding: 0; flex: 1; min-width: 0; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.pie-legend li { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto 3.2em; align-items: center; gap: 6px; padding: 1px 0; }
+.p-swatch { width: 10px; height: 10px; border-radius: 2px; }
+.p-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.p-value { color: var(--muted); text-align: right; }
+.p-pct { text-align: right; }
+.pie-empty { margin: 0; color: var(--muted); font-size: 0.8rem; }
+@container (max-width: 260px) {
+  .pie-body { flex-direction: column; align-items: stretch; }
+  .pie-disc { width: clamp(56px, 50cqi, 120px); align-self: center; }
+  .p-value { display: none; }
+  .pie-legend li { grid-template-columns: 10px minmax(0, 1fr) 3.2em; }
+}
+@container (max-width: 110px) {
+  .pie-legend { display: none; }
+}
+.w-table .w-pie { container-type: normal; }
+.w-table .w-pie .w-label, .w-table .pie-legend { display: none; }
+.w-table .pie-disc { width: 1.6em; }
 
 .w-stat { display: flex; flex-direction: column; }
 .w-stat .label, .w-stat .delta { color: var(--muted); font-size: 0.8rem; }
@@ -200,14 +174,25 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 .w-list li[data-status='warn'] { border-left-color: var(--warn); }
 .w-list li[data-status='error'] { border-left-color: var(--error); }
 .w-list li[data-status='unknown'] { border-left-color: var(--muted); }
+.w-list li[data-tone] { border-left: 3px solid var(--tone); padding-left: 8px; }
 /* Line breaks in the text are kept (a text file, a multi-line note). */
 .w-text { white-space: pre-wrap; }
 .w-text code { font-size: 0.85em; background: var(--track); border-radius: 3px; padding: 0 4px; }
 .w-list .sub { color: var(--muted); font-size: 0.8rem; }
+/* One line each for the title (with its tags) and the subtitle; what doesn't fit ends with "…". */
+.w-list .item-head { display: flex; align-items: baseline; min-width: 0; }
+.w-list .title { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.w-list .tag { flex: none; }
+/* In a narrow list the tags are left out, so the title has the room. */
+.w-list { container-type: inline-size; }
+@container (max-width: 300px) { .w-list .tag { display: none; } }
+.w-list .sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .w-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
 .w-table th { text-align: left; color: var(--muted); font-weight: 500; padding: 4px 6px; }
 .w-table td { padding: 6px; border-top: 1px solid var(--border); vertical-align: middle; }
+/* One line per cell, cut with "…"; a table too wide for its tile drops columns (fit.ts). */
+.w-table th, .w-table td { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 16em; }
 .w-table .w-gauge .gauge-head span:first-child { display: none; }
 
 /* ---- fullscreen tile ---- */
@@ -227,7 +212,7 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 .editor-screen-bar .muted { color: var(--muted); font-size: 0.8rem; }
 .editor button, .ctx-menu button { font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; cursor: pointer; }
 .editor button:disabled, .ctx-menu button:disabled { opacity: 0.45; cursor: default; }
-.editor button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.editor button.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 .editor-body { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start; }
 .grid.editing .tile { cursor: grab; outline: 1px dashed var(--border); outline-offset: 3px; }
 .grid.editing .tile[data-dragging] { opacity: 0.4; }
@@ -240,7 +225,7 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 .palette-item[data-used] span::after { content: ' ✓'; color: var(--ok); }
 .ctx-menu { position: fixed; z-index: 20; min-width: 180px; display: flex; flex-direction: column; gap: 2px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 6px; box-shadow: 0 8px 24px rgb(0 0 0 / 0.3); }
 .ctx-menu button { border: 0; text-align: left; padding: 5px 10px; }
-.ctx-menu button:hover:not(:disabled) { background: var(--track); }
+.ctx-menu button:hover:not(:disabled) { background: var(--surface-2); }
 .ctx-menu button[aria-checked='true'] { color: var(--accent); font-weight: 600; }
 .ctx-menu button[aria-checked='true']::before { content: '● '; }
 .ctx-menu .danger { color: var(--error); }
@@ -254,7 +239,8 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 /* ---- log ---- */
 .w-log { position: relative; display: flex; flex-direction: column; min-height: 0; flex: 1; }
 .tile > .w-log, .w-column > .w-log { flex: 1 1 160px; }
-.log-lines { flex: 1; min-height: 120px; max-height: 420px; overflow: auto; font: 0.78rem/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; }
+.tile > .w-log { min-height: 0; }
+.log-lines { flex: 1; min-height: 3em; max-height: 420px; overflow: auto; font: 0.78rem/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; }
 .tile[data-size='full'] .log-lines { max-height: none; }
 .log-line { white-space: pre-wrap; word-break: break-word; }
 .log-time { color: var(--muted); margin-right: 8px; }
@@ -269,11 +255,11 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 /* ---- hover: outline the tile, highlight the row or button under the pointer ---- */
 .grid .tile:hover { box-shadow: 0 0 0 2px var(--accent); }
 .w-list li, .w-table tbody tr { transition: background 0.1s, opacity 0.35s ease, transform 0.4s ease; }
-.w-list li:hover, .w-table tbody tr:hover { background: var(--track); }
+.w-list li:hover, .w-table tbody tr:hover { background: var(--surface-2); }
 .w-list li:has(a) { position: relative; cursor: pointer; }
 /* The whole row opens the link, not just the title. */
 .w-list li a::after { content: ''; position: absolute; inset: 0; }
-.tabs button:hover, .help-btn:hover, .rotate-btn:hover, .theme-choice button:hover { background: var(--track); }
+.tabs button:hover, .help-btn:hover, .rotate-btn:hover, .theme-choice button:hover { background: var(--surface-2); }
 .palette-item:hover { border-color: var(--accent) !important; }
 .grid.editing .tile:hover { outline-color: var(--accent); }
 
@@ -281,7 +267,7 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 .tile:focus { outline: none; }
 .tile[data-focused], .tile:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; z-index: 1; }
 [data-density='compact'] .tile[data-focused], [data-density='compact'] .tile:focus-visible { outline-width: 2px; outline-offset: 1px; }
-.tile [data-nav-item][aria-selected='true'] { background: color-mix(in srgb, var(--accent) 20%, transparent); box-shadow: inset 3px 0 0 var(--accent); }
+.tile [data-nav-item][aria-selected='true'] { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
 .bar-row, .up-row { transition: background 0.1s; border-radius: 3px; }
 
 /* Uptime: dot, name, strip of recent results (newest right), uptime %, last time or error. */
@@ -308,7 +294,7 @@ a.up-name:hover { text-decoration: underline; }
 /* ---- compact density (d): tighter gaps and padding, full width ---- */
 [data-density='compact'] #app { max-width: none; padding: 6px 8px; }
 [data-density='compact'] .top { margin-bottom: 6px; gap: 8px; }
-[data-density='compact'] .grid { gap: 4px; grid-auto-rows: minmax(84px, auto); }
+[data-density='compact'] .grid { gap: 4px; grid-auto-rows: 84px; }
 [data-density='compact'] .tile { border-radius: 4px; border-left-width: 3px; padding: 6px 8px; }
 [data-density='compact'] .tile header { margin-bottom: 4px; }
 [data-density='compact'] .w-column { gap: 6px; }
@@ -318,7 +304,7 @@ a.up-name:hover { text-decoration: underline; }
 [data-density='compact'] .w-table td { padding: 3px 4px; }
 [data-density='compact'] .bar-row { padding: 1px 0; }
 [data-density='compact'] .meters { gap: 2px 10px; }
-[data-density='compact'] .w-series { min-height: 70px; }
+[data-density='compact'] .w-series { min-height: 40px; }
 [data-density='compact'] .log-lines { padding: 4px 6px; border-radius: 3px; }
 [data-density='compact'] .fullscreen { padding: 8px; }
 
@@ -392,6 +378,28 @@ main.grid { animation: screen-in 0.25s ease-out; }
 :root[data-mode='ambient'] { font-size: clamp(16px, 1.25vw, 36px); cursor: none; }
 :root[data-mode='ambient'] body { overflow: hidden; }
 :root[data-mode='ambient'] #app { max-width: none; min-height: 100vh; padding: 2vw; pointer-events: none; user-select: none; }
-:root[data-mode='ambient'] .grid { gap: 1.5vw; grid-auto-rows: minmax(8rem, auto); }
+:root[data-mode='ambient'] .grid { gap: 1.5vw; grid-auto-rows: 8rem; }
 :root[data-mode='ambient'] .tile h2 { font-size: 1.1rem; }
 .ambient-foot { position: fixed; right: 2vw; bottom: 1vw; background: var(--bg); padding: 0 0.5em; border-radius: 4px; display: flex; gap: 1em; color: var(--muted); font-size: 0.8rem; }
+
+/* Demo mode (?mode=demo&id=...): one tile at the size its grid span has on a
+   1200px grid (12 columns, 16px gaps, 120px rows), so screenshots match the
+   app, and the same fixed height. The size is the entry's default or the page's `size` parameter. */
+.demo-one { display: flex; }
+/* ?fill: the one tile fills the page, which an embedding frame sizes. */
+:root[data-fill] #app { max-width: none; padding: 0; }
+.demo-fill { display: flex; height: 100vh; }
+.demo-fill .tile { flex: 1; min-width: 0; }
+.demo-one .tile { --col: calc((1200px - 11 * 16px) / 12); }
+.demo-one .tile[data-size='small'] { width: calc(3 * var(--col) + 2 * 16px); height: 120px; }
+.demo-one .tile[data-size='medium'] { width: calc(4 * var(--col) + 3 * 16px); height: calc(2 * 120px + 16px); }
+.demo-one .tile[data-size='large'] { width: calc(6 * var(--col) + 5 * 16px); height: calc(3 * 120px + 2 * 16px); }
+.demo-one .tile[data-size='wide'] { width: calc(8 * var(--col) + 7 * 16px); height: calc(2 * 120px + 16px); }
+.demo-one .tile[data-size='tall'] { width: calc(4 * var(--col) + 3 * 16px); height: calc(4 * 120px + 3 * 16px); }
+
+/* ---- fitting (fit.ts): what doesn't fit in a tile is left out ---- */
+[data-fit-cut] { display: none !important; }
+[data-fit-more]::after { content: attr(data-fit-more); display: block; color: var(--muted); font-size: 0.75rem; padding-top: 2px; }
+.w-list[data-fit-more]::after { padding-left: 2px; }
+table[data-fit-more]::after { display: table-caption; caption-side: bottom; text-align: left; }
+.meters[data-fit-more]::after { grid-column: 1 / -1; }

@@ -48,6 +48,7 @@ Optional. Lives at `~/.config/dashboard/config.yaml` (`%APPDATA%\dashboard\confi
 
 ```yaml
 theme: auto            # auto | light | dark
+color_theme: default   # default | contrast | paper | ember, or one of your own (see Themes)
 modules:
   cpu:
     size: large
@@ -86,6 +87,53 @@ modules:
 ```
 
 A plugin given only as a command (`plugin: [...]`) has no catalog entry, so its demo tile just says there is no demo view. Remove the line (or set `demo: false`) to run the module for real.
+
+### Themes
+
+`theme:` picks light or dark (`auto` follows the OS in the web view and the terminal's background in
+the TUI). `color_theme:` picks the colors. Every color theme has a light and a dark variant, and the
+web view and the TUI take every color from the same named tokens, so they match. Both settings
+screens can switch theme and colors; the choice is saved to the config file and shows at once.
+
+Built-in color themes:
+
+| Name | Look |
+|---|---|
+| `default` | The original: cool grays with a blue accent. |
+| `contrast` | Black on white and white on black, strong borders and saturated colors. |
+| `paper` | Warm off-white and soft charcoal, quiet ink colors. |
+| `ember` | Cream and coal with a burnt-orange accent. |
+
+Tokens:
+
+| Token | Used for |
+|---|---|
+| `bg`, `surface`, `surface-2` | Page, tiles and panels, hovered rows and buttons |
+| `text`, `muted`, `border`, `track` | Body text, quiet text, borders, the empty part of meters and gauges |
+| `accent`, `accent-soft`, `on-accent` | Highlights; the keyboard-selected item; text on an accent button |
+| `ok`, `warn`, `error`, `info` | Status colors |
+| `series-1` … `series-6` | Lines, bars and slices, in order |
+| `heat-*`, `cool-*`, `sunset-*` (`-low`, `-mid`, `-high`) | The stops of each color scale |
+
+To make your own, start from a built-in and change some tokens, per variant. Values are hex colors
+(`#rrggbb` or `#rgb`); an unknown token or a value that is not a color is an error that names it.
+
+```yaml
+color_theme: mine
+color_themes:
+  mine:
+    base: paper          # a built-in; default: default
+    light:
+      accent: "#2f6f4f"
+      series-1: "#2f6f4f"
+    dark:
+      accent: "#8fd0a8"
+```
+
+Widgets never carry colors of their own: a module can name a token with `tone:` (see
+[docs/contract.md](docs/contract.md)). The TUI leaves the terminal's own background and text
+color alone, darkens (or lightens) colors drawn as text until they read well, and uses the nearest
+of 256 or 16 colors when the terminal has no truecolor (`COLORTERM` is not `truecolor`/`24bit`).
 
 ### Issue trackers
 

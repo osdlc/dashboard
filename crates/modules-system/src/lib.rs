@@ -1,7 +1,7 @@
 //! The system bundle: CPU, memory, GPU, network, disk and processes (one module per
 //! area, so each can be placed, sized and refreshed on its own), plus log
-//! tailing, uptime checks, a text file viewer, the battery, a command's output
-//! and the machine's security settings. Each module sits behind a cargo
+//! tailing, uptime checks, a text file viewer, the battery, a command's output,
+//! the machine's security settings, and views read from a URL or a file. Each module sits behind a cargo
 //! feature named after its id.
 
 use std::time::Instant;
@@ -22,8 +22,14 @@ pub mod cmdrunner;
 pub mod cpu;
 #[cfg(feature = "disk")]
 pub mod disk;
+#[cfg(any(feature = "http", feature = "file"))]
+mod feed;
+#[cfg(feature = "file")]
+pub mod file;
 #[cfg(feature = "gpu")]
 pub mod gpu;
+#[cfg(feature = "http")]
+pub mod http;
 #[cfg(feature = "log")]
 pub mod log;
 #[cfg(feature = "memory")]
@@ -125,6 +131,20 @@ pub const MODULES: &[Builtin] = &[
         new: || Box::new(security::Security),
         catalog: security::catalog,
     },
+    #[cfg(feature = "http")]
+    Builtin {
+        id: "http",
+        core: false,
+        new: || Box::new(http::Http::default()),
+        catalog: http::catalog,
+    },
+    #[cfg(feature = "file")]
+    Builtin {
+        id: "file",
+        core: false,
+        new: || Box::new(file::File::default()),
+        catalog: file::catalog,
+    },
 ];
 
 /// Points the host keeps per graph: two minutes at the default 500 ms.
@@ -163,6 +183,7 @@ pub fn graph(
 
 pub fn sample(name: &str, t: i64, v: f64) -> SeriesData {
     SeriesData {
+        tone: None,
         name: name.into(),
         points: vec![(t, v)],
     }
@@ -241,6 +262,7 @@ pub fn demo_series(name: &str, step_ms: i64, values: &[f64]) -> SeriesData {
     let end = dashboard_host::now_ms();
     let n = values.len() as i64;
     SeriesData {
+        tone: None,
         name: name.into(),
         points: values
             .iter()

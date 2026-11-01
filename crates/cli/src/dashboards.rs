@@ -8,7 +8,7 @@ use std::process::Command;
 use anyhow::{Context, Result, bail};
 use dashboard_config::dashboards::name_for;
 use dashboard_config::layers::{Sources, find_project};
-use dashboard_config::packages::{Packages, data_dir};
+use dashboard_config::packages::Packages;
 use dashboard_config::{Config, parse};
 
 use dashboard_runtime::{known_modules, registry};
@@ -80,11 +80,8 @@ pub fn import(sources: &Sources, from: &str, name: Option<&str>, force: bool) ->
             println!("  - {need}");
         }
         if needs.iter().any(|n| n.contains("plugin package")) {
-            let dir = data_dir()
-                .map(|d| d.display().to_string())
-                .unwrap_or_else(|_| "the plugins folder".into());
             println!(
-                "There is no `dashboard plugin install` yet. To install a package, put its folder in {dir}/<id>/ (see docs/plugins.md)."
+                "Install a package with `dashboard plugin install <id> --index <index>`, or from its folder or .tar.gz (see docs/marketplace.md)."
             );
         }
     }

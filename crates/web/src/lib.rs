@@ -390,6 +390,8 @@ mod tests {
     fn state() -> AppState {
         let (_, settings) = watch::channel(UiSettings {
             theme: Default::default(),
+            color_theme: Default::default(),
+            color_themes: vec![],
             screens: vec![],
             modules: vec![],
             rotate: None,

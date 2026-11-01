@@ -1,0 +1,5 @@
+{
+  "queue": { "waiting": 14, "running": 3 },
+  "workers": ["w1", "w2", "w3", "w4"],
+  "latency": { "p50": 21.5, "p99": 107.4 }
+}

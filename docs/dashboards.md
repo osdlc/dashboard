@@ -38,8 +38,8 @@ dashboard export work work.yaml       # to a file (--force to replace it)
 `import` checks that the file is a valid config and saves it. It does not replace a saved
 dashboard of the same name unless you pass `--force`. Then it lists what the dashboard needs
 that isn't here: plugin packages that aren't installed, plugin programs not found on `PATH`,
-and modules this build doesn't have. There is no `dashboard plugin install` yet, so it says
-where to put a package folder instead. It also lists the programs the dashboard runs (plugins, and commands set in
+and modules this build doesn't have. Install a missing package with `dashboard plugin install`
+(see [marketplace.md](marketplace.md)). It also lists the programs the dashboard runs (plugins, and commands set in
 built-in modules' settings): opening a dashboard runs them, so read them first. Importing from a URL downloads with `curl`,
 and only `https://` URLs are accepted.
 
@@ -58,11 +58,14 @@ anywhere inside a repository uses the repository's file. It has the same keys as
 modules:
   ci:
     plugin: [python3, tools/ci_status.py]   # relative to this file's folder
+  repo:
+    builtin: git
+    config: { repos: [.] }                  # this repository, from any folder in it
 screens:
   - name: my-repo
     tiles:
       - module: ci
-      - module: git
+      - module: repo
 ```
 
 `--no-project` skips it.
@@ -107,19 +110,28 @@ How each key merges:
 |---|---|
 | `modules:` | Per module ID. A module's settings come whole from the last file that names it. Modules from earlier files stay. |
 | `screens:` | A saved dashboard's screens **replace** the machine file's. A project file's screens are **added in front** (so the repository's screen shows first); a project screen with the same name as an earlier one replaces it. |
-| `theme:`, `rotate:`, `description:` | The last file that sets it wins. |
+| `color_themes:` | Per theme name, like `modules:`. |
+| `theme:`, `color_theme:`, `rotate:`, `description:` | The last file that sets it wins. |
 
 Each file must be valid on its own. An error names the file it is in.
 
-A plugin's relative paths (`plugin: [./run.sh]`) start in the folder of the file that set that
-module. Plugin packages are looked for in `plugins/` next to each file (project first), then in
+Relative paths start in the folder of the file that set that module, in every file: the
+machine file, a saved dashboard and the project file. That covers a plugin's command
+(`plugin: [./run.sh]`, which also runs in that folder) and the paths in a built-in module's
+settings (`textfile`'s `path: TODO.md`, `git`'s `repos: [.]`). So `.dashboard.yaml` works the
+same from any folder inside the repository. Paths that start with `~/`, absolute paths and URLs
+are used as they are. A built-in marks which settings are paths in its config schema
+(`"x-path": true`). A built-in module that is only named on a screen has no settings, so has no
+paths. A saved dashboard's paths start in its folder, `~/.config/dashboard/dashboards/`, so
+`dashboard import` keeps relative paths relative to where it saves the file: use `~/` or
+absolute paths in a dashboard you share. Plugin packages are looked for in `plugins/` next to each file (project first), then in
 `~/.local/share/dashboard/plugins/`.
 
 When no file exists at all, the built-in demo is shown, as before.
 
 ## Where changes are saved
 
-The settings screen (theme) and the screen editor save to the saved dashboard in use, or to
+The settings screen (theme and colors) and the screen editor save to the saved dashboard in use, or to
 `config.yaml` when none is. They never write the project file, which is usually checked in:
 screens that came from it are left out when the editor saves, and the settings screen says
 so if you changed one. A screen of yours that a project screen of the same name hides is kept

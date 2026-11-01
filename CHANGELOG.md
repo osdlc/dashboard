@@ -4,6 +4,33 @@ The dashboard is pre-1.0: the config format, the module contract and the CLI can
 between minor versions. 0.4.0 is the first public release. The earlier versions were not
 released on their own; they record the stages the project was built in.
 
+## 0.8.0
+
+- **Layout that fits the tile.** A tile's size sets its rows in the TUI and its height in the web
+  view, and the view is fitted to it. Text is cut with "…" at the edge (wide characters count as
+  two cells). Tables drop columns by an optional `priority` when they're too narrow. A list that
+  would only show "+N more" is left out, and its heading gives its room to the section.
+- **Pie widget:** slices with label, value and status; pie or donut, with a legend. In the TUI and
+  the web view, and inline in table cells.
+- **Color themes:** one token set in the contract, used by both the TUI and the web view. Widgets
+  take a `tone` for a fixed color.
+- **Building blocks:** an example view for every widget type, and some that combine them, checked
+  by a test.
+- **`http` built-in:** polls a URL and shows a view, picked JSON values (JSON Pointer) or text.
+  Sends `If-None-Match` and reuses the last view on a 304. Tokens come from an env var or a
+  command, never from the config file.
+- **`file` built-in:** the same for a local file. Watches the file by default and falls back to
+  polling when watching isn't available.
+- **Push modules can report errors;** the tile keeps its last good view, marked stale.
+- **A hands-on tutorial** (`docs/tutorial.md`), from the demo to a dashboard and a widget of your
+  own.
+- **CLI:** `dashboard --version`; `--help` lists every exit code; config errors name the file the
+  mistake is in; built-in module paths are relative to the config file that set them.
+- **Fixes:**
+  - a tile that has never loaded shows its error, not "stale";
+  - a column inside a column gets the rows its children need;
+  - plugin install and remove say "cancelled" when the answer is no.
+
 ## 0.7.0
 
 - **Desktop app** (`apps/desktop`, Tauri 2): window, wallpaper and screensaver modes and a tray

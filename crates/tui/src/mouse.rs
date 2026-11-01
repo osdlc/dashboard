@@ -12,6 +12,8 @@ pub enum Click {
     Quit,
     Rotate,
     Theme(Theme),
+    /// A color theme, by name.
+    ColorTheme(String),
     EditConfig,
     /// Outside an open overlay: close it.
     Close,

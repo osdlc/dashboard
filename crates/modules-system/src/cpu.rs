@@ -36,6 +36,7 @@ impl Module for Cpu {
             .iter()
             .enumerate()
             .map(|(i, c)| Meter {
+                tone: None,
                 label: format!("{}", i + 1),
                 percent: c.cpu_usage() as f64,
             })
@@ -95,6 +96,7 @@ pub fn catalog() -> CatalogEntry {
                         .iter()
                         .enumerate()
                         .map(|(i, p)| Meter {
+                            tone: None,
                             label: format!("{}", i + 1),
                             percent: *p,
                         })

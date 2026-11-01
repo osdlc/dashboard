@@ -40,6 +40,7 @@ struct Config {
     /// Read this instead of the machine: a file with saved `pmset -g batt`
     /// output, or a folder laid out like `/sys/class/power_supply`. For tests
     /// and demos.
+    #[schemars(extend("x-path" = true))]
     sample: Option<String>,
 }
 

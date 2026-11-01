@@ -50,6 +50,28 @@ fn usage_errors_exit_2_with_an_error_document() {
 }
 
 #[test]
+fn version_prints_the_crate_version() {
+    for flag in ["--version", "-V"] {
+        let out = dashboard(&[flag]);
+        assert_eq!(out.status.code(), Some(0));
+        assert_eq!(
+            String::from_utf8_lossy(&out.stdout).trim(),
+            format!("dashboard {}", env!("CARGO_PKG_VERSION"))
+        );
+    }
+}
+
+#[test]
+fn help_lists_every_exit_code() {
+    let out = dashboard(&["--help"]);
+    assert_eq!(out.status.code(), Some(0));
+    let help = String::from_utf8_lossy(&out.stdout);
+    for code in [0, 1, 2, 22, 23, 24, 25] {
+        assert!(help.contains(&format!(" {code} ")), "{code}: {help}");
+    }
+}
+
+#[test]
 fn serve_refuses_json() {
     let out = dashboard(&["serve", "--json"]);
     assert_eq!(out.status.code(), Some(2));

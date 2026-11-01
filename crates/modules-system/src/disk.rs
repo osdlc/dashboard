@@ -96,10 +96,12 @@ impl Module for Disk {
             None => (
                 vec![
                     SeriesData {
+                        tone: None,
                         name: "read".into(),
                         points: vec![],
                     },
                     SeriesData {
+                        tone: None,
                         name: "write".into(),
                         points: vec![],
                     },

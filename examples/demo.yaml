@@ -1,12 +1,13 @@
-# Demo layout: eight screens using every tile size and widget style. This is
+# Demo layout: screens using every tile size and widget style. This is
 # also the default config when ~/.config/dashboard/config.yaml doesn't exist.
 #
 #   cargo run -p dashboard -- serve --config examples/demo.yaml
 #   cargo run -p dashboard -- tui   --config examples/demo.yaml
 #
-# Switch screens with 1-7 or [ and ]. Edit this file while it runs; changes apply live.
+# Switch screens with the number keys, Tab (terminal) or [ and ] (web). Edit this
+# file while it runs; changes apply live.
 # Each demo tile is the `demo` built-in with its own settings:
-#   show:   chart | lines | mirrored | meters | gauges | stats | leaderboard | table | feed | note | mixed | log
+#   show:   chart | lines | mirrored | meters | gauges | stats | leaderboard | pie | table | feed | note | mixed | log
 #   style:  line | area | bars                      (charts)
 #   color:  accent | heat | cool | sunset
 #   signal: wave | noise | spiky | sawtooth | steps | pulse
@@ -14,6 +15,8 @@
 #   size (outside config): small | medium | large | wide | tall
 
 theme: auto
+# Colors: default | contrast | paper | ember, or your own under color_themes: (see README).
+# color_theme: default
 
 # Uncomment to cycle screens automatically (pauses for a minute after you press a key).
 # rotate:
@@ -97,6 +100,12 @@ modules:
   leaders:
     builtin: demo
     config: { show: leaderboard, count: 10 }
+  storage:
+    builtin: demo
+    config: { show: pie, color: accent, signal: noise }
+  shares:
+    builtin: demo
+    config: { show: pie, title: Shares, color: sunset, count: 3, seed: 6 }
 
   # ---- logs ----
   app-log:
@@ -157,7 +166,7 @@ screens:
       - { module: hero, size: large }
       - { module: budgets, size: large }
       - { module: heatwall, size: wide }
-      - { module: headline, size: medium }
+      - { module: storage, size: medium }
       - { module: events, size: wide }
       - { module: readme, size: medium }
   - name: charts
@@ -180,12 +189,14 @@ screens:
       - { module: quota, size: medium }
       - { module: accent-grid, size: wide }
       - { module: pulse-grid, size: medium }
+      - { module: headline, size: medium }
   - name: lists
     tiles:
       - { module: fleet, size: wide }
       - { module: activity, size: tall }
       - { module: kpis, size: medium }
       - { module: leaders, size: medium }
+      - { module: shares, size: small }
   - name: logs
     tiles:
       - { module: app-log, size: wide }

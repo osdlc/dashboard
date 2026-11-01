@@ -1,0 +1,36 @@
+{
+  "id": "column",
+  "title": "Column",
+  "group": "primitives",
+  "default_size": "small",
+  "description": "Widgets stacked top to bottom. A column has only `children`. Most tiles are a column at the top: a headline number, then a chart or a list under it.",
+  "view": {
+    "status": "ok",
+    "summary": "Battery 76%, 4:12 left",
+    "root": {
+      "type": "column",
+      "children": [
+        {
+          "type": "stat",
+          "label": "Battery",
+          "value": "76",
+          "unit": "%",
+          "delta": "4:12 left"
+        },
+        {
+          "type": "gauge",
+          "label": "Charge",
+          "percent": 76,
+          "thresholds": {
+            "warn": 80,
+            "error": 95
+          }
+        },
+        {
+          "type": "text",
+          "text": "Discharging. Full charge 4,512 mAh of 5,000 (90% health)."
+        }
+      ]
+    }
+  }
+}

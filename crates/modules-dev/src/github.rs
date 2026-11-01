@@ -214,6 +214,7 @@ fn list_item(item: Item) -> ListItem {
         tags.insert(0, "draft".into());
     }
     ListItem {
+        tone: None,
         title: item.title,
         subtitle: Some(format!(
             "{}#{} · updated {}",

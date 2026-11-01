@@ -85,6 +85,11 @@ fn import_list_export_and_layers() {
         "{}",
         text(&out)
     );
+    assert!(
+        text(&out).contains("dashboard plugin install"),
+        "{}",
+        text(&out)
+    );
 
     // A second import of the same name is refused.
     let out = t.run(

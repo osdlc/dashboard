@@ -3,9 +3,6 @@
 #
 #   cargo run -p dashboard -- serve --config examples/widgets/w-local.yaml
 #
-# Run it from the repository root: paths are read from where the dashboard
-# was started.
-#
 # gpu reads ioreg on macOS, nvidia-smi for NVIDIA cards and amdgpu's sysfs
 # files on Linux. With none of them it says "no GPU stats".
 # kubernetes shows its demo view (`demo: true`) so the screen works without a
@@ -24,10 +21,10 @@ modules:
     refresh: 1m
     config: { command: git log --oneline -15, name: Recent commits }
   todo:
-    config: { path: crates/modules-personal/testdata/todo/todo.txt, show_done: true }
+    config: { path: ../../crates/modules-personal/testdata/todo/todo.txt, show_done: true }
   checklist:
     builtin: todo
-    config: { path: crates/modules-personal/testdata/todo/todo.md }
+    config: { path: ../../crates/modules-personal/testdata/todo/todo.md }
   kubernetes:
     demo: true
   security: {}

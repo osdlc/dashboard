@@ -4,6 +4,7 @@ import type { Widget } from '../contract'
 import { formatValue } from '../format'
 import { reducedMotion } from '../motion'
 import { scaleColor } from '../scale'
+import { seriesColor, toneColor } from '../colors'
 
 type Series = Extract<Widget, { type: 'series' }>
 const props = defineProps<{ widget: Series }>()
@@ -38,14 +39,21 @@ function path(pts: ReadonlyArray<readonly [number, number]>, base: number, heigh
 const paths = computed(() => {
   if (!range.value.ok || bars.value.length) return []
   const area = props.widget.style === 'area' || mirrored.value
+  const tone = (i: number) => props.widget.series[i]?.tone
+  // Area fills use the color scale (or accent) unless the series names a tone;
+  // lines each get the next categorical color.
+  const look = (i: number) => {
+    const t = tone(i)
+    return { '--fill': t ? toneColor(t) : fill.value, '--line': seriesColor(i, t) }
+  }
   if (mirrored.value) {
     const [down = [], up = []] = data.value
     return [
-      { d: path(down, H / 2, H / 2, true, area), cls: 'a' },
-      { d: path(up, H / 2, H / 2, false, area), cls: 'b' },
+      { d: path(down, H / 2, H / 2, true, area), cls: 'a', style: look(0) },
+      { d: path(up, H / 2, H / 2, false, area), cls: 'b', style: look(1) },
     ]
   }
-  return data.value.map((pts, i) => ({ d: path(pts, H, H, true, area), cls: `${i === 0 ? 'a' : 'b'} s${i}` }))
+  return data.value.map((pts, i) => ({ d: path(pts, H, H, true, area), cls: `${i === 0 ? 'a' : 'b'} s${i}`, style: look(i) }))
 })
 
 const latest = computed(() => {
@@ -70,9 +78,11 @@ const bars = computed(() => {
   if (props.widget.style !== 'bars' || mirrored.value || pts.length === 0) return []
   const { yMax } = range.value
   const w = W / pts.length
+  const tone = props.widget.series[0]?.tone
   return pts.map(([, v], i) => {
     const t = Math.min(v, yMax) / yMax
-    return { x: i * w + w * 0.1, w: w * 0.8, y: H - t * H, h: t * H, color: scaleColor(props.widget.color, t) }
+    const color = tone ? toneColor(tone) : scaleColor(props.widget.color, t)
+    return { x: i * w + w * 0.1, w: w * 0.8, y: H - t * H, h: t * H, color }
   })
 })
 
@@ -132,7 +142,7 @@ const slide = computed(() => ({
         :key="i"
         :d="p.d"
         :class="p.cls"
-        :style="{ '--fill': fill }"
+        :style="p.style"
         vector-effect="non-scaling-stroke"
       />
       </g>

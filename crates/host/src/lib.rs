@@ -21,7 +21,9 @@ pub mod process;
 pub use history::History;
 pub use plugin::Plugin;
 
-pub type ViewSender = mpsc::Sender<View>;
+/// Push mode: each view as it changes, or the error that stopped one. An
+/// error is shown like a failed poll: the last good view, marked stale.
+pub type ViewSender = mpsc::Sender<Result<View>>;
 
 /// Implemented by built-in modules directly, and by the stdio plugin client.
 #[async_trait]
@@ -111,7 +113,7 @@ impl Module for Demo {
     }
     async fn start(&mut self, tx: ViewSender) -> Result<()> {
         // One view; the tile keeps it after this returns.
-        let _ = tx.send(self.view.clone()).await;
+        let _ = tx.send(Ok(self.view.clone())).await;
         Ok(())
     }
 }
@@ -125,9 +127,18 @@ pub struct ModuleInfo {
     pub interval: Option<Duration>,
 }
 
+/// A tile's latest update, and whether it has ever rendered.
+#[derive(Clone)]
+struct Tile {
+    update: TileUpdate,
+    /// False while the tile shows only an error: there is no good view to
+    /// keep, so the next error replaces it rather than marking it stale.
+    loaded: bool,
+}
+
 #[derive(Clone)]
 pub struct Host {
-    tiles: Arc<RwLock<BTreeMap<String, TileUpdate>>>,
+    tiles: Arc<RwLock<BTreeMap<String, Tile>>>,
     modules: Arc<RwLock<Vec<ModuleInfo>>>,
     history: Arc<Mutex<History>>,
     /// Background tasks per tile, so a module can be stopped.
@@ -223,8 +234,8 @@ impl Host {
                     }
                 });
                 let forward = tokio::spawn(async move {
-                    while let Some(view) = vrx.recv().await {
-                        host.publish(&tile_id, Ok(view), demo).await;
+                    while let Some(result) = vrx.recv().await {
+                        host.publish(&tile_id, result, demo).await;
                     }
                 });
                 vec![run, forward]
@@ -251,7 +262,7 @@ impl Host {
         if let Some(last) = self.tiles.write().await.remove(tile_id) {
             let _ = self.tx.send(TileUpdate {
                 stale: true,
-                ..last
+                ..last.update
             });
         }
         self.history.lock().expect("history lock").forget(tile_id);
@@ -282,44 +293,60 @@ impl Host {
     }
 
     pub async fn snapshot(&self) -> Vec<TileUpdate> {
-        self.tiles.read().await.values().cloned().collect()
+        self.tiles
+            .read()
+            .await
+            .values()
+            .map(|t| t.update.clone())
+            .collect()
     }
 
     async fn publish(&self, tile_id: &str, result: Result<View>, demo: bool) {
         let mut tiles = self.tiles.write().await;
-        let update = match result {
+        let tile = match result {
             Ok(mut view) => {
                 self.history
                     .lock()
                     .expect("history lock")
                     .apply(tile_id, &mut view);
-                TileUpdate {
-                    tile_id: tile_id.to_string(),
-                    view,
-                    updated_at: now_ms(),
-                    stale: false,
-                    demo,
+                Tile {
+                    update: TileUpdate {
+                        tile_id: tile_id.to_string(),
+                        view,
+                        updated_at: now_ms(),
+                        stale: false,
+                        demo,
+                    },
+                    loaded: true,
                 }
             }
             Err(err) => {
                 tracing::warn!(tile = %tile_id, "render failed: {err:#}");
                 match tiles.get(tile_id) {
                     // Keep the last good view, marked stale.
-                    Some(last) => TileUpdate {
-                        stale: true,
-                        ..last.clone()
+                    Some(last) if last.loaded => Tile {
+                        update: TileUpdate {
+                            stale: true,
+                            ..last.update.clone()
+                        },
+                        loaded: true,
                     },
-                    None => TileUpdate {
-                        tile_id: tile_id.to_string(),
-                        view: error_view(&err),
-                        updated_at: now_ms(),
-                        stale: true,
-                        demo,
+                    // Never loaded: the error is all there is, and it is current.
+                    _ => Tile {
+                        update: TileUpdate {
+                            tile_id: tile_id.to_string(),
+                            view: error_view(&err),
+                            updated_at: now_ms(),
+                            stale: false,
+                            demo,
+                        },
+                        loaded: false,
                     },
                 }
             }
         };
-        tiles.insert(tile_id.to_string(), update.clone());
+        let update = tile.update.clone();
+        tiles.insert(tile_id.to_string(), tile);
         // No receivers is fine.
         let _ = self.tx.send(update);
     }
@@ -419,6 +446,40 @@ mod stop_tests {
                 },
             })
         }
+    }
+
+    /// A tile that never rendered shows its error as current, not stale;
+    /// once it has rendered, an error keeps that view, marked stale.
+    #[tokio::test]
+    async fn an_error_is_stale_only_after_a_good_view() {
+        let host = Host::new();
+        let view = |s: &str| View {
+            status: Status::Ok,
+            summary: s.into(),
+            root: Widget::Text {
+                text: s.into(),
+                markdown: false,
+            },
+        };
+        let tile = || async { host.snapshot().await.remove(0) };
+        host.publish("t", Err(anyhow::anyhow!("no token")), false)
+            .await;
+        let t = tile().await;
+        assert!(!t.stale);
+        assert_eq!(t.view.summary, "error: no token");
+        host.publish("t", Err(anyhow::anyhow!("still no token")), false)
+            .await;
+        let t = tile().await;
+        assert!(!t.stale);
+        assert_eq!(t.view.summary, "error: still no token");
+
+        host.publish("t", Ok(view("fine")), false).await;
+        assert!(!tile().await.stale);
+        host.publish("t", Err(anyhow::anyhow!("offline")), false)
+            .await;
+        let t = tile().await;
+        assert!(t.stale);
+        assert_eq!(t.view.summary, "fine");
     }
 
     #[tokio::test]

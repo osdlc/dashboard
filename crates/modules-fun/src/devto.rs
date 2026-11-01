@@ -43,6 +43,7 @@ struct Config {
     limit: Option<usize>,
     /// Read this file instead of calling the API: a saved `/api/articles`
     /// reply. For tests and demos.
+    #[schemars(extend("x-path" = true))]
     sample: Option<String>,
 }
 
@@ -166,6 +167,7 @@ fn article(a: &Article, now: i64) -> ListItem {
         sub.push(ago(now - t));
     }
     ListItem {
+        tone: None,
         title: a.title.clone(),
         subtitle: Some(sub.join(" · ")),
         status: None,

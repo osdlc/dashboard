@@ -1,0 +1,82 @@
+{
+  "id": "nested",
+  "title": "Row in a column in a row",
+  "group": "compositions",
+  "default_size": "large",
+  "description": "Layouts nest as deep as you like. Here the outer row has a column on the left, holding a row of two stats over a gauge, and a list on the right.",
+  "view": {
+    "status": "ok",
+    "summary": "42 open · 7 in review",
+    "root": {
+      "type": "row",
+      "children": [
+        {
+          "type": "column",
+          "children": [
+            {
+              "type": "row",
+              "children": [
+                {
+                  "type": "stat",
+                  "label": "Open",
+                  "value": "42",
+                  "delta": "-5 this week",
+                  "status": "ok"
+                },
+                {
+                  "type": "stat",
+                  "label": "In review",
+                  "value": "7"
+                }
+              ]
+            },
+            {
+              "type": "gauge",
+              "label": "Sprint done",
+              "percent": 64,
+              "marker": 70,
+              "caption": "18 of 28 points, day 7 of 10"
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "items": [
+            {
+              "title": "Fix login redirect",
+              "subtitle": "ana · 2h ago",
+              "status": "ok",
+              "tags": [
+                "bug"
+              ]
+            },
+            {
+              "title": "Rate limit the export API",
+              "subtitle": "sam · yesterday",
+              "tone": "info",
+              "tags": [
+                "api"
+              ]
+            },
+            {
+              "title": "Flaky test in checkout",
+              "subtitle": "lee · 3 days ago",
+              "status": "warn",
+              "tags": [
+                "ci"
+              ]
+            },
+            {
+              "title": "Dark mode for settings",
+              "subtitle": "kim · last week",
+              "tone": "muted",
+              "tags": [
+                "ui"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

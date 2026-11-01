@@ -198,7 +198,7 @@ fn unpack_and_move(f: &Fetched, places: &Places, tmp: &Path, yes: bool) -> Resul
         "A plugin runs as you, with your permissions. Install it?",
         yes,
     )? {
-        println!("not installed");
+        println!("cancelled; nothing was installed");
         return Ok(());
     }
 
@@ -535,7 +535,7 @@ pub fn remove(id: &str, yes: bool) -> Result<()> {
         bail!("{id} isn't installed in {}", plugins.display());
     }
     if !confirm(&format!("Remove {id} ({})?", target.display()), yes)? {
-        println!("not removed");
+        println!("cancelled; nothing was removed");
         return Ok(());
     }
     std::fs::remove_dir_all(&target).with_context(|| format!("removing {}", target.display()))?;

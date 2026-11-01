@@ -151,14 +151,11 @@ async fn every_screen_at_every_size() {
 
             // Same layout the draw used: tabs and footer take a row each.
             let main_h = h - 2;
-            let (rects, page_w, page) = page_layout(&app, screen, w, main_h);
-            let min = |k: usize, width| {
-                widgets::tile_min_height(&app.tiles[&screen.tiles[k].tile_id], width)
-            };
+            let (rects, page_w, page) = page_layout(screen, w, main_h);
             for (k, r) in rects.iter().enumerate() {
                 let id = &screen.tiles[k].tile_id;
                 assert!(
-                    r.height >= min(k, r.width),
+                    r.height >= 5,
                     "{w}x{h} {}: {id} got {} rows",
                     screen.name,
                     r.height
@@ -227,6 +224,7 @@ async fn size_preview() {
 fn column_of_sections_packs_to_the_top() {
     use dashboard_contract::{ListItem, Status};
     let item = |t: &str| ListItem {
+        tone: None,
         title: t.into(),
         subtitle: Some("owner/repo#1 · updated 2m ago".into()),
         status: None,

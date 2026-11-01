@@ -31,6 +31,8 @@ bundle-system = [
     "module-battery",
     "module-cmdrunner",
     "module-security",
+    "module-http",
+    "module-file",
 ]
 bundle-dev = [
     "dashboard-modules/bundle-dev",
@@ -95,6 +97,8 @@ module-textfile = ["dashboard-modules/module-textfile"]
 module-battery = ["dashboard-modules/module-battery"]
 module-cmdrunner = ["dashboard-modules/module-cmdrunner"]
 module-security = ["dashboard-modules/module-security"]
+module-http = ["dashboard-modules/module-http"]
+module-file = ["dashboard-modules/module-file"]
 module-github-prs = ["dashboard-modules/module-github-prs"]
 module-github-issues = ["dashboard-modules/module-github-issues"]
 module-jira = ["dashboard-modules/module-jira"]
@@ -135,14 +139,14 @@ module-sdlc = ["dashboard-modules/module-sdlc"]
 [dependencies]
 anyhow = "1.0.104"
 clap = { version = "4.6.7", features = ["derive"] }
-dashboard-cli-kit = { version = "0.7.0", path = "../cli-kit" }
-dashboard-config = { version = "0.7.0", path = "../config" }
-dashboard-contract = { version = "0.7.0", path = "../contract" }
-dashboard-host = { version = "0.7.0", path = "../host" }
-dashboard-modules = { version = "0.7.0", path = "../modules", default-features = false }
-dashboard-runtime = { version = "0.7.0", path = "../runtime" }
-dashboard-tui = { version = "0.7.0", path = "../tui" }
-dashboard-web = { version = "0.7.0", path = "../web" }
+dashboard-cli-kit = { version = "0.8.0", path = "../cli-kit" }
+dashboard-config = { version = "0.8.0", path = "../config" }
+dashboard-contract = { version = "0.8.0", path = "../contract" }
+dashboard-host = { version = "0.8.0", path = "../host" }
+dashboard-modules = { version = "0.8.0", path = "../modules", default-features = false }
+dashboard-runtime = { version = "0.8.0", path = "../runtime" }
+dashboard-tui = { version = "0.8.0", path = "../tui" }
+dashboard-web = { version = "0.8.0", path = "../web" }
 etag-write = "0.2.4"
 flate2 = "1.1.10"
 path-guard = "0.3.2"

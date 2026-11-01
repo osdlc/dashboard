@@ -7,7 +7,7 @@ license.workspace = true
 # One feature per module, named after its id. dashboard-modules turns them on
 # through its `bundle-system` and `module-<id>` features.
 [features]
-default = ["cpu", "memory", "gpu", "network", "disk", "processes", "log", "uptime", "textfile", "battery", "cmdrunner", "security"]
+default = ["cpu", "memory", "gpu", "network", "disk", "processes", "log", "uptime", "textfile", "battery", "cmdrunner", "security", "http", "file"]
 cpu = ["dep:sysinfo"]
 memory = ["dep:sysinfo"]
 gpu = ["dep:sysinfo"]
@@ -20,21 +20,27 @@ textfile = []
 battery = []
 cmdrunner = []
 security = []
+http = ["dashboard-modules-common/http"]
+file = ["dep:notify", "dep:tracing"]
 
 [dependencies]
 anyhow = "1.0.104"
 async-trait = "0.1.92"
-dashboard-contract = { version = "0.7.0", path = "../contract" }
-dashboard-host = { version = "0.7.0", path = "../host" }
-dashboard-modules-common = { version = "0.7.0", path = "../modules-common" }
+dashboard-contract = { version = "0.8.0", path = "../contract" }
+dashboard-host = { version = "0.8.0", path = "../host" }
+dashboard-modules-common = { version = "0.8.0", path = "../modules-common" }
 schemars = "1.2.3"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.154"
+# kqueue on macOS: FSEvents sends nothing inside a sandbox, and watches a
+# whole volume where only one folder is wanted.
+notify = { version = "8.2.1", optional = true, default-features = false, features = ["macos_kqueue"] }
 sysinfo = { version = "0.39.6", optional = true }
-tokio = { version = "1.54.1", features = ["io-util", "process", "rt", "time"] }
+tokio = { version = "1.54.1", features = ["io-util", "macros", "process", "rt", "sync", "time"] }
+tracing = { version = "0.1.44", optional = true }
 
 [target.'cfg(unix)'.dependencies]
 libc = "0.2.191"
 
 [dev-dependencies]
-tokio = { version = "1.54.1", features = ["macros", "rt"] }
+tokio = { version = "1.54.1", features = ["macros", "net", "rt", "rt-multi-thread"] }

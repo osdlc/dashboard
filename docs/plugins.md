@@ -5,6 +5,33 @@ one JSON message per line. Use any language. The dashboard starts it, asks it fo
 manifest once, then asks it for a view on a timer and draws that view in the terminal and
 the browser.
 
+**No plugin needed** when something can already write the data: the `http` built-in fetches
+a URL on each refresh, and the `file` built-in watches a file and shows it again when it
+changes (checking it every second where watching can't start, or with `watch: false`). Both
+read the same data: a view or a widget in the JSON below, values picked out of any JSON with
+`fields`, or text. A cron job, a CI step or another machine's dashboard can write it.
+
+```yaml
+modules:
+  nightly:
+    builtin: file
+    config: { path: ~/.cache/backup/status.json }   # {"status": "ok", "summary": ..., "root": {...}}
+  queue:
+    builtin: http
+    refresh: 15s
+    config:
+      url: http://buildbox:9000/stats             # any JSON
+      token_env: QUEUE_TOKEN                       # sent as Authorization: Bearer ...
+      fields:
+        - { label: Waiting, pointer: /queue/waiting }
+        - { label: p99, pointer: /latency/p99, unit: ms }
+```
+
+`format` is `auto` (a view or widget when the data is one, else indented JSON, else text),
+`view`, `json` or `text`. A series widget with an `id` gets history kept by the host, so a
+URL that returns one point per fetch draws a growing chart. All settings:
+`dashboard widgets http --json` and `dashboard widgets file --json` (the `config_schema`).
+
 Examples, all tested against the real host (`crates/host/tests/example_plugins.rs`). Each
 is a [plugin package](#package-it): a folder with the program and a `dashboard-plugin.yaml`.
 
@@ -324,6 +351,11 @@ A widget is a JSON object with a `type`. Optional fields can be left out.
 
 {"type":"bars","label":"Builds","format":"count","bars":[{"label":"api","value":935},{"label":"web","value":120,"status":"warn"}]}
 
+{"type":"pie","label":"Disk","format":"bytes","slices":[{"label":"photos","value":64424509440},
+ {"label":"apps","value":32212254720},{"label":"free","value":10737418240,"status":"warn"}]}
+// shares of the total, clockwise from the top; donut: false draws a full disc
+// color: accent (a color per slice) | heat | cool | sunset; a slice's status wins
+
 {"type":"list","empty_text":"Nothing to review","items":[
   {"title":"Fix login","subtitle":"repo#12 · 3h ago","status":"warn","tags":["draft"],
    "action":{"type":"open_url","url":"https://example.com/12"}}]}
@@ -331,7 +363,9 @@ A widget is a JSON object with a `type`. Optional fields can be left out.
 {"type":"table","columns":[{"key":"name","label":"Name"},{"key":"load","label":"Load"}],
  "rows":[{"cells":{"name":"atlas","load":{"type":"gauge","label":"","percent":12}},"status":"ok",
           "action":{"type":"open_url","url":"https://example.com/atlas"}}]}
-// a cell is text, a number, or a stat/gauge widget
+// a cell is text, a number, or a stat/gauge/pie widget
+// a column's priority (default 0) says which to drop first when the tile is narrow:
+// the lowest goes first, then the rightmost; the first column is always kept
 
 {"type":"log","label":"api.log","lines":[{"text":"started","level":"info","time":"14:02:11"}]}
 

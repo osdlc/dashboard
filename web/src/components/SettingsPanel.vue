@@ -45,6 +45,19 @@ const themes = ['auto', 'light', 'dark'] as const
           {{ t }}
         </button>
       </div>
+      <h3>Colors</h3>
+      <div class="theme-choice" role="radiogroup" aria-label="Color theme">
+        <button
+          v-for="name in settings.color_themes ?? []"
+          :key="name"
+          type="button"
+          role="radio"
+          :aria-checked="(settings.color_theme?.name ?? 'default') === name"
+          @click="emit('send', { type: 'set_color_theme', name, etag: settings.config.etag ?? null })"
+        >
+          {{ name }}
+        </button>
+      </div>
       <p class="muted">Saved to the config file; your comments and formatting are kept.</p>
 
       <h3>Rotation</h3>

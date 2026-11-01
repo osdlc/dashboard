@@ -86,10 +86,12 @@ impl Module for Network {
             None => (
                 vec![
                     SeriesData {
+                        tone: None,
                         name: "down".into(),
                         points: vec![],
                     },
                     SeriesData {
+                        tone: None,
                         name: "up".into(),
                         points: vec![],
                     },
