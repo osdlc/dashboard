@@ -1,0 +1,9 @@
+[
+{"id":0,"description":"Send the invoice","entry":"20261001T090000Z","end":"20261020T090000Z","modified":"20261020T090000Z","status":"completed","uuid":"0c6a1b9e-2f63-4d0e-9e57-6f3b7a1f0a01","urgency":0},
+{"id":1,"description":"Review the hiring loop feedback","due":"20261026T233000Z","entry":"20261020T090000Z","modified":"20261020T090000Z","project":"team","status":"pending","uuid":"5d1c9a3e-8b2f-4f6a-a1c2-0e9b7d6c5a02","urgency":12.4},
+{"id":2,"description":"Try the new espresso grinder","entry":"20261021T090000Z","modified":"20261021T090000Z","priority":"L","status":"pending","tags":["home"],"uuid":"9a7e5c3b-1d2f-4e6a-b8c9-0a1b2c3d4e03","urgency":1.8},
+{"id":3,"annotations":[{"entry":"20261024T101500Z","description":"see https://github.com/acme/web/issues/812"}],"description":"Fix the flaky login test","due":"20261026T120000Z","entry":"20261019T090000Z","modified":"20261026T080000Z","priority":"H","project":"web","start":"20261026T080000Z","status":"pending","tags":["bug"],"uuid":"3b2a1c9d-8e7f-4a6b-9c5d-1e2f3a4b5c04","urgency":19.2},
+{"id":4,"description":"Book the dentist","entry":"20261015T090000Z","modified":"20261015T090000Z","status":"pending","uuid":"7f6e5d4c-3b2a-4190-8f7e-6d5c4b3a2a05","wait":"20261105T000000Z","urgency":25.0},
+{"id":5,"description":"Update the on-call runbook","entry":"20261022T090000Z","modified":"20261022T090000Z","project":"ops","scheduled":"20261029T100000Z","status":"pending","uuid":"2e1d0c9b-8a7f-4e6d-9c5b-4a3f2e1d0c06","urgency":6.1},
+{"id":0,"description":"Water the plants","entry":"20261001T090000Z","mask":"--+","modified":"20261020T090000Z","recur":"weekly","due":"20261001T090000Z","status":"recurring","uuid":"1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c07","urgency":3.0}
+]

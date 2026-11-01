@@ -1,0 +1,46 @@
+# A plugin package: this file plus the plugin's own files. See docs/plugins.md.
+# The TypeScript copy of the native `git` module, for the native-vs-plugin
+# benchmark (bench/README.md). It carries a copy of the SDK,
+# so the folder works on its own once copied into the plugins folder.
+id: git-ts
+version: 0.1.0
+name: Git (TypeScript)
+description: >-
+  Local git repositories: branch, commits ahead of and behind the upstream,
+  and uncommitted changes. Runs git status in each one. Written in TypeScript
+  for the native-vs-plugin benchmark; the built-in git module shows the same.
+tags: [git, dev, local, benchmark]
+# Run in this folder.
+run: [node, main.ts]
+runtime: node>=24
+binaries: [git]
+size: medium
+config_schema:
+  type: object
+  additionalProperties: false
+  properties:
+    repos:
+      type: array
+      items: { type: string }
+      description: Repositories to show, by path. `~` is your home folder.
+# Shown in the catalog before the plugin is set up. The same as the built-in
+# git module's demo view.
+demo:
+  status: warn
+  summary: 4 repos · 2 dirty · 1 unpushed · 1 behind
+  root:
+    type: table
+    columns:
+      - { key: repo, label: Repository }
+      - { key: branch, label: Branch }
+      - { key: changes, label: Changes }
+      - { key: sync, label: Upstream }
+    rows:
+      - cells: { repo: api, branch: rate-limits, changes: 3 changed, sync: ↑2 }
+        status: warn
+      - cells: { repo: web, branch: main, changes: clean, sync: ↓4 }
+        status: warn
+      - cells: { repo: infra, branch: main, changes: clean, sync: in sync }
+        status: ok
+      - cells: { repo: notes, branch: drafts, changes: 1 changed, sync: no upstream }
+        status: warn

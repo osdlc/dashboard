@@ -15,6 +15,8 @@ pub mod method {
 }
 
 pub mod error_code {
+    /// JSON-RPC's own code for a method the receiver does not know.
+    pub const METHOD_NOT_FOUND: i64 = -32601;
     pub const UPSTREAM_UNAVAILABLE: i64 = -32001;
     pub const CONFIG_INVALID: i64 = -32002;
 }

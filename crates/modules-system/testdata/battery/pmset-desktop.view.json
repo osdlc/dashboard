@@ -1,0 +1,9 @@
+{
+  "status": "ok",
+  "summary": "AC power · no battery",
+  "root": {
+    "type": "text",
+    "text": "No battery found. Running on AC power.",
+    "markdown": false
+  }
+}

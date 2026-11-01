@@ -1,0 +1,77 @@
+{
+  "_class": "hudson.model.Hudson",
+  "jobs": [
+    {
+      "_class": "hudson.model.FreeStyleProject",
+      "name": "api-tests",
+      "url": "https://ci.example.com/job/api-tests/",
+      "color": "blue",
+      "lastBuild": {
+        "_class": "hudson.model.FreeStyleBuild",
+        "building": false,
+        "duration": 254000,
+        "number": 2210,
+        "result": "SUCCESS",
+        "timestamp": 1793098800000,
+        "url": "https://ci.example.com/job/api-tests/2210/"
+      }
+    },
+    {
+      "_class": "org.jenkinsci.plugins.workflow.job.WorkflowJob",
+      "name": "deploy-staging",
+      "url": "https://ci.example.com/job/deploy-staging/",
+      "color": "blue_anime",
+      "lastBuild": {
+        "_class": "org.jenkinsci.plugins.workflow.job.WorkflowRun",
+        "building": true,
+        "duration": 0,
+        "number": 388,
+        "result": null,
+        "timestamp": 1793102280000,
+        "url": "https://ci.example.com/job/deploy-staging/388/"
+      }
+    },
+    {
+      "_class": "com.cloudbees.hudson.plugins.folder.Folder",
+      "name": "team-mobile",
+      "url": "https://ci.example.com/job/team-mobile/"
+    },
+    {
+      "_class": "hudson.model.FreeStyleProject",
+      "name": "legacy-reports",
+      "url": "https://ci.example.com/job/legacy-reports/",
+      "color": "disabled",
+      "lastBuild": null
+    },
+    {
+      "_class": "org.jenkinsci.plugins.workflow.job.WorkflowJob",
+      "name": "web-e2e",
+      "url": "https://ci.example.com/job/web-e2e/",
+      "color": "red",
+      "lastBuild": {
+        "_class": "org.jenkinsci.plugins.workflow.job.WorkflowRun",
+        "building": false,
+        "duration": 732000,
+        "number": 1544,
+        "result": "FAILURE",
+        "timestamp": 1793100600000,
+        "url": "https://ci.example.com/job/web-e2e/1544/"
+      }
+    },
+    {
+      "_class": "hudson.model.FreeStyleProject",
+      "name": "lint",
+      "url": "https://ci.example.com/job/lint/",
+      "color": "yellow",
+      "lastBuild": {
+        "_class": "hudson.model.FreeStyleBuild",
+        "building": false,
+        "duration": 41000,
+        "number": 931,
+        "result": "UNSTABLE",
+        "timestamp": 1793091600000,
+        "url": "https://ci.example.com/job/lint/931/"
+      }
+    }
+  ]
+}

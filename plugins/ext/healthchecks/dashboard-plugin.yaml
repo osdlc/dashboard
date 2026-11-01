@@ -1,0 +1,66 @@
+# A plugin package: this file plus the plugin's own files. See docs/plugins.md.
+id: healthchecks
+version: 0.1.0
+name: Healthchecks
+description: >-
+  Your Healthchecks.io cron and heartbeat checks: counts of up, late and down
+  checks, then the checks with down and late ones first. Click a check to open
+  it on Healthchecks (with a full API key; a read-only key links to the front
+  page). Works with a self-hosted Healthchecks too. Untested live:
+  built from the Management API v3 docs and a sample response.
+tags: [ops, monitoring, cron, healthchecks, untested-live]
+# Run in this folder.
+run: [python3, main.py]
+runtime: python3>=3.9
+env: [HEALTHCHECKS_API_KEY]
+hosts: [healthchecks.io]
+size: medium
+config_schema:
+  type: object
+  additionalProperties: false
+  properties:
+    base_url: { type: string, description: "The Healthchecks site, e.g. a self-hosted one. Default https://healthchecks.io." }
+    tag: { type: [string, "null"], description: Only checks with this tag. }
+    limit: { type: integer, minimum: 1, description: "Checks listed. Default 20." }
+    token_env: { type: string, description: "Variable holding the project's API key (Settings, API Access). A read-only key works, but then clicking a check opens the site's front page, not the check.. Default HEALTHCHECKS_API_KEY." }
+    token_command: { type: [array, "null"], items: { type: string }, description: Command that prints the API key. }
+# The view of sample.json (`python3 main.py --sample`).
+demo:
+  status: error
+  summary: "1 down · 1 late · 5 checks"
+  root:
+    type: column
+    children:
+      - type: row
+        children:
+          - { type: stat, label: Up, value: "1", status: ok }
+          - { type: stat, label: Late, value: "1", status: warn }
+          - { type: stat, label: Down, value: "1", status: error }
+      - type: list
+        empty_text: no checks
+        items:
+          - title: Nightly backup
+            subtitle: down · last ping 1d ago
+            status: error
+            tags: [prod, backup]
+            action: { type: open_url, url: "https://healthchecks.io/checks/5d3b6e2a-1f4c-4a9e-9b1d-0c2e7f8a6b31/details/" }
+          - title: Certificate renewal
+            subtitle: late · last ping 1d ago
+            status: warn
+            tags: [prod]
+            action: { type: open_url, url: "https://healthchecks.io/checks/a1f0c9d8-3b2e-4c7a-8f61-5e4d3c2b1a09/details/" }
+          - title: Queue worker heartbeat
+            subtitle: running · last ping 1m ago
+            status: ok
+            tags: [prod, worker]
+            action: { type: open_url, url: "https://healthchecks.io/checks/0b9e8d7c-6a5f-4e3d-2c1b-0a9f8e7d6c5b/details/" }
+          - title: new-check
+            subtitle: new · never pinged
+            status: unknown
+            tags: []
+            action: { type: open_url, url: "https://healthchecks.io/checks/e4d3c2b1-a0f9-4e8d-9c7b-6a5f4e3d2c1b/details/" }
+          - title: Staging smoke test
+            subtitle: paused · last ping 7d ago
+            status: unknown
+            tags: [staging]
+            action: { type: open_url, url: "https://healthchecks.io/" }

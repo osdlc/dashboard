@@ -1,0 +1,11 @@
+{
+  "zones": [
+    { "zone": "Europe/London", "label": "London office" },
+    { "zone": "America/Los_Angeles" },
+    { "zone": "Asia/Tokyo", "label": null },
+    "Pacific/Fiji"
+  ],
+  "hour12": true,
+  "seconds": true,
+  "now": "2026-10-27T00:00:07Z"
+}

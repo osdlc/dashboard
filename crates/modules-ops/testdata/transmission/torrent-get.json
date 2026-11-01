@@ -1,0 +1,12 @@
+{
+  "arguments": {
+    "torrents": [
+      { "id": 1, "name": "debian-13.1.0-amd64-netinst.iso", "status": 6, "percentDone": 1, "rateDownload": 0, "rateUpload": 182272, "eta": -1, "error": 0, "errorString": "", "uploadRatio": 2.31, "totalSize": 790626304 },
+      { "id": 2, "name": "ubuntu-26.04-desktop-amd64.iso", "status": 4, "percentDone": 0.4212, "rateDownload": 6501171, "rateUpload": 40960, "eta": 532, "error": 0, "errorString": "", "uploadRatio": 0.02, "totalSize": 6203355136 },
+      { "id": 3, "name": "archlinux-2026.10.01-x86_64.iso", "status": 0, "percentDone": 0.13, "rateDownload": 0, "rateUpload": 0, "eta": -1, "error": 3, "errorString": "No data found! Ensure your drives are connected", "uploadRatio": 0, "totalSize": 1288490188 },
+      { "id": 4, "name": "Big Buck Bunny (2008) [1080p]", "status": 0, "percentDone": 1, "rateDownload": 0, "rateUpload": 0, "eta": -1, "error": 0, "errorString": "", "uploadRatio": 1.07, "totalSize": 928670754 },
+      { "id": 5, "name": "fedora-workstation-43-x86_64.iso", "status": 3, "percentDone": 0, "rateDownload": 0, "rateUpload": 0, "eta": -1, "error": 0, "errorString": "", "uploadRatio": 0, "totalSize": 2468347904 }
+    ]
+  },
+  "result": "success"
+}

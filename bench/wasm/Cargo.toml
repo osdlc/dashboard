@@ -1,0 +1,39 @@
+# The clock and textfile modules built for WASI (wasm32-wasip1) as stdio
+# plugins, for the native-vs-plugin benchmark. The module code is the real
+# built-in module source (crates/modules-fun/src/clock.rs and
+# crates/modules-system/src/textfile.rs), compiled against two small stand-ins:
+# `host` for dashboard-host (tokio with process and net does not build for
+# WASI) and `common`, which is dashboard-modules-common's own source built
+# against that stand-in. Not part of the main workspace. See bench/README.md.
+[workspace]
+members = [".", "host", "common"]
+
+[workspace.package]
+edition = "2024"
+version = "0.1.0"
+license = "MIT OR Apache-2.0"
+
+[package]
+name = "bench-wasm-plugins"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+anyhow = "1.0.104"
+async-trait = "0.1.92"
+dashboard-contract = { path = "../../crates/contract" }
+dashboard-host = { path = "host", package = "bench-wasm-host" }
+dashboard-modules-common = { path = "common", package = "bench-wasm-common" }
+jiff = "0.2.38"
+schemars = "1.2.3"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+opt-level = "s"
+strip = true
+panic = "abort"

@@ -1,0 +1,48 @@
+{
+  "groups": [
+    {
+      "id": "3410958123771200417",
+      "projectId": 95123,
+      "resolved": false,
+      "muted": false,
+      "noticeCount": 1203,
+      "noticeTotalCount": 1203,
+      "lastNoticeAt": "2026-10-27T01:52:10.512Z",
+      "createdAt": "2026-10-25T08:02:44.000Z",
+      "errors": [
+        { "type": "ActiveRecord::RecordNotFound", "message": "Couldn't find User with 'id'=42", "backtrace": [ { "file": "/PROJECT_ROOT/app/controllers/users_controller.rb", "line": 18, "function": "show" } ] }
+      ],
+      "context": { "environment": "production", "component": "users", "action": "show", "severity": "error" }
+    },
+    {
+      "id": "3410958123771200533",
+      "projectId": 95123,
+      "resolved": false,
+      "muted": false,
+      "noticeCount": 87,
+      "noticeTotalCount": 87,
+      "lastNoticeAt": "2026-10-27T01:30:00Z",
+      "createdAt": "2026-10-27T00:41:12Z",
+      "errors": [
+        { "type": "Net::ReadTimeout", "message": "Net::ReadTimeout with #<TCPSocket:(closed)>", "backtrace": [] }
+      ],
+      "context": { "environment": "production", "component": "PaymentsJob", "action": null, "severity": "critical" }
+    },
+    {
+      "id": "3410958123771199012",
+      "projectId": 95123,
+      "resolved": false,
+      "muted": true,
+      "noticeCount": 5,
+      "noticeTotalCount": 5,
+      "lastNoticeAt": "2026-10-26T14:00:00Z",
+      "createdAt": "2026-10-20T09:15:00Z",
+      "errors": [
+        { "type": "I18n::MissingTranslationData", "message": "translation missing: de.checkout.title", "backtrace": [] }
+      ],
+      "context": { "environment": "staging", "component": "checkout", "action": "index", "severity": "warning" }
+    }
+  ],
+  "count": 3,
+  "page": 1
+}

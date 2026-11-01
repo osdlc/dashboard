@@ -205,6 +205,7 @@ screens:
   - name: live
     tiles:
       - { module: cpu, size: wide }
+      - { module: gpu, size: medium }
       - { module: memory, size: medium }
       - { module: network, size: medium }
       - { module: disk, size: medium }

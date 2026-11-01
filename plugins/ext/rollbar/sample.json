@@ -1,0 +1,49 @@
+{
+  "err": 0,
+  "result": {
+    "page": 1,
+    "total_count": 5,
+    "items": [
+      {
+        "id": 1403772201, "project_id": 482211, "counter": 1187, "environment": "production",
+        "platform": "browser", "framework": "browser-js", "hash": "3f1e6a8c9b0d2e4f",
+        "title": "TypeError: Cannot read properties of undefined (reading 'items')",
+        "first_occurrence_timestamp": 1792980000, "last_occurrence_timestamp": 1793066160,
+        "last_activated_timestamp": 1793050000, "total_occurrences": 4821, "unique_occurrences": null,
+        "status": "active", "level": "error", "assigned_user_id": null
+      },
+      {
+        "id": 1403772377, "project_id": 482211, "counter": 1192, "environment": "production",
+        "platform": "python", "framework": "flask", "hash": "a71b2c3d4e5f6071",
+        "title": "OperationalError: could not connect to server: Connection refused",
+        "first_occurrence_timestamp": 1793058000, "last_occurrence_timestamp": 1793066340,
+        "last_activated_timestamp": 1793058000, "total_occurrences": 212, "unique_occurrences": null,
+        "status": "active", "level": "critical", "assigned_user_id": 7712
+      },
+      {
+        "id": 1403770019, "project_id": 482211, "counter": 1164, "environment": "staging",
+        "platform": "python", "framework": "flask", "hash": "0b1c2d3e4f5a6b7c",
+        "title": "KeyError: 'currency'",
+        "first_occurrence_timestamp": 1792890000, "last_occurrence_timestamp": 1793052000,
+        "last_activated_timestamp": 1792890000, "total_occurrences": 37, "unique_occurrences": null,
+        "status": "active", "level": "error", "assigned_user_id": null
+      },
+      {
+        "id": 1403769930, "project_id": 482211, "counter": 1151, "environment": "production",
+        "platform": "browser", "framework": "browser-js", "hash": "9a8b7c6d5e4f3a2b",
+        "title": "Slow response from /api/search (3.2 s)",
+        "first_occurrence_timestamp": 1792700000, "last_occurrence_timestamp": 1792996000,
+        "last_activated_timestamp": 1792700000, "total_occurrences": 1, "unique_occurrences": null,
+        "status": "active", "level": 30, "assigned_user_id": null
+      },
+      {
+        "id": 1403769001, "project_id": 482211, "counter": 1120, "environment": "production",
+        "platform": "python", "framework": "flask", "hash": "1a2b3c4d5e6f7a8b",
+        "title": "Deprecated settings key MAIL_TLS used",
+        "first_occurrence_timestamp": 1792500000, "last_occurrence_timestamp": 1792900000,
+        "last_activated_timestamp": 1792500000, "total_occurrences": 9, "unique_occurrences": null,
+        "status": "active", "level": "info", "assigned_user_id": null
+      }
+    ]
+  }
+}

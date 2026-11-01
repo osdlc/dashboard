@@ -1,0 +1,57 @@
+# A plugin package: this file plus the plugin's own files. See docs/plugins.md.
+id: opsgenie
+version: 0.1.0
+name: Opsgenie alerts
+description: >-
+  Open Opsgenie alerts, unacknowledged and highest priority first, with owner,
+  repeat count and age. Links to each alert when account is set. Any Opsgenie
+  search query works. Built from Opsgenie's public Alert API docs
+  (GET /v2/alerts) and untested live.
+tags: [ops, alerts, oncall, opsgenie]
+# Run in this folder.
+run: [python3, main.py]
+runtime: python3>=3.9
+env: [OPSGENIE_API_KEY]
+hosts: [api.opsgenie.com, api.eu.opsgenie.com]
+size: medium
+config_schema:
+  type: object
+  additionalProperties: false
+  properties:
+    region: { type: string, enum: [us, eu], description: "Where your account lives. Default us." }
+    base_url: { type: [string, "null"], description: "API address, if not Opsgenie's own (a proxy, for example)." }
+    query: { type: string, description: "Opsgenie search query. Default status:open." }
+    account: { type: [string, "null"], description: "Your Opsgenie subdomain (acme for acme.app.opsgenie.com), for links to each alert." }
+    limit: { type: integer, minimum: 1, description: "Alerts listed. Default 10." }
+    token_env: { type: string, description: "Environment variable holding the API key. Default OPSGENIE_API_KEY." }
+    token_command: { type: [array, "null"], items: { type: string }, description: "Command that prints the API key." }
+# Made-up alerts, the same as sample/alerts.json.
+demo:
+  status: error
+  summary: 3 open · 2 unacked · 1 P1
+  root:
+    type: column
+    children:
+      - type: row
+        children:
+          - { type: stat, label: Open, value: "3", status: warn }
+          - { type: stat, label: Unacked, value: "2", status: warn }
+          - { type: stat, label: P1, value: "1", status: error }
+      - type: list
+        empty_text: No open alerts
+        items:
+          - title: Payments API 5xx rate above 2%
+            subtitle: P1 · ana@acme.example · 4× · 15m ago
+            status: error
+            tags: [prod, payments]
+            action: { type: open_url, url: "https://acme.app.opsgenie.com/alert/detail/70413a06-38d6-4c85-92b8-5ebc900d42e2/details" }
+          - title: TLS certificate for www expires in 12 days
+            subtitle: P4 · no owner · 23h ago
+            status: unknown
+            tags: [certs]
+            action: { type: open_url, url: "https://acme.app.opsgenie.com/alert/detail/e8f9a0b1-c2d3-4e5f-8a9b-0c1d2e3f4a5b/details" }
+          - title: Disk 91% full on db-2
+            subtitle: P2 · sam@acme.example · 3h ago
+            status: warn
+            tags: [acked, prod, db]
+            action: { type: open_url, url: "https://acme.app.opsgenie.com/alert/detail/c3a7d1e2-6b2f-4f8e-9a51-2d0c6b7e9f10/details" }

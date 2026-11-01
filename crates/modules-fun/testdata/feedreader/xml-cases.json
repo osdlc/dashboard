@@ -1,0 +1,274 @@
+[
+  {
+    "xml": "<rss><channel></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "plain text",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<a>&nbsp;</a>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<a>&#X41;</a>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<a>&#0;</a>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<a b=\"1\" b=\"2\"/>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<a b=\"1\"c=\"2\"/>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<a b=1/>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<a/><b/>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<a/>text",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "text<a/>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<x:a/>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<rss><channel><title>a & b</title></channel></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<rss><channel><title a=\"<\"/></channel></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<rss><channel><title>a</titel></channel></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<rss/>",
+    "result": "not an RSS or Atom feed"
+  },
+  {
+    "xml": "<feed/>",
+    "result": "not an RSS or Atom feed"
+  },
+  {
+    "xml": "<html><body/></html>",
+    "result": "not an RSS or Atom feed"
+  },
+  {
+    "xml": "<rss xmlns=\"urn:example\"><channel/></rss>",
+    "result": "not an RSS or Atom feed"
+  },
+  {
+    "xml": "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"/>",
+    "result": "not an RSS or Atom feed"
+  },
+  {
+    "xml": "<rss><channel/></rss>",
+    "result": "ok"
+  },
+  {
+    "xml": "\ufeff<rss><channel/></rss>",
+    "result": "ok"
+  },
+  {
+    "xml": "<?xml version=\"1.0\"?>\r\n<!-- before -->\r\n<rss><channel><title >T</title ></channel></rss>\r\n<!-- after --><?pi after?>\n",
+    "result": "ok"
+  },
+  {
+    "xml": "<feed xmlns=\"http://www.w3.org/2005/Atom\"/>",
+    "result": "ok"
+  },
+  {
+    "xml": "<a:feed xmlns:a=\"http://www.w3.org/2005/Atom\"><a:entry/></a:feed>",
+    "result": "ok"
+  },
+  {
+    "xml": "<rss><channel><title><![CDATA[a & <b>]]></title><item><title xml:lang='en' a='&quot;&#9;'>x</title></item></channel></rss>",
+    "result": "ok"
+  },
+  {
+    "xml": "<!DOCTYPE rss [ <!ELEMENT rss ANY> ]><rss><channel/></rss>",
+    "result": "ok"
+  },
+  {
+    "xml": "<!DOCTYPE rss [<!ENTITY x \"Ex\">]><rss><channel><title>&x;</title></channel></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<!DOCTYPE rss [<!ENTITY % p \"x\">]><rss><channel/></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<!DOCTYPE rss [<!ENTITY a \"aaaaaaaaaa\"><!ENTITY b \"&a;&a;&a;&a;&a;&a;&a;&a;&a;&a;\"><!ENTITY c \"&b;&b;&b;&b;&b;&b;&b;&b;&b;&b;\">]><rss><channel><title>&c;</title></channel></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<!-- <!ENTITY --><!DOCTYPE rss PUBLIC \"-//Netscape Communications//DTD RSS 0.91//EN\" \"http://my.netscape.com/publish/formats/rss-0.91.dtd\"><rss><channel/></rss>",
+    "result": "ok"
+  },
+  {
+    "xml": "<rss><channel><title>bad\u000bchar</title></channel></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<rss><channel><title a=\"\u0001\"/></channel></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<rss><channel><!-- \u0001 --></channel></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<rss><channel><title>\ufffe</title></channel></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<rss><channel><title>\ud83d\ude00 \u0085 \u007f</title></channel></rss>",
+    "result": "ok"
+  },
+  {
+    "xml": "<rss><channel><title>a ]]> b</title></channel></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<rss><channel><title a=\"]]>\">a ]] > b ]></title></channel></rss>",
+    "result": "ok"
+  },
+  {
+    "xml": "<rss><channel><1a/></channel></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<rss><channel><title -a=\"1\"/></channel></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<rss><channel><a:b:c xmlns:a=\"u\"/></channel></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<rss><channel><a.b-c_d\u00b7e/><\u00e9t\u00e9/></channel></rss>",
+    "result": "ok"
+  },
+  {
+    "xml": "<rss><channel><title\u00a0a=\"1\"/></channel></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<rss><channel><item x:y=\"1\"/></channel></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<rss xmlns:p=\"u\" xmlns:q=\"u\"><channel p:x=\"1\" q:x=\"2\"/></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<rss xmlns:p=\"u\"><channel p:x=\"1\" x=\"2\"/></rss>",
+    "result": "ok"
+  },
+  {
+    "xml": " <?xml version=\"1.0\"?><rss><channel/></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<rss><channel/><?xml version=\"1.0\"?></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<?xml version=\"1.0\"?><?XML x?><rss><channel/></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<?xml version=\"1.0\"?><?a:b x?><rss><channel/></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<?xml version=\"1.0\"?><?xml-stylesheet href=\"a\"?><?foo?><rss><channel/></rss>",
+    "result": "ok"
+  },
+  {
+    "xml": "<rss><channel><!-- a -- b --></channel></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<rss><channel><title>&#xD800;</title></channel></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<rss><channel><title a=\"&#xDFFF;\"/></channel></rss>",
+    "result": "not valid XML"
+    },
+  {
+    "xml": "<rss><channel><title><![CDATA[&#xD800;]]></title></channel></rss>",
+    "result": "ok"
+  },
+  {
+    "xml": "<rss><channel><!-- &#xD83D;&#xDE00; --></channel></rss>",
+    "result": "ok"
+    },
+  {
+    "xml": "<?xml?><rss><channel/></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<?xml encoding=\"utf-8\"?><rss><channel/></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<?xml version=\"1.0\" foo=\"bar\"?><rss><channel/></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<?xml version=\"1.0\" standalone=\"yes\" encoding=\"utf-8\"?><rss><channel/></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<?xml version = '2.0' encoding='utf-8' standalone='no' ?><rss><channel/></rss>",
+    "result": "ok"
+  },
+  {
+    "xml": "<!DOCTYPE rss><!DOCTYPE rss><rss><channel/></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<!DOCTYPE rss [ <!-- <!ENTITY --> <?p <!ENTITY ?> ]><rss><channel/></rss>",
+    "result": "ok"
+  },
+  {
+    "xml": "<rss xmlns:xml=\"u\"><channel/></rss>",
+    "result": "not valid XML"
+  },
+  {
+    "xml": "<rss xmlns:xml=\"http://www.w3.org/XML/1998/namespace\"><channel/></rss>",
+    "result": "ok"
+  },
+  {
+    "xml": "<rss><channel><?p &#xD800;?></channel></rss>",
+    "result": "ok"
+  }
+]

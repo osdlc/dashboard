@@ -1,0 +1,50 @@
+# The TypeScript version of the feed reader widget, for the native-vs-plugin benchmark.
+# It shows the same view as the built-in `feedreader` module for the same input.
+id: feedreader-ts
+version: 0.1.0
+name: Feed reader (TS)
+description: >-
+  The newest items of some RSS and Atom feeds, as one list. Click an item to
+  open it. TypeScript version of the built-in feedreader module. Node has no
+  XML parser, so it carries a small one.
+tags: [news, feeds, rss, atom, reading, benchmark]
+run: [node, main.ts]
+runtime: node>=22
+size: medium
+config_schema:
+  type: object
+  additionalProperties: false
+  required: [feeds]
+  properties:
+    feeds:
+      type: array
+      items: { type: string }
+      description: >-
+        Feed URLs, RSS or Atom. An entry that does not start with http:// or
+        https:// is read as a file, for tests and demos.
+    max_items:
+      type: integer
+      minimum: 1
+      description: How many items to show, newest first, across all feeds.
+demo:
+  status: ok
+  summary: 5 items from 1 feed
+  root:
+    type: list
+    empty_text: No items in these feeds.
+    items:
+      - title: "How we cut our CI time in half"
+        subtitle: "Example Engineering Blog · 2026-10-27 09:30"
+        action: { type: open_url, url: "https://blog.example.com/ci-time" }
+      - title: "Postmortem: the October 20 outage"
+        subtitle: "Example Engineering Blog · 2026-10-26 16:05"
+        action: { type: open_url, url: "https://blog.example.com/postmortem-oct-20" }
+      - title: "Release 4.2: offline mode and faster search"
+        subtitle: "Example Engineering Blog · 2026-10-23 14:00"
+        action: { type: open_url, url: "https://blog.example.com/release-4-2" }
+      - title: "Hiring: two platform engineers"
+        subtitle: "Example Engineering Blog · 2026-10-21 11:20"
+        action: { type: open_url, url: "https://blog.example.com/hiring" }
+      - title: "Notes from RustConf"
+        subtitle: "Example Engineering Blog · 2026-10-15 08:00"
+        action: { type: open_url, url: "https://blog.example.com/rustconf" }

@@ -1,0 +1,40 @@
+# The Python version of the textfile widget, for the native-vs-plugin benchmark.
+# It shows the same view as the built-in `textfile` module for the same file.
+id: textfile-py
+version: 0.1.0
+name: Text file (Python)
+description: >-
+  Shows a text or markdown file and shows it again when it changes. Good for a
+  todo list or notes. Python version of the built-in textfile module.
+tags: [notes, local, files, benchmark]
+run: [python3, main.py]
+runtime: python3>=3.9
+size: tall
+config_schema:
+  type: object
+  additionalProperties: false
+  required: [path]
+  properties:
+    path: { type: string, description: "File to show. `~/` is expanded; a relative path is read from the config file's folder." }
+    markdown:
+      type: [boolean, "null"]
+      description: "Render as markdown. Default: true for .md and .markdown files."
+    lines: { type: integer, minimum: 1, description: "Lines to show, from the top. Default 200." }
+demo:
+  status: ok
+  summary: notes.md · 11 lines
+  root:
+    type: text
+    markdown: true
+    text: |-
+      # Release notes
+
+      Things to finish **before Friday**:
+
+      - [x] ship the config editor
+      - [ ] write the plugin guide
+      - [ ] check `dashboard plugin-check` on Windows
+
+      > The web view and the TUI read the same file.
+
+      See [docs/plugins.md](docs/plugins.md) for the protocol.

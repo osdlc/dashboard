@@ -1,0 +1,5 @@
+{
+  "zones": ["Pacific/Honolulu", "UTC", "Pacific/Kiritimati"],
+  "seconds": true,
+  "now": "2026-12-31T23:59:59-10:00"
+}

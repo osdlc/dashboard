@@ -86,6 +86,16 @@ modules:
       token_command: [op, read, "op://dev/codeberg/token"]   # instead of an env var
 ```
 
+### Git repositories
+
+`git` shows each repository's branch, commits ahead of and behind its upstream, and uncommitted changes. It runs `git status` in each one; nothing is fetched.
+
+```yaml
+modules:
+  git:
+    config: { repos: [~/dev/api, ~/dev/web] }
+```
+
 ### AI agent usage
 
 How much of each agent's limits you have used, with a marker for where an even pace would be:
@@ -93,12 +103,26 @@ How much of each agent's limits you have used, with a marker for where an even p
 - `cswap`: Claude Code accounts. Runs automatically when the `cswap` tool is installed.
 - `codex`: OpenAI Codex limits, tokens per day and all-time tokens, live from `codex app-server` (Codex's own login; experimental). If that fails it reads Codex's session logs in `~/.codex/sessions`, which are as of your last Codex request. `source: logs` skips the live call.
 - `copilot`: GitHub Copilot's monthly premium requests, using the `gh` CLI's login. It calls the same internal endpoint Copilot's own clients use, so it may change without notice.
+- `cursor`: Cursor's included usage and on-demand spend this billing cycle. It reads the Cursor app's login from its local database (with `sqlite3`) and calls the endpoint Cursor's own dashboard uses. A free or canceled account shows its plan and no gauge. Paid plans are untested live.
+- `antigravity`: Google Antigravity's model quotas, asked from the app's local language server. It only works while Antigravity is open; otherwise the tile says "not running". Untested live.
+- `gemini`: Gemini CLI requests against its daily quota (an estimate: replies saved since midnight Pacific time; the per-day bars use UTC days), and tokens per day, from the chats in `~/.gemini/tmp`. Set `daily_limit` to your plan's limit (default 1000).
+- `opencode`: OpenCode tokens and cost per day, from its database `~/.local/share/opencode/opencode.db` (read with `sqlite3`), or the message files older versions wrote in `storage/`.
+- `pi`: Pi tokens and cost per day, from its session logs in `~/.pi/agent/sessions`.
+
+The last three read local files only. Their days are UTC days, so for a US user "today" starts in the afternoon or evening. None of these modules shows or stores a token.
 
 ```yaml
 modules:
   codex: {}                    # or { config: { home: ~/.codex } }
   copilot: {}
+  cursor: {}
+  antigravity: {}
+  gemini: { config: { daily_limit: 1000 } }
+  opencode: {}
+  pi: {}
 ```
+
+`examples/widgets/w-agents.yaml` shows them all, most in demo mode.
 
 ### Uptime checks
 
@@ -115,6 +139,19 @@ modules:
         - name: api health
           curl: 'curl -H "Authorization: Bearer $API_TOKEN" https://api.example.com/health'
           expect: [200, 204]     # default: any 2xx or 3xx
+```
+
+### Clock
+
+`clock` shows the time in one or more time zones as a row of stats, with the date under each. It uses the system's time zone database and makes no network calls.
+
+```yaml
+modules:
+  clock:
+    config:
+      zones: [local, UTC, America/New_York, { zone: Asia/Tokyo, label: Tokyo office }]
+      hour12: false              # true: 2:05 PM
+      seconds: false             # true: also refreshes every second
 ```
 
 GitHub uses the `gh` CLI's login (`github-prs`, `github-issues`), so it needs no token setting.

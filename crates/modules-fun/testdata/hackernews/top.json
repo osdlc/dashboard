@@ -1,0 +1,108 @@
+[
+  {
+    "by": "alice",
+    "descendants": 97,
+    "id": 45000001,
+    "kids": [
+      45000101,
+      45000102
+    ],
+    "score": 312,
+    "time": 1761559200,
+    "title": "Show HN: A dashboard for the terminal",
+    "type": "story",
+    "url": "https://github.com/alice/tdash"
+  },
+  {
+    "by": "carol",
+    "descendants": 154,
+    "id": 45000002,
+    "kids": [
+      45000201
+    ],
+    "score": 88,
+    "text": "I keep a log tail and CI status. What about you?",
+    "time": 1761548400,
+    "title": "Ask HN: What do you keep on your second monitor?",
+    "type": "story"
+  },
+  {
+    "by": "bob",
+    "descendants": 0,
+    "id": 45000003,
+    "score": 1,
+    "time": 1761566370,
+    "title": "Why the status bar is still useful",
+    "type": "story",
+    "url": "https://www.Example.com:8443/post?id=1"
+  },
+  {
+    "by": "acme",
+    "id": 45000004,
+    "score": 5,
+    "time": 1761307100,
+    "title": "Acme (YC W24) is hiring a Rust engineer",
+    "type": "job",
+    "url": "https://acme.example/jobs"
+  },
+  null,
+  {
+    "deleted": true,
+    "id": 45000006,
+    "time": 1761565800,
+    "type": "story"
+  },
+  {
+    "by": "spammer",
+    "dead": true,
+    "id": 45000007,
+    "score": 1,
+    "time": 1761565500,
+    "title": "Cheap watches",
+    "type": "story",
+    "url": "http://spam.example"
+  },
+  {
+    "by": "dave",
+    "descendants": 12,
+    "id": 45000008,
+    "score": 45,
+    "time": 1761564000,
+    "title": "The cost of a context switch",
+    "type": "story",
+    "url": "http://blog.example.org/context-switch"
+  },
+  {
+    "by": "eve",
+    "descendants": 61,
+    "id": 45000009,
+    "parts": [
+      45000301,
+      45000302
+    ],
+    "score": 23,
+    "time": 1760529600,
+    "title": "Poll: Tabs or spaces in config files?",
+    "type": "poll"
+  },
+  {
+    "by": "pg",
+    "descendants": 400,
+    "id": 45000010,
+    "score": 1000,
+    "time": 1727006400,
+    "title": "An old essay on startups",
+    "type": "story",
+    "url": "https://paulgraham.com/startups.html"
+  },
+  {
+    "by": "frank",
+    "descendants": 3,
+    "id": 45000011,
+    "score": 7,
+    "time": 1761566340,
+    "title": "Past the limit",
+    "type": "story",
+    "url": "https://example.net/"
+  }
+]

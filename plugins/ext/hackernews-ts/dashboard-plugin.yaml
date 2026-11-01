@@ -1,0 +1,51 @@
+# The TypeScript version of the hackernews widget, for the native-vs-plugin benchmark.
+# It shows the same view as the built-in `hackernews` module for the same input.
+id: hackernews-ts
+version: 0.1.0
+name: Hacker News (TS)
+description: >-
+  Top stories from Hacker News (or new, best, Ask HN, Show HN, jobs), with
+  points, comments and age. Click a story to open it. Public API, no key.
+  TypeScript version of the built-in hackernews module.
+tags: [news, public-api, benchmark]
+run: [node, main.ts]
+runtime: node>=24
+hosts: [hacker-news.firebaseio.com]
+size: medium
+config_schema:
+  type: object
+  additionalProperties: false
+  properties:
+    feed:
+      type: string
+      enum: [top, new, best, ask, show, job]
+      description: Which list to show. Default top.
+    limit: { type: integer, minimum: 0, maximum: 30, description: "Stories shown, at most 30. Default 10." }
+    sample:
+      type: [string, "null"]
+      description: >-
+        Read this file instead of calling the API: a JSON array of HN items
+        (/v0/item/<id>.json replies, in feed order). For tests and demos.
+demo:
+  status: ok
+  summary: 4 top stories
+  root:
+    type: list
+    empty_text: no stories
+    items:
+      - title: "A tiny terminal dashboard written in Rust"
+        subtitle: "412 points · 128 comments · by ferris · 2h ago"
+        tags: [github.com]
+        action: { type: open_url, url: "https://github.com/example/dash" }
+      - title: "Ask HN: What do you keep on your second monitor?"
+        subtitle: "187 points · 243 comments · by curious · 5h ago"
+        tags: []
+        action: { type: open_url, url: "https://news.ycombinator.com/item?id=41000002" }
+      - title: "How we cut our build times in half"
+        subtitle: "96 points · 31 comments · by buildbot · 40m ago"
+        tags: [example.com]
+        action: { type: open_url, url: "https://www.example.com/blog/faster-builds" }
+      - title: "The history of the status bar"
+        subtitle: "1 point · 0 comments · by historian · just now"
+        tags: [example.org]
+        action: { type: open_url, url: "https://example.org/status-bars" }

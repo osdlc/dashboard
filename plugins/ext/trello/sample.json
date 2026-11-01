@@ -1,0 +1,77 @@
+[
+  {
+    "id": "6710a1b2c3d4e5f600000001",
+    "name": "Backlog",
+    "closed": false,
+    "cards": [
+      {
+        "id": "6710a1b2c3d4e5f600000101",
+        "name": "Dark mode for the settings page",
+        "due": null,
+        "dueComplete": false,
+        "shortUrl": "https://trello.com/c/Ab12Cd34",
+        "labels": [{ "id": "l1", "idBoard": "b1", "name": "design", "color": "purple" }]
+      },
+      {
+        "id": "6710a1b2c3d4e5f600000102",
+        "name": "Export reports as CSV",
+        "due": null,
+        "dueComplete": false,
+        "shortUrl": "https://trello.com/c/Ef56Gh78",
+        "labels": []
+      },
+      {
+        "id": "6710a1b2c3d4e5f600000103",
+        "name": "Audit third-party scripts",
+        "due": "2026-11-06T17:00:00.000Z",
+        "dueComplete": false,
+        "shortUrl": "https://trello.com/c/Ij90Kl12",
+        "labels": [{ "id": "l2", "idBoard": "b1", "name": "", "color": "red" }]
+      }
+    ]
+  },
+  {
+    "id": "6710a1b2c3d4e5f600000002",
+    "name": "Doing",
+    "closed": false,
+    "cards": [
+      {
+        "id": "6710a1b2c3d4e5f600000201",
+        "name": "Fix the flaky login test",
+        "due": "2026-10-26T16:00:00.000Z",
+        "dueComplete": false,
+        "shortUrl": "https://trello.com/c/Mn34Op56",
+        "labels": [{ "id": "l3", "idBoard": "b1", "name": "bug", "color": "red" }]
+      },
+      {
+        "id": "6710a1b2c3d4e5f600000202",
+        "name": "Write the migration guide",
+        "due": "2026-10-28T09:00:00.000Z",
+        "dueComplete": false,
+        "shortUrl": "https://trello.com/c/Qr78St90",
+        "labels": [{ "id": "l4", "idBoard": "b1", "name": "docs", "color": "blue" }]
+      }
+    ]
+  },
+  {
+    "id": "6710a1b2c3d4e5f600000003",
+    "name": "Review",
+    "closed": false,
+    "cards": [
+      {
+        "id": "6710a1b2c3d4e5f600000301",
+        "name": "New onboarding emails",
+        "due": "2026-10-25T12:00:00.000Z",
+        "dueComplete": true,
+        "shortUrl": "https://trello.com/c/Uv12Wx34",
+        "labels": []
+      }
+    ]
+  },
+  {
+    "id": "6710a1b2c3d4e5f600000004",
+    "name": "Done",
+    "closed": false,
+    "cards": []
+  }
+]

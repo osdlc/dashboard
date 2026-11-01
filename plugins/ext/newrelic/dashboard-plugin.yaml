@@ -1,0 +1,58 @@
+# A plugin package: this file plus the plugin's own files. See docs/plugins.md.
+id: newrelic
+version: 0.1.0
+name: New Relic alerts
+description: >-
+  Open New Relic alert violations, critical first, with the policy and how long
+  each has been open. Links to the incident when account_id is set. Counts
+  cover the first page of results (the API pages them). Built from
+  New Relic's public REST API v2 docs (GET /v2/alerts_violations.json) and
+  untested live.
+tags: [ops, monitoring, alerts, newrelic]
+# Run in this folder.
+run: [python3, main.py]
+runtime: python3>=3.9
+env: [NEW_RELIC_API_KEY]
+hosts: [api.newrelic.com, api.eu.newrelic.com]
+size: medium
+config_schema:
+  type: object
+  additionalProperties: false
+  properties:
+    region: { type: string, enum: [us, eu], description: "Where your account lives. Default us." }
+    base_url: { type: [string, "null"], description: "API address, if not New Relic's own (a proxy, for example)." }
+    account_id: { type: [integer, "null"], description: "Your account number, for links to each incident." }
+    policies: { type: [array, "null"], items: { type: string }, description: "Only violations of these policies (by name)." }
+    limit: { type: integer, minimum: 1, description: "Violations listed. Default 10." }
+    token_env: { type: string, description: "Environment variable holding a user API key. Default NEW_RELIC_API_KEY." }
+    token_command: { type: [array, "null"], items: { type: string }, description: "Command that prints the API key." }
+# Made-up violations, the same as sample/alerts_violations.json.
+demo:
+  status: error
+  summary: 1 critical · 2 warning
+  root:
+    type: column
+    children:
+      - type: row
+        children:
+          - { type: stat, label: Critical, value: "1", status: error }
+          - { type: stat, label: Warning, value: "2", status: warn }
+          - { type: stat, label: Policies, value: "3" }
+      - type: list
+        empty_text: No open violations
+        items:
+          - title: "High error rate: checkout-api"
+            subtitle: Checkout · Critical · opened 1h ago
+            status: error
+            tags: [Application]
+            action: { type: open_url, url: "https://alerts.newrelic.com/accounts/1234567/incidents/55501" }
+          - title: "Host CPU: db-2"
+            subtitle: Infrastructure · Warning · opened 16m ago
+            status: warn
+            tags: [Host]
+            action: { type: open_url, url: "https://alerts.newrelic.com/accounts/1234567/incidents/55503" }
+          - title: "Low Apdex: web-frontend"
+            subtitle: Web · Warning · opened 25m ago
+            status: warn
+            tags: [Application]
+            action: { type: open_url, url: "https://alerts.newrelic.com/accounts/1234567/incidents/55502" }

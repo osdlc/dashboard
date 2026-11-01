@@ -1,0 +1,103 @@
+# GitLab merge requests and issues. A token API, so it ships as a Python plugin
+# (see docs/modules.md). The demo below is `main.py --sample`,
+# the view of sample.json; a test checks they match.
+id: gitlab
+version: 0.1.0
+name: GitLab
+description: >-
+  GitLab merge requests and issues, one list per section, each a query on the
+  REST API with your own parameters (scope, state, labels, reviewer...). Merge
+  conflicts show red, ready-to-merge green, overdue issues red. Click an item
+  to open it. gitlab.com or self-managed. Untested live: built from the API
+  docs and a sample response.
+tags: [dev, gitlab, pull-requests, issues, token-api]
+run: [python3, main.py]
+runtime: python3>=3.9
+env: [GITLAB_TOKEN]
+hosts: [gitlab.com]
+size: tall
+config_schema:
+  type: object
+  additionalProperties: false
+  properties:
+    url:
+      type: string
+      description: GitLab address. Default https://gitlab.com.
+    token_env:
+      type: [string, "null"]
+      description: Variable holding a personal access token (read_api scope). Default GITLAB_TOKEN.
+    token_command:
+      type: [array, "null"]
+      items: { type: string }
+      description: A command that prints the token, e.g. [op, read, "op://dev/gitlab/token"]. Used instead of token_env.
+    limit: { type: integer, minimum: 1, maximum: 100, description: "Items per section. Default 10." }
+    sections:
+      type: array
+      minItems: 1
+      description: >-
+        One list each. Default: your open merge requests (scope created_by_me)
+        and your assigned open issues.
+      items:
+        type: object
+        additionalProperties: false
+        required: [label, type]
+        properties:
+          label: { type: string }
+          type: { type: string, enum: [merge_requests, issues] }
+          params:
+            type: object
+            additionalProperties: { type: [string, integer] }
+            description: >-
+              Query parameters for GET /api/v4/merge_requests or /api/v4/issues,
+              e.g. { scope: all, reviewer_username: dana, state: opened }.
+demo:
+  status: "ok"
+  summary: "3 my merge requests · 2 assigned issues"
+  root:
+    type: "column"
+    children:
+      - type: "text"
+        text: "**My merge requests**"
+        markdown: true
+      - type: "list"
+        items:
+          - title: "Cache the pipeline graph between renders"
+            subtitle: "acme/web!42 · by @dana · updated 1h ago"
+            tags: ["performance", "frontend"]
+            action:
+              type: "open_url"
+              url: "https://gitlab.com/acme/web/-/merge_requests/42"
+            status: "ok"
+          - title: "Move the billing worker to the new queue"
+            subtitle: "acme/api!118 · by @dana · updated 18h ago"
+            tags: ["conflicts", "backend"]
+            action:
+              type: "open_url"
+              url: "https://gitlab.com/acme/api/-/merge_requests/118"
+            status: "error"
+          - title: "Draft: Try the new chart library"
+            subtitle: "acme/web!44 · by @dana · updated 20m ago"
+            tags: ["draft"]
+            action:
+              type: "open_url"
+              url: "https://gitlab.com/acme/web/-/merge_requests/44"
+        empty_text: "none"
+      - type: "text"
+        text: "**Assigned issues**"
+        markdown: true
+      - type: "list"
+        items:
+          - title: "Invoices show the wrong currency for CHF accounts"
+            subtitle: "acme/api#231 · updated 2h ago"
+            tags: ["due 2026-10-25", "bug", "priority::high"]
+            action:
+              type: "open_url"
+              url: "https://gitlab.com/acme/api/-/issues/231"
+            status: "error"
+          - title: "Dark mode for the settings page"
+            subtitle: "acme/web#77 · updated 2d ago"
+            tags: ["feature"]
+            action:
+              type: "open_url"
+              url: "https://gitlab.com/acme/web/-/issues/77"
+        empty_text: "none"

@@ -1,0 +1,53 @@
+id: todoist
+version: 0.1.0
+name: Todoist
+description: >-
+  Todoist tasks matching a filter, by default what's due today or overdue:
+  overdue first, then the most urgent, with priority and labels as tags.
+  Untested live: built from Todoist's API v1 docs and a sample response.
+tags: [tasks, todoist, productivity, personal, untested-live]
+run: [python3, main.py]
+runtime: python3>=3.9
+env: [TODOIST_TOKEN]
+hosts: [api.todoist.com]
+size: medium
+config_schema:
+  type: object
+  additionalProperties: false
+  properties:
+    filter: { type: string, description: "A Todoist filter query. Default \"today | overdue\"." }
+    limit: { type: integer, minimum: 1, description: How many tasks to list. }
+    token_env: { type: string, description: "Variable holding your API token (Settings, Integrations, Developer). Default TODOIST_TOKEN." }
+    token_command: { type: [array, "null"], items: { type: string }, description: Command that prints the token. }
+demo:
+  status: error
+  summary: "1 overdue · 3 today"
+  root:
+    type: column
+    children:
+      - type: row
+        children:
+          - { type: stat, label: Overdue, value: "1", status: error }
+          - { type: stat, label: Today, value: "3" }
+          - { type: stat, label: Priority 1, value: "2", status: warn }
+      - type: list
+        empty_text: Nothing to do
+        items:
+          - title: Pay the electricity bill
+            subtitle: overdue 2d
+            status: error
+            tags: [p1, home]
+            action: { type: open_url, url: "https://app.todoist.com/app/task/6Jf8VQXxpwv56VQ7" }
+          - title: Ship the release notes
+            subtitle: today
+            status: warn
+            tags: [p1, work, release]
+            action: { type: open_url, url: "https://app.todoist.com/app/task/6Jf8VQXxpwv56VR1" }
+          - title: Reply to the review comments on the parser PR
+            subtitle: "today 15:00"
+            tags: [p2, work]
+            action: { type: open_url, url: "https://app.todoist.com/app/task/6Jf8VQXxpwv56VQ8" }
+          - title: Water the plants
+            subtitle: "today · every 3 days"
+            tags: []
+            action: { type: open_url, url: "https://app.todoist.com/app/task/6Jf8VQXxpwv56VQ9" }

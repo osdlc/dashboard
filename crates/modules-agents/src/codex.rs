@@ -22,7 +22,7 @@ use serde_json::{Value, json};
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::process::Command;
 
-use super::{Window, now_secs, worst};
+use super::{Window, count, day_label, now_secs, worst};
 use dashboard_modules_common::expand_home;
 use dashboard_modules_common::manifest;
 use dashboard_modules_common::time::{ago, demo_time, parse_time};
@@ -503,23 +503,6 @@ fn window_name(minutes: i64) -> String {
         m if m % 1440 == 0 => format!("{} days", m / 1440),
         m if m % 60 == 0 => format!("{} hours", m / 60),
         m => format!("{m} min"),
-    }
-}
-
-fn count(n: u64) -> String {
-    dashboard_contract::format_value(n as f64, ValueFormat::Count, None)
-}
-
-/// `2026-10-24` -> `Sat 24`.
-fn day_label(date: &str) -> String {
-    const DAYS: [&str; 7] = ["Thu", "Fri", "Sat", "Sun", "Mon", "Tue", "Wed"];
-    match parse_time(&format!("{date}T00:00:00Z")) {
-        Some(t) => format!(
-            "{} {}",
-            DAYS[(t / 86_400).rem_euclid(7) as usize],
-            date.get(8..10).unwrap_or("")
-        ),
-        None => date.to_string(),
     }
 }
 

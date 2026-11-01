@@ -1,0 +1,70 @@
+# Code review and CI widgets: GitLab (merge requests and issues), GitLab to-dos,
+# Gerrit, Azure DevOps and CircleCI. Each is a Python plugin package in
+# plugins/ext/ (examples/widgets/plugins links there, so `package: <id>` finds
+# them). From the repository root:
+#
+#   cargo run -p dashboard -- serve --config examples/widgets/w-dev-a.yaml
+#   cargo run -p dashboard -- tui   --config examples/widgets/w-dev-a.yaml
+#
+# All five call token APIs and are untested live, so nothing here calls them:
+# - the "review & ci" screen shows each package's demo view (`demo: true`: no
+#   process starts);
+# - the "sample" screen runs each plugin for real with `--sample`, which reads
+#   its sample.json (hand-written API responses) instead of the network.
+#
+# To run one for real, drop `demo: true`, fill in its config and set its token
+# variable (GITLAB_TOKEN, GERRIT_HTTP_PASSWORD, AZURE_DEVOPS_EXT_PAT or
+# CIRCLECI_TOKEN), or use token_command. Needs Python 3.9 or newer.
+
+modules:
+  gitlab:
+    package: gitlab
+    demo: true
+    config:
+      url: https://gitlab.com
+      sections:
+        - { label: My merge requests, type: merge_requests, params: { scope: created_by_me, state: opened } }
+        - { label: Assigned issues, type: issues, params: { scope: assigned_to_me, state: opened } }
+  todos:
+    package: gitlab-todos
+    demo: true
+  gerrit:
+    package: gerrit
+    demo: true
+    config: { url: "https://review.example.com", username: dana }
+  azure:
+    package: azure-devops
+    demo: true
+    config: { org: acme, project: Web }
+  ci:
+    package: circleci
+    demo: true
+    config: { projects: [gh/acme/api, gh/acme/web], branch: main }
+
+  # The same plugins, running, on their sample data.
+  gitlab-sample:
+    plugin: [python3, plugins/gitlab/main.py, --sample]
+  todos-sample:
+    plugin: [python3, plugins/gitlab-todos/main.py, --sample]
+  gerrit-sample:
+    plugin: [python3, plugins/gerrit/main.py, --sample]
+  azure-sample:
+    plugin: [python3, plugins/azure-devops/main.py, --sample]
+  ci-sample:
+    plugin: [python3, plugins/circleci/main.py, --sample]
+
+screens:
+  - name: review & ci
+    tiles:
+      - { module: gitlab, size: tall }
+      - { module: gerrit, size: tall }
+      - { module: todos, size: medium }
+      - { module: ci, size: medium }
+      - { module: azure, size: tall }
+  - name: sample
+    tiles:
+      - { module: gitlab-sample, size: tall }
+      - { module: gerrit-sample, size: tall }
+      - { module: todos-sample, size: medium }
+      - { module: ci-sample, size: medium }
+      - { module: azure-sample, size: tall }

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- RSS 2.0 with the usual extras: atom:link, media:title, content:encoded, dc:date. -->
+<rss version="2.0"
+     xmlns:atom="http://www.w3.org/2005/Atom"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:media="http://search.yahoo.com/mrss/"
+     xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Example   Engineering
+      Blog</title>
+    <link>https://blog.example.com/</link>
+    <atom:link href="https://blog.example.com/feed.xml" rel="self" type="application/rss+xml"/>
+    <description>Posts from the example team</description>
+    <item>
+      <title><![CDATA[Faster builds with <cargo> & friends]]></title>
+      <link>https://blog.example.com/faster-builds</link>
+      <pubDate>Tue, 27 Oct 2026 02:09:57 GMT</pubDate>
+      <media:title>Not this title</media:title>
+      <content:encoded><![CDATA[<p>The <b>body</b>, which the tile does not show.</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>Tom &amp; Jerry&#8217;s &#x1F680; launch</title>
+      <atom:link href="https://wrong.example.com/"/>
+      <link>
+        https://blog.example.com/launch
+      </link>
+      <pubDate>Mon, 26 Oct 2026 21:00:00 -0500</pubDate>
+    </item>
+    <item>
+      <title>An item with a permalink guid</title>
+      <guid isPermaLink="true">https://blog.example.com/guid-post</guid>
+      <pubDate>27 Oct 26 01:30 EDT</pubDate>
+    </item>
+    <item>
+      <title>A guid that is not a link</title>
+      <guid isPermaLink="false">tag:blog.example.com,2026:42</guid>
+      <dc:date>2026-10-20T08:15:00+02:00</dc:date>
+    </item>
+    <item>
+      <description>No title, a link that is not http, a bad pubDate and a dc:date.</description>
+      <link>javascript:alert(1)</link>
+      <pubDate>not a date</pubDate>
+      <dc:date>2026-10-25</dc:date>
+    </item>
+    <item>
+      <title>No date at all</title>
+      <link>https://blog.example.com/undated</link>
+    </item>
+    <item>
+      <title>   </title>
+      <link>https://blog.example.com/blank-title</link>
+      <pubDate>0001-01-01T00:00:00Z</pubDate>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,103 @@
+# Azure DevOps work items and pull requests. A token API, so it ships as a
+# Python plugin (see docs/modules.md). The demo below is
+# `main.py --sample`, the view of sample.json; a test checks they match.
+id: azure-devops
+version: 0.1.0
+name: Azure DevOps
+description: >-
+  Azure DevOps work items (from a WIQL query, default: open items assigned to
+  you) and active pull requests for one project (all of them, unless
+  reviewer_id or creator_id narrows the list). Priority 1 items, rejected
+  and conflicting pull requests show red, priority 2 and "waiting for author"
+  yellow, approved green. Click one to open it. Untested live: built from the
+  API docs and sample responses.
+tags: [dev, azure-devops, work-items, pull-requests, token-api]
+run: [python3, main.py]
+runtime: python3>=3.9
+env: [AZURE_DEVOPS_EXT_PAT]
+hosts: [dev.azure.com]
+size: tall
+config_schema:
+  type: object
+  additionalProperties: false
+  required: [org, project]
+  properties:
+    url:
+      type: string
+      description: Default https://dev.azure.com. For Azure DevOps Server, the collection's server URL.
+    org: { type: string, description: "Organization (or collection) name." }
+    project: { type: string, description: "Project name." }
+    token_env:
+      type: [string, "null"]
+      description: Variable holding a personal access token (Work Items and Code, read). Default AZURE_DEVOPS_EXT_PAT.
+    token_command:
+      type: [array, "null"]
+      items: { type: string }
+      description: A command that prints the token, e.g. [op, read, "op://dev/azure/pat"]. Used instead of token_env.
+    limit: { type: integer, minimum: 1, maximum: 200, description: "Items per list. Default 10." }
+    work_items:
+      type: [string, "null"]
+      description: >-
+        A WIQL query for the work items. Default: open items assigned to you
+        (@Me) in the project, recently changed first. null leaves them out.
+    pull_requests: { type: boolean, description: "Show the project's active pull requests, everyone's unless reviewer_id or creator_id is set. Default true." }
+    reviewer_id: { type: [string, "null"], description: "Only pull requests with this reviewer (a user or team ID)." }
+    creator_id: { type: [string, "null"], description: "Only pull requests by this user ID." }
+demo:
+  status: "ok"
+  summary: "3 work items · 3 pull requests"
+  root:
+    type: "column"
+    children:
+      - type: "text"
+        text: "**Work items**"
+        markdown: true
+      - type: "list"
+        items:
+          - title: "Checkout fails when the cart has a gift card"
+            subtitle: "Bug 4127 · Active · updated 1h ago"
+            tags: ["checkout", "customer-reported"]
+            action:
+              type: "open_url"
+              url: "https://dev.azure.com/acme/Web/_workitems/edit/4127"
+            status: "error"
+          - title: "Move the image service to the new storage account"
+            subtitle: "Task 4090 · Active · updated 17h ago"
+            tags: ["infra"]
+            action:
+              type: "open_url"
+              url: "https://dev.azure.com/acme/Web/_workitems/edit/4090"
+            status: "warn"
+          - title: "Export the report as CSV"
+            subtitle: "User Story 3988 · New · updated 3d ago"
+            tags: []
+            action:
+              type: "open_url"
+              url: "https://dev.azure.com/acme/Web/_workitems/edit/3988"
+        empty_text: "none"
+      - type: "text"
+        text: "**Pull requests**"
+        markdown: true
+      - type: "list"
+        items:
+          - title: "Handle gift cards in checkout totals"
+            subtitle: "storefront !812 · fix/gift-card-total · by Dana Ruiz · 3h ago"
+            tags: ["approved"]
+            action:
+              type: "open_url"
+              url: "https://dev.azure.com/acme/Web/_git/storefront/pullrequest/812"
+            status: "ok"
+          - title: "Switch uploads to the new storage account"
+            subtitle: "image-service !805 · storage-v2 · by Kim Park · 20h ago"
+            tags: ["conflicts", "waiting for author"]
+            action:
+              type: "open_url"
+              url: "https://dev.azure.com/acme/Web/_git/image-service/pullrequest/805"
+            status: "error"
+          - title: "Try the new date picker"
+            subtitle: "storefront !819 · date-picker · by Sam Lee · 39m ago"
+            tags: ["draft"]
+            action:
+              type: "open_url"
+              url: "https://dev.azure.com/acme/Web/_git/storefront/pullrequest/819"
+        empty_text: "none"

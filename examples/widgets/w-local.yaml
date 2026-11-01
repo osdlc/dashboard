@@ -1,0 +1,52 @@
+# Local widgets: GPU, a command's output, a todo file, Kubernetes pods,
+# security settings, the moon and the public IP.
+#
+#   cargo run -p dashboard -- serve --config examples/widgets/w-local.yaml
+#
+# Run it from the repository root: paths are read from where the dashboard
+# was started.
+#
+# gpu reads ioreg on macOS, nvidia-smi for NVIDIA cards and amdgpu's sysfs
+# files on Linux. With none of them it says "no GPU stats".
+# kubernetes shows its demo view (`demo: true`) so the screen works without a
+# cluster; drop that line to read your current kubectl context.
+# ipinfo calls ipinfo.io (no key) every ten minutes.
+
+theme: auto
+
+modules:
+  disk-usage:
+    builtin: cmdrunner
+    refresh: 30s
+    config: { command: df -h, name: Disk usage, lines: 12 }
+  recent-commits:
+    builtin: cmdrunner
+    refresh: 1m
+    config: { command: git log --oneline -15, name: Recent commits }
+  todo:
+    config: { path: crates/modules-personal/testdata/todo/todo.txt, show_done: true }
+  checklist:
+    builtin: todo
+    config: { path: crates/modules-personal/testdata/todo/todo.md }
+  kubernetes:
+    demo: true
+  security: {}
+  lunar: {}
+  ipinfo: {}
+
+screens:
+  - name: machine
+    tiles:
+      - { module: gpu, size: wide }
+      - { module: cpu, size: medium }
+      - { module: memory, size: medium }
+      - { module: security, size: small }
+      - { module: ipinfo, size: small }
+      - { module: disk-usage, size: wide }
+  - name: day
+    tiles:
+      - { module: todo, size: tall }
+      - { module: checklist, size: tall }
+      - { module: lunar, size: small }
+      - { module: recent-commits, size: medium }
+      - { module: kubernetes, size: wide }

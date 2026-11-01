@@ -1,0 +1,74 @@
+{
+  "status": "ok",
+  "summary": "7 items from 1 feed",
+  "root": {
+    "type": "list",
+    "items": [
+      {
+        "title": "An item with a permalink guid",
+        "subtitle": "Example Engineering Blog · 2026-10-27 05:30",
+        "status": null,
+        "tags": [],
+        "action": {
+          "type": "open_url",
+          "url": "https://blog.example.com/guid-post"
+        }
+      },
+      {
+        "title": "Faster builds with <cargo> & friends",
+        "subtitle": "Example Engineering Blog · 2026-10-27 02:09",
+        "status": null,
+        "tags": [],
+        "action": {
+          "type": "open_url",
+          "url": "https://blog.example.com/faster-builds"
+        }
+      },
+      {
+        "title": "Tom & Jerry’s 🚀 launch",
+        "subtitle": "Example Engineering Blog · 2026-10-27 02:00",
+        "status": null,
+        "tags": [],
+        "action": {
+          "type": "open_url",
+          "url": "https://blog.example.com/launch"
+        }
+      },
+      {
+        "title": "(no title)",
+        "subtitle": "Example Engineering Blog · 2026-10-25 00:00",
+        "status": null,
+        "tags": [],
+        "action": null
+      },
+      {
+        "title": "A guid that is not a link",
+        "subtitle": "Example Engineering Blog · 2026-10-20 06:15",
+        "status": null,
+        "tags": [],
+        "action": null
+      },
+      {
+        "title": "No date at all",
+        "subtitle": "Example Engineering Blog",
+        "status": null,
+        "tags": [],
+        "action": {
+          "type": "open_url",
+          "url": "https://blog.example.com/undated"
+        }
+      },
+      {
+        "title": "(no title)",
+        "subtitle": "Example Engineering Blog",
+        "status": null,
+        "tags": [],
+        "action": {
+          "type": "open_url",
+          "url": "https://blog.example.com/blank-title"
+        }
+      }
+    ],
+    "empty_text": "No items in these feeds."
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "oncalls": [
+    {
+      "escalation_policy": { "id": "PPOL001", "type": "escalation_policy_reference", "summary": "Payments" },
+      "escalation_level": 1,
+      "schedule": { "id": "PSCH001", "type": "schedule_reference", "summary": "Payments primary" },
+      "user": { "id": "PUSR001", "type": "user_reference", "summary": "Ana Ruiz", "html_url": "https://acme.pagerduty.com/users/PUSR001" },
+      "start": "2026-10-26T16:00:00Z",
+      "end": "2026-11-02T16:00:00Z"
+    },
+    {
+      "escalation_policy": { "id": "PPOL001", "type": "escalation_policy_reference", "summary": "Payments" },
+      "escalation_level": 2,
+      "schedule": null,
+      "user": { "id": "PUSR003", "type": "user_reference", "summary": "Kim Park" },
+      "start": null,
+      "end": null
+    },
+    {
+      "escalation_policy": { "id": "PPOL002", "type": "escalation_policy_reference", "summary": "Platform" },
+      "escalation_level": 1,
+      "schedule": { "id": "PSCH002", "type": "schedule_reference", "summary": "Platform primary" },
+      "user": { "id": "PUSR002", "type": "user_reference", "summary": "Sam Lee" },
+      "start": "2026-10-27T00:00:00Z",
+      "end": "2026-10-28T00:00:00Z"
+    }
+  ],
+  "limit": 100,
+  "offset": 0,
+  "more": false,
+  "total": null
+}

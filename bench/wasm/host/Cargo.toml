@@ -1,0 +1,13 @@
+# Stands in for dashboard-host: just the Module trait and now_ms.
+[package]
+name = "bench-wasm-host"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+anyhow = "1.0.104"
+async-trait = "0.1.92"
+dashboard-contract = { path = "../../../crates/contract" }
+serde_json = "1.0.154"

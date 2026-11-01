@@ -19,6 +19,19 @@ is a [plugin package](#package-it): a folder with the program and a `dashboard-p
 Run them all on one screen: `cargo run -p dashboard -- --config examples/plugins.yaml serve`.
 See them in the catalog: `cargo run -p dashboard -- --config examples/plugins.yaml widgets example`.
 
+`plugins/ext/` holds the native-vs-plugin benchmark widgets: clock, textfile, git, docker,
+hackernews, weather, feedreader and battery. Each one is a built-in module, written again as a
+TypeScript (`*-ts`) and a Python (`*-py`) package with a copy of the SDK file.
+`examples/bench.yaml` shows the three versions side by side, one screen per widget, and tests
+check they show the same view. It also holds Python packages for services that need a token:
+GitLab, Gerrit, Azure DevOps and CircleCI (`examples/widgets/w-dev-a.yaml`); Buildkite, Jenkins,
+Asana, Todoist and Trello (`w-dev-b.yaml`); Datadog, New Relic, PagerDuty, Opsgenie and Sentry
+(`w-ops-a.yaml`); Rollbar, Airbrake, UptimeRobot, DigitalOcean and Zendesk (`w-ops-b.yaml`);
+and Healthchecks.io (`w-public.yaml`). These are untested live: built from the services' API docs
+and tested against hand-written sample responses. See
+[`plugins/ext/README.md`](../plugins/ext/README.md). `examples/plugins/` links to each of them,
+so `examples/try.yaml` can show their demos by ID.
+
 ## Start from an SDK
 
 For TypeScript and Python there is a small SDK: one file, no packages, that runs the loop,

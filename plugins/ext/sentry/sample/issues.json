@@ -1,0 +1,49 @@
+[
+  {
+    "id": "4521987001",
+    "shortId": "WEB-3K1",
+    "title": "TypeError: Cannot read properties of undefined (reading 'total')",
+    "culprit": "src/cart/summary.ts in renderTotals",
+    "permalink": "https://acme.sentry.io/issues/4521987001/",
+    "level": "error",
+    "status": "unresolved",
+    "substatus": "escalating",
+    "isUnhandled": true,
+    "count": "1284",
+    "userCount": 312,
+    "firstSeen": "2026-10-25T14:02:00.000000Z",
+    "lastSeen": "2026-10-27T08:27:00.000000Z",
+    "project": { "id": "11", "name": "web", "slug": "web" },
+    "metadata": { "type": "TypeError", "value": "Cannot read properties of undefined (reading 'total')" }
+  },
+  {
+    "id": "4521987002",
+    "shortId": "API-9QF",
+    "title": "OperationalError: connection pool exhausted",
+    "culprit": "app.db.session in get_conn",
+    "permalink": "https://acme.sentry.io/issues/4521987002/",
+    "level": "fatal",
+    "status": "unresolved",
+    "isUnhandled": false,
+    "count": "57",
+    "userCount": 0,
+    "firstSeen": "2026-10-27T07:51:00.000000Z",
+    "lastSeen": "2026-10-27T08:20:00.000000Z",
+    "project": { "id": "12", "name": "api", "slug": "api" }
+  },
+  {
+    "id": "4521987003",
+    "shortId": "WEB-3JZ",
+    "title": "Slow DB query on /search",
+    "culprit": "GET /search",
+    "permalink": "https://acme.sentry.io/issues/4521987003/",
+    "level": "warning",
+    "status": "unresolved",
+    "isUnhandled": false,
+    "count": "23",
+    "userCount": 19,
+    "firstSeen": "2026-10-20T10:00:00.000000Z",
+    "lastSeen": "2026-10-27T05:12:00.000000Z",
+    "project": { "id": "11", "name": "web", "slug": "web" }
+  }
+]

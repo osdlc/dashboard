@@ -1,0 +1,33 @@
+{
+  "status": "ok",
+  "summary": "Honolulu 23:59:59 · UTC 09:59:59 · Kiritimati 23:59:59",
+  "root": {
+    "type": "row",
+    "children": [
+      {
+        "type": "stat",
+        "label": "Honolulu",
+        "value": "23:59:59",
+        "unit": null,
+        "delta": "Thu 31 Dec",
+        "status": null
+      },
+      {
+        "type": "stat",
+        "label": "UTC",
+        "value": "09:59:59",
+        "unit": null,
+        "delta": "Fri 1 Jan",
+        "status": null
+      },
+      {
+        "type": "stat",
+        "label": "Kiritimati",
+        "value": "23:59:59",
+        "unit": null,
+        "delta": "Fri 1 Jan",
+        "status": null
+      }
+    ]
+  }
+}

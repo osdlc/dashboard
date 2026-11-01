@@ -19,11 +19,16 @@ default = [
 bundle-system = [
     "module-cpu",
     "module-memory",
+    "module-gpu",
     "module-network",
     "module-disk",
     "module-processes",
     "module-log",
     "module-uptime",
+    "module-textfile",
+    "module-battery",
+    "module-cmdrunner",
+    "module-security",
 ]
 bundle-dev = [
     "module-github-prs",
@@ -31,38 +36,106 @@ bundle-dev = [
     "module-jira",
     "module-linear",
     "module-forgejo",
+    "module-git",
 ]
-# No modules yet.
-bundle-ops = []
-bundle-fun = ["module-demo"]
-bundle-agents = ["module-codex", "module-copilot"]
-# No modules yet.
-bundle-personal = []
+bundle-ops = [
+    "module-docker",
+    "module-kubernetes",
+    "module-ipinfo",
+    "module-pihole",
+    "module-transmission",
+]
+bundle-fun = [
+    "module-demo",
+    "module-clock",
+    "module-hackernews",
+    "module-feedreader",
+    "module-subreddit",
+    "module-devto",
+    "module-mempool",
+    "module-crypto",
+    "module-scores",
+]
+bundle-agents = [
+    "module-codex",
+    "module-copilot",
+    "module-cursor",
+    "module-antigravity",
+    "module-gemini",
+    "module-opencode",
+    "module-pi",
+]
+bundle-personal = [
+    "module-weather",
+    "module-todo",
+    "module-lunar",
+    "module-calendar",
+    "module-org-agenda",
+    "module-markdown-tasks",
+    "module-todo-txt",
+    "module-taskwarrior",
+    "module-sdlc",
+]
 
 module-cpu = ["dashboard-modules-system/cpu"]
 module-memory = ["dashboard-modules-system/memory"]
+module-gpu = ["dashboard-modules-system/gpu"]
 module-network = ["dashboard-modules-system/network"]
 module-disk = ["dashboard-modules-system/disk"]
 module-processes = ["dashboard-modules-system/processes"]
 module-log = ["dashboard-modules-system/log"]
 module-uptime = ["dashboard-modules-system/uptime"]
+module-textfile = ["dashboard-modules-system/textfile"]
+module-battery = ["dashboard-modules-system/battery"]
+module-cmdrunner = ["dashboard-modules-system/cmdrunner"]
+module-security = ["dashboard-modules-system/security"]
 module-github-prs = ["dashboard-modules-dev/github-prs"]
 module-github-issues = ["dashboard-modules-dev/github-issues"]
 module-jira = ["dashboard-modules-dev/jira"]
 module-linear = ["dashboard-modules-dev/linear"]
 module-forgejo = ["dashboard-modules-dev/forgejo"]
+module-git = ["dashboard-modules-dev/git"]
 module-demo = ["dashboard-modules-fun/demo"]
+module-clock = ["dashboard-modules-fun/clock"]
+module-hackernews = ["dashboard-modules-fun/hackernews"]
+module-feedreader = ["dashboard-modules-fun/feedreader"]
+module-subreddit = ["dashboard-modules-fun/subreddit"]
+module-devto = ["dashboard-modules-fun/devto"]
+module-mempool = ["dashboard-modules-fun/mempool"]
+module-crypto = ["dashboard-modules-fun/crypto"]
+module-scores = ["dashboard-modules-fun/scores"]
 module-codex = ["dashboard-modules-agents/codex"]
 module-copilot = ["dashboard-modules-agents/copilot"]
+module-cursor = ["dashboard-modules-agents/cursor"]
+module-antigravity = ["dashboard-modules-agents/antigravity"]
+module-gemini = ["dashboard-modules-agents/gemini"]
+module-opencode = ["dashboard-modules-agents/opencode"]
+module-pi = ["dashboard-modules-agents/pi"]
+module-docker = ["dashboard-modules-ops/docker"]
+module-kubernetes = ["dashboard-modules-ops/kubernetes"]
+module-ipinfo = ["dashboard-modules-ops/ipinfo"]
+module-pihole = ["dashboard-modules-ops/pihole"]
+module-transmission = ["dashboard-modules-ops/transmission"]
+module-weather = ["dashboard-modules-personal/weather"]
+module-todo = ["dashboard-modules-personal/todo"]
+module-lunar = ["dashboard-modules-personal/lunar"]
+module-calendar = ["dashboard-modules-personal/calendar"]
+module-org-agenda = ["dashboard-modules-personal/org-agenda"]
+module-markdown-tasks = ["dashboard-modules-personal/markdown-tasks"]
+module-todo-txt = ["dashboard-modules-personal/todo-txt"]
+module-taskwarrior = ["dashboard-modules-personal/taskwarrior"]
+module-sdlc = ["dashboard-modules-personal/sdlc"]
 
 [dependencies]
-dashboard-contract = { version = "0.4.0", path = "../contract" }
-dashboard-host = { version = "0.4.0", path = "../host" }
-dashboard-modules-common = { version = "0.4.0", path = "../modules-common" }
-dashboard-modules-agents = { version = "0.4.0", path = "../modules-agents", default-features = false, optional = true }
-dashboard-modules-dev = { version = "0.4.0", path = "../modules-dev", default-features = false, optional = true }
-dashboard-modules-fun = { version = "0.4.0", path = "../modules-fun", default-features = false, optional = true }
-dashboard-modules-system = { version = "0.4.0", path = "../modules-system", default-features = false, optional = true }
+dashboard-contract = { version = "0.5.0", path = "../contract" }
+dashboard-host = { version = "0.5.0", path = "../host" }
+dashboard-modules-common = { version = "0.5.0", path = "../modules-common" }
+dashboard-modules-agents = { version = "0.5.0", path = "../modules-agents", default-features = false, optional = true }
+dashboard-modules-dev = { version = "0.5.0", path = "../modules-dev", default-features = false, optional = true }
+dashboard-modules-ops = { version = "0.5.0", path = "../modules-ops", default-features = false, optional = true }
+dashboard-modules-personal = { version = "0.5.0", path = "../modules-personal", default-features = false, optional = true }
+dashboard-modules-fun = { version = "0.5.0", path = "../modules-fun", default-features = false, optional = true }
+dashboard-modules-system = { version = "0.5.0", path = "../modules-system", default-features = false, optional = true }
 
 [dev-dependencies]
 serde_json = "1.0.154"

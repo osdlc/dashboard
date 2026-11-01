@@ -1,0 +1,199 @@
+# The native-vs-plugin benchmark widgets, each built three ways: native Rust,
+# TypeScript (plugins/ext/<id>-ts) and Python (plugins/ext/<id>-py). One screen
+# per widget, so the three can be compared side by side. From the repository
+# root:
+#
+#   cargo run -p dashboard -- serve --config examples/bench.yaml
+#   cargo run -p dashboard -- tui   --config examples/bench.yaml
+#
+# See bench/README.md.
+#
+# A plugin runs in the config file's folder (examples/), so its paths start
+# with `../`. A built-in module reads paths from where the dashboard was
+# started: run it from the repository root.
+
+modules:
+  # ---- clock: now, in a few zones ----
+  clock:
+    config: { zones: [local, UTC, America/New_York, Asia/Tokyo], seconds: true }
+  clock-ts:
+    plugin: [node, ../plugins/ext/clock-ts/main.ts]
+    config: { zones: [local, UTC, America/New_York, Asia/Tokyo], seconds: true }
+  clock-py:
+    plugin: [python3, ../plugins/ext/clock-py/main.py]
+    config: { zones: [local, UTC, America/New_York, Asia/Tokyo], seconds: true }
+
+  # ---- clock: a fixed time (crates/modules-fun/testdata/clock/world.json) ----
+  clock-sample:
+    builtin: clock
+    config: &clock-world
+      zones: [UTC, America/New_York, Asia/Kolkata, Asia/Kathmandu, Australia/Adelaide, Pacific/Auckland]
+      now: "2026-10-27T19:35:09+05:30"
+  clock-ts-sample:
+    plugin: [node, ../plugins/ext/clock-ts/main.ts]
+    config: *clock-world
+  clock-py-sample:
+    plugin: [python3, ../plugins/ext/clock-py/main.py]
+    config: *clock-world
+
+  # ---- textfile: the same notes file; edit it and all three update ----
+  textfile:
+    config: { path: crates/modules-system/testdata/textfile/notes.md }
+  textfile-ts:
+    plugin: [node, ../plugins/ext/textfile-ts/main.ts]
+    config: { path: ../crates/modules-system/testdata/textfile/notes.md }
+  textfile-py:
+    plugin: [python3, ../plugins/ext/textfile-py/main.py]
+    config: { path: ../crates/modules-system/testdata/textfile/notes.md }
+
+  git:
+    config: { repos: [.] }
+  git-ts:
+    plugin: [node, ../plugins/ext/git-ts/main.ts]
+    config: { repos: [..] }
+  git-py:
+    plugin: [python3, ../plugins/ext/git-py/git_py.py]
+    config: { repos: [..] }
+
+  # ---- docker: running containers, an error tile when the daemon is down ----
+  docker:
+    config: { stats: true, limit: 10 }
+  docker-ts:
+    plugin: [node, ../plugins/ext/docker-ts/main.ts]
+    config: { stats: true, limit: 10 }
+  docker-py:
+    plugin: [python3, ../plugins/ext/docker-py/main.py]
+    config: { stats: true, limit: 10 }
+
+  # ---- hackernews: live, from the public HN API ----
+  hackernews: {}
+  hackernews-ts:
+    plugin: [node, ../plugins/ext/hackernews-ts/main.ts]
+  hackernews-py:
+    plugin: [python3, ../plugins/ext/hackernews-py/main.py]
+
+  # ---- hackernews: the same saved stories, no network ----
+  hackernews-sample:
+    builtin: hackernews
+    config: { sample: crates/modules-fun/testdata/hackernews/top.json }
+  hackernews-ts-sample:
+    plugin: [node, ../plugins/ext/hackernews-ts/main.ts]
+    config: { sample: ../crates/modules-fun/testdata/hackernews/top.json }
+  hackernews-py-sample:
+    plugin: [python3, ../plugins/ext/hackernews-py/main.py]
+    config: { sample: ../crates/modules-fun/testdata/hackernews/top.json }
+
+  # ---- weather: Open-Meteo, no key; calls api.open-meteo.com ----
+  weather:
+    config: { place: Berlin, days: 5 }
+  weather-ts:
+    plugin: [node, ../plugins/ext/weather-ts/main.ts]
+    config: { place: Berlin, days: 5 }
+  weather-py:
+    plugin: [python3, ../plugins/ext/weather-py/main.py]
+    config: { place: Berlin, days: 5 }
+
+  # ---- feedreader: two public feeds ----
+  feedreader:
+    config: { feeds: [https://blog.rust-lang.org/feed.xml, https://hnrss.org/frontpage] }
+  feedreader-ts:
+    plugin: [node, ../plugins/ext/feedreader-ts/main.ts]
+    config: { feeds: [https://blog.rust-lang.org/feed.xml, https://hnrss.org/frontpage] }
+  feedreader-py:
+    plugin: [python3, ../plugins/ext/feedreader-py/main.py]
+    config: { feeds: [https://blog.rust-lang.org/feed.xml, https://hnrss.org/frontpage] }
+
+  # ---- feedreader: the saved RSS, Atom and RSS 1.0 samples, with no network ----
+  feedreader-sample:
+    builtin: feedreader
+    config:
+      feeds:
+        - crates/modules-fun/testdata/feedreader/rss2.xml
+        - crates/modules-fun/testdata/feedreader/atom.xml
+        - crates/modules-fun/testdata/feedreader/rdf.xml
+  feedreader-ts-sample:
+    plugin: [node, ../plugins/ext/feedreader-ts/main.ts]
+    config:
+      feeds:
+        - ../crates/modules-fun/testdata/feedreader/rss2.xml
+        - ../crates/modules-fun/testdata/feedreader/atom.xml
+        - ../crates/modules-fun/testdata/feedreader/rdf.xml
+  feedreader-py-sample:
+    plugin: [python3, ../plugins/ext/feedreader-py/main.py]
+    config:
+      feeds:
+        - ../crates/modules-fun/testdata/feedreader/rss2.xml
+        - ../crates/modules-fun/testdata/feedreader/atom.xml
+        - ../crates/modules-fun/testdata/feedreader/rdf.xml
+
+  # ---- battery: this machine ----
+  battery: {}
+  battery-ts:
+    plugin: [node, ../plugins/ext/battery-ts/main.ts]
+  battery-py:
+    plugin: [python3, ../plugins/ext/battery-py/main.py]
+
+  # ---- battery: the same saved pmset output, for machines without a battery ----
+  battery-sample:
+    builtin: battery
+    config: { sample: crates/modules-system/testdata/battery/pmset-discharging.txt }
+  battery-ts-sample:
+    plugin: [node, ../plugins/ext/battery-ts/main.ts]
+    config: { sample: ../crates/modules-system/testdata/battery/pmset-discharging.txt }
+  battery-py-sample:
+    plugin: [python3, ../plugins/ext/battery-py/main.py]
+    config: { sample: ../crates/modules-system/testdata/battery/pmset-discharging.txt }
+
+screens:
+  - name: clock
+    tiles:
+      - { module: clock, size: medium }
+      - { module: clock-ts, size: medium }
+      - { module: clock-py, size: medium }
+      - { module: clock-sample, size: medium }
+      - { module: clock-ts-sample, size: medium }
+      - { module: clock-py-sample, size: medium }
+  - name: textfile
+    tiles:
+      - { module: textfile, size: tall }
+      - { module: textfile-ts, size: tall }
+      - { module: textfile-py, size: tall }
+  - name: git
+    tiles:
+      - { module: git, size: medium }
+      - { module: git-ts, size: medium }
+      - { module: git-py, size: medium }
+  - name: docker
+    tiles:
+      - { module: docker, size: wide }
+      - { module: docker-ts, size: wide }
+      - { module: docker-py, size: wide }
+  - name: hackernews
+    tiles:
+      - { module: hackernews, size: medium }
+      - { module: hackernews-ts, size: medium }
+      - { module: hackernews-py, size: medium }
+      - { module: hackernews-sample, size: medium }
+      - { module: hackernews-ts-sample, size: medium }
+      - { module: hackernews-py-sample, size: medium }
+  - name: weather
+    tiles:
+      - { module: weather, size: medium }
+      - { module: weather-ts, size: medium }
+      - { module: weather-py, size: medium }
+  - name: feedreader
+    tiles:
+      - { module: feedreader, size: medium }
+      - { module: feedreader-ts, size: medium }
+      - { module: feedreader-py, size: medium }
+      - { module: feedreader-sample, size: medium }
+      - { module: feedreader-ts-sample, size: medium }
+      - { module: feedreader-py-sample, size: medium }
+  - name: battery
+    tiles:
+      - { module: battery, size: medium }
+      - { module: battery-ts, size: medium }
+      - { module: battery-py, size: medium }
+      - { module: battery-sample, size: medium }
+      - { module: battery-ts-sample, size: medium }
+      - { module: battery-py-sample, size: medium }

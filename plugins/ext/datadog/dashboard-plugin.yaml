@@ -1,0 +1,61 @@
+# A plugin package: this file plus the plugin's own files. See docs/plugins.md.
+id: datadog
+version: 0.1.0
+name: Datadog monitors
+description: >-
+  Datadog monitors: how many are alerting, warning or without data, and a list
+  of the ones that need a look, each linking to the monitor. Filter by monitor
+  tags or name. Built from Datadog's public API docs (GET /api/v1/monitor) and
+  untested live.
+tags: [ops, monitoring, alerts, datadog]
+# Run in this folder.
+run: [python3, main.py]
+runtime: python3>=3.9
+env: [DD_API_KEY, DD_APP_KEY]
+hosts: [api.datadoghq.com, api.datadoghq.eu, api.us3.datadoghq.com, api.us5.datadoghq.com, api.ap1.datadoghq.com]
+size: medium
+config_schema:
+  type: object
+  additionalProperties: false
+  properties:
+    site: { type: string, description: "Your Datadog site: datadoghq.com (default), us3.datadoghq.com, us5.datadoghq.com, datadoghq.eu, ap1.datadoghq.com." }
+    base_url: { type: [string, "null"], description: "API address, if not https://api.<site> (a proxy, for example)." }
+    tags: { type: [array, "null"], items: { type: string }, description: "Only monitors with all of these monitor tags, e.g. team:web." }
+    name: { type: [string, "null"], description: "Only monitors whose name contains this text." }
+    show_ok: { type: boolean, description: "List monitors that are OK too. Default false." }
+    limit: { type: integer, minimum: 1, description: "Monitors listed. Default 10." }
+    token_env: { type: string, description: "Environment variable holding the API key. Default DD_API_KEY." }
+    token_command: { type: [array, "null"], items: { type: string }, description: "Command that prints the API key, e.g. [op, read, op://ops/datadog/api-key]." }
+    app_key_env: { type: string, description: "Environment variable holding the application key. Default DD_APP_KEY." }
+    app_key_command: { type: [array, "null"], items: { type: string }, description: "Command that prints the application key." }
+# Made-up monitors, the same as sample/monitors.json.
+demo:
+  status: error
+  summary: 1 alert · 1 warn · 1 no data · 3 ok
+  root:
+    type: column
+    children:
+      - type: row
+        children:
+          - { type: stat, label: Alert, value: "1", status: error }
+          - { type: stat, label: Warn, value: "1", status: warn }
+          - { type: stat, label: No data, value: "1", status: warn }
+          - { type: stat, label: OK, value: "3" }
+      - type: list
+        empty_text: All 6 monitors OK
+        items:
+          - title: API p95 latency above 800ms
+            subtitle: Alert · metric alert · 12m ago
+            status: error
+            tags: ["team:web", "service:api"]
+            action: { type: open_url, url: "https://app.datadoghq.com/monitors/2481001" }
+          - title: Checkout error rate
+            subtitle: Warn · query alert · 44m ago
+            status: warn
+            tags: ["team:web", "service:checkout"]
+            action: { type: open_url, url: "https://app.datadoghq.com/monitors/2481002" }
+          - title: Worker heartbeat
+            subtitle: No Data · service check · 10h ago
+            status: unknown
+            tags: ["team:platform"]
+            action: { type: open_url, url: "https://app.datadoghq.com/monitors/2481003" }

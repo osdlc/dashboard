@@ -1,0 +1,21 @@
+#+TITLE: Agenda
+
+* Work
+** TODO [#A] Send the Q3 report :work:urgent:
+   DEADLINE: <2026-10-25 Sun>
+   Numbers are in the shared sheet.
+** NEXT Review the design doc
+   SCHEDULED: <2026-10-27 Tue>
+** WAITING Contract back from legal
+   SCHEDULED: <2026-10-26 Mon> DEADLINE: <2026-10-30 Fri>
+** DONE Book the venue
+   CLOSED: [2026-10-20 Tue 14:02] DEADLINE: <2026-10-21 Wed>
+** Meeting notes
+   SCHEDULED: <2026-10-27 Tue>
+   Not a TODO, so not on the agenda.
+* Home
+** TODO Renew passport :errand:
+   DEADLINE: <2026-11-03 Tue +1y>
+** TODO [#C] Someday: learn the cello
+*** Notes
+    A sub-heading ends the item above.

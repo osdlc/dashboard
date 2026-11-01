@@ -1,0 +1,67 @@
+id: asana
+version: 0.1.0
+name: Asana
+description: >-
+  Open Asana tasks assigned to you in a workspace, or every open task in one
+  project: overdue first, then by due date, with overdue and due-today counts.
+  Untested live: built from Asana's API docs and a sample response.
+tags: [dev, tasks, asana, productivity, untested-live]
+run: [python3, main.py]
+runtime: python3>=3.9
+env: [ASANA_TOKEN]
+hosts: [app.asana.com]
+size: medium
+config_schema:
+  type: object
+  additionalProperties: false
+  properties:
+    workspace: { type: [string, "null"], description: Workspace gid. Shows your open tasks in it. }
+    project: { type: [string, "null"], description: Project gid. Shows every open task in it instead. }
+    limit: { type: integer, minimum: 1, description: How many tasks to list. }
+    token_env: { type: string, description: "Variable holding a personal access token. Default ASANA_TOKEN." }
+    token_command: { type: [array, "null"], items: { type: string }, description: Command that prints the token. }
+demo:
+  status: error
+  summary: "1 overdue · 2 today · 6 open"
+  root:
+    type: column
+    children:
+      - type: row
+        children:
+          - { type: stat, label: Overdue, value: "1", status: error }
+          - { type: stat, label: Today, value: "2", status: warn }
+          - { type: stat, label: Open, value: "6" }
+      - type: list
+        empty_text: No open tasks
+        items:
+          - title: Write the Q4 roadmap draft
+            subtitle: "Planning · overdue 3d"
+            status: error
+            action:
+              type: open_url
+              url: "https://app.asana.com/0/1208000000000001/1208000000000101"
+          - title: Approve design for the pricing page
+            subtitle: "Launch · Design · due today"
+            status: warn
+            action:
+              type: open_url
+              url: "https://app.asana.com/0/1208000000000003/1208000000000105"
+          - title: Review onboarding checklist
+            subtitle: "People · due today"
+            status: warn
+            action:
+              type: open_url
+              url: "https://app.asana.com/0/1208000000000002/1208000000000102"
+          - title: Send launch notes to support
+            subtitle: "Launch · due tomorrow"
+            action:
+              type: open_url
+              url: "https://app.asana.com/0/1208000000000003/1208000000000104"
+          - title: Renew the domain certificates
+            subtitle: "Ops · due in 7d"
+            action:
+              type: open_url
+              url: "https://app.asana.com/0/1208000000000005/1208000000000106"
+          - title: Book venue for the team offsite
+            subtitle: no due date
+            action: { type: open_url, url: "https://app.asana.com/0/0/1208000000000103" }

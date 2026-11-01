@@ -1,0 +1,61 @@
+# A plugin package: this file plus the plugin's own files. See docs/plugins.md.
+id: sentry
+version: 0.1.0
+name: Sentry issues
+description: >-
+  Unresolved Sentry issues for an organization or one project: events, users
+  and last seen, each linking to the issue. Any Sentry issue search works.
+  Works with self-hosted Sentry. Built from Sentry's public API docs (the
+  organization and project issues endpoints) and untested live.
+tags: [ops, errors, monitoring, sentry]
+# Run in this folder.
+run: [python3, main.py]
+runtime: python3>=3.9
+env: [SENTRY_AUTH_TOKEN]
+hosts: [sentry.io]
+size: wide
+config_schema:
+  type: object
+  additionalProperties: false
+  required: [org]
+  properties:
+    org: { type: string, description: "Organization slug, as in sentry.io/organizations/<org>/." }
+    project: { type: [string, "null"], description: "Only this project (its slug). Default: the whole organization." }
+    query: { type: string, description: "Sentry issue search. Default is:unresolved." }
+    environment: { type: [string, "null"], description: "Only this environment, e.g. production." }
+    sort: { type: string, enum: [date, new, freq, user], description: "date (last seen, default), new, freq or user." }
+    stats_period: { type: string, description: "Time window: issues seen in it, and their counts. 24h (default), 14d... With project set, only 24h or 14d." }
+    limit: { type: integer, minimum: 1, description: "Issues listed. Default 10." }
+    base_url: { type: string, description: "Sentry address. Default https://sentry.io; set it for EU (https://de.sentry.io) or self-hosted." }
+    token_env: { type: string, description: "Environment variable holding an auth token. Default SENTRY_AUTH_TOKEN." }
+    token_command: { type: [array, "null"], items: { type: string }, description: "Command that prints the auth token." }
+# Made-up issues, the same as sample/issues.json.
+demo:
+  status: error
+  summary: 3 issues · 1.4k events
+  root:
+    type: column
+    children:
+      - type: row
+        children:
+          - { type: stat, label: Issues, value: "3", status: warn }
+          - { type: stat, label: Events, value: "1.4k" }
+          - { type: stat, label: Users, value: "331" }
+      - type: list
+        empty_text: No unresolved issues
+        items:
+          - title: "TypeError: Cannot read properties of undefined (reading 'total')"
+            subtitle: WEB-3K1 · src/cart/summary.ts in renderTotals · 1.3k events · 312 users · 3m ago
+            status: error
+            tags: [unhandled, web]
+            action: { type: open_url, url: "https://acme.sentry.io/issues/4521987001/" }
+          - title: "OperationalError: connection pool exhausted"
+            subtitle: API-9QF · app.db.session in get_conn · 57 events · 10m ago
+            status: error
+            tags: [api]
+            action: { type: open_url, url: "https://acme.sentry.io/issues/4521987002/" }
+          - title: Slow DB query on /search
+            subtitle: WEB-3JZ · GET /search · 23 events · 19 users · 3h ago
+            status: warn
+            tags: [web]
+            action: { type: open_url, url: "https://acme.sentry.io/issues/4521987003/" }

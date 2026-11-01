@@ -1,0 +1,12 @@
+{
+  "domains": [
+    { "domain": "telemetry.example-tv.com", "count": 2210 },
+    { "domain": "ads.doubleclick.net", "count": 1342 },
+    { "domain": "app-measurement.com", "count": 977 },
+    { "domain": "metrics.icloud.com", "count": 655 },
+    { "domain": "browser.events.data.msn.com", "count": 418 }
+  ],
+  "total_queries": 48213,
+  "blocked_queries": 9874,
+  "took": 0.0012
+}

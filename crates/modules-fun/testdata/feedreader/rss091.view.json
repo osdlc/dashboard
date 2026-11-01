@@ -1,0 +1,30 @@
+{
+  "status": "ok",
+  "summary": "2 items from 1 feed",
+  "root": {
+    "type": "list",
+    "items": [
+      {
+        "title": "Old style item",
+        "subtitle": "$DIR/rss091.xml",
+        "status": null,
+        "tags": [],
+        "action": {
+          "type": "open_url",
+          "url": "http://old.example.com/a"
+        }
+      },
+      {
+        "title": "Another one",
+        "subtitle": "$DIR/rss091.xml",
+        "status": null,
+        "tags": [],
+        "action": {
+          "type": "open_url",
+          "url": "http://old.example.com/b"
+        }
+      }
+    ],
+    "empty_text": "No items in these feeds."
+  }
+}

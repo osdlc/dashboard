@@ -1,0 +1,65 @@
+id: buildkite
+version: 0.1.0
+name: Buildkite
+description: >-
+  Recent Buildkite builds for an organization or one pipeline, newest first,
+  with passed, failed and running counts. The tile turns red when a
+  pipeline's newest finished build failed; canceled and blocked builds don't
+  count as failed or running. Untested live: built from
+  Buildkite's REST API docs and a sample response.
+tags: [dev, ci, buildkite, builds, untested-live]
+run: [python3, main.py]
+runtime: python3>=3.9
+env: [BUILDKITE_TOKEN]
+hosts: [api.buildkite.com]
+size: medium
+config_schema:
+  type: object
+  additionalProperties: false
+  required: [org]
+  properties:
+    org: { type: string, description: Organization slug, as in buildkite.com/<org>. }
+    pipeline: { type: [string, "null"], description: Only this pipeline (its slug). }
+    branch: { type: [string, "null"], description: Only builds on this branch. }
+    limit: { type: integer, minimum: 1, maximum: 100, description: How many builds to show. }
+    token_env: { type: string, description: "Variable holding an API access token with read_builds. Default BUILDKITE_TOKEN." }
+    token_command: { type: [array, "null"], items: { type: string }, description: "Command that prints the token, e.g. [op, read, op://dev/buildkite/token]." }
+demo:
+  status: error
+  summary: "failing: web"
+  root:
+    type: column
+    children:
+      - type: row
+        children:
+          - { type: stat, label: Passed, value: "2", status: ok }
+          - { type: stat, label: Failed, value: "1", status: error }
+          - { type: stat, label: Running, value: "1", status: warn }
+      - type: list
+        empty_text: No builds yet
+        items:
+          - title: Add rate limiting to the search endpoint
+            subtitle: "api · #1482 · 2m ago"
+            status: warn
+            tags: [rate-limits, running]
+            action: { type: open_url, url: "https://buildkite.com/acme/api/builds/1482" }
+          - title: Move settings page to the new form components
+            subtitle: "web · #905 · 25m ago · took 4m 12s"
+            status: error
+            tags: [settings-forms]
+            action: { type: open_url, url: "https://buildkite.com/acme/web/builds/905" }
+          - title: Deploy api 1481 to production
+            subtitle: "deploy · #312 · 1h ago"
+            status: unknown
+            tags: [main, blocked]
+            action: { type: open_url, url: "https://buildkite.com/acme/deploy/builds/312" }
+          - title: Retry webhook deliveries with backoff
+            subtitle: "api · #1481 · 1h ago · took 3m 2s"
+            status: ok
+            tags: [main]
+            action: { type: open_url, url: "https://buildkite.com/acme/api/builds/1481" }
+          - title: Nightly build
+            subtitle: "web · #904 · 9h ago · took 11m 40s"
+            status: ok
+            tags: [main]
+            action: { type: open_url, url: "https://buildkite.com/acme/web/builds/904" }

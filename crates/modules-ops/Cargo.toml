@@ -1,0 +1,32 @@
+[package]
+name = "dashboard-modules-ops"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+# One feature per module, named after its id. dashboard-modules turns them on
+# through its `bundle-ops` and `module-<id>` features.
+[features]
+default = ["docker", "kubernetes", "ipinfo", "pihole", "transmission"]
+docker = []
+kubernetes = []
+ipinfo = ["http"]
+pihole = ["http"]
+transmission = ["http"]
+# reqwest, for the modules that call a web API.
+http = ["dashboard-modules-common/http"]
+
+[dependencies]
+anyhow = "1.0.104"
+async-trait = "0.1.92"
+dashboard-contract = { version = "0.5.0", path = "../contract" }
+dashboard-host = { version = "0.5.0", path = "../host" }
+dashboard-modules-common = { version = "0.5.0", path = "../modules-common" }
+schemars = "1.2.3"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+tokio = { version = "1.54.1", features = ["process", "rt", "time"] }
+
+[dev-dependencies]
+dashboard-config = { version = "0.5.0", path = "../config" }
+tokio = { version = "1.54.1", features = ["io-util", "macros", "net", "rt"] }

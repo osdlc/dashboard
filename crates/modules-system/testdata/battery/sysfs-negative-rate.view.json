@@ -1,0 +1,46 @@
+{
+  "status": "ok",
+  "summary": "50% · discharging · 1:20 left",
+  "root": {
+    "type": "column",
+    "children": [
+      {
+        "type": "gauge",
+        "label": "Battery",
+        "percent": 50.0,
+        "marker": null,
+        "thresholds": null,
+        "caption": "on battery"
+      },
+      {
+        "type": "row",
+        "children": [
+          {
+            "type": "stat",
+            "label": "Power",
+            "value": "battery",
+            "unit": null,
+            "delta": null,
+            "status": null
+          },
+          {
+            "type": "stat",
+            "label": "State",
+            "value": "discharging",
+            "unit": null,
+            "delta": null,
+            "status": null
+          },
+          {
+            "type": "stat",
+            "label": "Time left",
+            "value": "1:20",
+            "unit": null,
+            "delta": null,
+            "status": null
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,58 @@
+[
+  {
+    "id": "bitcoin",
+    "symbol": "btc",
+    "name": "Bitcoin",
+    "current_price": 79764,
+    "market_cap": 1603520473515,
+    "market_cap_rank": 1,
+    "high_24h": 80680,
+    "low_24h": 79416,
+    "price_change_24h": -422.02,
+    "price_change_percentage_24h": -0.52703,
+    "price_change_percentage_24h_in_currency": -0.52703,
+    "last_updated": "2026-10-27T11:57:55.000Z"
+  },
+  {
+    "id": "ethereum",
+    "symbol": "eth",
+    "name": "Ethereum",
+    "current_price": 3120.48,
+    "market_cap": 376512000000,
+    "market_cap_rank": 2,
+    "high_24h": 3190.1,
+    "low_24h": 3101.77,
+    "price_change_24h": 41.2,
+    "price_change_percentage_24h": 1.33811,
+    "price_change_percentage_24h_in_currency": 1.33811,
+    "last_updated": "2026-10-27T11:57:41.000Z"
+  },
+  {
+    "id": "dogecoin",
+    "symbol": "doge",
+    "name": "Dogecoin",
+    "current_price": 0.123456,
+    "market_cap": 18200000000,
+    "market_cap_rank": 9,
+    "high_24h": 0.1352,
+    "low_24h": 0.1201,
+    "price_change_24h": -0.0098,
+    "price_change_percentage_24h": -7.3512,
+    "price_change_percentage_24h_in_currency": -7.3512,
+    "last_updated": "2026-10-27T11:57:12.000Z"
+  },
+  {
+    "id": "solana",
+    "symbol": "sol",
+    "name": "Solana",
+    "current_price": 182.9,
+    "market_cap": 86100000000,
+    "market_cap_rank": 5,
+    "high_24h": 185.2,
+    "low_24h": 176.4,
+    "price_change_24h": 0,
+    "price_change_percentage_24h": null,
+    "price_change_percentage_24h_in_currency": null,
+    "last_updated": "2026-10-27T11:57:30.000Z"
+  }
+]

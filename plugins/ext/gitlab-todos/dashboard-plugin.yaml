@@ -1,0 +1,73 @@
+# Pending GitLab to-do items. A token API, so it ships as a Python plugin (see
+# docs/modules.md). The demo below is `main.py --sample`, the
+# view of sample.json; a test checks they match.
+id: gitlab-todos
+version: 0.1.0
+name: GitLab to-dos
+description: >-
+  Your pending GitLab to-do items: review and approval requests, mentions,
+  assignments, failed pipelines. Failures show red, people waiting on you
+  yellow. Click one to open it. gitlab.com or self-managed. Untested live:
+  built from the API docs and a sample response.
+tags: [dev, gitlab, todo, notifications, token-api]
+run: [python3, main.py]
+runtime: python3>=3.9
+env: [GITLAB_TOKEN]
+hosts: [gitlab.com]
+size: medium
+config_schema:
+  type: object
+  additionalProperties: false
+  properties:
+    url:
+      type: string
+      description: GitLab address. Default https://gitlab.com.
+    token_env:
+      type: [string, "null"]
+      description: Variable holding a personal access token (read_api scope). Default GITLAB_TOKEN.
+    token_command:
+      type: [array, "null"]
+      items: { type: string }
+      description: A command that prints the token, e.g. [op, read, "op://dev/gitlab/token"]. Used instead of token_env.
+    limit: { type: integer, minimum: 1, maximum: 100, description: "Items shown. Default 20." }
+    type:
+      type: [string, "null"]
+      enum: [MergeRequest, Issue, Commit, Epic, "DesignManagement::Design", "AlertManagement::Alert", null]
+      description: Only to-dos on this kind of item.
+    action:
+      type: [string, "null"]
+      enum: [assigned, mentioned, directly_addressed, build_failed, unmergeable, merge_train_removed, approval_required, review_requested, review_submitted, member_access_requested, marked, null]
+      description: Only to-dos for this action.
+demo:
+  status: "ok"
+  summary: "4 to-dos · 2 need you"
+  root:
+    type: "list"
+    items:
+      - title: "Add retry to the upload client"
+        subtitle: "acme/web!47 · @sam asked for your review · 25m ago"
+        tags: ["MR"]
+        action:
+          type: "open_url"
+          url: "https://gitlab.com/acme/web/-/merge_requests/47"
+        status: "warn"
+      - title: "Move the billing worker to the new queue"
+        subtitle: "acme/api!118 · pipeline failed · 2h ago"
+        tags: ["MR"]
+        action:
+          type: "open_url"
+          url: "https://gitlab.com/acme/api/-/pipelines/55120"
+        status: "error"
+      - title: "Invoices show the wrong currency for CHF accounts"
+        subtitle: "acme/api#231 · @kim mentioned you · 19h ago"
+        tags: ["issue"]
+        action:
+          type: "open_url"
+          url: "https://gitlab.com/acme/api/-/issues/231#note_6610"
+      - title: "Rotate the staging certificates"
+        subtitle: "acme/infra#12 · @sam assigned you · 3d ago"
+        tags: ["issue"]
+        action:
+          type: "open_url"
+          url: "https://gitlab.com/acme/infra/-/issues/12"
+    empty_text: "Nothing to do"

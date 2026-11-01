@@ -1,0 +1,108 @@
+{
+  "status": "warn",
+  "summary": "8 items from 3 feeds · 3 failed",
+  "root": {
+    "type": "list",
+    "items": [
+      {
+        "title": "Could not read $DIR/broken.xml",
+        "subtitle": "not valid XML",
+        "status": "error",
+        "tags": [],
+        "action": null
+      },
+      {
+        "title": "Could not read $DIR/notafeed.xml",
+        "subtitle": "not an RSS or Atom feed",
+        "status": "error",
+        "tags": [],
+        "action": null
+      },
+      {
+        "title": "Could not read $DIR/missing.xml",
+        "subtitle": "could not read the file",
+        "status": "error",
+        "tags": [],
+        "action": null
+      },
+      {
+        "title": "An item with a permalink guid",
+        "subtitle": "Example Engineering Blog · 2026-10-27 05:30",
+        "status": null,
+        "tags": [],
+        "action": {
+          "type": "open_url",
+          "url": "https://blog.example.com/guid-post"
+        }
+      },
+      {
+        "title": "Faster builds with <cargo> & friends",
+        "subtitle": "Example Engineering Blog · 2026-10-27 02:09",
+        "status": null,
+        "tags": [],
+        "action": {
+          "type": "open_url",
+          "url": "https://blog.example.com/faster-builds"
+        }
+      },
+      {
+        "title": "Tom & Jerry’s 🚀 launch",
+        "subtitle": "Example Engineering Blog · 2026-10-27 02:00",
+        "status": null,
+        "tags": [],
+        "action": {
+          "type": "open_url",
+          "url": "https://blog.example.com/launch"
+        }
+      },
+      {
+        "title": "First story",
+        "subtitle": "Example News · Café · 2026-10-27 00:00",
+        "status": null,
+        "tags": [],
+        "action": {
+          "type": "open_url",
+          "url": "https://news.example.net/1"
+        }
+      },
+      {
+        "title": "Second story",
+        "subtitle": "Example News · Café · 2026-10-26 23:59",
+        "status": null,
+        "tags": [],
+        "action": {
+          "type": "open_url",
+          "url": "https://news.example.net/2"
+        }
+      },
+      {
+        "title": "v1.9.3 & hotfix notes © &bogus;",
+        "subtitle": "Release notes · 2026-10-26 14:00",
+        "status": null,
+        "tags": [],
+        "action": {
+          "type": "open_url",
+          "url": "https://releases.example.org/1.9.3"
+        }
+      },
+      {
+        "title": "v2.0.0",
+        "subtitle": "Release notes · 2026-10-26 12:00",
+        "status": null,
+        "tags": [],
+        "action": {
+          "type": "open_url",
+          "url": "https://releases.example.org/2.0.0"
+        }
+      },
+      {
+        "title": "A relative link",
+        "subtitle": "Release notes · 2026-10-25 18:45",
+        "status": null,
+        "tags": [],
+        "action": null
+      }
+    ],
+    "empty_text": "No items in these feeds."
+  }
+}

@@ -1,0 +1,50 @@
+[
+  {
+    "type_of": "article",
+    "id": 3100001,
+    "title": "Building a terminal dashboard in a weekend",
+    "description": "What I learned writing a small TUI with ratatui.",
+    "url": "https://dev.to/ferris/building-a-terminal-dashboard-in-a-weekend-1a2b",
+    "comments_count": 14,
+    "public_reactions_count": 238,
+    "positive_reactions_count": 238,
+    "published_at": "2026-10-25T09:00:00Z",
+    "published_timestamp": "2026-10-25T09:00:00Z",
+    "reading_time_minutes": 7,
+    "tag_list": ["rust", "tui", "showdev", "productivity"],
+    "tags": "rust, tui, showdev, productivity",
+    "user": { "name": "Ferris Crab", "username": "ferris" }
+  },
+  {
+    "type_of": "article",
+    "id": 3100002,
+    "title": "Error handling without the boilerplate",
+    "description": "anyhow, thiserror and when to use which.",
+    "url": "https://dev.to/errata/error-handling-without-the-boilerplate-9z8y",
+    "comments_count": 1,
+    "public_reactions_count": 1,
+    "positive_reactions_count": 1,
+    "published_at": "2026-10-27T11:15:00Z",
+    "published_timestamp": "2026-10-27T11:15:00Z",
+    "reading_time_minutes": 4,
+    "tag_list": ["rust"],
+    "tags": "rust",
+    "user": { "name": "Erra Ta", "username": "errata" }
+  },
+  {
+    "type_of": "article",
+    "id": 3100003,
+    "title": "Five async pitfalls I hit in production",
+    "description": "Blocking calls, cancellation and more.",
+    "url": "https://dev.to/oncall/five-async-pitfalls-i-hit-in-production-4c5d",
+    "comments_count": 0,
+    "public_reactions_count": 57,
+    "positive_reactions_count": 57,
+    "published_at": "2026-10-26T18:30:00Z",
+    "published_timestamp": "2026-10-26T18:30:00Z",
+    "reading_time_minutes": 1,
+    "tag_list": [],
+    "tags": "",
+    "user": { "name": "On Call", "username": "oncall" }
+  }
+]

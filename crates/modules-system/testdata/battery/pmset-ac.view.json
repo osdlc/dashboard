@@ -1,0 +1,46 @@
+{
+  "status": "ok",
+  "summary": "80% · not charging",
+  "root": {
+    "type": "column",
+    "children": [
+      {
+        "type": "gauge",
+        "label": "Battery",
+        "percent": 80.0,
+        "marker": null,
+        "thresholds": null,
+        "caption": "on AC power"
+      },
+      {
+        "type": "row",
+        "children": [
+          {
+            "type": "stat",
+            "label": "Power",
+            "value": "AC power",
+            "unit": null,
+            "delta": null,
+            "status": null
+          },
+          {
+            "type": "stat",
+            "label": "State",
+            "value": "not charging",
+            "unit": null,
+            "delta": null,
+            "status": null
+          },
+          {
+            "type": "stat",
+            "label": "Time left",
+            "value": "-",
+            "unit": null,
+            "delta": null,
+            "status": null
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "violations": [
+    {
+      "id": 90011,
+      "label": "Error percentage > 5% for at least 5 minutes on 'checkout-api'",
+      "duration": 3720,
+      "policy_name": "Checkout",
+      "condition_name": "High error rate",
+      "priority": "Critical",
+      "opened_at": 1793089800000,
+      "entity": { "product": "Apm", "type": "Application", "group_id": 0, "id": 41111, "name": "checkout-api" },
+      "links": { "policy_id": 701, "condition_id": 8801, "incident_id": 55501 }
+    },
+    {
+      "id": 90012,
+      "label": "Apdex < 0.85 for at least 10 minutes on 'web-frontend'",
+      "duration": 1500,
+      "policy_name": "Web",
+      "condition_name": "Low Apdex",
+      "priority": "Warning",
+      "opened_at": 1793092020000,
+      "entity": { "product": "Apm", "type": "Application", "group_id": 0, "id": 41112, "name": "web-frontend" },
+      "links": { "policy_id": 702, "condition_id": 8802, "incident_id": 55502 }
+    },
+    {
+      "id": 90013,
+      "label": "CPU % > 90 for at least 15 minutes on 'db-2'",
+      "duration": 960,
+      "policy_name": "Infrastructure",
+      "condition_name": "Host CPU",
+      "priority": "Warning",
+      "opened_at": 1793092560000,
+      "entity": { "product": "Infrastructure", "type": "Host", "group_id": 0, "id": 41113, "name": "db-2" },
+      "links": { "policy_id": 703, "condition_id": 8803, "incident_id": 55503 }
+    }
+  ]
+}

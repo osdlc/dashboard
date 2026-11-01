@@ -10,8 +10,13 @@ http = ["dep:reqwest"]
 
 [dependencies]
 anyhow = "1.0.104"
-dashboard-contract = { version = "0.4.0", path = "../contract" }
-dashboard-host = { version = "0.4.0", path = "../host" }
+dashboard-contract = { version = "0.5.0", path = "../contract" }
+dashboard-host = { version = "0.5.0", path = "../host" }
 reqwest = { version = "0.13.5", features = ["json", "query"], optional = true }
 schemars = "1.2.3"
+serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.154"
+tokio = { version = "1.54.1", features = ["process"] }
+
+[dev-dependencies]
+tokio = { version = "1.54.1", features = ["macros", "process", "rt"] }

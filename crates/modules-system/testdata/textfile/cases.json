@@ -1,0 +1,8 @@
+[
+  { "file": "notes.md", "config": {}, "view": "notes.md.view.json" },
+  { "file": "notes.md", "config": { "markdown": false }, "view": "notes-plain.view.json" },
+  { "file": "plain.txt", "config": {}, "view": "plain.txt.view.json" },
+  { "file": "long.txt", "config": { "lines": 5 }, "view": "long-5.view.json" },
+  { "file": "blank.txt", "config": {}, "view": "blank.txt.view.json" },
+  { "file": "latin1.txt", "config": {}, "view": "latin1.txt.view.json" }
+]

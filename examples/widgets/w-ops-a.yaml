@@ -1,0 +1,49 @@
+# Ops widgets: Datadog, New Relic, PagerDuty, Opsgenie and Sentry. Each is a
+# Python plugin package in plugins/ext/ (Python 3.9 or newer, standard library
+# only). From the repository root:
+#
+#   cargo run -p dashboard -- serve --config examples/widgets/w-ops-a.yaml
+#   cargo run -p dashboard -- tui   --config examples/widgets/w-ops-a.yaml
+#
+# Every tile is `demo: true`: it shows the package's made-up demo view, and
+# nothing runs (no process, no network calls). None of these has been tried
+# against the real service yet ("untested live"). To run one for real, remove
+# `demo: true` and set the token variable named next to it.
+#
+# Packages are found in plugins/<id>/ next to this file; here that folder is a
+# link to plugins/ext/.
+
+modules:
+  datadog:
+    package: datadog
+    demo: true            # real: set $DD_API_KEY and $DD_APP_KEY
+    config: { site: datadoghq.com, tags: ["team:web"] }
+  newrelic:
+    package: newrelic
+    demo: true            # real: set $NEW_RELIC_API_KEY
+    config: { region: us, account_id: 1234567 }
+  pagerduty:
+    package: pagerduty
+    demo: true            # real: set $PAGERDUTY_TOKEN
+    config: { urgencies: [high, low], oncall: true }
+  opsgenie:
+    package: opsgenie
+    demo: true            # real: set $OPSGENIE_API_KEY
+    config: { account: acme, query: "status:open" }
+  sentry:
+    package: sentry
+    demo: true            # real: set $SENTRY_AUTH_TOKEN
+    config: { org: acme, project: web }
+
+screens:
+  - name: ops
+    tiles:
+      - { module: pagerduty, size: medium }
+      - { module: opsgenie, size: medium }
+      - { module: datadog, size: medium }
+      - { module: newrelic, size: medium }
+      - { module: sentry, size: wide }
+  - name: on call
+    tiles:
+      - { module: pagerduty, size: tall }
+      - { module: opsgenie, size: tall }

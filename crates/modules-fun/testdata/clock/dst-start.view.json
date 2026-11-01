@@ -1,0 +1,41 @@
+{
+  "status": "ok",
+  "summary": "New York 03:30 · Chicago 01:30 · Phoenix 00:30 · UTC 07:30",
+  "root": {
+    "type": "row",
+    "children": [
+      {
+        "type": "stat",
+        "label": "New York",
+        "value": "03:30",
+        "unit": null,
+        "delta": "Sun 8 Mar",
+        "status": null
+      },
+      {
+        "type": "stat",
+        "label": "Chicago",
+        "value": "01:30",
+        "unit": null,
+        "delta": "Sun 8 Mar",
+        "status": null
+      },
+      {
+        "type": "stat",
+        "label": "Phoenix",
+        "value": "00:30",
+        "unit": null,
+        "delta": "Sun 8 Mar",
+        "status": null
+      },
+      {
+        "type": "stat",
+        "label": "UTC",
+        "value": "07:30",
+        "unit": null,
+        "delta": "Sun 8 Mar",
+        "status": null
+      }
+    ]
+  }
+}

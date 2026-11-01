@@ -1,0 +1,9 @@
+{
+  "status": "ok",
+  "summary": "long.txt · first 5 of 12 lines",
+  "root": {
+    "type": "text",
+    "text": "line 1\nline 2\nline 3\nline 4\nline 5\n…",
+    "markdown": false
+  }
+}
