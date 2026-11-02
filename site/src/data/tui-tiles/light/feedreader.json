@@ -1,0 +1,73 @@
+{"width": 120, "styles": [["#197e44","",""],["","",""],["#6b7280","",""]],
+"sizes": {
+"small": {"cols": 30, "rows": 5, "lines": [
+[[0,"┌ feedreader ────────────────┐"]],
+[[0,"│"],[1,"● How we cut our CI time in…"],[0,"│"]],
+[[0,"│  "],[2,"Example Engineering Blog …"],[0,"│"]],
+[[0,"│  "],[2,"+4 more                   "],[0,"│"]],
+[[0,"└────────────────────────────┘"]]
+]},
+"medium": {"cols": 40, "rows": 10, "lines": [
+[[0,"┌ feedreader ──────────────────────────┐"]],
+[[0,"│"],[1,"● How we cut our CI time in half      "],[0,"│"]],
+[[0,"│  "],[2,"Example Engineering Blog · 2026-10-…"],[0,"│"]],
+[[0,"│"],[1,"● Postmortem: the October 20 outage   "],[0,"│"]],
+[[0,"│  "],[2,"Example Engineering Blog · 2026-10-…"],[0,"│"]],
+[[0,"│"],[1,"● Release 4.2: offline mode and faste…"],[0,"│"]],
+[[0,"│  "],[2,"Example Engineering Blog · 2026-10-…"],[0,"│"]],
+[[0,"│"],[1,"● Hiring: two platform engineers      "],[0,"│"]],
+[[0,"│  "],[2,"+1 more                             "],[0,"│"]],
+[[0,"└──────────────────────────────────────┘"]]
+]},
+"large": {"cols": 60, "rows": 15, "lines": [
+[[0,"┌ feedreader ──────────────────────────────────────────────┐"]],
+[[0,"│"],[1,"● How we cut our CI time in half                          "],[0,"│"]],
+[[0,"│  "],[2,"Example Engineering Blog · 2026-10-27 09:30             "],[0,"│"]],
+[[0,"│"],[1,"● Postmortem: the October 20 outage                       "],[0,"│"]],
+[[0,"│  "],[2,"Example Engineering Blog · 2026-10-26 16:05             "],[0,"│"]],
+[[0,"│"],[1,"● Release 4.2: offline mode and faster search             "],[0,"│"]],
+[[0,"│  "],[2,"Example Engineering Blog · 2026-10-23 14:00             "],[0,"│"]],
+[[0,"│"],[1,"● Hiring: two platform engineers                          "],[0,"│"]],
+[[0,"│  "],[2,"Example Engineering Blog · 2026-10-21 11:20             "],[0,"│"]],
+[[0,"│"],[1,"● Notes from RustConf                                     "],[0,"│"]],
+[[0,"│  "],[2,"Example Engineering Blog · 2026-10-15 08:00             "],[0,"│"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"└──────────────────────────────────────────────────────────┘"]]
+]},
+"wide": {"cols": 80, "rows": 10, "lines": [
+[[0,"┌ feedreader ──────────────────────────────────────────────────────────────────┐"]],
+[[0,"│"],[1,"● How we cut our CI time in half                                              "],[0,"│"]],
+[[0,"│  "],[2,"Example Engineering Blog · 2026-10-27 09:30                                 "],[0,"│"]],
+[[0,"│"],[1,"● Postmortem: the October 20 outage                                           "],[0,"│"]],
+[[0,"│  "],[2,"Example Engineering Blog · 2026-10-26 16:05                                 "],[0,"│"]],
+[[0,"│"],[1,"● Release 4.2: offline mode and faster search                                 "],[0,"│"]],
+[[0,"│  "],[2,"Example Engineering Blog · 2026-10-23 14:00                                 "],[0,"│"]],
+[[0,"│"],[1,"● Hiring: two platform engineers                                              "],[0,"│"]],
+[[0,"│  "],[2,"+1 more                                                                     "],[0,"│"]],
+[[0,"└──────────────────────────────────────────────────────────────────────────────┘"]]
+]},
+"tall": {"cols": 40, "rows": 20, "lines": [
+[[0,"┌ feedreader ──────────────────────────┐"]],
+[[0,"│"],[1,"● How we cut our CI time in half      "],[0,"│"]],
+[[0,"│  "],[2,"Example Engineering Blog · 2026-10-…"],[0,"│"]],
+[[0,"│"],[1,"● Postmortem: the October 20 outage   "],[0,"│"]],
+[[0,"│  "],[2,"Example Engineering Blog · 2026-10-…"],[0,"│"]],
+[[0,"│"],[1,"● Release 4.2: offline mode and faste…"],[0,"│"]],
+[[0,"│  "],[2,"Example Engineering Blog · 2026-10-…"],[0,"│"]],
+[[0,"│"],[1,"● Hiring: two platform engineers      "],[0,"│"]],
+[[0,"│  "],[2,"Example Engineering Blog · 2026-10-…"],[0,"│"]],
+[[0,"│"],[1,"● Notes from RustConf                 "],[0,"│"]],
+[[0,"│  "],[2,"Example Engineering Blog · 2026-10-…"],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"└──────────────────────────────────────┘"]]
+]}
+}}

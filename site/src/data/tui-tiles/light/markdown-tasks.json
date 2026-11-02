@@ -1,0 +1,73 @@
+{"width": 120, "styles": [["#976800","",""],["#c7363b","",""],["","",""],["#6b7280","",""]],
+"sizes": {
+"small": {"cols": 30, "rows": 5, "lines": [
+[[0,"┌ markdown-tasks ────────────┐"]],
+[[0,"│"],[1,"● "],[2,"Pay the electricity bill  "],[0,"│"]],
+[[0,"│  "],[3,"overdue 1d · Inbox.md     "],[0,"│"]],
+[[0,"│  "],[3,"+4 more                   "],[0,"│"]],
+[[0,"└────────────────────────────┘"]]
+]},
+"medium": {"cols": 40, "rows": 10, "lines": [
+[[0,"┌ markdown-tasks ──────────────────────┐"]],
+[[0,"│"],[1,"● "],[2,"Pay the electricity bill            "],[0,"│"]],
+[[0,"│  "],[3,"overdue 1d · Inbox.md               "],[0,"│"]],
+[[0,"│● "],[2,"Book flights for the offsite "],[3,"[trave…"],[0,"│"]],
+[[0,"│  "],[3,"due today · Inbox.md                "],[0,"│"]],
+[[0,"│"],[2,"● Draft the blog post "],[3,"[writing]       "],[0,"│"]],
+[[0,"│  "],[3,"due Sun · scheduled today · Inbox.md"],[0,"│"]],
+[[0,"│"],[2,"● Water the plants                    "],[0,"│"]],
+[[0,"│  "],[3,"+1 more                             "],[0,"│"]],
+[[0,"└──────────────────────────────────────┘"]]
+]},
+"large": {"cols": 60, "rows": 15, "lines": [
+[[0,"┌ markdown-tasks ──────────────────────────────────────────┐"]],
+[[0,"│"],[1,"● "],[2,"Pay the electricity bill                                "],[0,"│"]],
+[[0,"│  "],[3,"overdue 1d · Inbox.md                                   "],[0,"│"]],
+[[0,"│● "],[2,"Book flights for the offsite "],[3,"[travel]                   "],[0,"│"]],
+[[0,"│  "],[3,"due today · Inbox.md                                    "],[0,"│"]],
+[[0,"│"],[2,"● Draft the blog post "],[3,"[writing]                           "],[0,"│"]],
+[[0,"│  "],[3,"due Sun · scheduled today · Inbox.md                    "],[0,"│"]],
+[[0,"│"],[2,"● Water the plants                                        "],[0,"│"]],
+[[0,"│  "],[3,"due Tue · Inbox.md                                      "],[0,"│"]],
+[[0,"│"],[2,"● Read \"Designing Data-Intensive Applications\"            "],[0,"│"]],
+[[0,"│  "],[3,"Inbox.md                                                "],[0,"│"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"└──────────────────────────────────────────────────────────┘"]]
+]},
+"wide": {"cols": 80, "rows": 10, "lines": [
+[[0,"┌ markdown-tasks ──────────────────────────────────────────────────────────────┐"]],
+[[0,"│"],[1,"● "],[2,"Pay the electricity bill                                                    "],[0,"│"]],
+[[0,"│  "],[3,"overdue 1d · Inbox.md                                                       "],[0,"│"]],
+[[0,"│● "],[2,"Book flights for the offsite "],[3,"[travel]                                       "],[0,"│"]],
+[[0,"│  "],[3,"due today · Inbox.md                                                        "],[0,"│"]],
+[[0,"│"],[2,"● Draft the blog post "],[3,"[writing]                                               "],[0,"│"]],
+[[0,"│  "],[3,"due Sun · scheduled today · Inbox.md                                        "],[0,"│"]],
+[[0,"│"],[2,"● Water the plants                                                            "],[0,"│"]],
+[[0,"│  "],[3,"+1 more                                                                     "],[0,"│"]],
+[[0,"└──────────────────────────────────────────────────────────────────────────────┘"]]
+]},
+"tall": {"cols": 40, "rows": 20, "lines": [
+[[0,"┌ markdown-tasks ──────────────────────┐"]],
+[[0,"│"],[1,"● "],[2,"Pay the electricity bill            "],[0,"│"]],
+[[0,"│  "],[3,"overdue 1d · Inbox.md               "],[0,"│"]],
+[[0,"│● "],[2,"Book flights for the offsite "],[3,"[trave…"],[0,"│"]],
+[[0,"│  "],[3,"due today · Inbox.md                "],[0,"│"]],
+[[0,"│"],[2,"● Draft the blog post "],[3,"[writing]       "],[0,"│"]],
+[[0,"│  "],[3,"due Sun · scheduled today · Inbox.md"],[0,"│"]],
+[[0,"│"],[2,"● Water the plants                    "],[0,"│"]],
+[[0,"│  "],[3,"due Tue · Inbox.md                  "],[0,"│"]],
+[[0,"│"],[2,"● Read \"Designing Data-Intensive Appl…"],[0,"│"]],
+[[0,"│  "],[3,"Inbox.md                            "],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"└──────────────────────────────────────┘"]]
+]}
+}}

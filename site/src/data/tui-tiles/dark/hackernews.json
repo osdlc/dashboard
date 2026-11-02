@@ -1,0 +1,73 @@
+{"width": 120, "styles": [["#3fbf74","",""],["","",""],["#9097a1","",""]],
+"sizes": {
+"small": {"cols": 30, "rows": 5, "lines": [
+[[0,"┌ hackernews ────────────────┐"]],
+[[0,"│"],[1,"● A tiny terminal dashboard…"],[0,"│"]],
+[[0,"│  "],[2,"412 points · 128 comments…"],[0,"│"]],
+[[0,"│  "],[2,"+3 more                   "],[0,"│"]],
+[[0,"└────────────────────────────┘"]]
+]},
+"medium": {"cols": 40, "rows": 10, "lines": [
+[[0,"┌ hackernews ──────────────────────────┐"]],
+[[0,"│"],[1,"● A tiny terminal dashboard written i…"],[0,"│"]],
+[[0,"│  "],[2,"412 points · 128 comments · by ferr…"],[0,"│"]],
+[[0,"│"],[1,"● Ask HN: What do you keep on your se…"],[0,"│"]],
+[[0,"│  "],[2,"187 points · 243 comments · by curi…"],[0,"│"]],
+[[0,"│"],[1,"● How we cut our build times in half "],[2,"…"],[0,"│"]],
+[[0,"│  "],[2,"96 points · 31 comments · by buildb…"],[0,"│"]],
+[[0,"│"],[1,"● The history of the status bar "],[2,"[exam…"],[0,"│"]],
+[[0,"│  "],[2,"1 point · 0 comments · by historian…"],[0,"│"]],
+[[0,"└──────────────────────────────────────┘"]]
+]},
+"large": {"cols": 60, "rows": 15, "lines": [
+[[0,"┌ hackernews ──────────────────────────────────────────────┐"]],
+[[0,"│"],[1,"● A tiny terminal dashboard written in Rust "],[2,"[github.com]  "],[0,"│"]],
+[[0,"│  "],[2,"412 points · 128 comments · by ferris · 2h ago          "],[0,"│"]],
+[[0,"│"],[1,"● Ask HN: What do you keep on your second monitor?        "],[0,"│"]],
+[[0,"│  "],[2,"187 points · 243 comments · by curious · 5h ago         "],[0,"│"]],
+[[0,"│"],[1,"● How we cut our build times in half "],[2,"[example.com]        "],[0,"│"]],
+[[0,"│  "],[2,"96 points · 31 comments · by buildbot · 40m ago         "],[0,"│"]],
+[[0,"│"],[1,"● The history of the status bar "],[2,"[example.org]             "],[0,"│"]],
+[[0,"│  "],[2,"1 point · 0 comments · by historian · just now          "],[0,"│"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"└──────────────────────────────────────────────────────────┘"]]
+]},
+"wide": {"cols": 80, "rows": 10, "lines": [
+[[0,"┌ hackernews ──────────────────────────────────────────────────────────────────┐"]],
+[[0,"│"],[1,"● A tiny terminal dashboard written in Rust "],[2,"[github.com]                      "],[0,"│"]],
+[[0,"│  "],[2,"412 points · 128 comments · by ferris · 2h ago                              "],[0,"│"]],
+[[0,"│"],[1,"● Ask HN: What do you keep on your second monitor?                            "],[0,"│"]],
+[[0,"│  "],[2,"187 points · 243 comments · by curious · 5h ago                             "],[0,"│"]],
+[[0,"│"],[1,"● How we cut our build times in half "],[2,"[example.com]                            "],[0,"│"]],
+[[0,"│  "],[2,"96 points · 31 comments · by buildbot · 40m ago                             "],[0,"│"]],
+[[0,"│"],[1,"● The history of the status bar "],[2,"[example.org]                                 "],[0,"│"]],
+[[0,"│  "],[2,"1 point · 0 comments · by historian · just now                              "],[0,"│"]],
+[[0,"└──────────────────────────────────────────────────────────────────────────────┘"]]
+]},
+"tall": {"cols": 40, "rows": 20, "lines": [
+[[0,"┌ hackernews ──────────────────────────┐"]],
+[[0,"│"],[1,"● A tiny terminal dashboard written i…"],[0,"│"]],
+[[0,"│  "],[2,"412 points · 128 comments · by ferr…"],[0,"│"]],
+[[0,"│"],[1,"● Ask HN: What do you keep on your se…"],[0,"│"]],
+[[0,"│  "],[2,"187 points · 243 comments · by curi…"],[0,"│"]],
+[[0,"│"],[1,"● How we cut our build times in half "],[2,"…"],[0,"│"]],
+[[0,"│  "],[2,"96 points · 31 comments · by buildb…"],[0,"│"]],
+[[0,"│"],[1,"● The history of the status bar "],[2,"[exam…"],[0,"│"]],
+[[0,"│  "],[2,"1 point · 0 comments · by historian…"],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"└──────────────────────────────────────┘"]]
+]}
+}}

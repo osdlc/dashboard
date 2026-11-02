@@ -1,0 +1,73 @@
+{"width": 120, "styles": [["#3fbf74","",""],["","","b"],["#ef5b5f","",""],["","",""],["#9097a1","",""],["#e0a826","",""]],
+"sizes": {
+"small": {"cols": 30, "rows": 5, "lines": [
+[[0,"┌ azure-devops ──────────────┐"]],
+[[0,"│"],[1,"Work items                  "],[0,"│"]],
+[[0,"│"],[2,"● "],[3,"Checkout fails when the c…"],[0,"│"]],
+[[0,"│  "],[4,"+2 more                   "],[0,"│"]],
+[[0,"└────────────────────────────┘"]]
+]},
+"medium": {"cols": 40, "rows": 10, "lines": [
+[[0,"┌ azure-devops ────────────────────────┐"]],
+[[0,"│"],[1,"Work items                            "],[0,"│"]],
+[[0,"│"],[2,"● "],[3,"Checkout fails when the cart has a …"],[0,"│"]],
+[[0,"│  "],[4,"Bug 4127 · Active · updated 1h ago  "],[0,"│"]],
+[[0,"│"],[5,"● "],[3,"Move the image service to the new s…"],[0,"│"]],
+[[0,"│  "],[4,"Task 4090 · Active · updated 17h ago"],[0,"│"]],
+[[0,"│"],[3,"● Export the report as CSV            "],[0,"│"]],
+[[0,"│  "],[4,"User Story 3988 · New · updated 3d …"],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"└──────────────────────────────────────┘"]]
+]},
+"large": {"cols": 60, "rows": 15, "lines": [
+[[0,"┌ azure-devops ────────────────────────────────────────────┐"]],
+[[0,"│"],[1,"Work items                                                "],[0,"│"]],
+[[0,"│"],[2,"● "],[3,"Checkout fails when the cart has a gift card "],[4,"[checkout]…"],[0,"│"]],
+[[0,"│  "],[4,"Bug 4127 · Active · updated 1h ago                      "],[0,"│"]],
+[[0,"│"],[5,"● "],[3,"Move the image service to the new storage account "],[4,"[infr…"],[0,"│"]],
+[[0,"│  "],[4,"Task 4090 · Active · updated 17h ago                    "],[0,"│"]],
+[[0,"│"],[3,"● Export the report as CSV                                "],[0,"│"]],
+[[0,"│  "],[4,"User Story 3988 · New · updated 3d ago                  "],[0,"│"]],
+[[0,"│"],[1,"Pull requests                                             "],[0,"│"]],
+[[0,"│● "],[3,"Handle gift cards in checkout totals "],[4,"[approved]         "],[0,"│"]],
+[[0,"│  "],[4,"storefront !812 · fix/gift-card-total · by Dana Ruiz · …"],[0,"│"]],
+[[0,"│"],[2,"● "],[3,"Switch uploads to the new storage account "],[4,"[conflicts] […"],[0,"│"]],
+[[0,"│  "],[4,"image-service !805 · storage-v2 · by Kim Park · 20h ago "],[0,"│"]],
+[[0,"│  "],[4,"+1 more                                                 "],[0,"│"]],
+[[0,"└──────────────────────────────────────────────────────────┘"]]
+]},
+"wide": {"cols": 80, "rows": 10, "lines": [
+[[0,"┌ azure-devops ────────────────────────────────────────────────────────────────┐"]],
+[[0,"│"],[1,"Work items                                                                    "],[0,"│"]],
+[[0,"│"],[2,"● "],[3,"Checkout fails when the cart has a gift card "],[4,"[checkout] [customer-reported] "],[0,"│"]],
+[[0,"│  "],[4,"Bug 4127 · Active · updated 1h ago                                          "],[0,"│"]],
+[[0,"│"],[5,"● "],[3,"Move the image service to the new storage account "],[4,"[infra]                   "],[0,"│"]],
+[[0,"│  "],[4,"Task 4090 · Active · updated 17h ago                                        "],[0,"│"]],
+[[0,"│"],[3,"● Export the report as CSV                                                    "],[0,"│"]],
+[[0,"│  "],[4,"User Story 3988 · New · updated 3d ago                                      "],[0,"│"]],
+[[0,"│                                                                              │"]],
+[[0,"└──────────────────────────────────────────────────────────────────────────────┘"]]
+]},
+"tall": {"cols": 40, "rows": 20, "lines": [
+[[0,"┌ azure-devops ────────────────────────┐"]],
+[[0,"│"],[1,"Work items                            "],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│"],[2,"● "],[3,"Checkout fails when the cart has a …"],[0,"│"]],
+[[0,"│  "],[4,"Bug 4127 · Active · updated 1h ago  "],[0,"│"]],
+[[0,"│"],[5,"● "],[3,"Move the image service to the new s…"],[0,"│"]],
+[[0,"│  "],[4,"Task 4090 · Active · updated 17h ago"],[0,"│"]],
+[[0,"│"],[3,"● Export the report as CSV            "],[0,"│"]],
+[[0,"│  "],[4,"User Story 3988 · New · updated 3d …"],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│"],[1,"Pull requests                         "],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│● "],[3,"Handle gift cards in checkout total…"],[0,"│"]],
+[[0,"│  "],[4,"storefront !812 · fix/gift-card-tot…"],[0,"│"]],
+[[0,"│"],[2,"● "],[3,"Switch uploads to the new storage a…"],[0,"│"]],
+[[0,"│  "],[4,"image-service !805 · storage-v2 · b…"],[0,"│"]],
+[[0,"│"],[3,"● Try the new date picker "],[4,"[draft]     "],[0,"│"]],
+[[0,"│  "],[4,"storefront !819 · date-picker · by …"],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"└──────────────────────────────────────┘"]]
+]}
+}}

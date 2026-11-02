@@ -1,0 +1,73 @@
+{"width": 120, "styles": [["#ef5b5f","",""],["","",""],["#9097a1","",""],["#e0a826","",""]],
+"sizes": {
+"small": {"cols": 30, "rows": 5, "lines": [
+[[0,"┌ zendesk ───────────────────┐"]],
+[[0,"│"],[1,"● Password reset email neve…"],[0,"│"]],
+[[0,"│  "],[2,"#48233 · new · updated 5m…"],[0,"│"]],
+[[0,"│  "],[2,"+3 more                   "],[0,"│"]],
+[[0,"└────────────────────────────┘"]]
+]},
+"medium": {"cols": 40, "rows": 10, "lines": [
+[[0,"┌ zendesk ─────────────────────────────┐"]],
+[[0,"│"],[1,"● Password reset email never arrives "],[2,"…"],[0,"│"]],
+[[0,"│  "],[2,"#48233 · new · updated 5m ago       "],[0,"│"]],
+[[0,"│● "],[1,"Checkout fails with error 502 for a…"],[0,"│"]],
+[[0,"│  "],[2,"#48213 · open · urgent · updated 19…"],[0,"│"]],
+[[0,"│"],[3,"● "],[1,"Invoice shows the wrong VAT number "],[2,"…"],[0,"│"]],
+[[0,"│  "],[2,"#48190 · pending · high · updated 3…"],[0,"│"]],
+[[0,"│"],[1,"● Export of all orders for 2025 as CSV"],[0,"│"]],
+[[0,"│  "],[2,"#48102 · hold · updated 1d ago      "],[0,"│"]],
+[[0,"└──────────────────────────────────────┘"]]
+]},
+"large": {"cols": 60, "rows": 15, "lines": [
+[[0,"┌ zendesk ─────────────────────────────────────────────────┐"]],
+[[0,"│"],[1,"● Password reset email never arrives "],[2,"[login] [email] [acc…"],[0,"│"]],
+[[0,"│  "],[2,"#48233 · new · updated 5m ago                           "],[0,"│"]],
+[[0,"│● "],[1,"Checkout fails with error 502 for all EU customers "],[2,"[che…"],[0,"│"]],
+[[0,"│  "],[2,"#48213 · open · urgent · updated 19m ago                "],[0,"│"]],
+[[0,"│"],[3,"● "],[1,"Invoice shows the wrong VAT number "],[2,"[billing]            "],[0,"│"]],
+[[0,"│  "],[2,"#48190 · pending · high · updated 3h ago                "],[0,"│"]],
+[[0,"│"],[1,"● Export of all orders for 2025 as CSV                    "],[0,"│"]],
+[[0,"│  "],[2,"#48102 · hold · updated 1d ago                          "],[0,"│"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"└──────────────────────────────────────────────────────────┘"]]
+]},
+"wide": {"cols": 80, "rows": 10, "lines": [
+[[0,"┌ zendesk ─────────────────────────────────────────────────────────────────────┐"]],
+[[0,"│"],[1,"● Password reset email never arrives "],[2,"[login] [email] [account]                "],[0,"│"]],
+[[0,"│  "],[2,"#48233 · new · updated 5m ago                                               "],[0,"│"]],
+[[0,"│● "],[1,"Checkout fails with error 502 for all EU customers "],[2,"[checkout] [eu] [outage] "],[0,"│"]],
+[[0,"│  "],[2,"#48213 · open · urgent · updated 19m ago                                    "],[0,"│"]],
+[[0,"│"],[3,"● "],[1,"Invoice shows the wrong VAT number "],[2,"[billing]                                "],[0,"│"]],
+[[0,"│  "],[2,"#48190 · pending · high · updated 3h ago                                    "],[0,"│"]],
+[[0,"│"],[1,"● Export of all orders for 2025 as CSV                                        "],[0,"│"]],
+[[0,"│  "],[2,"#48102 · hold · updated 1d ago                                              "],[0,"│"]],
+[[0,"└──────────────────────────────────────────────────────────────────────────────┘"]]
+]},
+"tall": {"cols": 40, "rows": 20, "lines": [
+[[0,"┌ zendesk ─────────────────────────────┐"]],
+[[0,"│"],[1,"● Password reset email never arrives "],[2,"…"],[0,"│"]],
+[[0,"│  "],[2,"#48233 · new · updated 5m ago       "],[0,"│"]],
+[[0,"│● "],[1,"Checkout fails with error 502 for a…"],[0,"│"]],
+[[0,"│  "],[2,"#48213 · open · urgent · updated 19…"],[0,"│"]],
+[[0,"│"],[3,"● "],[1,"Invoice shows the wrong VAT number "],[2,"…"],[0,"│"]],
+[[0,"│  "],[2,"#48190 · pending · high · updated 3…"],[0,"│"]],
+[[0,"│"],[1,"● Export of all orders for 2025 as CSV"],[0,"│"]],
+[[0,"│  "],[2,"#48102 · hold · updated 1d ago      "],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"└──────────────────────────────────────┘"]]
+]}
+}}
