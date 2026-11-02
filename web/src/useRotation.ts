@@ -1,16 +1,21 @@
 import { computed, onMounted, onUnmounted, ref, type ComputedRef, type Ref } from 'vue'
 import type { UiSettings } from './contract'
+import { AMBIENT_INTERVAL_MS } from './mode'
 
 export type RotationState = 'on' | 'paused' | 'off' | 'none'
 
 /**
  * Automatic screen rotation, matching the TUI (crates/tui/src/rotate.rs):
  * user activity pauses it until idle for `resume_after_ms`; `toggle` turns it off and on.
+ *
+ * With `ambient`, every screen rotates even when the config sets no rotation
+ * (every `AMBIENT_INTERVAL_MS`), and activity doesn't pause it.
  */
 export function useRotation(
   settings: Ref<UiSettings | null>,
   index: ComputedRef<number>,
   go: (i: number) => void,
+  ambient = false,
 ) {
   const enabled = ref(true)
   const now = ref(Date.now())
@@ -19,15 +24,19 @@ export function useRotation(
 
   const order = computed(() => {
     const s = settings.value
+    if (ambient && s && !s.rotate) return s.screens.map((_, i) => i)
     if (!s?.rotate) return []
     return s.rotate.screens.map((name) => s.screens.findIndex((x) => x.name === name)).filter((i) => i >= 0)
   })
 
+  const interval = () => settings.value?.rotate?.interval_ms ?? (ambient ? AMBIENT_INTERVAL_MS : null)
+
   const state = computed<RotationState>(() => {
     const r = settings.value?.rotate
-    if (!r || order.value.length < 2) return 'none'
+    if (interval() === null || order.value.length < 2) return 'none'
+    if (ambient) return 'on'
     if (!enabled.value) return 'off'
-    if (lastInput.value !== null && now.value - lastInput.value < r.resume_after_ms) return 'paused'
+    if (r && lastInput.value !== null && now.value - lastInput.value < r.resume_after_ms) return 'paused'
     return 'on'
   })
 
@@ -44,8 +53,8 @@ export function useRotation(
 
   function tick() {
     now.value = Date.now()
-    const r = settings.value?.rotate
-    if (!r || state.value !== 'on' || now.value - lastSwitch < r.interval_ms) return
+    const ms = interval()
+    if (ms === null || state.value !== 'on' || now.value - lastSwitch < ms) return
     lastSwitch = now.value
     const pos = order.value.indexOf(index.value)
     const next = pos >= 0 ? order.value[(pos + 1) % order.value.length] : order.value[0]
@@ -65,7 +74,7 @@ export function useRotation(
   const events = ['pointerdown', 'pointermove', 'wheel'] as const
   onMounted(() => {
     timer = window.setInterval(tick, 1000)
-    for (const e of events) window.addEventListener(e, onActivity, { passive: true })
+    if (!ambient) for (const e of events) window.addEventListener(e, onActivity, { passive: true })
   })
   onUnmounted(() => {
     window.clearInterval(timer)

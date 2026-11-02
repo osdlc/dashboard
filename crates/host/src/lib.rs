@@ -14,12 +14,16 @@ use dashboard_contract::{
 use tokio::sync::{RwLock, broadcast, mpsc};
 use tokio::time::MissedTickBehavior;
 
+pub mod browser;
 pub mod history;
 mod plugin;
+pub mod process;
 pub use history::History;
 pub use plugin::Plugin;
 
-pub type ViewSender = mpsc::Sender<View>;
+/// Push mode: each view as it changes, or the error that stopped one. An
+/// error is shown like a failed poll: the last good view, marked stale.
+pub type ViewSender = mpsc::Sender<Result<View>>;
 
 /// Implemented by built-in modules directly, and by the stdio plugin client.
 #[async_trait]
@@ -109,7 +113,7 @@ impl Module for Demo {
     }
     async fn start(&mut self, tx: ViewSender) -> Result<()> {
         // One view; the tile keeps it after this returns.
-        let _ = tx.send(self.view.clone()).await;
+        let _ = tx.send(Ok(self.view.clone())).await;
         Ok(())
     }
 }
@@ -123,13 +127,22 @@ pub struct ModuleInfo {
     pub interval: Option<Duration>,
 }
 
+/// A tile's latest update, and whether it has ever rendered.
+#[derive(Clone)]
+struct Tile {
+    update: TileUpdate,
+    /// False while the tile shows only an error: there is no good view to
+    /// keep, so the next error replaces it rather than marking it stale.
+    loaded: bool,
+}
+
 #[derive(Clone)]
 pub struct Host {
-    tiles: Arc<RwLock<BTreeMap<String, TileUpdate>>>,
+    tiles: Arc<RwLock<BTreeMap<String, Tile>>>,
     modules: Arc<RwLock<Vec<ModuleInfo>>>,
     history: Arc<Mutex<History>>,
     /// Background tasks per tile, so a module can be stopped.
-    tasks: Arc<Mutex<BTreeMap<String, Vec<tokio::task::AbortHandle>>>>,
+    tasks: Arc<Mutex<BTreeMap<String, Vec<tokio::task::JoinHandle<()>>>>>,
     tx: broadcast::Sender<TileUpdate>,
 }
 
@@ -161,6 +174,21 @@ impl Host {
         options: SpawnOptions,
     ) -> Result<Manifest> {
         let manifest = module.init(config).await?;
+        self.spawn_initialized(tile_id, module, manifest.clone(), options)
+            .await;
+        Ok(manifest)
+    }
+
+    /// Start refreshing a module whose `init` has already returned
+    /// `manifest`. Lets a caller init several modules at once and still
+    /// start them in a set order.
+    pub async fn spawn_initialized(
+        &self,
+        tile_id: &str,
+        mut module: Box<dyn Module>,
+        manifest: Manifest,
+        options: SpawnOptions,
+    ) {
         let tile_id = tile_id.to_string();
         let task_key = tile_id.clone();
         let host = self.clone();
@@ -195,7 +223,7 @@ impl Host {
                         host.publish(&tile_id, result, demo).await;
                     }
                 });
-                vec![task.abort_handle()]
+                vec![task]
             }
             None => {
                 let (vtx, mut vrx) = mpsc::channel(16);
@@ -206,29 +234,53 @@ impl Host {
                     }
                 });
                 let forward = tokio::spawn(async move {
-                    while let Some(view) = vrx.recv().await {
-                        host.publish(&tile_id, Ok(view), demo).await;
+                    while let Some(result) = vrx.recv().await {
+                        host.publish(&tile_id, result, demo).await;
                     }
                 });
-                vec![run.abort_handle(), forward.abort_handle()]
+                vec![run, forward]
             }
         };
         self.tasks
             .lock()
             .expect("tasks lock")
             .insert(task_key, handles);
-        Ok(manifest)
     }
 
     /// Stop a module and forget its tile and history. No-op if not running.
+    /// Returns once the module is dropped, so a plugin's processes are gone.
+    /// Renderers get the tile's last view once more, marked stale: they keep
+    /// the views they were sent, and a module restarted with new settings
+    /// (or that fails to restart) must not look current.
     pub async fn stop(&self, tile_id: &str) {
         let handles = self.tasks.lock().expect("tasks lock").remove(tile_id);
         for h in handles.into_iter().flatten() {
             h.abort();
+            let _ = h.await;
         }
         self.modules.write().await.retain(|m| m.tile_id != tile_id);
-        self.tiles.write().await.remove(tile_id);
+        if let Some(last) = self.tiles.write().await.remove(tile_id) {
+            let _ = self.tx.send(TileUpdate {
+                stale: true,
+                ..last.update
+            });
+        }
         self.history.lock().expect("history lock").forget(tile_id);
+    }
+
+    /// Stop every module. An app that ends the process without dropping its
+    /// async runtime calls this first, so plugin processes are killed.
+    pub async fn stop_all(&self) {
+        let ids: Vec<String> = self
+            .tasks
+            .lock()
+            .expect("tasks lock")
+            .keys()
+            .cloned()
+            .collect();
+        for id in ids {
+            self.stop(&id).await;
+        }
     }
 
     /// Running modules, in spawn order.
@@ -241,44 +293,60 @@ impl Host {
     }
 
     pub async fn snapshot(&self) -> Vec<TileUpdate> {
-        self.tiles.read().await.values().cloned().collect()
+        self.tiles
+            .read()
+            .await
+            .values()
+            .map(|t| t.update.clone())
+            .collect()
     }
 
     async fn publish(&self, tile_id: &str, result: Result<View>, demo: bool) {
         let mut tiles = self.tiles.write().await;
-        let update = match result {
+        let tile = match result {
             Ok(mut view) => {
                 self.history
                     .lock()
                     .expect("history lock")
                     .apply(tile_id, &mut view);
-                TileUpdate {
-                    tile_id: tile_id.to_string(),
-                    view,
-                    updated_at: now_ms(),
-                    stale: false,
-                    demo,
+                Tile {
+                    update: TileUpdate {
+                        tile_id: tile_id.to_string(),
+                        view,
+                        updated_at: now_ms(),
+                        stale: false,
+                        demo,
+                    },
+                    loaded: true,
                 }
             }
             Err(err) => {
                 tracing::warn!(tile = %tile_id, "render failed: {err:#}");
                 match tiles.get(tile_id) {
                     // Keep the last good view, marked stale.
-                    Some(last) => TileUpdate {
-                        stale: true,
-                        ..last.clone()
+                    Some(last) if last.loaded => Tile {
+                        update: TileUpdate {
+                            stale: true,
+                            ..last.update.clone()
+                        },
+                        loaded: true,
                     },
-                    None => TileUpdate {
-                        tile_id: tile_id.to_string(),
-                        view: error_view(&err),
-                        updated_at: now_ms(),
-                        stale: true,
-                        demo,
+                    // Never loaded: the error is all there is, and it is current.
+                    _ => Tile {
+                        update: TileUpdate {
+                            tile_id: tile_id.to_string(),
+                            view: error_view(&err),
+                            updated_at: now_ms(),
+                            stale: false,
+                            demo,
+                        },
+                        loaded: false,
                     },
                 }
             }
         };
-        tiles.insert(tile_id.to_string(), update.clone());
+        let update = tile.update.clone();
+        tiles.insert(tile_id.to_string(), tile);
         // No receivers is fine.
         let _ = self.tx.send(update);
     }
@@ -380,6 +448,40 @@ mod stop_tests {
         }
     }
 
+    /// A tile that never rendered shows its error as current, not stale;
+    /// once it has rendered, an error keeps that view, marked stale.
+    #[tokio::test]
+    async fn an_error_is_stale_only_after_a_good_view() {
+        let host = Host::new();
+        let view = |s: &str| View {
+            status: Status::Ok,
+            summary: s.into(),
+            root: Widget::Text {
+                text: s.into(),
+                markdown: false,
+            },
+        };
+        let tile = || async { host.snapshot().await.remove(0) };
+        host.publish("t", Err(anyhow::anyhow!("no token")), false)
+            .await;
+        let t = tile().await;
+        assert!(!t.stale);
+        assert_eq!(t.view.summary, "error: no token");
+        host.publish("t", Err(anyhow::anyhow!("still no token")), false)
+            .await;
+        let t = tile().await;
+        assert!(!t.stale);
+        assert_eq!(t.view.summary, "error: still no token");
+
+        host.publish("t", Ok(view("fine")), false).await;
+        assert!(!tile().await.stale);
+        host.publish("t", Err(anyhow::anyhow!("offline")), false)
+            .await;
+        let t = tile().await;
+        assert!(t.stale);
+        assert_eq!(t.view.summary, "fine");
+    }
+
     #[tokio::test]
     async fn stop_removes_module_and_tile() {
         let host = Host::new();
@@ -395,12 +497,63 @@ mod stop_tests {
         assert_eq!(host.modules().await.len(), 1);
         assert_eq!(host.snapshot().await.len(), 1);
 
+        let mut updates = host.subscribe();
         host.stop("c").await;
+        // Renderers are told the view they hold is no longer current.
+        let mut last = updates.recv().await.unwrap();
+        while let Ok(next) = updates.try_recv() {
+            last = next;
+        }
+        assert_eq!(last.tile_id, "c");
+        assert!(last.stale);
         assert!(host.modules().await.is_empty());
         assert!(host.snapshot().await.is_empty());
         // The task is gone, so nothing is published again.
         tokio::time::sleep(Duration::from_millis(250)).await;
         assert!(host.snapshot().await.is_empty());
+    }
+
+    /// A counter that notes when it is dropped.
+    struct Tracked(Counter, Arc<std::sync::atomic::AtomicBool>);
+
+    impl Drop for Tracked {
+        fn drop(&mut self) {
+            self.1.store(true, std::sync::atomic::Ordering::SeqCst);
+        }
+    }
+
+    #[async_trait]
+    impl Module for Tracked {
+        async fn init(&mut self, config: serde_json::Value) -> Result<Manifest> {
+            self.0.init(config).await
+        }
+        async fn render(&mut self) -> Result<View> {
+            self.0.render().await
+        }
+    }
+
+    /// `stop` and `stop_all` return once the modules are dropped, so what
+    /// they hold (a plugin's processes) is gone.
+    #[tokio::test]
+    async fn stop_all_drops_the_modules() {
+        let host = Host::new();
+        let dropped: Vec<_> = (0..2).map(|_| Arc::default()).collect();
+        for (i, flag) in dropped.iter().enumerate() {
+            let module = Tracked(Counter(0), Arc::clone(flag));
+            host.spawn(
+                &format!("t{i}"),
+                Box::new(module),
+                serde_json::Value::Null,
+                SpawnOptions::default(),
+            )
+            .await
+            .unwrap();
+        }
+        host.stop("t0").await;
+        assert!(dropped[0].load(std::sync::atomic::Ordering::SeqCst));
+        host.stop_all().await;
+        assert!(dropped[1].load(std::sync::atomic::Ordering::SeqCst));
+        assert!(host.modules().await.is_empty());
     }
 
     #[tokio::test]

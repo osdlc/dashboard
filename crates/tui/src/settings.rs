@@ -11,8 +11,8 @@ use crate::help::{centered, format_ms};
 use crate::mouse::{self, Click, Hits};
 use crate::theme::Palette;
 
-/// Theme comes first and the key line is pinned to the bottom, so both sit at
-/// known rows for mouse clicks whatever wraps in between.
+/// Theme and colors come first and the key line is pinned to the bottom, so
+/// they sit at known rows for mouse clicks whatever wraps in between.
 pub fn draw(f: &mut Frame, p: &Palette, s: &UiSettings, hits: &mut Hits) {
     let area = centered(f.area(), 75, 85);
     f.render_widget(Clear, area);
@@ -46,6 +46,32 @@ pub fn draw(f: &mut Frame, p: &Palette, s: &UiSettings, hits: &mut Hits) {
     mouse::spans(
         Rect {
             y: body.y + 1,
+            height: 1,
+            ..body
+        },
+        &choices,
+        hits,
+    );
+
+    // Row 2: heading. Row 3: the color themes, the same way.
+    lines.push(heading("Colors"));
+    let mut choices = vec![("  ".to_string(), None)];
+    let mut names = vec![Span::raw("  ")];
+    for name in &s.color_themes {
+        let (text, style) = if *name == s.color_theme.name {
+            (format!("[{name}]"), accent.add_modifier(Modifier::BOLD))
+        } else {
+            (format!(" {name} "), muted)
+        };
+        names.push(Span::styled(text.clone(), style));
+        names.push(Span::raw(" "));
+        choices.push((text, Some(Click::ColorTheme(name.clone()))));
+        choices.push((" ".to_string(), None));
+    }
+    lines.push(Line::from(names));
+    mouse::spans(
+        Rect {
+            y: body.y + 3,
             height: 1,
             ..body
         },
@@ -110,6 +136,11 @@ pub fn draw(f: &mut Frame, p: &Palette, s: &UiSettings, hits: &mut Hits) {
             Some(Click::Theme(next_theme(s.theme))),
         ),
         ("   ".to_string(), None),
+        (
+            "c change colors".to_string(),
+            next_color_theme(s).map(Click::ColorTheme),
+        ),
+        ("   ".to_string(), None),
         ("e edit config file".to_string(), Some(Click::EditConfig)),
         ("   ".to_string(), None),
         ("Esc close".to_string(), Some(Click::Close)),
@@ -119,6 +150,8 @@ pub fn draw(f: &mut Frame, p: &Palette, s: &UiSettings, hits: &mut Hits) {
         Paragraph::new(Line::from(vec![
             Span::styled("  t", accent),
             Span::raw(" change theme   "),
+            Span::styled("c", accent),
+            Span::raw(" change colors   "),
             Span::styled("e", accent),
             Span::raw(" edit config file   "),
             Span::styled("Esc", accent),
@@ -142,4 +175,12 @@ pub fn next_theme(t: Theme) -> Theme {
         Theme::Light => Theme::Dark,
         Theme::Dark => Theme::Auto,
     }
+}
+
+/// The color theme after the current one, wrapping; `None` with nothing to pick.
+pub fn next_color_theme(s: &UiSettings) -> Option<String> {
+    let names = &s.color_themes;
+    let i = names.iter().position(|n| *n == s.color_theme.name);
+    let next = i.map_or(0, |i| (i + 1) % names.len().max(1));
+    names.get(next).cloned()
 }

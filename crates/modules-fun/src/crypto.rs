@@ -43,6 +43,7 @@ struct Config {
     warn_drop: f64,
     /// Read this file instead of calling the API: a saved
     /// `/api/v3/coins/markets` reply. For tests and demos.
+    #[schemars(extend("x-path" = true))]
     sample: Option<String>,
 }
 
@@ -209,6 +210,7 @@ fn view(markets: &[Market], c: &Config) -> View {
     let col = |key: &str, label: &str| Column {
         key: key.into(),
         label: label.into(),
+        priority: None,
     };
     View {
         status: if warned { Status::Warn } else { Status::Ok },

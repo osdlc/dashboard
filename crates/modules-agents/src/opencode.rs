@@ -27,6 +27,7 @@ const DOCS: &str = "https://opencode.ai/docs";
 struct Config {
     /// OpenCode's data folder; default `$XDG_DATA_HOME/opencode` or
     /// `~/.local/share/opencode`.
+    #[schemars(extend("x-path" = true))]
     home: Option<String>,
 }
 

@@ -3,11 +3,13 @@
     python3 -m unittest
 """
 
+import datetime
 import json
 import os
 import unittest
 
-from view import SAMPLE_TODAY, days, label, view
+import view as view_module
+from view import SAMPLE_TODAY, days, due, label, view
 
 with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "sample.json"), encoding="utf-8") as f:
     RESULTS = json.load(f)["results"]
@@ -20,6 +22,16 @@ class ViewTest(unittest.TestCase):
     def test_due_dates_with_and_without_a_time(self):
         self.assertEqual([days(t, SAMPLE_TODAY) for t in RESULTS], [-2, 0, 0, 0])
         self.assertIsNone(days({**RESULTS[0], "due": None}, SAMPLE_TODAY))
+
+    def test_a_fixed_time_zone_due_time_is_shown_in_local_time(self):
+        # Due today at 21:00 in Los Angeles: the API sends the UTC time, tomorrow at 04:00.
+        task = {"due": {"date": "2026-10-28T04:00:00.000000Z", "timezone": "America/Los_Angeles"}}
+        view_module.TZ = datetime.timezone(datetime.timedelta(hours=-7))
+        try:
+            self.assertEqual(days(task, "2026-10-27"), 0)
+            self.assertEqual(due(task, "2026-10-27"), "today 21:00")
+        finally:
+            view_module.TZ = None
 
     def test_overdue_first_then_the_most_urgent(self):
         v = view(RESULTS, SAMPLE_TODAY, 10)

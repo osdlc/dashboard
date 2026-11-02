@@ -5,6 +5,33 @@ one JSON message per line. Use any language. The dashboard starts it, asks it fo
 manifest once, then asks it for a view on a timer and draws that view in the terminal and
 the browser.
 
+**No plugin needed** when something can already write the data: the `http` built-in fetches
+a URL on each refresh, and the `file` built-in watches a file and shows it again when it
+changes (checking it every second where watching can't start, or with `watch: false`). Both
+read the same data: a view or a widget in the JSON below, values picked out of any JSON with
+`fields`, or text. A cron job, a CI step or another machine's dashboard can write it.
+
+```yaml
+modules:
+  nightly:
+    builtin: file
+    config: { path: ~/.cache/backup/status.json }   # {"status": "ok", "summary": ..., "root": {...}}
+  queue:
+    builtin: http
+    refresh: 15s
+    config:
+      url: http://buildbox:9000/stats             # any JSON
+      token_env: QUEUE_TOKEN                       # sent as Authorization: Bearer ...
+      fields:
+        - { label: Waiting, pointer: /queue/waiting }
+        - { label: p99, pointer: /latency/p99, unit: ms }
+```
+
+`format` is `auto` (a view or widget when the data is one, else indented JSON, else text),
+`view`, `json` or `text`. A series widget with an `id` gets history kept by the host, so a
+URL that returns one point per fetch draws a growing chart. All settings:
+`dashboard widgets http --json` and `dashboard widgets file --json` (the `config_schema`).
+
 Examples, all tested against the real host (`crates/host/tests/example_plugins.rs`). Each
 is a [plugin package](#package-it): a folder with the program and a `dashboard-plugin.yaml`.
 
@@ -89,7 +116,8 @@ as the terminal UI would draw it. Those mistakes include:
 - links that aren't http(s).
 
 It exits non-zero on a problem. Notes (things this host ignores for now) don't fail it.
-`--json` also prints the last view.
+With `--json` it prints one JSON document instead of the report: the manifest, each render, the
+last view and the findings.
 
 ## Add it to a config
 
@@ -108,8 +136,10 @@ screens:
 ```
 
 A plugin started with `plugin:` runs in the config file's folder, so relative paths resolve
-from there. Changes to the file apply while the dashboard runs; the plugin restarts only if its
-own settings changed.
+from there. On Windows the program is looked up in `PATH` with `PATHEXT` (so `npx` finds
+`npx.cmd`), and `python3` is the first Python in `PATH`, or `py -3` instead of the Microsoft
+Store alias; see [windows.md](windows.md). Changes to the file apply while the dashboard runs;
+the plugin restarts only if its own settings changed.
 
 Or, once it is a package, by its ID:
 
@@ -164,6 +194,7 @@ demo:                            # a view with made-up data, shown before it is 
 Rules the loader checks:
 - `id` matches the folder name;
 - `version`, `name` and `description` are not empty;
+- `version` holds only letters, digits, dots, dashes and plus (`1.2.0`, `1.0.0-beta.1`);
 - `run:` names a program on PATH, or a path inside the package. A program given as a path
   (`./plugin`, `bin/plugin`) is relative to the folder;
 - `runtime:` is a program name with an optional minimum, `name>=1.2`;
@@ -177,21 +208,31 @@ The dashboard looks for packages in two places, first match wins:
 - `<data home>/dashboard/plugins/<id>/`: `~/.local/share/dashboard/plugins/` by default,
   moved by `XDG_DATA_HOME`.
 
-To install one by hand, copy its folder there. A folder that isn't a valid package is skipped
-with a message; it doesn't stop the others.
+To install one, use `dashboard plugin install` (see [marketplace.md](marketplace.md)), or copy
+its folder there by hand. A folder that isn't a valid package is skipped with a message; it
+doesn't stop the others.
 
 ## Find widgets
 
 ```sh
-dashboard widgets                 # everything: built-ins, bundled plugins, installed packages
+dashboard widgets                 # everything: built-ins, bundled plugins, packages, marketplace
 dashboard widgets pull requests   # every word must appear in the ID, name, description or tags
 dashboard widgets --tag dev
-dashboard widgets jira --json     # full entries, with config schema and demo view
+dashboard widgets jira --json     # {"schemaVersion", "kind": "widgets", "entries": [...]}: full entries, with config schema and demo view
 ```
 
 Search ignores case. `--tag` keeps entries with exactly that tag. Built-in modules are added
 under `modules:` by their ID (or with `builtin: <id>` for a second copy); packages with
 `package: <id>`.
+
+The web editor's "Add component" list shows the same catalog (`GET /api/catalog?q=&tag=`) and
+writes these entries for you.
+
+Marketplace packages that are listed but not installed come from a cached index,
+`<data home>/dashboard/marketplace/index.json` (e.g. `~/.local/share/dashboard/marketplace/`):
+a copy of the last index `dashboard plugin install`, `list` or `update` read. They show as
+`market` in `dashboard widgets` and can't be added until installed. The index format is in
+[marketplace.md](marketplace.md#the-index).
 
 ## The protocol
 
@@ -310,6 +351,11 @@ A widget is a JSON object with a `type`. Optional fields can be left out.
 
 {"type":"bars","label":"Builds","format":"count","bars":[{"label":"api","value":935},{"label":"web","value":120,"status":"warn"}]}
 
+{"type":"pie","label":"Disk","format":"bytes","slices":[{"label":"photos","value":64424509440},
+ {"label":"apps","value":32212254720},{"label":"free","value":10737418240,"status":"warn"}]}
+// shares of the total, clockwise from the top; donut: false draws a full disc
+// color: accent (a color per slice) | heat | cool | sunset; a slice's status wins
+
 {"type":"list","empty_text":"Nothing to review","items":[
   {"title":"Fix login","subtitle":"repo#12 · 3h ago","status":"warn","tags":["draft"],
    "action":{"type":"open_url","url":"https://example.com/12"}}]}
@@ -317,7 +363,9 @@ A widget is a JSON object with a `type`. Optional fields can be left out.
 {"type":"table","columns":[{"key":"name","label":"Name"},{"key":"load","label":"Load"}],
  "rows":[{"cells":{"name":"atlas","load":{"type":"gauge","label":"","percent":12}},"status":"ok",
           "action":{"type":"open_url","url":"https://example.com/atlas"}}]}
-// a cell is text, a number, or a stat/gauge widget
+// a cell is text, a number, or a stat/gauge/pie widget
+// a column's priority (default 0) says which to drop first when the tile is narrow:
+// the lowest goes first, then the rightmost; the first column is always kept
 
 {"type":"log","label":"api.log","lines":[{"text":"started","level":"info","time":"14:02:11"}]}
 
@@ -344,7 +392,7 @@ dashboard schema manifest     # JSON Schema for the manifest
 dashboard schema view         # ... for a view (all widgets)
 dashboard schema initialize-params
 dashboard schema package      # ... for dashboard-plugin.yaml
-dashboard schema catalog-entry  # ... for one entry of `dashboard widgets --json`
+dashboard schema catalog-entry  # ... for one of the entries of `dashboard widgets --json`
 ```
 
 The SDKs' types are generated from these by `node sdk/gen-types.mjs`; a test fails when they
@@ -356,6 +404,4 @@ Rust plugins can use the `dashboard-contract` crate directly.
 - **Push mode:** a plugin sending `view/update` on its own schedule. The host rejects it today.
 - **Running declared commands:** with confirmation in the UI.
 - **Clicks sent back to the plugin.**
-- **Installing packages:** `dashboard plugin install`, from a folder, a URL with a hash, or a
-  reviewed index. Today, copy the folder.
 - **WASM plugins:** sandboxed.

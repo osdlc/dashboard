@@ -1,8 +1,10 @@
 //! Packs tiles into rows on a 12-column grid by size class.
 //!
-//! Every tile gets at least its minimum height. When the rows fit in the
-//! terminal they are stretched to fill it; when they don't, the page is
-//! taller than the terminal and scrolls.
+//! A tile's rows come from its size class alone, never from its content, so
+//! a long view can't push other tiles around: the view is fitted to the tile
+//! instead (see `widgets`). When the rows fit in the terminal they are
+//! stretched to fill it; when they don't, the page is taller than the
+//! terminal and scrolls.
 
 use dashboard_contract::Size;
 use ratatui::layout::{Constraint, Layout, Rect};
@@ -43,15 +45,9 @@ fn columns(size: Size, width: u16) -> u16 {
 }
 
 /// One `Rect` per tile, in order, with y from 0 on a page `width` wide, and
-/// the page height (at least `view_height`). `min_height(i, w)` is the rows
-/// tile `i` needs at width `w`.
-pub fn place(
-    width: u16,
-    view_height: u16,
-    sizes: &[Size],
-    min_height: impl Fn(usize, u16) -> u16,
-) -> (Vec<Rect>, u16) {
-    place_with_tier(width, width, view_height, sizes, min_height)
+/// the page height (at least `view_height`).
+pub fn place(width: u16, view_height: u16, sizes: &[Size]) -> (Vec<Rect>, u16) {
+    place_with_tier(width, width, view_height, sizes)
 }
 
 /// Like `place`, but picks column spans for `tier_width`: the terminal width,
@@ -61,7 +57,6 @@ pub fn place_with_tier(
     tier_width: u16,
     view_height: u16,
     sizes: &[Size],
-    min_height: impl Fn(usize, u16) -> u16,
 ) -> (Vec<Rect>, u16) {
     if sizes.is_empty() {
         return (vec![], view_height);
@@ -78,7 +73,6 @@ pub fn place_with_tier(
         used += w;
     }
 
-    // Horizontal split first: minimum heights depend on width.
     let full = Rect::new(0, 0, width, 1);
     let cols: Vec<Vec<Rect>> = rows
         .iter()
@@ -90,24 +84,12 @@ pub fn place_with_tier(
         })
         .collect();
 
-    // A row is as tall as its tallest tile needs, and at least its size class.
+    // A row is as tall as its tallest size class.
     let units_h: Vec<u16> = rows
         .iter()
         .map(|r| r.iter().map(|(i, _)| units(sizes[*i]).1).max().unwrap_or(1))
         .collect();
-    let mins: Vec<u16> = rows
-        .iter()
-        .zip(&cols)
-        .zip(&units_h)
-        .map(|((row, rects), u)| {
-            row.iter()
-                .zip(rects)
-                .map(|((i, _), r)| min_height(*i, r.width))
-                .max()
-                .unwrap_or(0)
-                .max(u * ROW_UNIT)
-        })
-        .collect();
+    let mins: Vec<u16> = units_h.iter().map(|u| u * ROW_UNIT).collect();
 
     // Spare room goes to rows in proportion to their size class.
     let need: u16 = mins.iter().sum();
@@ -141,6 +123,23 @@ pub fn place_with_tier(
     (out, y.max(view_height))
 }
 
+/// The area one tile of `size` gets on a page `width` wide when it shares a
+/// full row: its column span and its size class's rows. For the site's
+/// previews.
+#[cfg(test)]
+pub fn single(size: Size, width: u16) -> Rect {
+    let span = columns(size, width);
+    let r = Layout::horizontal([
+        Constraint::Ratio(span as u32, COLUMNS as u32),
+        Constraint::Ratio((COLUMNS - span) as u32, COLUMNS as u32),
+    ])
+    .split(Rect::new(0, 0, width, 1))[0];
+    Rect {
+        height: units(size).1 * ROW_UNIT,
+        ..r
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -148,7 +147,7 @@ mod tests {
     #[test]
     fn packs_rows_and_fills_the_view() {
         // large(6) + medium(4) fit one row; wide(8) starts the next.
-        let (r, page) = place(160, 40, &[Size::Large, Size::Medium, Size::Wide], |_, _| 0);
+        let (r, page) = place(160, 40, &[Size::Large, Size::Medium, Size::Wide]);
         assert_eq!(r[0].y, r[1].y);
         assert!(r[2].y > r[0].y);
         // Leftover width is shared, so the first row spans the full width.
@@ -159,25 +158,26 @@ mod tests {
 
     #[test]
     fn narrow_is_one_per_row() {
-        let (r, _) = place(60, 40, &[Size::Small, Size::Small], |_, _| 0);
+        let (r, _) = place(60, 40, &[Size::Small, Size::Small]);
         assert_eq!(r[0].width, 60);
         assert!(r[1].y > r[0].y);
     }
 
     #[test]
-    fn tiles_keep_their_minimum_and_the_page_grows() {
-        // Six tiles in one column with 30 rows: they used to get 5 rows each.
+    fn rows_come_from_size_classes_and_the_page_grows() {
+        // Six tiles, one per row on a narrow terminal with 30 rows: each gets
+        // its size class's rows and the page scrolls.
         let sizes = [
             Size::Large,
             Size::Large,
             Size::Wide,
             Size::Medium,
             Size::Wide,
-            Size::Medium,
+            Size::Small,
         ];
-        let (r, page) = place(60, 30, &sizes, |i, _| if i == 0 { 20 } else { 12 });
-        assert_eq!(r[0].height, 20);
-        assert!(r[1..].iter().all(|t| t.height >= 12));
-        assert!(page > 30, "page scrolls: {page}");
+        let (r, page) = place(60, 30, &sizes);
+        let heights: Vec<u16> = r.iter().map(|t| t.height).collect();
+        assert_eq!(heights, [15, 15, 10, 10, 10, 5]);
+        assert_eq!(page, 65);
     }
 }

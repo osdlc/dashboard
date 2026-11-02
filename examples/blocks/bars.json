@@ -1,0 +1,44 @@
+{
+  "id": "bars",
+  "title": "Bars",
+  "group": "primitives",
+  "default_size": "medium",
+  "description": "Labeled horizontal bars, in the order given. A full bar is the largest value unless `max` sets it. Each bar can carry a status (ok, warn, error) or a tone for its color.",
+  "view": {
+    "status": "warn",
+    "summary": "atlas 1.1k builds",
+    "root": {
+      "type": "bars",
+      "label": "Builds this week",
+      "format": "count",
+      "bars": [
+        {
+          "label": "atlas",
+          "value": 1054
+        },
+        {
+          "label": "ember",
+          "value": 999
+        },
+        {
+          "label": "iris",
+          "value": 829
+        },
+        {
+          "label": "harbor",
+          "value": 815,
+          "status": "warn"
+        },
+        {
+          "label": "fjord",
+          "value": 593
+        },
+        {
+          "label": "quill",
+          "value": 212,
+          "tone": "muted"
+        }
+      ]
+    }
+  }
+}

@@ -16,7 +16,7 @@ use async_trait::async_trait;
 use dashboard_contract::rpc::LogLevel;
 use dashboard_contract::{
     Action, Bar, CatalogEntry, Cell, ColorScale, Column, ListItem, LogLine, Manifest, Meter, Row,
-    SeriesData, SeriesStyle, Size, Status, Thresholds, ValueFormat, View, Widget,
+    SeriesData, SeriesStyle, Size, Slice, Status, Thresholds, ValueFormat, View, Widget,
 };
 use dashboard_host::{Module, now_ms};
 use schemars::JsonSchema;
@@ -42,6 +42,8 @@ enum Show {
     Stats,
     /// Horizontal bars, sorted.
     Leaderboard,
+    /// Shares of a whole as a donut, next to two stats.
+    Pie,
     /// A table with gauges in cells.
     Table,
     /// A list with tags and statuses.
@@ -150,6 +152,7 @@ impl Module for Demo {
             Show::Gauges => self.gauges(t),
             Show::Stats => self.stats(t),
             Show::Leaderboard => self.leaderboard(t),
+            Show::Pie => self.pie(t),
             Show::Table => self.table(t),
             Show::Feed => self.feed(t),
             Show::Note => note(),
@@ -165,7 +168,7 @@ impl Module for Demo {
         let c = &self.config;
         let summary = match c.show {
             Show::Chart => format!("{:?} · {:?} · {:?}", c.style, c.color, c.signal),
-            Show::Mirrored | Show::Meters => {
+            Show::Mirrored | Show::Meters | Show::Pie => {
                 format!("{:?} · {:?} · {:?}", c.show, c.color, c.signal)
             }
             Show::Mixed => format!("{:?} · {:?}", c.show, c.color),
@@ -304,6 +307,7 @@ impl Demo {
     fn meters(&mut self, t: f64) -> Widget {
         let meters = (0..self.count(24))
             .map(|i| Meter {
+                tone: None,
                 label: format!("{}", i + 1),
                 percent: self.signal(self.config.signal, i, t + i as f64 * 0.137),
             })
@@ -392,6 +396,7 @@ impl Demo {
                     _ => None,
                 };
                 Bar {
+                    tone: None,
                     label: (*name).into(),
                     value,
                     status,
@@ -408,6 +413,67 @@ impl Demo {
         }
     }
 
+    /// A disk split by kind of file, sizes drifting slowly; the free space
+    /// turns warn and error as it shrinks.
+    fn pie(&mut self, t: f64) -> Widget {
+        const GIB: f64 = 1024.0 * 1024.0 * 1024.0;
+        let kinds = ["photos", "apps", "code", "music", "mail", "caches", "other"];
+        let n = self.count(5).min(kinds.len());
+        let mut level = 0.0;
+        let mut slices: Vec<Slice> = kinds[..n]
+            .iter()
+            .enumerate()
+            .map(|(i, kind)| {
+                let v = self.signal(self.config.signal, i, t * 0.2);
+                level += v / 100.0 / n as f64;
+                Slice {
+                    tone: None,
+                    label: (*kind).into(),
+                    value: (20.0 + v * 2.0) / (i + 1) as f64,
+                    status: None,
+                }
+            })
+            .collect();
+        // The kinds keep their shares; together they fill 35% to 93% of the disk.
+        let capacity = 500.0 * GIB;
+        let used = capacity * (0.35 + 0.58 * level);
+        let weight: f64 = slices.iter().map(|s| s.value).sum();
+        for s in &mut slices {
+            s.value *= used / weight;
+        }
+        let free = capacity - used;
+        let status = match free / capacity {
+            f if f < 0.1 => Status::Error,
+            f if f < 0.25 => Status::Warn,
+            _ => Status::Ok,
+        };
+        slices.push(Slice {
+            tone: None,
+            label: "free".into(),
+            value: free,
+            status: (status != Status::Ok).then_some(status),
+        });
+        let gib = |v: f64| format!("{:.0}", v / GIB);
+        Widget::Row {
+            children: vec![
+                Widget::Pie {
+                    label: Some(self.config.title.clone().unwrap_or("Disk".into())),
+                    slices,
+                    donut: true,
+                    format: ValueFormat::Bytes,
+                    unit: None,
+                    color: self.config.color,
+                },
+                Widget::Column {
+                    children: vec![
+                        stat("Used", gib(used), "GiB", "of 500".into(), Status::Ok),
+                        stat("Free", gib(free), "GiB", "left".into(), status),
+                    ],
+                },
+            ],
+        }
+    }
+
     fn table(&mut self, t: f64) -> Widget {
         let columns = [
             ("svc", "Service"),
@@ -418,6 +484,7 @@ impl Demo {
         .map(|(key, label)| Column {
             key: key.into(),
             label: label.into(),
+            priority: None,
         })
         .to_vec();
         let regions = ["us-east", "eu-west", "ap-south"];
@@ -486,6 +553,7 @@ impl Demo {
             .map(|i| {
                 let (title, src, status, tags) = events[(i + shift) % events.len()];
                 ListItem {
+                    tone: None,
                     title: format!("{title} · {}", NAMES[(i + shift * 3) % NAMES.len()]),
                     subtitle: Some(format!("{src} · {}s ago", (i * 37 + shift) % 300)),
                     status: Some(status),
@@ -547,6 +615,7 @@ impl Demo {
         let meters = {
             let meters = (0..8)
                 .map(|i| Meter {
+                    tone: None,
                     label: format!("{}", i + 1),
                     percent: self.signal(Signal::Noise, i + 10, t),
                 })
@@ -576,12 +645,14 @@ impl Demo {
 
 pub fn catalog() -> CatalogEntry {
     let mut d = Demo::default();
+    // A color per slice; the default heat scale reads like statuses on a pie.
+    d.config.color = ColorScale::Accent;
     let t = 42.0;
     let demo = View {
         status: Status::Ok,
         summary: "made-up data in every widget style".into(),
         root: Widget::Column {
-            children: vec![d.stats(t), d.gauges(t), d.leaderboard(t)],
+            children: vec![d.stats(t), d.gauges(t), d.pie(t), d.leaderboard(t)],
         },
     };
     CatalogEntry {
@@ -607,6 +678,7 @@ fn note() -> Widget {
 
 fn point(name: &str, v: f64) -> SeriesData {
     SeriesData {
+        tone: None,
         name: name.into(),
         points: vec![(now_ms(), v)],
     }

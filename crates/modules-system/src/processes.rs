@@ -82,6 +82,7 @@ fn table(count: usize, rows: Vec<Row>) -> View {
     .map(|(key, label)| Column {
         key: key.into(),
         label: label.into(),
+        priority: None,
     })
     .to_vec();
     View {

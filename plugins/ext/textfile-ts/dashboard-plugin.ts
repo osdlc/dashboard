@@ -225,7 +225,10 @@ export interface RunCommandAction {
 
 export interface Bar {
   label: string;
+  /** Colors the bar ok, warn or error. */
   status?: Status | null;
+  /** Fill color when `status` is not set. Default: `accent`. */
+  tone?: Tone | null;
   value: number;
 }
 
@@ -234,21 +237,36 @@ export type Cell = string | number | Widget;
 export type ColorScale = "accent" | "heat" | "cool" | "sunset";
 
 export interface Column {
+  /** Names the cell in each row's `cells`. */
   key: string;
+  /** The column heading. */
   label: string;
+  /**
+   * Which columns to keep when a table is too narrow for all of them:
+   * renderers drop the lowest priority first (the rightmost of equal
+   * ones) and always keep the first column. Default 0.
+   */
+  priority?: number | null;
 }
 
 export interface ListItem {
+  /** What clicking the item does, e.g. open a link. */
   action?: Action | null;
+  /** Colors the item's marker ok, warn or error. */
   status?: Status | null;
+  /** A second, quieter line. */
   subtitle?: string | null;
+  /** Short labels shown as chips. */
   tags?: string[];
   title: string;
+  /** Color of the item's marker when `status` is not set. */
+  tone?: Tone | null;
 }
 
 export type LogLevel = "error" | "warn" | "info" | "debug";
 
 export interface LogLine {
+  /** error, warn, info or debug: colors the line. */
   level?: LogLevel | null;
   text: string;
   /** Shown before the text, e.g. "14:02:11". */
@@ -257,30 +275,56 @@ export interface LogLine {
 
 export interface Meter {
   label: string;
+  /** 0-100. */
   percent: number;
+  /** A fixed color for this meter instead of the grid's color scale. */
+  tone?: Tone | null;
 }
 
 export interface Row {
+  /** What clicking the row does, e.g. open a link. */
   action?: Action | null;
-  /** Keyed by `Column::key`. */
+  /** Keyed by the column's `key`. */
   cells: Record<string, Cell>;
+  /** Colors the row's marker ok, warn or error. */
   status?: Status | null;
 }
 
 export interface SeriesData {
+  /** Shown in the legend; also keys the history when the widget has an `id`. */
   name: string;
   /** (unix ms, value) */
   points: [number, number][];
+  /**
+   * This series' color, instead of the widget's `color` (one series) or
+   * the next `series-N` token (several).
+   */
+  tone?: Tone | null;
 }
 
 export type SeriesStyle = "line" | "area" | "bars";
 
+export interface Slice {
+  label: string;
+  /** Colors the slice ok, warn or error. */
+  status?: Status | null;
+  /** Color when `status` is not set. Default: the next `series-N` token. */
+  tone?: Tone | null;
+  /** Zero or more. Shown with the widget's `format` and `unit`. */
+  value: number;
+}
+
 export type Status = "ok" | "warn" | "error" | "unknown";
 
 export interface Thresholds {
+  /** The percent at which the fill turns the error color. */
   error: number;
+  /** The percent at which the fill turns the warn color. */
   warn: number;
 }
+
+/** A token a widget can color something with, e.g. one line of a chart. */
+export type Tone = "accent" | "ok" | "warn" | "error" | "info" | "muted" | "series-1" | "series-2" | "series-3" | "series-4" | "series-5" | "series-6";
 
 export interface UptimeCheck {
   /** e.g. "HTTP 200" or the error. */
@@ -307,6 +351,7 @@ export type Widget =
   | SeriesWidget
   | MeterGridWidget
   | BarsWidget
+  | PieWidget
   | ListWidget
   | TableWidget
   | LogWidget
@@ -314,32 +359,48 @@ export type Widget =
   | RowWidget
   | ColumnWidget;
 
+/** A paragraph of text. */
 export interface TextWidget {
+  /** Read markdown in `text`: `**bold**`, and code between backticks. */
   markdown?: boolean;
   text: string;
   type: "text";
 }
 
+/** One number with a label, e.g. "p99 107 ms". */
 export interface StatWidget {
+  /** A change to show beside the value, e.g. "+2.8%". */
   delta?: string | null;
+  /** Shown above or before the value. */
   label: string;
+  /** Colors the value: ok, warn or error. */
   status?: Status | null;
   type: "stat";
+  /** Shown after the value, smaller, e.g. "ms" or "/s". */
   unit?: string | null;
+  /** Already formatted, e.g. "3451" or "1.2k". */
   value: string;
 }
 
+/** A horizontal meter from 0 to 100%. */
 export interface GaugeWidget {
+  /** A line under the meter, e.g. "1721 of 1858 GiB used". */
   caption?: string | null;
   label: string;
+  /** A tick on the track at this percent, e.g. where usage should be by now. */
   marker?: number | null;
+  /** How full, 0-100. */
   percent: number;
+  /** Percents at which the fill turns warn and error colored. */
   thresholds?: Thresholds | null;
   type: "gauge";
 }
 
+/** Values over time, as a line, a filled area or bars. */
 export interface SeriesWidget {
+  /** The color of a single series. */
   color?: ColorScale;
+  /** How values are written: plain, bytes or count. */
   format?: ValueFormat;
   /** Points the host keeps per series when `id` is set. Default 300. */
   history?: number | null;
@@ -355,15 +416,20 @@ export interface SeriesWidget {
    * e.g. network download and upload.
    */
   mirrored?: boolean;
+  /** One or more lines, each with its points. */
   series: SeriesData[];
+  /** A line, a filled area or one bar per sample. */
   style?: SeriesStyle;
   type: "series";
+  /** Shown after values, e.g. "%" or "/s". */
   unit?: string | null;
+  /** The top of the chart. Default: the largest value. */
   y_max?: number | null;
 }
 
 /** Many small meters in a compact grid, e.g. one per CPU core. */
 export interface MeterGridWidget {
+  /** The meters' color: `accent`, or a scale colored by each meter's value. */
   color?: ColorScale;
   label?: string | null;
   meters: Meter[];
@@ -373,20 +439,47 @@ export interface MeterGridWidget {
 /** Labeled horizontal bars, in the order given. */
 export interface BarsWidget {
   bars: Bar[];
+  /** How values are written: plain, bytes or count. */
   format?: ValueFormat;
   label?: string | null;
   /** Value of a full bar. Default: the largest value. */
   max?: number | null;
   type: "bars";
+  /** Shown after each value. */
   unit?: string | null;
 }
 
+/**
+ * Shares of a whole, as a pie or donut with a legend. Slices keep the
+ * order given; each one's share is its value over the sum of all values.
+ */
+export interface PieWidget {
+  /**
+   * `accent` (the default) gives each slice its own color, the theme's
+   * accent first. The other scales spread the slices along the scale
+   * in order. A slice's `status` overrides its color.
+   */
+  color?: ColorScale;
+  /** A ring with a hole in the middle. Default true; false draws a full disc. */
+  donut?: boolean;
+  /** How values are written in the legend: plain, bytes or count. */
+  format?: ValueFormat;
+  label?: string | null;
+  slices: Slice[];
+  type: "pie";
+  /** Shown after each value in the legend. */
+  unit?: string | null;
+}
+
+/** Items with a title, a subtitle, a status marker and tags. */
 export interface ListWidget {
+  /** Shown when there are no items. */
   empty_text?: string | null;
   items: ListItem[];
   type: "list";
 }
 
+/** Rows and columns. A cell holds text, a number, or a stat, gauge or pie. */
 export interface TableWidget {
   columns: Column[];
   rows: Row[];
@@ -406,11 +499,13 @@ export interface UptimeWidget {
   type: "uptime";
 }
 
+/** Widgets side by side, sharing the width. */
 export interface RowWidget {
   children: Widget[];
   type: "row";
 }
 
+/** Widgets stacked top to bottom. */
 export interface ColumnWidget {
   children: Widget[];
   type: "column";

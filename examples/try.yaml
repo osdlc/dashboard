@@ -38,6 +38,39 @@
 #   cargo run -p dashboard --no-default-features --features bundle-system -- widgets
 # lists only what it has; a config naming a left-out module reports it as an
 # error on its tile. See docs/modules.md.
+#
+# Keyboard (web and TUI; the "keyboard" screen has tiles full of links): arrows
+# or h j k l move between tiles, Enter goes into a tile, up/down pick an item,
+# Enter opens its link, Esc steps back out. `?` lists every key.
+#
+# Signing in: `serve` opens a one-time `?boot=` link. For another tab, or when
+# that link has expired, run `cargo run -p dashboard -- open`.
+#
+# Adding widgets: in the web view press `e` for the screen editor. "Add
+# component" searches the catalog (built-ins, installed packages and the
+# marketplace), shows a demo preview and a settings form, and writes the
+# module and its tile into this file, keeping its comments.
+#
+# Marketplace: build the sample index from plugins/ext, then list it:
+#   scripts/build-marketplace.sh
+#   cargo run -p dashboard -- plugin list --index marketplace/index.json
+# Packages it offers then show (not installed) in the editor's catalog.
+# `plugin install <id> --index marketplace/index.json` installs one into your
+# data folder (~/.local/share/dashboard/plugins); docs/marketplace.md has more.
+#
+# Saved dashboards: examples/try-focus.yaml is a dashboard laid over this file
+# (its screens replace these). Save it and show it with:
+#   cargo run -p dashboard -- import examples/try-focus.yaml
+#   cargo run -p dashboard -- serve --config examples/try.yaml --dashboard try-focus
+# `import` saves it in ~/.config/dashboard/dashboards; set XDG_CONFIG_HOME to
+# keep it somewhere else. The web view has a switcher next to the title.
+# docs/dashboards.md explains the layers, including a project .dashboard.yaml.
+#
+# Ambient mode and the desktop app: open the web page with `?mode=ambient` for
+# large type and rotating screens with nothing to click. The desktop app shows
+# the same page in a window, as the wallpaper or as a screensaver:
+#   cargo run -p dashboard-desktop -- --config examples/try.yaml
+# (docs/desktop.md lists --wallpaper, --screensaver and --ambient).
 
 theme: auto
 
@@ -74,15 +107,15 @@ modules:
     config: { command: git log --oneline -15, name: Recent commits }
   readme:
     builtin: textfile
-    # A built-in module reads paths from where the dashboard was started.
-    config: { path: README.md, lines: 40 }
+    # Relative paths start from this file's folder.
+    config: { path: ../README.md, lines: 40 }
 
   # ---- dev bundle: GitHub is real through gh; the rest need tokens ----
   github-prs: {}
   github-issues: {}
   git:
-    # Repositories under the folder the dashboard was started in.
-    config: { repos: [.] }
+    # This repository: relative paths start from this file's folder.
+    config: { repos: [..] }
   jira:
     demo: true            # real: set $JIRA_API_TOKEN and config { url, email }
   linear:
@@ -187,22 +220,22 @@ modules:
   # The task and calendar modules below read the sample files in
   # crates/modules-personal/testdata. Point them at your own files.
   todo:
-    config: { path: crates/modules-personal/testdata/todo/todo.md }
+    config: { path: ../crates/modules-personal/testdata/todo/todo.md }
   calendar:
-    config: { path: crates/modules-personal/testdata/calendar/team.ics, days: 2 }
+    config: { path: ../crates/modules-personal/testdata/calendar/team.ics, days: 2 }
   org-agenda:
     config:
-      paths: [crates/modules-personal/testdata/org]
+      paths: [../crates/modules-personal/testdata/org]
       days: 14
       undated: true
   markdown-tasks:
-    config: { paths: [crates/modules-personal/testdata/markdown] }
+    config: { paths: [../crates/modules-personal/testdata/markdown] }
   todo-txt:
-    config: { path: crates/modules-personal/testdata/todo-txt/todo.txt }
+    config: { path: ../crates/modules-personal/testdata/todo-txt/todo.txt }
   taskwarrior:
     demo: true            # real: install Taskwarrior (`task`)
   sdlc:
-    config: { path: crates/modules-personal/testdata/sdlc, planning: true }
+    config: { path: ../crates/modules-personal/testdata/sdlc, planning: true }
   # Task services that need a token: plugin packages (untested live).
   asana:
     package: asana
@@ -302,7 +335,7 @@ modules:
     config: { zones: [local, UTC, Asia/Kolkata], seconds: true }
   battery-native:
     builtin: battery
-    config: { sample: crates/modules-system/testdata/battery/pmset-discharging.txt }
+    config: { sample: ../crates/modules-system/testdata/battery/pmset-discharging.txt }
   battery-ts:
     plugin: [node, ../plugins/ext/battery-ts/main.ts]
     config: { sample: ../crates/modules-system/testdata/battery/pmset-discharging.txt }
@@ -312,7 +345,7 @@ modules:
   # How the benchmark is run.
   bench-report:
     builtin: textfile
-    config: { path: bench/README.md, lines: 120 }
+    config: { path: ../bench/README.md, lines: 120 }
 
   # ---- demo mode: the same modules shown with `demo: true` ----
   cpu-demo:
@@ -330,6 +363,16 @@ modules:
   docker-demo:
     builtin: docker
     demo: true
+  # ---- keyboard navigation: tiles whose items are links ----
+  hn-keys:
+    builtin: hackernews
+    config: { limit: 15 }
+  feeds-keys:
+    builtin: feedreader
+    config: { feeds: [https://this-week-in-rust.org/rss.xml] }
+  prs-keys:
+    builtin: github-prs
+    demo: true            # the real one is on the dev screen (gh CLI)
 
 # Sizes on the 12-column grid: small 3x1, medium 4x2, large 6x3, wide 8x2, tall 4x4.
 screens:
@@ -401,6 +444,12 @@ screens:
       - { module: gemini, size: medium }
       - { module: opencode, size: medium }
       - { module: pi, size: medium }
+  - name: keyboard
+    tiles:
+      - { module: hn-keys, size: tall }
+      - { module: feeds-keys, size: tall }
+      - { module: prs-keys, size: medium }
+      - { module: uptime, size: medium }
   - name: plugins
     tiles:
       - { module: git-repos, size: wide }

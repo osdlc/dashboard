@@ -115,6 +115,7 @@ pub(crate) fn tasks_view(tasks: &[Task], today: Date, limit: usize) -> View {
                 None
             };
             ListItem {
+                tone: None,
                 title: t.title.clone(),
                 subtitle: (!sub.is_empty()).then(|| sub.join(" · ")),
                 status,

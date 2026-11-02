@@ -45,6 +45,7 @@ enum Format {
 #[serde(default, deny_unknown_fields)]
 struct Config {
     /// The todo file. `~/` is expanded.
+    #[schemars(extend("x-path" = true))]
     path: Option<String>,
     format: Format,
     /// List finished tasks too, after the open ones.
@@ -288,6 +289,7 @@ fn view(tasks: &[Task], today: Date, name: &str, show_done: bool, limit: usize) 
                 _ => None,
             };
             ListItem {
+                tone: None,
                 title: t.title.clone(),
                 subtitle: t.due.filter(|_| !t.done).map(|d| due_text(d, today)),
                 status,

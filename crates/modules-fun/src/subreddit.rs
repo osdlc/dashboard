@@ -71,6 +71,7 @@ struct Config {
     /// Read this file instead of calling Reddit: a saved
     /// `/r/<name>/<sort>.json` reply, or a saved `/r/<name>/<sort>/.rss` feed
     /// if the name ends in .rss or .xml. For tests and demos.
+    #[schemars(extend("x-path" = true))]
     sample: Option<String>,
 }
 
@@ -294,6 +295,7 @@ fn post(p: &Post, now: i64) -> ListItem {
         tags.push("nsfw".into());
     }
     ListItem {
+        tone: None,
         title: p.title.clone(),
         subtitle: Some(sub.join(" · ")),
         status: None,
@@ -322,7 +324,7 @@ fn view(
         .children
         .iter()
         .map(|c| &c.data)
-        .filter(|p| !(hide_stickied && p.stickied) && !p.title.is_empty())
+        .filter(|p| !(p.title.is_empty() || hide_stickied && p.stickied))
         .take(limit)
         .map(|p| post(p, now))
         .collect();

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Widget } from '../contract'
 import { scaleColor } from '../scale'
+import { toneColor } from '../colors'
 
 type Grid = Extract<Widget, { type: 'meter_grid' }>
 defineProps<{ widget: Grid }>()
@@ -17,7 +18,7 @@ defineProps<{ widget: Grid }>()
             class="m-fill"
             :style="{
               width: Math.min(100, Math.max(0, m.percent)) + '%',
-              background: scaleColor(widget.color, m.percent / 100),
+              background: m.tone ? toneColor(m.tone) : scaleColor(widget.color, m.percent / 100),
             }"
           />
         </span>

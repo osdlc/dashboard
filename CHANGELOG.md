@@ -4,6 +4,82 @@ The dashboard is pre-1.0: the config format, the module contract and the CLI can
 between minor versions. 0.4.0 is the first public release. The earlier versions were not
 released on their own; they record the stages the project was built in.
 
+## 0.8.0
+
+- **Layout that fits the tile.** A tile's size sets its rows in the TUI and its height in the web
+  view, and the view is fitted to it. Text is cut with "…" at the edge (wide characters count as
+  two cells). Tables drop columns by an optional `priority` when they're too narrow. A list that
+  would only show "+N more" is left out, and its heading gives its room to the section.
+- **Pie widget:** slices with label, value and status; pie or donut, with a legend. In the TUI and
+  the web view, and inline in table cells.
+- **Color themes:** one token set in the contract, used by both the TUI and the web view. Widgets
+  take a `tone` for a fixed color.
+- **Building blocks:** an example view for every widget type, and some that combine them, checked
+  by a test.
+- **`http` built-in:** polls a URL and shows a view, picked JSON values (JSON Pointer) or text.
+  Sends `If-None-Match` and reuses the last view on a 304. Tokens come from an env var or a
+  command, never from the config file.
+- **`file` built-in:** the same for a local file. Watches the file by default and falls back to
+  polling when watching isn't available.
+- **Push modules can report errors;** the tile keeps its last good view, marked stale.
+- **A hands-on tutorial** (`docs/tutorial.md`), from the demo to a dashboard and a widget of your
+  own.
+- **CLI:** `dashboard --version`; `--help` lists every exit code; config errors name the file the
+  mistake is in; built-in module paths are relative to the config file that set them.
+- **Fixes:**
+  - a tile that has never loaded shows its error, not "stale";
+  - a column inside a column gets the rows its children need;
+  - plugin install and remove say "cancelled" when the answer is no.
+
+## 0.7.0
+
+- **Desktop app** (`apps/desktop`, Tauri 2): window, wallpaper and screensaver modes and a tray
+  icon. On macOS the screensaver window sits above the menu bar and Dock. There is also an
+  experimental macOS `.saver`.
+- **Ambient mode** in the web view (`?mode=ambient`): no header or editor, large type, every
+  screen rotating, nothing to click.
+- **The config runtime moved into its own crate** (`dashboard-runtime`), shared by the CLI and the
+  desktop app.
+- **Processes and signals:**
+  - plugins and the codex app-server run in their own process group on Unix, and stopping one
+    stops the whole group;
+  - `token_command` gets 30 s and is killed if it hangs;
+  - stop cleanly on SIGHUP, and on signals during start-up.
+- **Modules start at the same time** on start and reload.
+- **Fixes:**
+  - disk rates count each device once;
+  - network totals leave out VPN tunnels and container bridges;
+  - a stopped tile's last view is sent once more, marked stale;
+  - an empty `modules:` or `screens:` in a config layer changes nothing;
+  - Todoist due times in a fixed time zone show in local time.
+
+## 0.6.0
+
+- **Catalog in the web editor:** the add list is a searchable catalog (built-ins, installed
+  packages and a cached marketplace index) with tag filters. Picking an entry shows its demo view
+  and the settings it needs.
+- **Keyboard focus** on tiles and their items in the TUI and the web view; Enter opens links.
+- **Marketplace, local first:** `dashboard plugin install`, `list`, `update`, `remove` and `pack`.
+- **Saved dashboards and config layers:** `--dashboard`, `dashboards list`, `import`, `export`,
+  and a project `.dashboard.yaml`. A project file must be trusted with `dashboard trust` before it
+  is used. `trust` and `import` list the programs a config would run.
+- **Web dashboard switcher,** and config layers shown in settings.
+- **CLI conventions:**
+  - fixed exit codes (2 usage, 22 missing tool, 23–25 service errors);
+  - a single `dashboard: message` error line with a hint;
+  - `--json` documents for every command.
+- **Safer config writes:**
+  - writes from the web view and the TUI are compare-and-swap, so a change based on an older file
+    is refused;
+  - the trust list and the serve record are written atomically.
+- **Web sign-in:** a one-time boot token in the opened URL is traded for a session token. The
+  server checks the Host header as well as the Origin.
+- **Windows support:**
+  - plugin programs are resolved through PATHEXT, `.cmd` shims and `py -3`;
+  - process trees end with job objects;
+  - cmdrunner and codex work on Windows;
+  - `docs/windows.md` covers what differs.
+
 ## 0.5.0
 
 A large set of widgets, most of them built in and grouped in feature-gated bundles.

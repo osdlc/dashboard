@@ -13,7 +13,7 @@ Built-in modules are grouped into bundles, one crate per bundle:
 
 | Bundle | Crate | Modules |
 |---|---|---|
-| system | `crates/modules-system` | cpu, memory, gpu, network, disk, processes, log, uptime, textfile, battery, cmdrunner, security |
+| system | `crates/modules-system` | cpu, memory, gpu, network, disk, processes, log, uptime, textfile, battery, cmdrunner, security, http, file |
 | dev | `crates/modules-dev` | github-prs, github-issues, jira, linear, forgejo, git |
 | fun | `crates/modules-fun` | demo, clock, hackernews, feedreader, subreddit, devto, mempool, crypto, scores |
 | agents | `crates/modules-agents` | codex, copilot, cursor, antigravity, gemini, opencode, pi |
@@ -63,9 +63,11 @@ Binary size, `--profile small` on macOS arm64:
 
 | Build | Size |
 |---|---|
-| every bundle (default) | 6.2 MB (6,204,048 bytes) |
-| `bundle-system` only | 3.5 MB (3,476,208 bytes) |
-| no bundles | 3.3 MB (3,322,592 bytes) |
+| every bundle (default) | 7.6 MB (7,562,432 bytes) |
+| `bundle-system` only | 3.5 MB (3,542,688 bytes) |
+| no bundles | 3.3 MB (3,339,184 bytes) |
+
+Each bundle alone, and the same builds for Windows: [windows.md](windows.md#size).
 
 Most of the gap between "every bundle" and "system only" is reqwest and its TLS stack, which
 only the web-API modules (jira, linear, forgejo, copilot, cursor, antigravity, hackernews,
@@ -142,3 +144,8 @@ in `bundles()` in `crates/modules/src/lib.rs`.
 
 Tokens never go in the config file or the code: read them through `token_env` /
 `token_command` (see `Secret` in `crates/modules-common/src/secret.rs`).
+
+A setting that is a file or folder path gets `#[schemars(extend("x-path" = true))]` on its field
+(a string or a list of strings). Before the module starts, the runtime makes relative paths in it
+start from the folder of the config file that set them, so the module only expands `~/` with
+`expand_home`. `path_settings_are_marked` in `crates/modules/src/lib.rs` checks the usual names.
