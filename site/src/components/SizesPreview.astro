@@ -1,0 +1,474 @@
+---
+// A tile at every size, in the web view and the terminal UI: the "Sizes"
+// section of widget and building block pages. The server draws every view and
+// size, the web ones as pictures; with scripts, the web view is the web app's
+// own demo page (public/demo-app/) in a frame the reader resizes, and a picker
+// switches its color theme.
+import { COLOR_THEMES } from '../lib/color-themes'
+import { SIZES, type Shot, type Size } from '../lib/registry'
+import type { TileCapture } from '../lib/term-tile'
+import TermTile from './TermTile.astro'
+
+interface Props {
+  /** The tile's name, for picture descriptions. */
+  name: string
+  defaultSize: Size
+  /** The demo app's page for this tile: `demo-app/index.html?mode=demo&fill&catalog=...&id=...`, from the site's base. */
+  liveSrc: string
+  /** The web pictures, in each theme. */
+  shot: (theme: string, size: Size) => Shot | null
+  shotThemes: string[]
+  /** The terminal captures, in each theme. */
+  tui: { theme: string; capture: TileCapture }[]
+  /** Added to the picture descriptions, e.g. the view's summary. */
+  summary?: string | null
+  /** What the tile shows, for the note under it: "demo view", "example view". */
+  what?: string
+}
+const { name, defaultSize, liveSrc, shot, shotThemes, tui, summary, what = 'demo view' } = Astro.props
+
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/')
+const tuiWidth = tui[0]?.capture.width ?? 120
+const colsText = SIZES.map((s) => {
+  const c = tui[0]?.capture.sizes[s]
+  return c ? `${s} ${c.cols}×${c.rows}` : null
+})
+  .filter(Boolean)
+  .join(', ')
+/** A size's preset for the live web frame: the tile's size in its picture. */
+const preset = (s: Size) => (shotThemes[0] ? shot(shotThemes[0], s) : null)
+const VIEWS = [
+  { id: 'web', name: 'Web' },
+  { id: 'terminal', name: 'Terminal' },
+]
+---
+
+<section class="sizes" aria-labelledby="sizes-title" data-sizes data-default={defaultSize} data-name={name}>
+  <div class="sizes-head">
+    <h2 id="sizes-title">Sizes</h2>
+    <div class="switches" data-switches hidden>
+      <div class="switch" role="group" aria-label="View">
+        {
+          VIEWS.map((v) => (
+            <button type="button" data-view={v.id} aria-pressed={v.id === 'web' ? 'true' : 'false'}>
+              {v.name}
+            </button>
+          ))
+        }
+      </div>
+      <div class="switch" role="group" aria-label="Tile size">
+        {
+          SIZES.map((s) => (
+            <button
+              type="button"
+              data-size={s}
+              data-w={preset(s)?.width}
+              data-h={preset(s)?.height}
+              aria-pressed={s === defaultSize ? 'true' : 'false'}
+              title={s === defaultSize ? 'The default size' : undefined}
+            >
+              {s}
+              {s === defaultSize && <span class="dflt" aria-hidden="true">*</span>}
+            </button>
+          ))
+        }
+      </div>
+      <label class="colors" data-colors-box>
+        <span>colors</span>
+        <select data-colors title="The web view's color theme">
+          {COLOR_THEMES.map((c) => <option value={c}>{c}</option>)}
+        </select>
+      </label>
+    </div>
+  </div>
+  <figure class="window demo">
+    <div class="window-bar">
+      <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="title" data-caption aria-live="polite">web view · {defaultSize}</span>
+      <span class="spacer"></span>
+    </div>
+    <div class="stage">
+      {
+        SIZES.map((size) => {
+          const pics = shotThemes.map((theme) => ({ theme, pic: shot(theme, size) })).filter((p) => p.pic)
+          return (
+            <div class="panel" data-view="web" data-size={size} data-on={size === defaultSize ? '' : undefined}>
+              {pics.length ? (
+                pics.map(({ theme, pic }) => (
+                  <img
+                    src={base + pic!.path}
+                    width={pic!.width}
+                    height={pic!.height}
+                    loading="lazy"
+                    data-shows-theme={theme}
+                    alt={`The ${name} tile in the web view at ${size} size, showing its ${what}${summary ? `: ${summary}` : ''}.`}
+                  />
+                ))
+              ) : (
+                <p class="none">No picture yet.</p>
+              )}
+            </div>
+          )
+        })
+      }
+      <div class="panel live" data-view="web" data-live hidden>
+        <div class="frame" data-frame data-src={base + liveSrc}>
+          <button
+            type="button"
+            class="grip"
+            data-grip
+            aria-label="Resize the tile: drag, or use the arrow keys (Shift for bigger steps)"
+            title="Drag to resize"></button>
+        </div>
+      </div>
+      {
+        SIZES.map((size) => (
+          <div class="panel" data-view="terminal" data-size={size}>
+            {tui.length ? (
+              tui
+                .filter((t) => t.capture.sizes[size])
+                .map((t) => (
+                  <TermTile
+                    capture={t.capture.sizes[size]!}
+                    styles={t.capture.styles}
+                    theme={t.theme}
+                    label={`The ${name} tile in the terminal UI at ${size} size (${t.capture.sizes[size]!.cols}×${t.capture.sizes[size]!.rows} cells), showing its ${what}.`}
+                  />
+                ))
+            ) : (
+              <p class="none">No terminal capture yet.</p>
+            )}
+          </div>
+        ))
+      }
+    </div>
+  </figure>
+  <p class="hint">
+    The {what} at each tile size (<span class="dflt">*</span> marks the default). Web: the web view itself, running on
+    the {what}'s data; the sizes are a tile's width on its 12-column grid, 1200px wide, and the corner handle resizes it
+    to any size. <span data-colors-note hidden>Colors switches the web view between the built-in color themes; the
+    terminal pictures keep the terminal's own colors.</span> Terminal: drawn by the terminal UI for a {tuiWidth}-column
+    terminal, at the least height the size gets ({colsText}); a real screen stretches rows to fill the terminal.
+  </p>
+</section>
+
+<script>
+  // Without scripts the switches stay hidden and the default picture shows.
+  const root = document.documentElement
+  const dark = matchMedia('(prefers-color-scheme: dark)')
+  const siteTheme = () => root.dataset.theme ?? (dark.matches ? 'dark' : 'light')
+  const COLORS_KEY = 'dashboard-site.colors'
+  const savedColors = () => {
+    try {
+      return localStorage.getItem(COLORS_KEY) ?? 'default'
+    } catch {
+      return 'default'
+    }
+  }
+
+  for (const box of document.querySelectorAll<HTMLElement>('[data-sizes]')) {
+    const state = { view: 'web', size: box.dataset.default!, custom: false }
+    const caption = box.querySelector<HTMLElement>('[data-caption]')!
+    const stage = box.querySelector<HTMLElement>('.stage')!
+    const live = box.querySelector<HTMLElement>('[data-live]')!
+    const frame = box.querySelector<HTMLElement>('[data-frame]')!
+    const grip = box.querySelector<HTMLButtonElement>('[data-grip]')!
+    const colors = box.querySelector<HTMLSelectElement>('[data-colors]')!
+    const colorsBox = box.querySelector<HTMLElement>('[data-colors-box]')!
+    const sizeButtons = [...box.querySelectorAll<HTMLButtonElement>('button[data-size]')]
+    const presets = new Map(sizeButtons.map((b) => [b.dataset.size!, [Number(b.dataset.w), Number(b.dataset.h)]]))
+
+    // A theme saved by an older page that this one doesn't list falls back to the default.
+    colors.value = savedColors()
+    if (!colors.value) colors.value = 'default'
+
+    // The live frame replaces the pictures (and so never loads them).
+    const iframe = document.createElement('iframe')
+    iframe.src = `${frame.dataset.src}&theme=${siteTheme()}&color_theme=${encodeURIComponent(colors.value)}`
+    iframe.title = `Live demo of the ${box.dataset.name ?? ''} tile in the web view`
+    frame.prepend(iframe)
+    for (const p of box.querySelectorAll('.panel[data-view="web"]:not([data-live])')) p.remove()
+    live.hidden = false
+    box.querySelector<HTMLElement>('[data-colors-note]')!.hidden = false
+    const tallest = Math.max(...[...presets.values()].map(([, h]) => h || 0))
+    if (tallest) stage.style.minHeight = `${tallest + 64}px`
+
+    const send = () =>
+      iframe.contentWindow?.postMessage({ theme: siteTheme(), color_theme: colors.value }, location.origin)
+    new MutationObserver(send).observe(root, { attributes: true, attributeFilter: ['data-theme'] })
+    dark.addEventListener('change', send)
+    colors.addEventListener('change', () => {
+      send()
+      try {
+        localStorage.setItem(COLORS_KEY, colors.value)
+      } catch {}
+    })
+
+    const room = () => stage.clientWidth - 32
+    const size = { w: 0, h: 0 }
+    const resize = (w: number, h: number) => {
+      size.w = Math.round(Math.max(120, Math.min(w, room())))
+      size.h = Math.round(Math.max(80, Math.min(h, 1600)))
+      frame.style.width = `${size.w}px`
+      frame.style.height = `${size.h}px`
+    }
+    const snap = () => {
+      const [w, h] = presets.get(state.size) ?? [0, 0]
+      if (w && h) resize(w, h)
+    }
+
+    const show = () => {
+      for (const b of box.querySelectorAll<HTMLButtonElement>('button[data-view]'))
+        b.setAttribute('aria-pressed', String(b.dataset.view === state.view))
+      const custom = state.view === 'web' && state.custom
+      for (const b of sizeButtons) b.setAttribute('aria-pressed', String(!custom && b.dataset.size === state.size))
+      for (const p of box.querySelectorAll<HTMLElement>('.panel'))
+        p.toggleAttribute(
+          'data-on',
+          p.dataset.view === state.view && (p.hasAttribute('data-live') || p.dataset.size === state.size),
+        )
+      // Color themes are the web view's; the terminal pictures have the terminal's colors.
+      colorsBox.hidden = state.view !== 'web'
+      caption.textContent =
+        state.view === 'web'
+          ? `web view · ${custom ? 'custom' : state.size} · ${size.w} × ${size.h}`
+          : `terminal UI · ${state.size}`
+    }
+
+    box.addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button')
+      if (!b) return
+      if (b.dataset.view) state.view = b.dataset.view
+      else if (b.dataset.size) {
+        state.size = b.dataset.size
+        state.custom = false
+        snap()
+      } else return
+      show()
+    })
+
+    // Dragging the corner: the frame is centered, so it grows twice the
+    // pointer's sideways move to keep the corner under the pointer.
+    let start: { x: number; y: number; w: number; h: number } | null = null
+    grip.addEventListener('pointerdown', (e) => {
+      start = { x: e.clientX, y: e.clientY, w: size.w, h: size.h }
+      grip.setPointerCapture(e.pointerId)
+      frame.dataset.dragging = ''
+      e.preventDefault()
+    })
+    grip.addEventListener('pointermove', (e) => {
+      if (!start) return
+      resize(start.w + 2 * (e.clientX - start.x), start.h + (e.clientY - start.y))
+      state.custom = true
+      show()
+    })
+    const stop = () => {
+      start = null
+      delete frame.dataset.dragging
+    }
+    grip.addEventListener('pointerup', stop)
+    grip.addEventListener('pointercancel', stop)
+    grip.addEventListener('keydown', (e) => {
+      const step = e.shiftKey ? 50 : 10
+      const d = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key]
+      if (!d) return
+      e.preventDefault()
+      resize(size.w + d[0], size.h + d[1])
+      state.custom = true
+      show()
+    })
+
+    snap()
+    show()
+    box.querySelector<HTMLElement>('[data-switches]')!.hidden = false
+  }
+</script>
+
+<style>
+  .sizes {
+    margin-top: 40px;
+  }
+
+  .sizes-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 24px;
+    margin-bottom: 14px;
+  }
+
+  h2 {
+    font-size: 20px;
+    margin: 0;
+  }
+
+  .switches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+  }
+
+  .switches[hidden],
+  .colors[hidden] {
+    display: none;
+  }
+
+  .switch {
+    display: inline-flex;
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .switch button {
+    padding: 5px 11px;
+    border: 0;
+    border-left: 1px solid var(--line);
+    background: var(--bg-raised);
+    color: var(--ink-2);
+    font: 12.5px/1.4 var(--font-code);
+    cursor: pointer;
+  }
+
+  .switch button:first-child {
+    border-left: 0;
+  }
+
+  .switch button:hover {
+    color: var(--ink);
+  }
+
+  .switch button[aria-pressed='true'] {
+    background: var(--ink);
+    color: var(--bg);
+  }
+
+  .switch button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+
+  .colors {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font: 12.5px/1.4 var(--font-code);
+    color: var(--muted);
+  }
+
+  .colors select {
+    padding: 4px 8px;
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    background: var(--bg-raised);
+    color: var(--ink);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .colors select:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  .dflt {
+    margin-left: 1px;
+    color: var(--accent);
+  }
+
+  .demo {
+    margin: 0;
+  }
+
+  /* Every view and size sits in the same cell, the hidden ones invisible, so
+     the stage is as tall as the tallest and switching doesn't move the page. */
+  .stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    padding: 28px 16px;
+    background: radial-gradient(var(--dots) 1px, transparent 1px) 0 0 / 14px 14px, var(--bg-sunk);
+    container-type: inline-size;
+  }
+
+  .panel {
+    grid-area: 1 / 1;
+    justify-self: center;
+    align-self: start;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .panel:not([data-on]) {
+    visibility: hidden;
+  }
+
+  .live[hidden] {
+    display: none;
+  }
+
+  .frame {
+    position: relative;
+    max-width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 0 0 1px var(--line);
+  }
+
+  .frame :global(iframe) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+  }
+
+  /* The frame would swallow pointer moves while dragging. */
+  .frame[data-dragging] :global(iframe) {
+    pointer-events: none;
+  }
+
+  .grip {
+    position: absolute;
+    right: -9px;
+    bottom: -9px;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 1px solid var(--line-strong);
+    border-radius: 6px;
+    background:
+      linear-gradient(135deg, transparent 45%, var(--muted) 45% 52%, transparent 52% 62%, var(--muted) 62% 69%, transparent 69%),
+      var(--bg-raised);
+    cursor: nwse-resize;
+    touch-action: none;
+  }
+
+  .grip:hover,
+  .frame[data-dragging] .grip {
+    border-color: var(--accent);
+  }
+
+  .grip:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .stage img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+
+  .none {
+    margin: 0;
+    color: var(--muted);
+  }
+
+  .hint {
+    margin: 14px 0 0;
+    font-size: 14.5px;
+    color: var(--muted);
+  }
+</style>

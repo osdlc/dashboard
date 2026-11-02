@@ -1,0 +1,238 @@
+---
+// The tutorial. Its text is docs/tutorial.md, so the repository and the site
+// can't drift apart: edit the markdown file, not this page.
+import { compiledContent, getHeadings } from '../../../docs/tutorial.md'
+import Base from '../layouts/Base.astro'
+import SiteFooter from '../components/SiteFooter.astro'
+import SiteHeader from '../components/SiteHeader.astro'
+import { codeWindows } from '../lib/tutorial'
+
+const steps = getHeadings().filter((h) => h.depth === 2)
+const html = codeWindows(await compiledContent())
+---
+
+<Base
+  title="Tutorial: build your own dashboard · dashboard"
+  description="From nothing to a dashboard of your own: run the demo, write a config, add widgets, connect GitHub and token APIs, write a widget in TypeScript, and keep several dashboards."
+>
+  <SiteHeader here="tutorial" />
+
+  <main class="wrap page">
+    <div class="layout">
+      <nav class="toc" aria-label="Steps">
+        <p class="toc-head">Steps</p>
+        <ol>
+          {
+            steps.map((h) => (
+              <li>
+                <a href={`#${h.slug}`}>{h.text.replace(/^\d+\.\s*/, '')}</a>
+              </li>
+            ))
+          }
+        </ol>
+      </nav>
+      <article class="doc" set:html={html} />
+    </div>
+  </main>
+
+  <SiteFooter />
+
+  <script>
+    import { wireCopyButtons } from '../lib/copy'
+    wireCopyButtons()
+  </script>
+</Base>
+
+<style>
+  .page {
+    padding-top: 40px;
+    padding-bottom: 96px;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+  }
+
+  @media (min-width: 1040px) {
+    .layout {
+      grid-template-columns: 220px minmax(0, 1fr);
+      gap: 56px;
+      align-items: start;
+    }
+    .toc {
+      position: sticky;
+      top: 88px;
+    }
+  }
+
+  /* ---- table of contents ---- */
+
+  .toc-head {
+    margin: 0 0 10px;
+    font: 12.5px var(--font-code);
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
+    color: var(--muted);
+  }
+
+  .toc ol {
+    margin: 0 0 0 9px;
+    padding: 0;
+    list-style: none;
+    counter-reset: step;
+    border-left: 1px solid var(--line-strong);
+  }
+
+  .toc li {
+    counter-increment: step;
+    position: relative;
+    padding: 4px 0 4px 18px;
+    font-size: 14.5px;
+    line-height: 1.4;
+  }
+
+  .toc li::before {
+    content: counter(step);
+    position: absolute;
+    left: -9px;
+    top: 5px;
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 1px solid var(--line-strong);
+    font: 10px/15px var(--font-code);
+    text-align: center;
+    color: var(--accent);
+  }
+
+  .toc a {
+    color: var(--ink-2);
+    text-decoration: none;
+  }
+
+  .toc a:hover {
+    color: var(--ink);
+    text-decoration: underline;
+  }
+
+  /* ---- the markdown ---- */
+
+  .doc {
+    max-width: 78ch;
+    min-width: 0;
+  }
+
+  .doc :global(h1) {
+    font-size: clamp(30px, 4.2vw, 46px);
+    margin-bottom: 22px;
+  }
+
+  .doc :global(h2) {
+    font-size: clamp(22px, 2.6vw, 28px);
+    max-width: none;
+    margin: 72px 0 18px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+
+  .doc :global(h3) {
+    font-size: 17px;
+    margin: 40px 0 12px;
+  }
+
+  .doc :global(p),
+  .doc :global(li) {
+    color: var(--ink-2);
+  }
+
+  .doc :global(p) {
+    margin: 0 0 16px;
+  }
+
+  .doc :global(ul),
+  .doc :global(ol) {
+    margin: 0 0 18px;
+    padding-left: 22px;
+  }
+
+  .doc :global(li) {
+    margin: 5px 0;
+  }
+
+  .doc :global(li::marker) {
+    color: var(--accent);
+    font-family: var(--font-code);
+  }
+
+  .doc :global(:not(pre) > code) {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .doc :global(strong) {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* Code windows, from codeWindows() in lib/tutorial.ts. */
+  .doc :global(.code-window) {
+    margin: 0 0 20px;
+    box-shadow: none;
+  }
+
+  .doc :global(.code-window .title) {
+    text-align: left;
+  }
+
+  .doc :global(.code-window pre) {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .doc :global(.code-window pre[data-language='text']) {
+    color: #a8a495;
+  }
+
+  .doc :global(.copy) {
+    flex: none;
+    height: 22px;
+    padding: 0 8px;
+    border: 1px solid var(--term-line);
+    border-radius: 5px;
+    background: none;
+    color: var(--term-dim);
+    font: 11.5px var(--font-code);
+    cursor: pointer;
+  }
+
+  .doc :global(.copy:hover) {
+    color: var(--term-ink);
+  }
+
+  .doc :global(table) {
+    width: 100%;
+    margin: 0 0 20px;
+    border-collapse: collapse;
+    font-size: 14.5px;
+    border: 1px solid var(--line);
+  }
+
+  .doc :global(th),
+  .doc :global(td) {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    vertical-align: top;
+    color: var(--ink-2);
+  }
+
+  .doc :global(thead th) {
+    background: var(--bg-sunk);
+    font: 500 12px var(--font-code);
+    color: var(--muted);
+    text-transform: lowercase;
+  }
+</style>

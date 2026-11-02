@@ -1,0 +1,73 @@
+{"width": 120, "styles": [["#197e44","",""],["","","b"],["","",""],["#6b7280","",""]],
+"sizes": {
+"small": {"cols": 30, "rows": 5, "lines": [
+[[0,"┌ forgejo ───────────────────┐"]],
+[[0,"│"],[1,"Review requested            "],[0,"│"]],
+[[0,"│"],[2,"● Sync folders in the backg…"],[0,"│"]],
+[[0,"│  "],[3,"acme/notes#57 · updated 3…"],[0,"│"]],
+[[0,"└────────────────────────────┘"]]
+]},
+"medium": {"cols": 40, "rows": 10, "lines": [
+[[0,"┌ forgejo ─────────────────────────────┐"]],
+[[0,"│"],[1,"Review requested                      "],[0,"│"]],
+[[0,"│"],[2,"● Sync folders in the background      "],[0,"│"]],
+[[0,"│  "],[3,"acme/notes#57 · updated 3h ago      "],[0,"│"]],
+[[0,"│"],[1,"My pull requests                      "],[0,"│"]],
+[[0,"│"],[2,"● Export notes as Markdown "],[3,"[feature]  "],[0,"│"]],
+[[0,"│  "],[3,"acme/notes#55 · updated 1d ago      "],[0,"│"]],
+[[0,"│"],[2,"● Switch the shell prompt to starship "],[0,"│"]],
+[[0,"│  "],[3,"me/dotfiles#12 · updated 4d ago     "],[0,"│"]],
+[[0,"└──────────────────────────────────────┘"]]
+]},
+"large": {"cols": 60, "rows": 15, "lines": [
+[[0,"┌ forgejo ─────────────────────────────────────────────────┐"]],
+[[0,"│"],[1,"Review requested                                          "],[0,"│"]],
+[[0,"│"],[2,"● Sync folders in the background                          "],[0,"│"]],
+[[0,"│  "],[3,"acme/notes#57 · updated 3h ago                          "],[0,"│"]],
+[[0,"│"],[1,"My pull requests                                          "],[0,"│"]],
+[[0,"│"],[2,"● Export notes as Markdown "],[3,"[feature]                      "],[0,"│"]],
+[[0,"│  "],[3,"acme/notes#55 · updated 1d ago                          "],[0,"│"]],
+[[0,"│"],[2,"● Switch the shell prompt to starship                     "],[0,"│"]],
+[[0,"│  "],[3,"me/dotfiles#12 · updated 4d ago                         "],[0,"│"]],
+[[0,"│"],[1,"Assigned                                                  "],[0,"│"]],
+[[0,"│"],[2,"● Search ignores accented letters "],[3,"[bug]                   "],[0,"│"]],
+[[0,"│  "],[3,"acme/notes#49 · updated 8h ago                          "],[0,"│"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"└──────────────────────────────────────────────────────────┘"]]
+]},
+"wide": {"cols": 80, "rows": 10, "lines": [
+[[0,"┌ forgejo ─────────────────────────────────────────────────────────────────────┐"]],
+[[0,"│"],[1,"Review requested                                                              "],[0,"│"]],
+[[0,"│"],[2,"● Sync folders in the background                                              "],[0,"│"]],
+[[0,"│  "],[3,"acme/notes#57 · updated 3h ago                                              "],[0,"│"]],
+[[0,"│"],[1,"My pull requests                                                              "],[0,"│"]],
+[[0,"│"],[2,"● Export notes as Markdown "],[3,"[feature]                                          "],[0,"│"]],
+[[0,"│  "],[3,"acme/notes#55 · updated 1d ago                                              "],[0,"│"]],
+[[0,"│"],[2,"● Switch the shell prompt to starship                                         "],[0,"│"]],
+[[0,"│  "],[3,"me/dotfiles#12 · updated 4d ago                                             "],[0,"│"]],
+[[0,"└──────────────────────────────────────────────────────────────────────────────┘"]]
+]},
+"tall": {"cols": 40, "rows": 20, "lines": [
+[[0,"┌ forgejo ─────────────────────────────┐"]],
+[[0,"│"],[1,"Review requested                      "],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│"],[2,"● Sync folders in the background      "],[0,"│"]],
+[[0,"│  "],[3,"acme/notes#57 · updated 3h ago      "],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│"],[1,"My pull requests                      "],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│"],[2,"● Export notes as Markdown "],[3,"[feature]  "],[0,"│"]],
+[[0,"│  "],[3,"acme/notes#55 · updated 1d ago      "],[0,"│"]],
+[[0,"│"],[2,"● Switch the shell prompt to starship "],[0,"│"]],
+[[0,"│  "],[3,"me/dotfiles#12 · updated 4d ago     "],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│"],[1,"Assigned                              "],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│"],[2,"● Search ignores accented letters "],[3,"[bu…"],[0,"│"]],
+[[0,"│  "],[3,"acme/notes#49 · updated 8h ago      "],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"└──────────────────────────────────────┘"]]
+]}
+}}

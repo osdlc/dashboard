@@ -1,0 +1,186 @@
+---
+// The terminal UI, rendered from text snapshots of the demo screens
+// (scripts/tui-snapshots.sh), with tabs to switch screens.
+import { tuiHtml } from '../lib/tui'
+import showcase from '../data/tui/showcase.txt?raw'
+import meters from '../data/tui/meters.txt?raw'
+import lists from '../data/tui/lists.txt?raw'
+import logs from '../data/tui/logs.txt?raw'
+
+const screens = [
+  { name: 'showcase', text: showcase },
+  { name: 'meters', text: meters },
+  { name: 'lists', text: lists },
+  { name: 'logs', text: logs },
+]
+const cols = Math.max(...showcase.split('\n').map((l) => [...l.replace(/\s+$/, '')].length), 1)
+---
+
+<figure class="term window" style={`--cols:${cols}`} data-term>
+  <div class="window-bar">
+    <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span class="title">~ dashboard tui</span>
+    <span class="spacer"></span>
+  </div>
+  <div class="tabs" role="tablist" aria-label="Demo screens">
+    {
+      screens.map((s, i) => (
+        <button type="button" role="tab" aria-selected={i === 0 ? 'true' : 'false'} data-screen={s.name}>
+          <kbd>{i + 1}</kbd> {s.name}
+        </button>
+      ))
+    }
+  </div>
+  <div class="screen">
+    {
+      screens.map((s, i) => (
+        <pre
+          class="tui"
+          data-screen={s.name}
+          hidden={i !== 0}
+          aria-label={`Terminal UI, ${s.name} screen`}
+          set:html={tuiHtml(s.text, s.name)}
+        />
+      ))
+    }
+  </div>
+  <figcaption>Actual output of the terminal renderer at 120×34, with the demo modules.</figcaption>
+</figure>
+
+<script>
+  for (const term of document.querySelectorAll<HTMLElement>('[data-term]')) {
+    const tabs = [...term.querySelectorAll<HTMLButtonElement>('[role=tab]')]
+    const show = (name: string) => {
+      for (const t of tabs) t.setAttribute('aria-selected', String(t.dataset.screen === name))
+      for (const p of term.querySelectorAll<HTMLElement>('pre[data-screen]')) p.hidden = p.dataset.screen !== name
+    }
+    for (const t of tabs) t.addEventListener('click', () => show(t.dataset.screen!))
+  }
+</script>
+
+<style>
+  .term {
+    margin: 0;
+    container-type: inline-size;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 2px;
+    padding: 8px 10px 0;
+    background: var(--term-bar);
+    border-bottom: 1px solid var(--term-line);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .tabs button {
+    flex: none;
+    font: 12px/1 var(--font-code);
+    color: var(--term-dim);
+    background: transparent;
+    border: 1px solid transparent;
+    border-bottom: 0;
+    border-radius: 6px 6px 0 0;
+    padding: 7px 10px 8px;
+    cursor: pointer;
+  }
+
+  .tabs button:hover {
+    color: var(--term-ink);
+  }
+
+  .tabs button[aria-selected='true'] {
+    color: var(--term-ink);
+    background: var(--term-bg);
+    border-color: var(--term-line);
+    margin-bottom: -1px;
+  }
+
+  .tabs kbd {
+    font-size: 10px;
+    min-width: 0;
+    padding: 0 4px;
+    background: transparent;
+    border-color: var(--term-faint);
+    color: inherit;
+  }
+
+  .screen {
+    padding: 10px 12px 12px;
+  }
+
+  .tui {
+    margin: 0;
+    font-family: var(--font-code);
+    /* Fit all columns into the frame: a JetBrains Mono cell is 0.6em wide. */
+    font-size: max(4px, calc((100cqi - 26px) / (var(--cols) * 0.6)));
+    line-height: 1.22;
+    color: var(--term-ink);
+    white-space: pre;
+    overflow: hidden;
+    font-variant-ligatures: none;
+  }
+
+  .tui :global(span[style]) {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+    white-space: pre;
+  }
+
+  .tui :global(.t-box) {
+    color: #4a4a43;
+  }
+  .tui :global(.t-title) {
+    color: #f3efe4;
+    font-weight: 700;
+  }
+  .tui :global(.t-dim) {
+    color: var(--term-dim);
+  }
+  .tui :global(.t-tab-on) {
+    color: #101210;
+    background: #f0a640;
+    font-weight: 700;
+  }
+  .tui :global(.t-key) {
+    color: #f0a640;
+    font-weight: 700;
+  }
+  .tui :global(.t-faint) {
+    color: #34352f;
+  }
+  .tui :global(.t-cool) {
+    color: #5cd08a;
+  }
+  .tui :global(.t-warm) {
+    color: #f0c43c;
+  }
+  .tui :global(.t-hot) {
+    color: #ff6f5e;
+  }
+  .tui :global(.t-bar) {
+    color: #8bb8ff;
+  }
+  .tui :global(.t-chart) {
+    color: #e07ad0;
+  }
+  .tui :global(.t-ok) {
+    color: #5cd08a;
+  }
+  .tui :global(.t-marker) {
+    color: #f3efe4;
+  }
+  .tui :global(.t-scroll) {
+    color: #2c2d29;
+  }
+
+  figcaption {
+    padding: 9px 14px;
+    border-top: 1px solid var(--term-line);
+    background: var(--term-bar);
+    font: 11.5px/1.4 var(--font-code);
+    color: var(--term-dim);
+  }
+</style>

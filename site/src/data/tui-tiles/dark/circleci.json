@@ -1,0 +1,73 @@
+{"width": 120, "styles": [["#ef5b5f","",""],["","",""],["#9097a1","",""],["#3fbf74","",""],["#e0a826","",""]],
+"sizes": {
+"small": {"cols": 30, "rows": 5, "lines": [
+[[0,"┌ circleci ──────────────────┐"]],
+[[0,"│● "],[1,"Retry the billing webhook…"],[0,"│"]],
+[[0,"│  "],[2,"api #1432 · main · build-…"],[0,"│"]],
+[[0,"│  "],[2,"+5 more                   "],[0,"│"]],
+[[0,"└────────────────────────────┘"]]
+]},
+"medium": {"cols": 40, "rows": 10, "lines": [
+[[0,"┌ circleci ────────────────────────────┐"]],
+[[0,"│● "],[1,"Retry the billing webhook on 502 "],[2,"[@…"],[0,"│"]],
+[[0,"│  "],[2,"api #1432 · main · build-and-test f…"],[0,"│"]],
+[[0,"│"],[3,"● "],[1,"Bump the Postgres driver "],[2,"[@renovate…"],[0,"│"]],
+[[0,"│  "],[2,"api #1431 · main · passed · 3h ago  "],[0,"│"]],
+[[0,"│"],[3,"● "],[1,"Add the invoices export endpoint "],[2,"[@…"],[0,"│"]],
+[[0,"│  "],[2,"api #1430 · main · passed · 18h ago "],[0,"│"]],
+[[0,"│"],[1,"● Cache the pipeline graph between re…"],[0,"│"]],
+[[0,"│  "],[2,"+2 more                             "],[0,"│"]],
+[[0,"└──────────────────────────────────────┘"]]
+]},
+"large": {"cols": 60, "rows": 15, "lines": [
+[[0,"┌ circleci ────────────────────────────────────────────────┐"]],
+[[0,"│● "],[1,"Retry the billing webhook on 502 "],[2,"[@dana]                "],[0,"│"]],
+[[0,"│  "],[2,"api #1432 · main · build-and-test failed · 1h ago       "],[0,"│"]],
+[[0,"│"],[3,"● "],[1,"Bump the Postgres driver "],[2,"[@renovate-bot]                "],[0,"│"]],
+[[0,"│  "],[2,"api #1431 · main · passed · 3h ago                      "],[0,"│"]],
+[[0,"│"],[3,"● "],[1,"Add the invoices export endpoint "],[2,"[@sam]                 "],[0,"│"]],
+[[0,"│  "],[2,"api #1430 · main · passed · 18h ago                     "],[0,"│"]],
+[[0,"│"],[1,"● Cache the pipeline graph between renders "],[2,"[@dana]        "],[0,"│"]],
+[[0,"│  "],[2,"web #877 · main · running · 11m ago                     "],[0,"│"]],
+[[0,"│"],[4,"● "],[1,"Try the new chart library "],[2,"[@kim]                        "],[0,"│"]],
+[[0,"│  "],[2,"web #876 · main · on hold · 2h ago                      "],[0,"│"]],
+[[0,"│"],[3,"● "],[1,"Release 4.12 "],[2,"[@sam]                                     "],[0,"│"]],
+[[0,"│  "],[2,"web #875 · main · passed · 21h ago                      "],[0,"│"]],
+[[0,"│                                                          │"]],
+[[0,"└──────────────────────────────────────────────────────────┘"]]
+]},
+"wide": {"cols": 80, "rows": 10, "lines": [
+[[0,"┌ circleci ────────────────────────────────────────────────────────────────────┐"]],
+[[0,"│● "],[1,"Retry the billing webhook on 502 "],[2,"[@dana]                                    "],[0,"│"]],
+[[0,"│  "],[2,"api #1432 · main · build-and-test failed · 1h ago                           "],[0,"│"]],
+[[0,"│"],[3,"● "],[1,"Bump the Postgres driver "],[2,"[@renovate-bot]                                    "],[0,"│"]],
+[[0,"│  "],[2,"api #1431 · main · passed · 3h ago                                          "],[0,"│"]],
+[[0,"│"],[3,"● "],[1,"Add the invoices export endpoint "],[2,"[@sam]                                     "],[0,"│"]],
+[[0,"│  "],[2,"api #1430 · main · passed · 18h ago                                         "],[0,"│"]],
+[[0,"│"],[1,"● Cache the pipeline graph between renders "],[2,"[@dana]                            "],[0,"│"]],
+[[0,"│  "],[2,"+2 more                                                                     "],[0,"│"]],
+[[0,"└──────────────────────────────────────────────────────────────────────────────┘"]]
+]},
+"tall": {"cols": 40, "rows": 20, "lines": [
+[[0,"┌ circleci ────────────────────────────┐"]],
+[[0,"│● "],[1,"Retry the billing webhook on 502 "],[2,"[@…"],[0,"│"]],
+[[0,"│  "],[2,"api #1432 · main · build-and-test f…"],[0,"│"]],
+[[0,"│"],[3,"● "],[1,"Bump the Postgres driver "],[2,"[@renovate…"],[0,"│"]],
+[[0,"│  "],[2,"api #1431 · main · passed · 3h ago  "],[0,"│"]],
+[[0,"│"],[3,"● "],[1,"Add the invoices export endpoint "],[2,"[@…"],[0,"│"]],
+[[0,"│  "],[2,"api #1430 · main · passed · 18h ago "],[0,"│"]],
+[[0,"│"],[1,"● Cache the pipeline graph between re…"],[0,"│"]],
+[[0,"│  "],[2,"web #877 · main · running · 11m ago "],[0,"│"]],
+[[0,"│"],[4,"● "],[1,"Try the new chart library "],[2,"[@kim]    "],[0,"│"]],
+[[0,"│  "],[2,"web #876 · main · on hold · 2h ago  "],[0,"│"]],
+[[0,"│"],[3,"● "],[1,"Release 4.12 "],[2,"[@sam]                 "],[0,"│"]],
+[[0,"│  "],[2,"web #875 · main · passed · 21h ago  "],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"└──────────────────────────────────────┘"]]
+]}
+}}

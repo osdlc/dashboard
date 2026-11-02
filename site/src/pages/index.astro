@@ -1,0 +1,905 @@
+---
+import { Code } from 'astro:components'
+import Base from '../layouts/Base.astro'
+import Terminal from '../components/Terminal.astro'
+import SiteFooter from '../components/SiteFooter.astro'
+import SiteHeader from '../components/SiteHeader.astro'
+import Widgets from '../components/Widgets.astro'
+import { widgets } from '../lib/registry'
+import { demoExcerpt } from '../lib/demo-config'
+import plugin from '../data/load.py?raw'
+
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/')
+const shot = (name: string) => `${base}shots/${name}`
+const repo = 'https://github.com/osdlc/dashboard'
+const blob = (path: string) => `${repo}/blob/main/${path}`
+
+const theme = 'vitesse-dark'
+
+const quickstart = `git clone ${repo}
+cd dashboard
+cargo build --release   # needs Rust and pnpm
+./target/release/dashboard tui     # terminal
+./target/release/dashboard serve   # browser`
+
+const pluginConfig = `modules:
+  load:
+    plugin: [python3, ~/bin/load.py]   # program and arguments
+    refresh: 5s                        # optional override
+screens:
+  - name: main
+    tiles:
+      - { module: load, size: medium }`
+
+const transcript = `→ {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"contract_version":"0.1","host":{"name":"dashboard","version":"0.1.0"},"config":{}}}
+← {"jsonrpc":"2.0","id":1,"result":{"manifest":{"id":"load","name":"Load average","contract_version":"0.1","refresh":{"mode":"poll","interval_ms":2000},"layout":{"size":"medium"}}}}
+→ {"jsonrpc":"2.0","id":2,"method":"view/render"}
+← {"jsonrpc":"2.0","id":2,"result":{"status":"ok","summary":"load 3.12 2.80 2.41","root":{"type":"column","children":[…]}}}`
+
+const modules = [
+  {
+    group: 'System',
+    note: 'Read from the OS, no setup.',
+    items: [
+      ['cpu', 'Total over time and a meter per core. Every 500 ms.'],
+      ['memory', 'Memory and swap.'],
+      ['network', 'Download and upload, mirrored on one chart.'],
+      ['disk', 'Space per volume.'],
+      ['processes', 'Top processes by CPU.'],
+    ],
+  },
+  {
+    group: 'Code and issues',
+    note: 'GitHub uses your gh login. Tracker tokens come from an env var or a command.',
+    items: [
+      ['github-prs', 'Yours and review requests, with checks and review state.'],
+      ['github-issues', 'Open issues assigned to you.'],
+      ['jira', 'Sections from JQL. Cloud, or Server / Data Center with bearer auth.'],
+      ['linear', 'Assigned, created and more.'],
+      ['forgejo', 'Also Gitea and Codeberg: review requests, your PRs, assigned.'],
+      ['git', 'Local repositories: branch, commits ahead and behind, uncommitted changes.'],
+    ],
+  },
+  {
+    group: 'Logs and uptime',
+    note: 'Local files and plain curl.',
+    items: [
+      ['log', 'Tail a file, optionally keeping only lines that match.'],
+      ['textfile', 'A text or markdown file, such as notes or a todo list. Shown again when it changes.'],
+      [
+        'uptime',
+        'A URL or a full curl command per check. A strip of recent results, uptime % and response time.',
+      ],
+    ],
+  },
+  {
+    group: 'AI agent usage',
+    note: 'How much of each limit you have used, with a marker for where an even pace would be.',
+    items: [
+      ['cswap', 'Claude Code accounts, through the bundled cswap plugin when cswap is installed.'],
+      ['codex', 'OpenAI Codex limits and tokens per day, live from codex app-server or from its session logs.'],
+      ['copilot', 'GitHub Copilot monthly premium requests, using the gh login.'],
+    ],
+  },
+]
+---
+
+<Base
+  title="dashboard: a developer dashboard for your terminal and browser"
+  description="One Rust binary that shows system stats, pull requests, issues, logs, uptime checks and AI usage limits as a terminal UI or a local web page, configured with one YAML file."
+>
+  <SiteHeader />
+
+  <main>
+    <!-- ---- hero ---- -->
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow rise">
+            <span class="strip" aria-hidden="true">
+              {Array.from({ length: 28 }, (_, i) => <i class={i === 9 ? 's' : i === 21 ? 'd' : ''} />)}
+            </span>
+            <span>open source · v0.1 · early</span>
+          </p>
+          <h1 class="rise d1">A developer dashboard for your terminal and your browser.</h1>
+          <p class="lede rise d2">
+            One Rust binary. System stats, pull requests, issues, logs, uptime checks and AI usage limits, from one
+            YAML file, shown as a terminal UI or a local web page.
+          </p>
+          <div class="quick rise d3">
+            <div class="quick-head">
+              <span>Build from source</span>
+              <button type="button" class="copy" data-copy={quickstart.replace(/ +#.*$/gm, '')}>Copy</button>
+            </div>
+            <Code code={quickstart} lang="sh" theme={theme} class="code" />
+          </div>
+          <p class="hint rise d4">
+            No config yet? It starts with a built-in demo of eight screens. Press <kbd>1</kbd>–<kbd>8</kbd> to switch,
+            <kbd>?</kbd> for help. Then follow the <a href={`${base}tutorial/`}>tutorial</a> to build your own.
+          </p>
+        </div>
+        <div class="hero-shot rise d2">
+          <div class="window browser">
+            <div class="window-bar">
+              <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="title">127.0.0.1:7878 — dashboard serve</span>
+              <span class="spacer"></span>
+            </div>
+            <img
+              src={shot('web-showcase.png')}
+              width="1500"
+              height="1100"
+              alt="The web view on the demo's showcase screen: an area chart, request stats, budget gauges with pace markers, a grid of heat-colored meters, a disk donut chart and an event feed."
+              fetchpriority="high"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---- two views ---- -->
+    <section class="section" id="views">
+      <div class="wrap">
+        <p class="label"><span class="n">01</span> two views</p>
+        <h2>The same tiles in a terminal and in a browser.</h2>
+        <p class="lede">
+          Modules produce views: a small set of widgets described as JSON. The terminal renderer and the web renderer
+          draw the same views, so a tile shows the same thing in both.
+        </p>
+
+        <div class="views">
+          <div class="view">
+            <Terminal />
+            <div class="view-copy">
+              <h3><code>dashboard tui</code></h3>
+              <ul>
+                <li>Braille charts and block meters, built on ratatui.</li>
+                <li>Mouse: click, scroll, hover highlight. Double-click a tile for fullscreen.</li>
+                <li>
+                  <kbd>1</kbd>–<kbd>9</kbd> or <kbd>Tab</kbd> for screens, <kbd>s</kbd> settings,
+                  <kbd>?</kbd> help.
+                </li>
+                <li>Light or dark from your terminal's background.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="view">
+            <figure class="window browser">
+              <div class="window-bar">
+                <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="title">127.0.0.1:7878 — compact</span>
+                <span class="spacer"></span>
+              </div>
+              <img
+                src={shot('web-compact.png')}
+                width="1500"
+                height="862"
+                loading="lazy"
+                alt="The web view's showcase screen in compact density: tighter gaps and full width."
+              />
+            </figure>
+            <div class="view-copy">
+              <h3><code>dashboard serve</code></h3>
+              <ul>
+                <li>A Vue app built into the binary, live over a WebSocket, with smooth transitions.</li>
+                <li>Compact density with <kbd>d</kbd>. Fullscreen any tile.</li>
+                <li>Screen editor: drag tiles to reorder, right-click to resize, move or remove.</li>
+                <li>Only on 127.0.0.1, behind a per-session token.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="gallery">
+          <figure>
+            <img src={shot('web-editor.png')} width="1500" height="1100" loading="lazy" alt="The screen editor with a tile's size menu open: small, medium, large, wide, tall, move earlier, move later, remove." />
+            <figcaption>Screen editor. Saved back into your config file.</figcaption>
+          </figure>
+          <figure>
+            <img src={shot('web-lists.png')} width="1500" height="1100" loading="lazy" alt="A table with load gauges in its cells, an activity feed, a stats tile, a leaderboard of bars and a donut chart of shares." />
+            <figcaption>Tables with gauges in cells, bars and lists.</figcaption>
+          </figure>
+          <figure>
+            <img src={shot('web-logs.png')} width="1500" height="1100" loading="lazy" alt="Two log tiles with INFO, WARN and ERROR lines colored by level, next to stats and gauges." />
+            <figcaption>Log tiles, colored by level.</figcaption>
+          </figure>
+          <figure>
+            <img src={shot('web-uptime.png')} width="690" height="160" loading="lazy" alt="The uptime tile: four checks with uptime percentage and response time; one failing." />
+            <figcaption>Uptime checks from the demo config.</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---- modules ---- -->
+    <section class="section" id="modules">
+      <div class="wrap">
+        <p class="label"><span class="n">02</span> modules and widgets</p>
+        <h2>Built-in modules for the things you check all day.</h2>
+        <p class="lede">
+          Each module has its own refresh period, which you can override (never below its minimum), and can be sized or
+          turned off. To show one more than once with different settings, give it a new ID and
+          <code>builtin: &lt;module&gt;</code>.
+        </p>
+
+        <div class="modules">
+          {
+            modules.map((m) => (
+              <div class="group">
+                <h3>{m.group}</h3>
+                <p>{m.note}</p>
+                <dl>
+                  {m.items.map(([id, text]) => (
+                    <>
+                      <dt>
+                        <code>{id}</code>
+                      </dt>
+                      <dd>{text}</dd>
+                    </>
+                  ))}
+                </dl>
+              </div>
+            ))
+          }
+        </div>
+
+        <p class="more">
+          <a href={`${base}widgets/`}>All {widgets.length} widgets in the registry</a>: built-in modules and plugin
+          packages, each with a demo, its settings and a config example.
+        </p>
+
+        <h3 class="sub">Widgets</h3>
+        <p class="sub-copy">
+          Every module, built-in or plugin, describes its tile with these. Both renderers draw all of them.
+        </p>
+        <Widgets />
+      </div>
+    </section>
+
+    <!-- ---- plugins ---- -->
+    <section class="section" id="plugins">
+      <div class="wrap">
+        <p class="label"><span class="n">03</span> plugins</p>
+        <h2>Write a module in any language.</h2>
+        <div class="split">
+          <div class="prose">
+            <p>
+              A plugin is a program that speaks JSON-RPC 2.0 on stdin and stdout, one JSON message per line. The
+              dashboard starts it, then:
+            </p>
+            <ol class="steps">
+              <li>
+                <code>initialize</code> sends the contract version and the module's config block. The plugin returns
+                <code>{'{ manifest }'}</code>: ID, name, refresh period, size.
+              </li>
+              <li>
+                <code>view/render</code> is called on every refresh. The plugin returns a view: a status, a one-line
+                summary and a root widget.
+              </li>
+              <li><code>shutdown</code>, then <code>exit</code>, when the dashboard stops.</li>
+            </ol>
+            <p>
+              The host keeps chart history: give a series an <code>id</code> and send only new points. Anything the
+              plugin writes to stderr goes to the dashboard's log. If the plugin exits or stops answering, the tile
+              shows the error and the plugin is started again.
+            </p>
+            <p>
+              Plugins can declare commands, but nothing in the protocol lets a plugin run one. JSON Schemas for the
+              manifest and view: <code>dashboard schema manifest</code>, <code>dashboard schema view</code>. Full
+              details in <a href={blob('docs/contract.md')}>docs/contract.md</a>. Step 5 of the
+              <a href={`${base}tutorial/#5-your-own-widget`}>tutorial</a> writes one in TypeScript.
+            </p>
+          </div>
+          <div class="code-stack">
+            <div class="window">
+              <div class="window-bar">
+                <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="title">load.py</span>
+                <span class="spacer"></span>
+              </div>
+              <Code code={plugin.trimEnd()} lang="python" theme={theme} class="code" />
+            </div>
+            <div class="window">
+              <div class="window-bar">
+                <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="title">config.yaml</span>
+                <span class="spacer"></span>
+              </div>
+              <Code code={pluginConfig} lang="yaml" theme={theme} class="code" />
+            </div>
+            <div class="window">
+              <div class="window-bar">
+                <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="title">on the wire</span>
+                <span class="spacer"></span>
+              </div>
+              <pre class="code wire">{transcript}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---- config ---- -->
+    <section class="section" id="config">
+      <div class="wrap split config">
+        <div class="prose">
+          <p class="label"><span class="n">04</span> config</p>
+          <h2>One YAML file. Edits apply while it runs.</h2>
+          <ul class="facts">
+            <li>
+              Lives at <code>~/.config/dashboard/config.yaml</code>, or pass <code>--config &lt;path&gt;</code>.
+              Without one you get the demo.
+            </li>
+            <li>
+              Save the file and the dashboard picks it up. Only modules whose settings changed restart. If the file has
+              an error, the last good config stays in effect and the error shows on the settings screen.
+            </li>
+            <li>
+              When the app writes to the file (the theme, the screen editor), only that key's bytes change. Your
+              comments, order and quoting stay as you wrote them.
+            </li>
+            <li>
+              <code>dashboard schema config</code> prints a JSON Schema, for completion and checks in editors that use
+              yaml-language-server. <code>dashboard config</code> checks the file.
+            </li>
+            <li>Screens can rotate on a timer, pausing for a minute after you press a key.</li>
+          </ul>
+          <p class="source">
+            Right: an excerpt of <a href={blob('examples/demo.yaml')}>examples/demo.yaml</a>, the built-in demo.
+          </p>
+        </div>
+        <div class="window">
+          <div class="window-bar">
+            <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="title">examples/demo.yaml</span>
+            <span class="spacer"></span>
+          </div>
+          <Code code={demoExcerpt()} lang="yaml" theme={theme} class="code yaml" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ---- local ---- -->
+    <section class="section" id="local">
+      <div class="wrap">
+        <p class="label"><span class="n">05</span> local first</p>
+        <h2>Runs on your machine. Sends nothing home.</h2>
+        <div class="cards">
+          <div class="card">
+            <h3>Localhost only</h3>
+            <p>
+              The web view binds to <code>127.0.0.1</code>. Every request needs the random per-session token from the
+              printed link, and the <code>Origin</code> header is checked, so other websites in your browser can't
+              talk to it.
+            </p>
+          </div>
+          <div class="card">
+            <h3>No telemetry</h3>
+            <p>
+              No analytics, crash reports or update checks. The only network requests are the ones your modules make:
+              <code>gh</code> to GitHub, <code>curl</code> for uptime checks, your issue tracker's API, and the
+              AI usage modules to their own services.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Tokens stay out of the config</h3>
+            <p>
+              Tracker modules read a token from an environment variable, or run a command you choose, like a password
+              manager's CLI, and use what it prints. Nothing is written to the file.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Plugins display, they don't act</h3>
+            <p>
+              A plugin can only answer requests with data. Commands are declared up front as an argument list (no
+              shell), and each parameter must match a pattern.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---- status ---- -->
+    <section class="section" id="status">
+      <div class="wrap">
+        <p class="label"><span class="n">06</span> status</p>
+        <h2>Early, and built for one person on one machine.</h2>
+        <p class="lede">
+          dashboard is at v0.1, the v1 foundation. It is used daily, but the config format and the plugin contract may
+          still change. There are no releases or packages yet: you build it from source.
+        </p>
+        <div class="status">
+          <div>
+            <h3><span class="dot ok"></span>Works now</h3>
+            <ul>
+              <li>Terminal UI and web view from one binary</li>
+              <li>All modules above, and stdio plugins (poll mode)</li>
+              <li>Several screens, rotation, a settings screen and a help screen</li>
+              <li>Screen editor in the web view, saved to the config file</li>
+              <li>Live config reload, JSON Schema for the config</li>
+            </ul>
+          </div>
+          <div>
+            <h3><span class="dot warn"></span>Not yet</h3>
+            <ul>
+              <li>Running a module's declared commands from a tile, with a confirmation step</li>
+              <li>Push-mode plugins that send updates on their own</li>
+              <li>WASM plugins</li>
+              <li>Prebuilt binaries or package manager installs</li>
+            </ul>
+          </div>
+          <div>
+            <h3><span class="dot off"></span>Out of scope for v1</h3>
+            <ul>
+              <li>More than one user, or access from other machines</li>
+              <li>Passing data between modules</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <SiteFooter />
+
+  <script>
+    import { wireCopyButtons } from '../lib/copy'
+    wireCopyButtons()
+  </script>
+</Base>
+
+<style>
+
+  /* ---- hero ---- */
+
+  .hero {
+    position: relative;
+    padding: 64px 0 88px;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(var(--dots) 1px, transparent 1.2px);
+    background-size: 14px 14px;
+    mask-image: linear-gradient(to bottom, black, transparent 85%);
+    -webkit-mask-image: linear-gradient(to bottom, black, transparent 85%);
+    pointer-events: none;
+  }
+
+  .hero-grid {
+    position: relative;
+    display: grid;
+    gap: 48px;
+  }
+
+  @media (min-width: 1040px) {
+    .hero-grid {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      align-items: center;
+      gap: 56px;
+    }
+    .hero-shot {
+      margin-right: -180px;
+    }
+  }
+
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 22px;
+    font: 12.5px/1 var(--font-code);
+    color: var(--muted);
+  }
+
+  .strip {
+    display: inline-flex;
+    gap: 2px;
+    height: 14px;
+    overflow: hidden;
+    width: 88px;
+  }
+
+  .strip i {
+    flex: none;
+    width: 2px;
+    border-radius: 1px;
+    background: var(--ok);
+    opacity: 0.85;
+  }
+  .strip i.s {
+    background: var(--warn);
+  }
+  .strip i.d {
+    background: var(--err);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .strip i {
+      animation: tick 8s steps(14) infinite;
+    }
+  }
+
+  @keyframes tick {
+    to {
+      transform: translateX(-56px);
+    }
+  }
+
+  h1 {
+    font-size: clamp(30px, 3.9vw, 46px);
+    line-height: 1.1;
+    letter-spacing: -0.045em;
+    margin-bottom: 22px;
+    text-wrap: balance;
+  }
+
+  .quick {
+    margin-top: 32px;
+    border: 1px solid var(--term-line);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  .quick-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px 0 14px;
+    height: 36px;
+    background: var(--term-bar);
+    border-bottom: 1px solid var(--term-line);
+    font: 12px var(--font-code);
+    color: var(--term-dim);
+  }
+
+  .copy {
+    font: 12px var(--font-code);
+    color: var(--term-ink);
+    background: transparent;
+    border: 1px solid var(--term-line);
+    border-radius: 5px;
+    padding: 4px 9px;
+    cursor: pointer;
+  }
+
+  .copy:hover {
+    border-color: var(--term-dim);
+  }
+
+  .hint {
+    margin: 16px 0 0;
+    font-size: 14.5px;
+    color: var(--muted);
+  }
+
+  .browser img {
+    width: 100%;
+    height: auto;
+  }
+
+  /* ---- views ---- */
+
+  .views {
+    display: grid;
+    gap: 40px;
+    margin-top: 44px;
+  }
+
+  @media (min-width: 1000px) {
+    .views {
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+    }
+  }
+
+  .view {
+    min-width: 0;
+  }
+
+  .view figure.window {
+    margin: 0;
+  }
+
+  .view-copy {
+    padding: 22px 4px 0;
+  }
+
+  .view-copy h3 code {
+    font-size: 15px;
+  }
+
+  .view-copy ul,
+  .status ul,
+  .facts {
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .view-copy li,
+  .status li,
+  .facts li {
+    position: relative;
+    padding-left: 20px;
+    margin: 7px 0;
+    font-size: 15.5px;
+    color: var(--ink-2);
+  }
+
+  .view-copy li::before,
+  .status li::before,
+  .facts li::before {
+    content: '›';
+    position: absolute;
+    left: 2px;
+    color: var(--accent);
+    font-family: var(--font-code);
+  }
+
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+    gap: 28px 20px;
+    margin-top: 56px;
+  }
+
+  .gallery figure {
+    margin: 0;
+    min-width: 0;
+  }
+
+  .gallery img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    object-position: top left;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--term-bg);
+  }
+
+  .gallery figure:last-child img {
+    object-fit: contain;
+    object-position: center;
+    padding: 6%;
+  }
+
+  .gallery figcaption {
+    margin-top: 8px;
+    font-size: 13.5px;
+    color: var(--muted);
+  }
+
+  /* ---- modules ---- */
+
+  .modules {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 0;
+    margin: 44px 0 72px;
+    border-top: 1px solid var(--line-strong);
+  }
+
+  .group {
+    padding: 22px 22px 24px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  @media (min-width: 600px) {
+    .group + .group {
+      padding-left: 22px;
+      border-left: 1px solid var(--line);
+    }
+  }
+
+  .group > p {
+    margin: 6px 0 16px;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  dl {
+    margin: 0;
+  }
+
+  dt {
+    margin-top: 12px;
+  }
+
+  dt code {
+    background: none;
+    border: 0;
+    padding: 0;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  dd {
+    margin: 2px 0 0;
+    font-size: 14.5px;
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+
+  .more {
+    margin: 28px 0 56px;
+    font-size: 15.5px;
+    color: var(--ink-2);
+  }
+
+  .more a {
+    font-family: var(--font-code);
+    font-size: 14px;
+  }
+
+  .sub {
+    font-size: 20px;
+  }
+
+  .sub-copy {
+    margin: 8px 0 22px;
+    color: var(--muted);
+  }
+
+  /* ---- plugins / config ---- */
+
+  .split {
+    display: grid;
+    gap: 40px;
+    margin-top: 28px;
+  }
+
+  @media (min-width: 1000px) {
+    .split {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: 56px;
+      align-items: start;
+    }
+    .config {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    }
+    .split > .prose {
+      position: sticky;
+      top: 88px;
+    }
+  }
+
+  .config {
+    margin-top: 0;
+  }
+
+  .prose p {
+    color: var(--ink-2);
+    margin: 0 0 16px;
+  }
+
+  .steps {
+    counter-reset: step;
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px;
+    border-left: 1px solid var(--line-strong);
+  }
+
+  .steps li {
+    counter-increment: step;
+    position: relative;
+    padding: 0 0 14px 22px;
+    color: var(--ink-2);
+  }
+
+  .steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: -11px;
+    top: 2px;
+    width: 21px;
+    height: 21px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 1px solid var(--line-strong);
+    font: 11px/19px var(--font-code);
+    text-align: center;
+    color: var(--accent);
+  }
+
+  .code-stack {
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .code-stack .window,
+  .config .window {
+    min-width: 0;
+  }
+
+  .wire {
+    font-size: 12px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: #a8a495;
+  }
+
+  .yaml {
+    max-height: 640px;
+  }
+
+  .source {
+    font-size: 14px;
+  }
+
+  @media (max-width: 999px) {
+    .source {
+      display: none;
+    }
+  }
+
+  /* ---- local ---- */
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
+    margin-top: 36px;
+  }
+
+  .card {
+    padding: 20px 20px 22px;
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-top: 2px solid var(--ok);
+    border-radius: 8px;
+  }
+
+  .card p {
+    margin: 10px 0 0;
+    font-size: 15px;
+    color: var(--ink-2);
+  }
+
+  /* ---- status ---- */
+
+  .status {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 28px;
+    margin-top: 36px;
+  }
+
+  .status h3 {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+  .dot.ok {
+    background: var(--ok);
+  }
+  .dot.warn {
+    background: var(--warn);
+  }
+  .dot.off {
+    background: var(--faint);
+  }
+
+
+  /* Shiki output: keep the frame's background and our sizing. */
+  :global(.astro-code.code) {
+    background-color: var(--term-bg) !important;
+  }
+</style>

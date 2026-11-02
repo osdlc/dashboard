@@ -1,0 +1,94 @@
+---
+// One tile as the terminal UI draws it, from a capture in src/data/tui-tiles/
+// (see lib/term-tile.ts), in a terminal of the capture's theme. Shown only
+// while the site's theme matches (data-shows-theme, see global.css).
+import { tileHtml, type SizeCapture, type Style } from '../lib/term-tile'
+
+interface Props {
+  capture: SizeCapture
+  styles: Style[]
+  theme: string
+  label: string
+}
+const { capture, styles, theme, label } = Astro.props
+---
+
+<pre
+  class="tt"
+  data-tt-theme={theme}
+  data-shows-theme={theme}
+  style={`--cols:${capture.cols};--rows:${capture.rows}`}
+  role="img"
+  aria-label={label}
+  set:html={tileHtml(capture, styles)}
+/>
+
+<style>
+  /* A terminal's 16 colors. Dark is the default, for themes without their own. */
+  .tt {
+    --tt-bg: #0f110f;
+    --tt-fg: #d9d6cb;
+    --tt-black: #1a1c19;
+    --tt-red: #ff6f5e;
+    --tt-green: #5cd08a;
+    --tt-yellow: #f0c43c;
+    --tt-blue: #8bb8ff;
+    --tt-magenta: #e07ad0;
+    --tt-cyan: #5cc8d6;
+    --tt-gray: #b4b0a4;
+    --tt-darkgray: #6f6c62;
+    --tt-lightred: #ff9486;
+    --tt-lightgreen: #86e2aa;
+    --tt-lightyellow: #ffd970;
+    --tt-lightblue: #b0cfff;
+    --tt-lightmagenta: #f0a0e2;
+    --tt-lightcyan: #92e2ea;
+    --tt-white: #f3efe4;
+  }
+
+  .tt[data-tt-theme='light'] {
+    --tt-bg: #fbf9f4;
+    --tt-fg: #1a1a16;
+    --tt-black: #1a1a16;
+    --tt-red: #b8332a;
+    --tt-green: #1d7f45;
+    --tt-yellow: #8f6a00;
+    --tt-blue: #1f5fbf;
+    --tt-magenta: #9a3b8a;
+    --tt-cyan: #0e7c86;
+    --tt-gray: #6b6759;
+    --tt-darkgray: #8d8878;
+    --tt-lightred: #d4493f;
+    --tt-lightgreen: #2a9a58;
+    --tt-lightyellow: #b08800;
+    --tt-lightblue: #3b78d8;
+    --tt-lightmagenta: #b4519f;
+    --tt-lightcyan: #1b95a0;
+    --tt-white: #e8e3d6;
+  }
+
+  .tt {
+    margin: 0;
+    padding: 0.6em 0.8em;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--tt-bg);
+    color: var(--tt-fg);
+    font-family: var(--font-code);
+    /* 13px, or less so all columns fit: a JetBrains Mono cell is 0.6em wide. */
+    font-size: min(13px, calc((100cqi - 2px) / (var(--cols) * 0.6 + 1.6)));
+    line-height: 1.25;
+    white-space: pre;
+    overflow: hidden;
+    font-variant-ligatures: none;
+    width: max-content;
+    max-width: 100%;
+  }
+
+  .tt :global(.w) {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+    white-space: pre;
+  }
+</style>

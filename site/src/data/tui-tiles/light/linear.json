@@ -1,0 +1,73 @@
+{"width": 120, "styles": [["#197e44","",""],["","","b"],["#c7363b","",""],["","",""],["#6b7280","",""]],
+"sizes": {
+"small": {"cols": 30, "rows": 5, "lines": [
+[[0,"┌ linear ────────────────────┐"]],
+[[0,"│"],[1,"Assigned                    "],[0,"│"]],
+[[0,"│"],[2,"● "],[3,"Search results flicker wh…"],[0,"│"]],
+[[0,"│  "],[4,"+2 more                   "],[0,"│"]],
+[[0,"└────────────────────────────┘"]]
+]},
+"medium": {"cols": 40, "rows": 10, "lines": [
+[[0,"┌ linear ──────────────────────────────┐"]],
+[[0,"│"],[1,"Assigned                              "],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│"],[2,"● "],[3,"Search results flicker while typing"],[4,"…"],[0,"│"]],
+[[0,"│  "],[4,"ENG-482 · In Progress · updated 1h …"],[0,"│"]],
+[[0,"│"],[3,"● Cache avatar images on the CDN "],[4,"[Med…"],[0,"│"]],
+[[0,"│  "],[4,"ENG-470 · Todo · updated 20h ago    "],[0,"│"]],
+[[0,"│"],[3,"● Onboarding checklist for new worksp…"],[0,"│"]],
+[[0,"│  "],[4,"ENG-455 · Backlog · updated 3d ago  "],[0,"│"]],
+[[0,"└──────────────────────────────────────┘"]]
+]},
+"large": {"cols": 60, "rows": 15, "lines": [
+[[0,"┌ linear ──────────────────────────────────────────────────┐"]],
+[[0,"│"],[1,"Assigned                                                  "],[0,"│"]],
+[[0,"│                                                          │"]],
+[[0,"│"],[2,"● "],[3,"Search results flicker while typing "],[4,"[Urgent] [bug]      "],[0,"│"]],
+[[0,"│  "],[4,"ENG-482 · In Progress · updated 1h ago                  "],[0,"│"]],
+[[0,"│"],[3,"● Cache avatar images on the CDN "],[4,"[Medium] [performance]   "],[0,"│"]],
+[[0,"│  "],[4,"ENG-470 · Todo · updated 20h ago                        "],[0,"│"]],
+[[0,"│"],[3,"● Onboarding checklist for new workspaces "],[4,"[Low] [feature] "],[0,"│"]],
+[[0,"│  "],[4,"ENG-455 · Backlog · updated 3d ago                      "],[0,"│"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"└──────────────────────────────────────────────────────────┘"]]
+]},
+"wide": {"cols": 80, "rows": 10, "lines": [
+[[0,"┌ linear ──────────────────────────────────────────────────────────────────────┐"]],
+[[0,"│"],[1,"Assigned                                                                      "],[0,"│"]],
+[[0,"│                                                                              │"]],
+[[0,"│"],[2,"● "],[3,"Search results flicker while typing "],[4,"[Urgent] [bug]                          "],[0,"│"]],
+[[0,"│  "],[4,"ENG-482 · In Progress · updated 1h ago                                      "],[0,"│"]],
+[[0,"│"],[3,"● Cache avatar images on the CDN "],[4,"[Medium] [performance]                       "],[0,"│"]],
+[[0,"│  "],[4,"ENG-470 · Todo · updated 20h ago                                            "],[0,"│"]],
+[[0,"│"],[3,"● Onboarding checklist for new workspaces "],[4,"[Low] [feature]                     "],[0,"│"]],
+[[0,"│  "],[4,"ENG-455 · Backlog · updated 3d ago                                          "],[0,"│"]],
+[[0,"└──────────────────────────────────────────────────────────────────────────────┘"]]
+]},
+"tall": {"cols": 40, "rows": 20, "lines": [
+[[0,"┌ linear ──────────────────────────────┐"]],
+[[0,"│"],[1,"Assigned                              "],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│"],[2,"● "],[3,"Search results flicker while typing"],[4,"…"],[0,"│"]],
+[[0,"│  "],[4,"ENG-482 · In Progress · updated 1h …"],[0,"│"]],
+[[0,"│"],[3,"● Cache avatar images on the CDN "],[4,"[Med…"],[0,"│"]],
+[[0,"│  "],[4,"ENG-470 · Todo · updated 20h ago    "],[0,"│"]],
+[[0,"│"],[3,"● Onboarding checklist for new worksp…"],[0,"│"]],
+[[0,"│  "],[4,"ENG-455 · Backlog · updated 3d ago  "],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"└──────────────────────────────────────┘"]]
+]}
+}}

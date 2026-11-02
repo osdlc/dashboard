@@ -1,0 +1,73 @@
+{"width": 120, "styles": [["#197e44","",""],["","","b"],["","",""],["#6b7280","",""],["#976800","",""],["#c7363b","",""]],
+"sizes": {
+"small": {"cols": 30, "rows": 5, "lines": [
+[[0,"┌ gerrit ────────────────────┐"]],
+[[0,"│"],[1,"Mine                        "],[0,"│"]],
+[[0,"│● "],[2,"Speed up the incremental …"],[0,"│"]],
+[[0,"│  "],[3,"+2 more                   "],[0,"│"]],
+[[0,"└────────────────────────────┘"]]
+]},
+"medium": {"cols": 40, "rows": 10, "lines": [
+[[0,"┌ gerrit ──────────────────────────────┐"]],
+[[0,"│"],[1,"Mine                                  "],[0,"│"]],
+[[0,"│● "],[2,"Speed up the incremental link step "],[3,"…"],[0,"│"]],
+[[0,"│  "],[3,"platform/build 48213 · main · by Da…"],[0,"│"]],
+[[0,"│"],[4,"● "],[2,"Drop the old cache format "],[3,"[CR-1] [V…"],[0,"│"]],
+[[0,"│  "],[3,"platform/build 48190 · main · by Da…"],[0,"│"]],
+[[0,"│"],[5,"● "],[2,"Backport: fix the tag signing check"],[3,"…"],[0,"│"]],
+[[0,"│  "],[3,"tools/release 48237 · stable-2.4 · …"],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"└──────────────────────────────────────┘"]]
+]},
+"large": {"cols": 60, "rows": 15, "lines": [
+[[0,"┌ gerrit ──────────────────────────────────────────────────┐"]],
+[[0,"│"],[1,"Mine                                                      "],[0,"│"]],
+[[0,"│● "],[2,"Speed up the incremental link step "],[3,"[CR+2] [V+1]         "],[0,"│"]],
+[[0,"│  "],[3,"platform/build 48213 · main · by Dana Ruiz · updated 1h…"],[0,"│"]],
+[[0,"│"],[4,"● "],[2,"Drop the old cache format "],[3,"[CR-1] [V+1]                  "],[0,"│"]],
+[[0,"│  "],[3,"platform/build 48190 · main · by Dana Ruiz · 2 unresolv…"],[0,"│"]],
+[[0,"│"],[5,"● "],[2,"Backport: fix the tag signing check "],[3,"[V-1]               "],[0,"│"]],
+[[0,"│  "],[3,"tools/release 48237 · stable-2.4 · by Dana Ruiz · updat…"],[0,"│"]],
+[[0,"│"],[1,"To review                                                 "],[0,"│"]],
+[[0,"│"],[2,"● Add a timeout to the health probe "],[3,"[CR+1] [V+1]          "],[0,"│"]],
+[[0,"│  "],[3,"platform/runtime 48201 · main · by Sam Lee · updated 2h…"],[0,"│"]],
+[[0,"│"],[2,"● Log the slow requests at warn                           "],[0,"│"]],
+[[0,"│  "],[3,"platform/runtime 48177 · main · by Kim Park · updated 1…"],[0,"│"]],
+[[0,"│                                                          │"]],
+[[0,"└──────────────────────────────────────────────────────────┘"]]
+]},
+"wide": {"cols": 80, "rows": 10, "lines": [
+[[0,"┌ gerrit ──────────────────────────────────────────────────────────────────────┐"]],
+[[0,"│"],[1,"Mine                                                                          "],[0,"│"]],
+[[0,"│● "],[2,"Speed up the incremental link step "],[3,"[CR+2] [V+1]                             "],[0,"│"]],
+[[0,"│  "],[3,"platform/build 48213 · main · by Dana Ruiz · updated 1h ago                 "],[0,"│"]],
+[[0,"│"],[4,"● "],[2,"Drop the old cache format "],[3,"[CR-1] [V+1]                                      "],[0,"│"]],
+[[0,"│  "],[3,"platform/build 48190 · main · by Dana Ruiz · 2 unresolved · updated 4h ago  "],[0,"│"]],
+[[0,"│"],[5,"● "],[2,"Backport: fix the tag signing check "],[3,"[V-1]                                   "],[0,"│"]],
+[[0,"│  "],[3,"tools/release 48237 · stable-2.4 · by Dana Ruiz · updated 7m ago            "],[0,"│"]],
+[[0,"│                                                                              │"]],
+[[0,"└──────────────────────────────────────────────────────────────────────────────┘"]]
+]},
+"tall": {"cols": 40, "rows": 20, "lines": [
+[[0,"┌ gerrit ──────────────────────────────┐"]],
+[[0,"│"],[1,"Mine                                  "],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│● "],[2,"Speed up the incremental link step "],[3,"…"],[0,"│"]],
+[[0,"│  "],[3,"platform/build 48213 · main · by Da…"],[0,"│"]],
+[[0,"│"],[4,"● "],[2,"Drop the old cache format "],[3,"[CR-1] [V…"],[0,"│"]],
+[[0,"│  "],[3,"platform/build 48190 · main · by Da…"],[0,"│"]],
+[[0,"│"],[5,"● "],[2,"Backport: fix the tag signing check"],[3,"…"],[0,"│"]],
+[[0,"│  "],[3,"tools/release 48237 · stable-2.4 · …"],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│"],[1,"To review                             "],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│"],[2,"● Add a timeout to the health probe "],[3,"[…"],[0,"│"]],
+[[0,"│  "],[3,"platform/runtime 48201 · main · by …"],[0,"│"]],
+[[0,"│"],[2,"● Log the slow requests at warn       "],[0,"│"]],
+[[0,"│  "],[3,"platform/runtime 48177 · main · by …"],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"└──────────────────────────────────────┘"]]
+]}
+}}
