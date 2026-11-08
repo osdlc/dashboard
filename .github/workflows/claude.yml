@@ -1,6 +1,6 @@
-# Answers questions on pull requests. Mention @claude in a pull request
-#
 # Copied from osdlc/osdlc .github/workflows/claude.yml; change it there first.
+#
+# Answers questions on pull requests. Mention @claude in a pull request
 # comment, an inline review comment or a review, and Claude replies in a
 # comment on the pull request.
 #
