@@ -1,6 +1,6 @@
 //! Clock: the local time in one or more time zones, as a row of stats, a
-//! column, a world-clock table or a timeline of each zone's day. No network:
-//! the zone rules come from the system's time zone database.
+//! column or a world-clock table. No network: the zone rules come from the
+//! system's time zone database.
 //!
 //! ```yaml
 //! modules:
@@ -9,7 +9,7 @@
 //!       zones: [local, UTC, America/New_York, { zone: Asia/Tokyo, label: Tokyo office }]
 //!       hour12: false
 //!       seconds: false
-//!       style: row         # row | column | table | timeline
+//!       style: row         # row | column | table
 //! ```
 //!
 //! This is one of the native-vs-plugin benchmark widgets: the TypeScript and
@@ -68,8 +68,6 @@ enum Style {
     /// A world-clock table: time, date, UTC offset, hours from the first
     /// zone, and whether it is working hours, day or night there.
     Table,
-    /// A meter per zone showing how far through its day it is.
-    Timeline,
 }
 
 impl Default for Config {
@@ -147,7 +145,7 @@ impl Module for Clock {
             match self.style {
                 Style::Row => Size::Small,
                 Style::Column => Size::Tall,
-                Style::Table | Style::Timeline => Size::Wide,
+                Style::Table => Size::Wide,
             },
             10,
         ))
@@ -356,7 +354,7 @@ fn part_of_day(hour: i8, weekday: usize) -> (&'static str, Status) {
     }
 }
 
-/// The column, table and timeline styles.
+/// The column and table styles.
 fn styled(style: Style, zones: &[Zone], now: Timestamp, hour12: bool, seconds: bool) -> View {
     let first = zones.first().map_or(0, |z| z.tz.to_offset(now).seconds());
     let mut summary = vec![];
@@ -377,20 +375,6 @@ fn styled(style: Style, zones: &[Zone], now: Timestamp, hour12: bool, seconds: b
                 delta: Some(date),
                 status: None,
             }),
-            Style::Timeline => {
-                let minutes = f64::from(z.hour()) * 60.0 + f64::from(z.minute());
-                children.push(Widget::Gauge {
-                    label: format!("{} {shown}", zone.label),
-                    percent: (minutes / 14.4 * 10.0).round() / 10.0,
-                    marker: None,
-                    thresholds: None,
-                    caption: Some(format!(
-                        "{date} · {} · {} · {part}",
-                        utc_offset(offset),
-                        relative(offset - first)
-                    )),
-                });
-            }
             Style::Table => {
                 let text = |s: String| Cell::Text(s);
                 rows.push(Row {
@@ -445,7 +429,7 @@ pub fn catalog() -> CatalogEntry {
     let now = parse_now("2026-10-27T14:05:00Z").expect("demo time");
     CatalogEntry {
         description: "The local time in one or more time zones, as a row of stats, a \
-                      column, a world-clock table or a timeline of each zone's day. \
+                      column or a world-clock table. \
                       Uses the system's time zone database; no network."
             .into(),
         tags: crate::strings(&["time", "local", "fun"]),
@@ -573,7 +557,7 @@ mod tests {
     /// The native-only styles: `styles/<name>.json` with `<name>.view.json`.
     #[tokio::test]
     async fn style_samples_match_the_expected_views() {
-        for name in ["column", "table", "timeline", "table-hour12-weekend"] {
+        for name in ["column", "table", "table-hour12-weekend"] {
             let name = format!("styles/{name}");
             let got = render(read(&format!("{name}.json"))).await.unwrap();
             if std::env::var_os("BLESS").is_some() {

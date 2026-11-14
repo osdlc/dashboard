@@ -6,10 +6,9 @@ released on their own; they record the stages the project was built in.
 
 ## Unreleased
 
-- **Clock styles:** `style: column | table | timeline` beside the default `row`. `table` is a
-  world clock with each zone's UTC offset, hours from the first zone, and working hours, day or
-  night; `timeline` shows how far through its day each zone is. Native only: the `clock-ts` and
-  `clock-py` benchmark copies keep the `row` style.
+- **Clock styles:** `style: column | table` beside the default `row`. `table` is a world clock
+  with each zone's UTC offset, hours from the first zone, and working hours, day or night. Native
+  only: the `clock-ts` and `clock-py` benchmark copies keep the `row` style.
 
 ## 0.8.0
 
