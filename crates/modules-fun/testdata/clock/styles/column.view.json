@@ -1,0 +1,49 @@
+{
+  "status": "ok",
+  "summary": "Chicago 09:05 · UTC 14:05 · Berlin 15:05 · Kolkata 19:35 · Tokyo office 23:05",
+  "root": {
+    "type": "column",
+    "children": [
+      {
+        "type": "stat",
+        "label": "Chicago",
+        "value": "09:05",
+        "unit": null,
+        "delta": "Tue 27 Oct",
+        "status": null
+      },
+      {
+        "type": "stat",
+        "label": "UTC",
+        "value": "14:05",
+        "unit": null,
+        "delta": "Tue 27 Oct",
+        "status": null
+      },
+      {
+        "type": "stat",
+        "label": "Berlin",
+        "value": "15:05",
+        "unit": null,
+        "delta": "Tue 27 Oct",
+        "status": null
+      },
+      {
+        "type": "stat",
+        "label": "Kolkata",
+        "value": "19:35",
+        "unit": null,
+        "delta": "Tue 27 Oct",
+        "status": null
+      },
+      {
+        "type": "stat",
+        "label": "Tokyo office",
+        "value": "23:05",
+        "unit": null,
+        "delta": "Tue 27 Oct",
+        "status": null
+      }
+    ]
+  }
+}

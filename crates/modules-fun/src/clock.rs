@@ -1,5 +1,6 @@
-//! Clock: the local time in one or more time zones, as a row of stats. No
-//! network: the zone rules come from the system's time zone database.
+//! Clock: the local time in one or more time zones, as a row of stats, a
+//! column, a world-clock table or a timeline of each zone's day. No network:
+//! the zone rules come from the system's time zone database.
 //!
 //! ```yaml
 //! modules:
@@ -8,17 +9,21 @@
 //!       zones: [local, UTC, America/New_York, { zone: Asia/Tokyo, label: Tokyo office }]
 //!       hour12: false
 //!       seconds: false
+//!       style: row         # row | column | table | timeline
 //! ```
 //!
 //! This is one of the native-vs-plugin benchmark widgets: the TypeScript and
 //! Python versions in `plugins/ext/clock-ts` and `plugins/ext/clock-py`
 //! follow the same rules and must show the same view for the same input.
 //! The shared samples (configs with a fixed `now`) and expected views are in
-//! `testdata/clock/`.
+//! `testdata/clock/`. The other styles are native only; their samples are in
+//! `testdata/clock/styles/`.
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::{CatalogEntry, Manifest, Size, Status, View, Widget};
+use std::collections::BTreeMap;
+
+use dashboard_contract::{CatalogEntry, Cell, Column, Manifest, Row, Size, Status, View, Widget};
 use dashboard_host::Module;
 use jiff::Timestamp;
 use jiff::tz::TimeZone;
@@ -47,6 +52,24 @@ struct Config {
     /// `2026-10-27T14:05:00Z` or `2026-10-27T19:35:00+05:30` (years 1970 to
     /// 2999). For tests and demos.
     now: Option<String>,
+    /// How the zones are laid out.
+    style: Style,
+}
+
+/// How the clock lays out its zones.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+enum Style {
+    /// One stat per zone, side by side.
+    #[default]
+    Row,
+    /// One stat per zone, stacked: for a tall tile.
+    Column,
+    /// A world-clock table: time, date, UTC offset, hours from the first
+    /// zone, and whether it is working hours, day or night there.
+    Table,
+    /// A meter per zone showing how far through its day it is.
+    Timeline,
 }
 
 impl Default for Config {
@@ -56,6 +79,7 @@ impl Default for Config {
             hour12: false,
             seconds: false,
             now: None,
+            style: Style::Row,
         }
     }
 }
@@ -87,6 +111,7 @@ pub struct Clock {
     hour12: bool,
     seconds: bool,
     now: Option<Timestamp>,
+    style: Style,
 }
 
 #[async_trait]
@@ -113,19 +138,27 @@ impl Module for Clock {
         };
         self.hour12 = config.hour12;
         self.seconds = config.seconds;
+        self.style = config.style;
         Ok(manifest(
             "clock",
             "Clock",
             if self.seconds { 1_000 } else { 5_000 },
             1_000,
-            Size::Small,
+            match self.style {
+                Style::Row => Size::Small,
+                Style::Column => Size::Tall,
+                Style::Table | Style::Timeline => Size::Wide,
+            },
             10,
         ))
     }
 
     async fn render(&mut self) -> Result<View> {
         let now = self.now.unwrap_or_else(Timestamp::now);
-        Ok(view(&self.zones, now, self.hour12, self.seconds))
+        Ok(match self.style {
+            Style::Row => view(&self.zones, now, self.hour12, self.seconds),
+            style => styled(style, &self.zones, now, self.hour12, self.seconds),
+        })
     }
 }
 
@@ -279,6 +312,131 @@ fn view(zones: &[Zone], now: Timestamp, hour12: bool, seconds: bool) -> View {
     }
 }
 
+/// "Tokyo 23:05" or "Tokyo 11:05 PM", for summaries and captions.
+fn clock_text(time: &str, unit: &Option<String>) -> String {
+    match unit {
+        Some(u) => format!("{time} {u}"),
+        None => time.to_string(),
+    }
+}
+
+/// "UTC", "UTC+5:30", "UTC-4".
+fn utc_offset(seconds: i32) -> String {
+    if seconds == 0 {
+        return "UTC".into();
+    }
+    let sign = if seconds < 0 { '-' } else { '+' };
+    let m = seconds.unsigned_abs() / 60;
+    match m % 60 {
+        0 => format!("UTC{sign}{}", m / 60),
+        r => format!("UTC{sign}{}:{r:02}", m / 60),
+    }
+}
+
+/// Hours from the first zone: "—" (same), "+9h", "-5h", "+3:30".
+fn relative(seconds: i32) -> String {
+    if seconds == 0 {
+        return "—".into();
+    }
+    let sign = if seconds < 0 { '-' } else { '+' };
+    let m = seconds.unsigned_abs() / 60;
+    match m % 60 {
+        0 => format!("{sign}{}h", m / 60),
+        r => format!("{sign}{}:{r:02}", m / 60),
+    }
+}
+
+/// Working hours (9 to 17 on a weekday), day (7 to 21) or night.
+fn part_of_day(hour: i8, weekday: usize) -> (&'static str, Status) {
+    let weekend = weekday == 0 || weekday == 6;
+    match hour {
+        9..=16 if !weekend => ("working hours", Status::Ok),
+        7..=20 => ("day", Status::Unknown),
+        _ => ("night", Status::Unknown),
+    }
+}
+
+/// The column, table and timeline styles.
+fn styled(style: Style, zones: &[Zone], now: Timestamp, hour12: bool, seconds: bool) -> View {
+    let first = zones.first().map_or(0, |z| z.tz.to_offset(now).seconds());
+    let mut summary = vec![];
+    let mut children = vec![];
+    let mut rows = vec![];
+    for zone in zones {
+        let (time, unit, date) = wall(&zone.tz, now, hour12, seconds);
+        let z = now.to_zoned(zone.tz.clone());
+        let offset = zone.tz.to_offset(now).seconds();
+        let shown = clock_text(&time, &unit);
+        summary.push(format!("{} {shown}", zone.label));
+        let (part, status) = part_of_day(z.hour(), z.weekday().to_sunday_zero_offset() as usize);
+        match style {
+            Style::Column => children.push(Widget::Stat {
+                label: zone.label.clone(),
+                value: time,
+                unit,
+                delta: Some(date),
+                status: None,
+            }),
+            Style::Timeline => {
+                let minutes = f64::from(z.hour()) * 60.0 + f64::from(z.minute());
+                children.push(Widget::Gauge {
+                    label: format!("{} {shown}", zone.label),
+                    percent: (minutes / 14.4 * 10.0).round() / 10.0,
+                    marker: None,
+                    thresholds: None,
+                    caption: Some(format!(
+                        "{date} · {} · {} · {part}",
+                        utc_offset(offset),
+                        relative(offset - first)
+                    )),
+                });
+            }
+            Style::Table => {
+                let text = |s: String| Cell::Text(s);
+                rows.push(Row {
+                    cells: BTreeMap::from([
+                        ("zone".into(), text(zone.label.clone())),
+                        ("time".into(), text(shown)),
+                        ("date".into(), text(date)),
+                        ("offset".into(), text(utc_offset(offset))),
+                        ("diff".into(), text(relative(offset - first))),
+                        ("part".into(), text(part.into())),
+                    ]),
+                    status: Some(status),
+                    action: None,
+                });
+            }
+            Style::Row => unreachable!("the row style uses view()"),
+        }
+    }
+    let root = match style {
+        Style::Table => {
+            let col = |key: &str, label: &str, priority: i32| Column {
+                key: key.into(),
+                label: label.into(),
+                priority: Some(priority),
+            };
+            Widget::Table {
+                columns: vec![
+                    col("zone", "Zone", 0),
+                    col("time", "Time", 5),
+                    col("date", "Date", 3),
+                    col("diff", "From first", 4),
+                    col("offset", "Offset", 1),
+                    col("part", "Now", 2),
+                ],
+                rows,
+            }
+        }
+        _ => Widget::Column { children },
+    };
+    View {
+        status: Status::Ok,
+        summary: summary.join(" · "),
+        root,
+    }
+}
+
 pub fn catalog() -> CatalogEntry {
     let zones: Vec<Zone> = ["UTC", "America/New_York", "Asia/Tokyo"]
         .iter()
@@ -286,7 +444,8 @@ pub fn catalog() -> CatalogEntry {
         .collect();
     let now = parse_now("2026-10-27T14:05:00Z").expect("demo time");
     CatalogEntry {
-        description: "The local time in one or more time zones, as a row of stats. \
+        description: "The local time in one or more time zones, as a row of stats, a \
+                      column, a world-clock table or a timeline of each zone's day. \
                       Uses the system's time zone database; no network."
             .into(),
         tags: crate::strings(&["time", "local", "fun"]),
@@ -409,6 +568,46 @@ mod tests {
         ] {
             assert!(render(config.clone()).await.is_err(), "{config}");
         }
+    }
+
+    /// The native-only styles: `styles/<name>.json` with `<name>.view.json`.
+    #[tokio::test]
+    async fn style_samples_match_the_expected_views() {
+        for name in ["column", "table", "timeline", "table-hour12-weekend"] {
+            let name = format!("styles/{name}");
+            let got = render(read(&format!("{name}.json"))).await.unwrap();
+            if std::env::var_os("BLESS").is_some() {
+                let json = serde_json::to_string_pretty(&got).unwrap() + "\n";
+                std::fs::write(data(&format!("{name}.view.json")), json).unwrap();
+            }
+            let expected: View =
+                serde_json::from_value(read(&format!("{name}.view.json"))).unwrap();
+            assert_eq!(got, expected, "{name}");
+        }
+    }
+
+    #[test]
+    fn offsets_and_parts_of_day() {
+        assert_eq!(utc_offset(0), "UTC");
+        assert_eq!(utc_offset(19_800), "UTC+5:30");
+        assert_eq!(utc_offset(-14_400), "UTC-4");
+        assert_eq!(relative(0), "—");
+        assert_eq!(relative(-18_000), "-5h");
+        assert_eq!(relative(34_200), "+9:30");
+        assert_eq!(part_of_day(10, 2).0, "working hours");
+        assert_eq!(part_of_day(10, 6).0, "day");
+        assert_eq!(part_of_day(17, 3).0, "day");
+        assert_eq!(part_of_day(22, 3).0, "night");
+        assert_eq!(part_of_day(6, 3).0, "night");
+    }
+
+    #[tokio::test]
+    async fn unknown_style_is_rejected() {
+        assert!(
+            render(serde_json::json!({ "style": "analog" }))
+                .await
+                .is_err()
+        );
     }
 
     #[test]

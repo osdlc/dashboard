@@ -1,0 +1,101 @@
+{
+  "status": "ok",
+  "summary": "Chicago 09:05 · UTC 14:05 · Berlin 15:05 · Kolkata 19:35 · Tokyo office 23:05",
+  "root": {
+    "type": "table",
+    "columns": [
+      {
+        "key": "zone",
+        "label": "Zone",
+        "priority": 0
+      },
+      {
+        "key": "time",
+        "label": "Time",
+        "priority": 5
+      },
+      {
+        "key": "date",
+        "label": "Date",
+        "priority": 3
+      },
+      {
+        "key": "diff",
+        "label": "From first",
+        "priority": 4
+      },
+      {
+        "key": "offset",
+        "label": "Offset",
+        "priority": 1
+      },
+      {
+        "key": "part",
+        "label": "Now",
+        "priority": 2
+      }
+    ],
+    "rows": [
+      {
+        "cells": {
+          "date": "Tue 27 Oct",
+          "diff": "—",
+          "offset": "UTC-5",
+          "part": "working hours",
+          "time": "09:05",
+          "zone": "Chicago"
+        },
+        "status": "ok",
+        "action": null
+      },
+      {
+        "cells": {
+          "date": "Tue 27 Oct",
+          "diff": "+5h",
+          "offset": "UTC",
+          "part": "working hours",
+          "time": "14:05",
+          "zone": "UTC"
+        },
+        "status": "ok",
+        "action": null
+      },
+      {
+        "cells": {
+          "date": "Tue 27 Oct",
+          "diff": "+6h",
+          "offset": "UTC+1",
+          "part": "working hours",
+          "time": "15:05",
+          "zone": "Berlin"
+        },
+        "status": "ok",
+        "action": null
+      },
+      {
+        "cells": {
+          "date": "Tue 27 Oct",
+          "diff": "+10:30",
+          "offset": "UTC+5:30",
+          "part": "day",
+          "time": "19:35",
+          "zone": "Kolkata"
+        },
+        "status": "unknown",
+        "action": null
+      },
+      {
+        "cells": {
+          "date": "Tue 27 Oct",
+          "diff": "+14h",
+          "offset": "UTC+9",
+          "part": "night",
+          "time": "23:05",
+          "zone": "Tokyo office"
+        },
+        "status": "unknown",
+        "action": null
+      }
+    ]
+  }
+}
