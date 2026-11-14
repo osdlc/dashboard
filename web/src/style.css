@@ -171,7 +171,9 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 .w-clockface .w-label, .w-display .w-label, .cf-caption, .dp-caption { color: var(--muted); font-size: 0.8rem; margin: 0; }
 .w-clockface .w-label, .w-display .w-label { margin-bottom: 2px; }
 .cf-caption, .dp-caption { margin-top: 2px; }
-.cf-dial { flex: 1; min-height: 40px; width: 100%; max-height: 100%; display: block; }
+/* Height comes from the space left, never from the width: a wide share would
+   otherwise make the dial taller than the tile and the fit would cut it. */
+.cf-dial { flex: 1 1 0px; height: 0; min-height: 0; width: 100%; display: block; }
 .cf-face { fill: var(--surface); stroke: var(--border); stroke-width: 1.5; }
 .w-clockface[data-status='ok'] .cf-face { stroke: var(--ok); }
 .w-clockface[data-status='warn'] .cf-face { stroke: var(--warn); }
