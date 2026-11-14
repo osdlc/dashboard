@@ -1,0 +1,73 @@
+{
+ "chart": {
+  "result": [
+   {
+    "meta": {
+     "currency": "USD",
+     "symbol": "MSFT",
+     "exchangeName": "NMS",
+     "instrumentType": "EQUITY",
+     "regularMarketTime": 1794603601,
+     "longName": "Microsoft Corporation",
+     "shortName": "Microsoft Corporation",
+     "chartPreviousClose": 523.0,
+     "previousClose": 523.0,
+     "regularMarketPrice": 523.88,
+     "currentTradingPeriod": {
+      "pre": {
+       "timezone": "EST",
+       "start": 1794560400,
+       "end": 1794580200,
+       "gmtoffset": -18000
+      },
+      "regular": {
+       "timezone": "EST",
+       "start": 1794580200,
+       "end": 1794603600,
+       "gmtoffset": -18000
+      },
+      "post": {
+       "timezone": "EST",
+       "start": 1794603600,
+       "end": 1794618000,
+       "gmtoffset": -18000
+      }
+     },
+     "dataGranularity": "5m",
+     "range": "1d"
+    },
+    "timestamp": [
+     1794580200,
+     1794582600,
+     1794585000,
+     1794587400,
+     1794589800,
+     1794592200,
+     1794594600,
+     1794597000,
+     1794599400,
+     1794603600
+    ],
+    "indicators": {
+     "quote": [
+      {
+       "close": [
+        514.7,
+        518.9401,
+        524.665,
+        523.83,
+        524.06,
+        524.5546,
+        524.155,
+        524.44,
+        524.69,
+        523.88
+       ]
+      }
+     ]
+    }
+   }
+  ],
+  "error": null
+ }
+}
