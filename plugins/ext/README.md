@@ -20,6 +20,7 @@ match the SDK; after an SDK change, copy it again.
 | `pagerduty` | PagerDuty: open incidents, and who is first on call |
 | `opsgenie` | Opsgenie alerts: open alerts, unacknowledged and highest priority first |
 | `sentry` | Sentry: unresolved issues for an organization or one project |
+| `containers` | Colima, Lima and Podman VMs, every Docker context's engine and its containers, in one tile |
 
 ## Benchmark copies
 
@@ -80,6 +81,22 @@ catalog demo use.
 ```sh
 dashboard plugin-check -- python3 plugins/ext/healthchecks/main.py --sample
 HEALTHCHECKS_API_KEY=... dashboard plugin-check -- python3 plugins/ext/healthchecks/main.py
+```
+
+## Containers and VMs (local CLIs)
+
+`containers` reads the CLIs on this machine, no token: `colima list --json`, `limactl list --json`,
+`podman machine list --format json`, `docker context ls` and, per context, `docker ps`. Each is
+optional: one that is not on PATH is skipped, one that fails shows an error row and a warning tile,
+and a unix-socket context whose socket file is missing shows "not running" without calling docker.
+Its `docker`, `limactl`, `colima` and `podman` settings name the program (default the bare name);
+`""` or `false` turns that source off. Other settings: `show_exited`, `show_stopped_vms`, `limit`
+and `timeout`. `view.py` builds the tile from the CLI text (unit tests in `test_view.py`);
+`main.py` runs the commands. `testdata/` holds fake CLIs printing recorded output, and the `demo:`
+is what the ones in `testdata/ok` produce. The test is `crates/cli/tests/ext_containers.rs`.
+
+```sh
+dashboard plugin-check -- python3 plugins/ext/containers/main.py
 ```
 
 ## Ops widgets (token APIs)

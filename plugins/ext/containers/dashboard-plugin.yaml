@@ -1,0 +1,254 @@
+# A plugin package: this file plus the plugin's own files. See docs/plugins.md.
+id: containers
+version: 0.1.0
+name: Containers and VMs
+description: >-
+  Container runtimes on this machine in one tile: Colima and Lima VMs (and
+  Podman machines), every Docker context with whether its engine answers, and
+  the containers on each engine. Each CLI is optional: one that is not
+  installed is skipped, one that fails shows an error row. Set a program
+  setting to "" or false to turn that source off.
+tags: [containers, docker, colima, lima, podman, vm, ops, local]
+# Run in this folder.
+run: [python3, main.py]
+runtime: python3>=3.9
+# Each is optional; a missing one is skipped.
+binaries: [docker, colima, limactl, podman]
+size: wide
+config_schema:
+  type: object
+  additionalProperties: false
+  properties:
+    show_exited: { type: boolean, description: "Also list containers that are not running (docker ps -a). Default false." }
+    show_stopped_vms: { type: boolean, description: "Also list VMs that are stopped. Default true." }
+    limit: { type: integer, minimum: 0, description: "Container rows shown. Default 30." }
+    timeout: { type: number, description: "Seconds each CLI call may take. Default 4." }
+    docker: { type: [string, boolean], description: 'The docker program, e.g. a full path. "" or false turns the Docker engines and containers off. Default docker.' }
+    limactl: { type: [string, boolean], description: 'The limactl program. "" or false turns Lima VMs off. Default limactl.' }
+    colima: { type: [string, boolean], description: 'The colima program. "" or false turns Colima VMs off. Default colima.' }
+    podman: { type: [string, boolean], description: 'The podman program. "" or false turns Podman machines off. Default podman.' }
+# The output of testdata/ok/*, the fake CLIs the tests run (made-up names only).
+demo:
+  {
+    "root": {
+      "children": [
+        {
+          "children": [
+            {
+              "label": "VMs running",
+              "type": "stat",
+              "value": "2/4"
+            },
+            {
+              "label": "Engines up",
+              "type": "stat",
+              "value": "2/3"
+            },
+            {
+              "label": "Containers",
+              "type": "stat",
+              "unit": "running",
+              "value": "3"
+            }
+          ],
+          "type": "row"
+        },
+        {
+          "columns": [
+            {
+              "key": "kind",
+              "label": "Kind",
+              "priority": 2
+            },
+            {
+              "key": "name",
+              "label": "VM"
+            },
+            {
+              "key": "status",
+              "label": "Status",
+              "priority": 3
+            },
+            {
+              "key": "res",
+              "label": "CPU · mem · disk",
+              "priority": 1
+            },
+            {
+              "key": "extra",
+              "label": "Type",
+              "priority": -1
+            }
+          ],
+          "rows": [
+            {
+              "cells": {
+                "extra": "docker",
+                "kind": "colima",
+                "name": "default",
+                "res": "4 · 8 GiB · 100 GiB",
+                "status": "Running"
+              },
+              "status": "ok"
+            },
+            {
+              "cells": {
+                "extra": "vz",
+                "kind": "lima",
+                "name": "dev",
+                "res": "2 · 4 GiB · 50 GiB",
+                "status": "Running"
+              },
+              "status": "ok"
+            },
+            {
+              "cells": {
+                "extra": "containerd",
+                "kind": "colima",
+                "name": "staging",
+                "res": "2 · 4 GiB · 60 GiB",
+                "status": "Stopped"
+              },
+              "status": "unknown"
+            },
+            {
+              "cells": {
+                "extra": "applehv",
+                "kind": "podman",
+                "name": "podman-machine-default",
+                "res": "2 · 2GiB · 100GiB",
+                "status": "Stopped"
+              },
+              "status": "unknown"
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "columns": [
+            {
+              "key": "engine",
+              "label": "Docker context"
+            },
+            {
+              "key": "current",
+              "label": "Current",
+              "priority": 1
+            },
+            {
+              "key": "state",
+              "label": "Engine",
+              "priority": 3
+            },
+            {
+              "key": "count",
+              "label": "Containers",
+              "priority": 2
+            },
+            {
+              "key": "endpoint",
+              "label": "Endpoint",
+              "priority": -1
+            }
+          ],
+          "rows": [
+            {
+              "cells": {
+                "count": "",
+                "current": "",
+                "endpoint": "/nonexistent/dashboard-demo/docker.sock",
+                "engine": "desktop",
+                "state": "not running"
+              },
+              "status": "unknown"
+            },
+            {
+              "cells": {
+                "count": "2 running",
+                "current": "●",
+                "endpoint": "tcp://192.0.2.10:2375",
+                "engine": "colima",
+                "state": "up"
+              },
+              "status": "ok"
+            },
+            {
+              "cells": {
+                "count": "1 running",
+                "current": "",
+                "endpoint": "tcp://192.0.2.20:2375",
+                "engine": "staging",
+                "state": "up"
+              },
+              "status": "ok"
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "columns": [
+            {
+              "key": "name",
+              "label": "Container"
+            },
+            {
+              "key": "engine",
+              "label": "Engine",
+              "priority": 2
+            },
+            {
+              "key": "image",
+              "label": "Image",
+              "priority": 1
+            },
+            {
+              "key": "status",
+              "label": "Status",
+              "priority": 3
+            },
+            {
+              "key": "ports",
+              "label": "Ports",
+              "priority": -1
+            }
+          ],
+          "rows": [
+            {
+              "cells": {
+                "engine": "colima",
+                "image": "redis:7",
+                "name": "cache",
+                "ports": "6379/tcp",
+                "status": "Up 3 hours"
+              },
+              "status": "ok"
+            },
+            {
+              "cells": {
+                "engine": "colima",
+                "image": "postgres:16",
+                "name": "postgres",
+                "ports": "0.0.0.0:5432->5432/tcp",
+                "status": "Up 3 hours"
+              },
+              "status": "ok"
+            },
+            {
+              "cells": {
+                "engine": "staging",
+                "image": "nginx:1.27",
+                "name": "web",
+                "ports": "0.0.0.0:8080->80/tcp",
+                "status": "Up 5 days"
+              },
+              "status": "ok"
+            }
+          ],
+          "type": "table"
+        }
+      ],
+      "type": "column"
+    },
+    "status": "ok",
+    "summary": "2/4 VMs up · 2/3 engines · 3 containers"
+  }
