@@ -1,0 +1,22 @@
+#!/bin/sh
+# Stands in for the docker CLI: `context ls --format json` and
+# `--context NAME ps [-a] --format json`, from the files beside it. A context
+# with no ps-NAME.jsonl fails like an engine that cannot be reached.
+here=$(dirname "$0")
+if [ "$1" = context ] && [ "$2" = ls ]; then
+  cat "$here/contexts.jsonl"
+  exit 0
+fi
+if [ "$1" = --context ]; then
+  ctx=$2
+  shift 2
+  if [ "$1" = ps ]; then
+    file="$here/ps-$ctx.jsonl"
+    [ "$2" = -a ] && file="$here/ps-$ctx-all.jsonl"
+    if [ -f "$file" ]; then cat "$file"; exit 0; fi
+    echo "Cannot connect to the Docker daemon at tcp://192.0.2.99:2375. Is the docker daemon running?" >&2
+    exit 1
+  fi
+fi
+echo "fake docker: unknown command $*" >&2
+exit 1

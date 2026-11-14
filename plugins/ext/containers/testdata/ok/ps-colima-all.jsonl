@@ -1,0 +1,3 @@
+{"Command":"\"docker-entrypoint.s…\"","Image":"postgres:16","Names":"postgres","Ports":"0.0.0.0:5432->5432/tcp","State":"running","Status":"Up 3 hours"}
+{"Command":"\"docker-entrypoint.s…\"","Image":"redis:7","Names":"cache","Ports":"6379/tcp","State":"running","Status":"Up 3 hours"}
+{"Command":"\"/bin/sh -c 'make t…\"","Image":"app-builder:latest","Names":"old-build","Ports":"","State":"exited","Status":"Exited (0) 2 days ago"}

@@ -213,6 +213,11 @@ modules:
     package: healthchecks
     demo: true            # real: set $HEALTHCHECKS_API_KEY
 
+  # Reads the local colima, limactl, podman and docker CLIs; the demo needs none.
+  containers:
+    package: containers
+    demo: true
+
   # ---- personal bundle: Open-Meteo, public, no key ----
   weather:
     config: { place: Berlin, days: 5 }
@@ -397,6 +402,7 @@ screens:
       - { module: latency, size: large }
       - { module: install-log, size: wide }
       - { module: docker, size: wide }
+      - { module: containers, size: wide }
       - { module: ipinfo, size: small }
       - { module: kubernetes, size: wide }
   - name: incidents

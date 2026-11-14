@@ -1,0 +1,2 @@
+{"Current":true,"Description":"colima","DockerEndpoint":"tcp://192.0.2.10:2375","Error":"","Name":"colima"}
+{"Current":false,"Description":"Unreachable box","DockerEndpoint":"tcp://192.0.2.99:2375","Error":"","Name":"remote"}

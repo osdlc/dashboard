@@ -1,0 +1,1 @@
+{"Command":"\"/docker-entrypoint.…\"","Image":"nginx:1.27","Names":"web","Ports":"0.0.0.0:8080->80/tcp","State":"running","Status":"Up 5 days"}
