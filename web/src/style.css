@@ -162,6 +162,41 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 .w-table .pie-disc { width: 1.6em; }
 
 .w-stat { display: flex; flex-direction: column; }
+
+/* Clock face and display: fill the height the tile has left, centered. */
+.tile > .w-clockface, .tile > .w-display, .tile > .w-row:has(> .w-clockface, > .w-display) { flex: 1; min-height: 0; }
+.w-row > .w-clockface, .w-row > .w-display { min-height: 0; }
+.w-column > .w-clockface, .w-column > .w-display { flex: 1 1 80px; min-height: 0; }
+.w-clockface, .w-display { display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 0; }
+.w-clockface .w-label, .w-display .w-label, .cf-caption, .dp-caption { color: var(--muted); font-size: 0.8rem; margin: 0; }
+.w-clockface .w-label, .w-display .w-label { margin-bottom: 2px; }
+.cf-caption, .dp-caption { margin-top: 2px; }
+.cf-dial { flex: 1; min-height: 40px; width: 100%; max-height: 100%; display: block; }
+.cf-face { fill: var(--surface); stroke: var(--border); stroke-width: 1.5; }
+.w-clockface[data-status='ok'] .cf-face { stroke: var(--ok); }
+.w-clockface[data-status='warn'] .cf-face { stroke: var(--warn); }
+.w-clockface[data-status='error'] .cf-face { stroke: var(--error); }
+.cf-tick { stroke: var(--border); stroke-width: 1; stroke-linecap: round; }
+.cf-tick.quarter { stroke: var(--muted); stroke-width: 2; }
+.cf-hand { stroke: var(--text); stroke-linecap: round; transition: transform 0.4s ease-out; }
+.cf-hour { stroke-width: 3.2; }
+.cf-minute { stroke-width: 2.2; }
+.cf-second { stroke: var(--accent); stroke-width: 1; transition-duration: 0.25s; }
+.cf-pin { fill: var(--accent); }
+@media (prefers-reduced-motion: reduce) { .cf-hand { transition: none; } }
+.dp-box { flex: 1; min-height: 2rem; align-self: stretch; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.dp-text { font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1; white-space: nowrap; }
+.dp-text small { font-size: 0.4em; font-weight: 500; color: var(--muted); margin-left: 0.2em; }
+.dp-probe { position: absolute; visibility: hidden; pointer-events: none; }
+.w-display[data-status='ok'] .dp-text { color: var(--ok); }
+.w-display[data-status='warn'] .dp-text { color: var(--warn); }
+.w-display[data-status='error'] .dp-text { color: var(--error); }
+/* In a table cell: plain inline text and a small dial. */
+.w-table .w-display, .w-table .w-clockface { display: inline-flex; flex-direction: row; vertical-align: middle; }
+.w-table .w-display .w-label, .w-table .dp-caption, .w-table .w-clockface .w-label, .w-table .cf-caption, .w-table .dp-probe { display: none; }
+.w-table .dp-box { min-height: 0; overflow: visible; }
+.w-table .dp-text { font-size: inherit !important; }
+.w-table .cf-dial { width: 1.6em; height: 1.6em; min-height: 0; flex: none; }
 .w-stat .label, .w-stat .delta { color: var(--muted); font-size: 0.8rem; }
 .w-stat .value { font-size: 1.5rem; font-weight: 600; }
 

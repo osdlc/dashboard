@@ -1,0 +1,33 @@
+{
+  "status": "ok",
+  "summary": "Chicago 9:05 AM · UTC 2:05 PM · Tokyo office 11:05 PM",
+  "root": {
+    "type": "row",
+    "children": [
+      {
+        "type": "display",
+        "text": "9:05",
+        "label": "Chicago",
+        "caption": "Tue 27 Oct",
+        "unit": "AM",
+        "status": null
+      },
+      {
+        "type": "display",
+        "text": "2:05",
+        "label": "UTC",
+        "caption": "Tue 27 Oct",
+        "unit": "PM",
+        "status": null
+      },
+      {
+        "type": "display",
+        "text": "11:05",
+        "label": "Tokyo office",
+        "caption": "Tue 27 Oct",
+        "unit": "PM",
+        "status": null
+      }
+    ]
+  }
+}

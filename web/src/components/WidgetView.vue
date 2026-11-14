@@ -11,6 +11,8 @@ import UptimeView from './UptimeView.vue'
 import LogView from './LogView.vue'
 import MeterGrid from './MeterGrid.vue'
 import PieChart from './PieChart.vue'
+import ClockFace from './ClockFace.vue'
+import DisplayText from './DisplayText.vue'
 import SeriesChart from './SeriesChart.vue'
 
 defineOptions({ name: 'WidgetView' })
@@ -76,6 +78,10 @@ const keys = computed(() => {
   <BarList v-else-if="w.type === 'bars'" :widget="w" />
 
   <PieChart v-else-if="w.type === 'pie'" :widget="w" />
+
+  <ClockFace v-else-if="w.type === 'clock_face'" :widget="w" />
+
+  <DisplayText v-else-if="w.type === 'display'" :widget="w" />
 
   <LogView v-else-if="w.type === 'log'" :widget="w" />
 

@@ -25,6 +25,8 @@ use tokio::sync::{mpsc, watch};
 
 mod canvas;
 mod charts;
+mod clockface;
+mod display;
 mod fit;
 mod help;
 mod layout;
