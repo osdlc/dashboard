@@ -4,7 +4,7 @@ version: 0.1.0
 name: Stocks
 description: >-
   Prices and the change since the previous close of the symbols you pick, from
-  Yahoo Finance, with a chart of each one's day. Warns when a symbol falls at
+  Yahoo Finance. Warns when a symbol falls at
   least a set percent, or a symbol is not found. Click a row to open it on
   Yahoo Finance. Uses Yahoo's unofficial chart endpoint, no key, and can break
   without notice.
@@ -24,7 +24,6 @@ config_schema:
       maxItems: 25
       description: 'Ticker symbols as Yahoo Finance writes them, e.g. AAPL, BRK-B, ^GSPC, EURUSD=X. Shown in this order. Default [SPY, QQQ, AAPL, MSFT, NVDA].'
     warn_drop: { type: number, exclusiveMinimum: 0, description: "Warn when a symbol fell at least this many percent since the previous close. Default 2." }
-    chart: { type: boolean, description: "Draw each symbol's day as a line chart below the table (up to 6 symbols). Default true." }
     sample:
       type: [string, "null"]
       x-path: true
