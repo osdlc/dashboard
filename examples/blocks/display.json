@@ -1,0 +1,18 @@
+{
+  "id": "display",
+  "title": "Display",
+  "group": "primitives",
+  "default_size": "small",
+  "description": "One value as large as the tile allows, such as a big number or a clock. The terminal draws it in a block font for digits and a few symbols, and in plain text for anything else.",
+  "view": {
+    "status": "ok",
+    "summary": "Tokyo 2:05 PM",
+    "root": {
+      "type": "display",
+      "text": "2:05",
+      "label": "Tokyo",
+      "caption": "Tue 27 Oct",
+      "unit": "PM"
+    }
+  }
+}

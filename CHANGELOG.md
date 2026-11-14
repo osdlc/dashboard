@@ -6,9 +6,13 @@ released on their own; they record the stages the project was built in.
 
 ## Unreleased
 
-- **Clock styles:** `style: column | table` beside the default `row`. `table` is a world clock
-  with each zone's UTC offset, hours from the first zone, and working hours, day or night. Native
-  only: the `clock-ts` and `clock-py` benchmark copies keep the `row` style.
+- **Clock face and display widgets:** `clock_face` is an analog dial (hour, minute and optional
+  second hand) and `display` is one value as large as the tile allows, with a block font in the
+  TUI. Any module can use them; the clock uses both in its new styles.
+- **Clock styles:** `style: column | table | analog | digital` beside the default `row`. `table` is
+  a world clock with each zone's UTC offset, hours from the first zone, and working hours, day or
+  night; `analog` draws a dial per zone and `digital` shows each time as big text. Native only: the
+  `clock-ts` and `clock-py` benchmark copies keep the `row` style.
 
 ## 0.8.0
 

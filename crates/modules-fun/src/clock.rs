@@ -1,6 +1,6 @@
 //! Clock: the local time in one or more time zones, as a row of stats, a
-//! column or a world-clock table. No network: the zone rules come from the
-//! system's time zone database.
+//! column, a world-clock table, analog dials or big digital text. No network: the
+//! zone rules come from the system's time zone database.
 //!
 //! ```yaml
 //! modules:
@@ -9,7 +9,7 @@
 //!       zones: [local, UTC, America/New_York, { zone: Asia/Tokyo, label: Tokyo office }]
 //!       hour12: false
 //!       seconds: false
-//!       style: row         # row | column | table
+//!       style: row         # row | column | table | analog | digital
 //! ```
 //!
 //! This is one of the native-vs-plugin benchmark widgets: the TypeScript and
@@ -68,6 +68,10 @@ enum Style {
     /// A world-clock table: time, date, UTC offset, hours from the first
     /// zone, and whether it is working hours, day or night there.
     Table,
+    /// An analog dial per zone, side by side.
+    Analog,
+    /// The time per zone as big text, side by side.
+    Digital,
 }
 
 impl Default for Config {
@@ -145,7 +149,8 @@ impl Module for Clock {
             match self.style {
                 Style::Row => Size::Small,
                 Style::Column => Size::Tall,
-                Style::Table => Size::Wide,
+                Style::Analog => Size::Large,
+                Style::Table | Style::Digital => Size::Wide,
             },
             10,
         ))
@@ -354,7 +359,7 @@ fn part_of_day(hour: i8, weekday: usize) -> (&'static str, Status) {
     }
 }
 
-/// The column and table styles.
+/// The column, table, analog and digital styles.
 fn styled(style: Style, zones: &[Zone], now: Timestamp, hour12: bool, seconds: bool) -> View {
     let first = zones.first().map_or(0, |z| z.tz.to_offset(now).seconds());
     let mut summary = vec![];
@@ -368,6 +373,21 @@ fn styled(style: Style, zones: &[Zone], now: Timestamp, hour12: bool, seconds: b
         summary.push(format!("{} {shown}", zone.label));
         let (part, status) = part_of_day(z.hour(), z.weekday().to_sunday_zero_offset() as usize);
         match style {
+            Style::Analog => children.push(Widget::ClockFace {
+                hour: z.hour() as u8,
+                minute: z.minute() as u8,
+                second: seconds.then_some(z.second() as u8),
+                label: Some(zone.label.clone()),
+                caption: Some(date),
+                status: None,
+            }),
+            Style::Digital => children.push(Widget::Display {
+                text: time,
+                label: Some(zone.label.clone()),
+                caption: Some(date),
+                unit,
+                status: None,
+            }),
             Style::Column => children.push(Widget::Stat {
                 label: zone.label.clone(),
                 value: time,
@@ -412,6 +432,7 @@ fn styled(style: Style, zones: &[Zone], now: Timestamp, hour12: bool, seconds: b
                 rows,
             }
         }
+        Style::Analog | Style::Digital => Widget::Row { children },
         _ => Widget::Column { children },
     };
     View {
@@ -429,7 +450,7 @@ pub fn catalog() -> CatalogEntry {
     let now = parse_now("2026-10-27T14:05:00Z").expect("demo time");
     CatalogEntry {
         description: "The local time in one or more time zones, as a row of stats, a \
-                      column or a world-clock table. \
+                      column, a world-clock table, analog dials or big digital text. \
                       Uses the system's time zone database; no network."
             .into(),
         tags: crate::strings(&["time", "local", "fun"]),
@@ -557,7 +578,13 @@ mod tests {
     /// The native-only styles: `styles/<name>.json` with `<name>.view.json`.
     #[tokio::test]
     async fn style_samples_match_the_expected_views() {
-        for name in ["column", "table", "table-hour12-weekend"] {
+        for name in [
+            "column",
+            "table",
+            "table-hour12-weekend",
+            "analog",
+            "digital",
+        ] {
             let name = format!("styles/{name}");
             let got = render(read(&format!("{name}.json"))).await.unwrap();
             if std::env::var_os("BLESS").is_some() {
@@ -588,7 +615,7 @@ mod tests {
     #[tokio::test]
     async fn unknown_style_is_rejected() {
         assert!(
-            render(serde_json::json!({ "style": "analog" }))
+            render(serde_json::json!({ "style": "sundial" }))
                 .await
                 .is_err()
         );

@@ -227,6 +227,45 @@ pub enum Widget {
         #[serde(default)]
         color: ColorScale,
     },
+    /// An analog clock face with hour and minute hands, and a second hand
+    /// when `second` is given. The renderer draws it; it never reads a clock.
+    ClockFace {
+        /// 0-23.
+        hour: u8,
+        /// 0-59.
+        minute: u8,
+        /// 0-59. No second hand when absent.
+        #[serde(default)]
+        second: Option<u8>,
+        /// Shown above the face, e.g. "Tokyo".
+        #[serde(default)]
+        label: Option<String>,
+        /// Shown below the face, e.g. a date.
+        #[serde(default)]
+        caption: Option<String>,
+        /// Colors the face's outline: ok, warn or error.
+        #[serde(default)]
+        status: Option<Status>,
+    },
+    /// One value as large as the space allows: a big number or a clock.
+    Display {
+        /// Already formatted, e.g. "14:05". The TUI's block font covers
+        /// digits and a few symbols (`: . - + %`, space, A, M, P); other
+        /// characters show the whole text small.
+        text: String,
+        /// Shown above the text.
+        #[serde(default)]
+        label: Option<String>,
+        /// Shown below the text.
+        #[serde(default)]
+        caption: Option<String>,
+        /// Shown after the text, smaller, e.g. "PM".
+        #[serde(default)]
+        unit: Option<String>,
+        /// Colors the text: ok, warn or error.
+        #[serde(default)]
+        status: Option<Status>,
+    },
     /// Items with a title, a subtitle, a status marker and tags.
     List {
         items: Vec<ListItem>,
@@ -234,7 +273,7 @@ pub enum Widget {
         #[serde(default)]
         empty_text: Option<String>,
     },
-    /// Rows and columns. A cell holds text, a number, or a stat, gauge or pie.
+    /// Rows and columns. A cell holds text, a number, or a stat, gauge, pie, display or clock face.
     Table {
         columns: Vec<Column>,
         rows: Vec<Row>,
@@ -469,8 +508,9 @@ pub struct Row {
 pub enum Cell {
     Text(String),
     Number(f64),
-    /// `Stat`, `Gauge` and `Pie` are rendered inline (the TUI shows a pie as
-    /// its largest slice); others fall back to text.
+    /// `Stat`, `Gauge`, `Pie`, `Display` and `ClockFace` are rendered inline (the
+    /// TUI shows a pie as its largest slice, a clock face as "14:05"); others
+    /// fall back to text.
     Widget(Widget),
 }
 
