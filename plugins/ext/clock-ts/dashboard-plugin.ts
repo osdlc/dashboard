@@ -400,6 +400,12 @@ export interface GaugeWidget {
 export interface SeriesWidget {
   /** The color of a single series. */
   color?: ColorScale;
+  /**
+   * Scale to the data's own range with a little padding (for prices that
+   * sit far from 0). Ignored when `y_min` or `y_max` is set, and when
+   * `mirrored`.
+   */
+  fit?: boolean;
   /** How values are written: plain, bytes or count. */
   format?: ValueFormat;
   /** Points the host keeps per series when `id` is set. Default 300. */
@@ -413,7 +419,8 @@ export interface SeriesWidget {
   label: string;
   /**
    * Draw the first series above the axis and the second below it,
-   * e.g. network download and upload.
+   * e.g. network download and upload. Negative values count as 0 here
+   * (`dashboard check` flags them).
    */
   mirrored?: boolean;
   /** One or more lines, each with its points. */
@@ -423,8 +430,16 @@ export interface SeriesWidget {
   type: "series";
   /** Shown after values, e.g. "%" or "/s". */
   unit?: string | null;
-  /** The top of the chart. Default: the largest value. */
+  /**
+   * The top of the chart. Default: the largest value (at least 1 when no
+   * value is negative and `y_min` is unset).
+   */
   y_max?: number | null;
+  /**
+   * The bottom of the chart. Default: 0, or the smallest value when that
+   * is negative. Set it to chart values that never reach 0.
+   */
+  y_min?: number | null;
 }
 
 /** Many small meters in a compact grid, e.g. one per CPU core. */

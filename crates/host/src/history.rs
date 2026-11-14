@@ -74,6 +74,8 @@ mod tests {
                     label: "CPU".into(),
                     unit: None,
                     y_max: None,
+                    y_min: None,
+                    fit: false,
                     id: Some("cpu".into()),
                     history: Some(3),
                     style: Default::default(),

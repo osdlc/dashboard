@@ -167,6 +167,8 @@ pub fn graph(
         label: label.into(),
         unit: Some(unit.into()),
         y_max,
+        y_min: None,
+        fit: false,
         id: Some(id.into()),
         history: Some(HISTORY),
         style: SeriesStyle::Area,

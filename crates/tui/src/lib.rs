@@ -1404,6 +1404,8 @@ mod tests_support {
                 Some("%".into())
             },
             y_max: if mirrored { None } else { Some(100.0) },
+            y_min: None,
+            fit: false,
             id: None,
             history: None,
             style,
