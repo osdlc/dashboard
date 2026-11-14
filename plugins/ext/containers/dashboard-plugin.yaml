@@ -45,9 +45,8 @@ demo:
               "value": "2/3"
             },
             {
-              "label": "Containers",
+              "label": "Containers running",
               "type": "stat",
-              "unit": "running",
               "value": "3"
             }
           ],
@@ -116,7 +115,7 @@ demo:
                 "extra": "applehv",
                 "kind": "podman",
                 "name": "podman-machine-default",
-                "res": "2 · 2GiB · 100GiB",
+                "res": "2 · 2 GiB · 100 GiB",
                 "status": "Stopped"
               },
               "status": "unknown"

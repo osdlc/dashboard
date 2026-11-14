@@ -1,6 +1,7 @@
 """Turns the output of the container CLIs into the tile. No I/O: main.py runs the
 commands and passes their text in, so this is what the unit tests cover."""
 
+import re
 import json
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -39,8 +40,13 @@ def vm_error(kind: str, err: str) -> Row:
     return {"kind": kind, "name": kind, "status": err, "res": "", "extra": "", "tone": "error"}
 
 
-def _res(cpus: Any, memory: str, disk: str) -> str:
-    return f"{cpus} · {memory} · {disk}"
+def _spaced(v: Any) -> Any:
+    """Podman writes sizes as "2GiB"; the other sources give "2 GiB"."""
+    return re.sub(r"^(\d+(?:\.\d+)?)([KMGT]i?B)$", r"\1 \2", v) if isinstance(v, str) else v
+
+
+def _res(cpus: Any, memory: Any, disk: Any) -> str:
+    return f"{cpus} · {_spaced(memory)} · {_spaced(disk)}"
 
 
 def lima_rows(text: str) -> List[Row]:
@@ -138,7 +144,7 @@ def build(vms: List[Row], engines: List[Engine], show_exited: bool,
         "children": [
             {"type": "stat", "label": "VMs running", "value": f"{vms_up}/{len(vms)}"},
             {"type": "stat", "label": "Engines up", "value": f"{engines_up}/{len(engine_rows)}"},
-            {"type": "stat", "label": "Containers", "value": str(n_running), "unit": "running"},
+            {"type": "stat", "label": "Containers running", "value": str(n_running)},
         ],
     }]
     if not vms and not engine_rows:

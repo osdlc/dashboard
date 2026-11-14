@@ -121,5 +121,12 @@ class BuildTest(unittest.TestCase):
         self.assertEqual(tables(v), [])
 
 
+
+class SizeTest(unittest.TestCase):
+    def test_podman_sizes_are_spaced_like_the_others(self):
+        self.assertEqual(view._res(2, "2GiB", "100GiB"), "2 · 2 GiB · 100 GiB")
+        self.assertEqual(view._res(4, "8 GiB", "1.5TB"), "4 · 8 GiB · 1.5 TB")
+        self.assertEqual(view._res("?", "?", "?"), "? · ? · ?")
+
 if __name__ == "__main__":
     unittest.main()
