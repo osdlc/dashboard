@@ -415,6 +415,10 @@ class _SeriesWidgetRequired(TypedDict):
 class SeriesWidget(_SeriesWidgetRequired, total=False):
     # The color of a single series.
     color: "ColorScale"
+    # Scale to the data's own range with a little padding (for prices that
+    # sit far from 0). Ignored when `y_min` or `y_max` is set, and when
+    # `mirrored`.
+    fit: bool
     # How values are written: plain, bytes or count.
     format: "ValueFormat"
     # Points the host keeps per series when `id` is set. Default 300.
@@ -424,14 +428,19 @@ class SeriesWidget(_SeriesWidgetRequired, total=False):
     # for (tile, `id`, series name). Renderers always get the full history.
     id: Optional[str]
     # Draw the first series above the axis and the second below it,
-    # e.g. network download and upload.
+    # e.g. network download and upload. Negative values count as 0 here
+    # (`dashboard check` flags them).
     mirrored: bool
     # A line, a filled area or one bar per sample.
     style: "SeriesStyle"
     # Shown after values, e.g. "%" or "/s".
     unit: Optional[str]
-    # The top of the chart. Default: the largest value.
+    # The top of the chart. Default: the largest value (at least 1 when no
+    # value is negative and `y_min` is unset).
     y_max: Optional[float]
+    # The bottom of the chart. Default: 0, or the smallest value when that
+    # is negative. Set it to chart values that never reach 0.
+    y_min: Optional[float]
 
 
 class _MeterGridWidgetRequired(TypedDict):

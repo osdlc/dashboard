@@ -242,6 +242,8 @@ impl Demo {
             label: label.into(),
             unit: Some(unit.into()),
             y_max,
+            y_min: None,
+            fit: false,
             id: Some(id.into()),
             history: Some(240),
             style: if mirrored {

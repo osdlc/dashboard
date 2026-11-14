@@ -155,9 +155,19 @@ pub enum Widget {
         /// Shown after values, e.g. "%" or "/s".
         #[serde(default)]
         unit: Option<String>,
-        /// The top of the chart. Default: the largest value.
+        /// The top of the chart. Default: the largest value (at least 1 when no
+        /// value is negative and `y_min` is unset).
         #[serde(default)]
         y_max: Option<f64>,
+        /// The bottom of the chart. Default: 0, or the smallest value when that
+        /// is negative. Set it to chart values that never reach 0.
+        #[serde(default)]
+        y_min: Option<f64>,
+        /// Scale to the data's own range with a little padding (for prices that
+        /// sit far from 0). Ignored when `y_min` or `y_max` is set, and when
+        /// `mirrored`.
+        #[serde(default)]
+        fit: bool,
         /// When set, the host keeps history for this widget: each update's
         /// `points` are new samples, appended to what the host already holds
         /// for (tile, `id`, series name). Renderers always get the full history.
@@ -173,7 +183,8 @@ pub enum Widget {
         #[serde(default)]
         color: ColorScale,
         /// Draw the first series above the axis and the second below it,
-        /// e.g. network download and upload.
+        /// e.g. network download and upload. Negative values count as 0 here
+        /// (`dashboard check` flags them).
         #[serde(default)]
         mirrored: bool,
         /// How values are written: plain, bytes or count.
@@ -328,11 +339,66 @@ fn yes() -> bool {
     true
 }
 
+/// The vertical range of a `series` chart as (bottom, top), shared by every renderer.
+///
+/// Bottom is `y_min`, else the smaller of 0 and the lowest value. Top is `y_max`, else
+/// the highest value, which is at least 1 when the bottom is 0 or more and `y_min` is
+/// unset (so a chart of small positive values draws as it always has). With `fit` and
+/// no bounds, the range is the data's own with 5% padding. The top is always above the
+/// bottom.
+pub fn series_scale(
+    values: &[f64],
+    y_min: Option<f64>,
+    y_max: Option<f64>,
+    fit: bool,
+) -> (f64, f64) {
+    const EPS: f64 = 1e-9;
+    let (lo, hi) = values
+        .iter()
+        .filter(|v| v.is_finite())
+        .fold((f64::INFINITY, f64::NEG_INFINITY), |(l, h), v| {
+            (l.min(*v), h.max(*v))
+        });
+    let has_data = lo.is_finite();
+    if fit && y_min.is_none() && y_max.is_none() && has_data {
+        let pad = if hi > lo {
+            (hi - lo) * 0.05
+        } else {
+            lo.abs().max(1.0) * 0.01
+        };
+        return (lo - pad, hi + pad);
+    }
+    let data_lo = if has_data { lo } else { 0.0 };
+    let data_hi = if has_data { hi } else { 0.0 };
+    let bottom = y_min.unwrap_or(data_lo.min(0.0));
+    let top = y_max.unwrap_or(if y_min.is_none() && bottom >= 0.0 {
+        data_hi.max(1.0)
+    } else {
+        data_hi
+    });
+    (bottom, top.max(bottom + EPS))
+}
+
 /// Formats a value for display. Shared so every renderer shows the same text.
 pub fn format_value(value: f64, format: ValueFormat, unit: Option<&str>) -> String {
     let unit = unit.unwrap_or("");
     match format {
-        ValueFormat::Plain => format!("{value:.0}{unit}"),
+        ValueFormat::Plain => {
+            // Small percentages keep one decimal ("-1.2%"), unless they are whole.
+            let decimals = usize::from(unit == "%" && value.abs() < 10.0 && value.fract() != 0.0);
+            let text = format!("{value:.decimals$}");
+            // Never "-0" or "-0.0": a value that rounds to zero has no sign.
+            let text = if text
+                .trim_start_matches('-')
+                .chars()
+                .all(|c| c == '0' || c == '.')
+            {
+                text.trim_start_matches('-').to_string()
+            } else {
+                text
+            };
+            format!("{text}{unit}")
+        }
         ValueFormat::Bytes => {
             const STEPS: [&str; 5] = ["B", "KiB", "MiB", "GiB", "TiB"];
             let mut v = value.abs();
@@ -711,6 +777,27 @@ mod tests {
             "3.0 GiB"
         );
         assert_eq!(format_value(42.4, ValueFormat::Plain, Some("%")), "42%");
+        assert_eq!(format_value(-1.24, ValueFormat::Plain, Some("%")), "-1.2%");
+        assert_eq!(format_value(-0.04, ValueFormat::Plain, Some("%")), "0.0%");
+        assert_eq!(format_value(5.0, ValueFormat::Plain, Some("%")), "5%");
+        assert_eq!(
+            format_value(-1.24, ValueFormat::Plain, Some(" ms")),
+            "-1 ms"
+        );
+    }
+
+    #[test]
+    fn series_scale_rules() {
+        assert_eq!(series_scale(&[3.0, 40.0], None, None, false), (0.0, 40.0));
+        assert_eq!(series_scale(&[0.2], None, None, false), (0.0, 1.0));
+        assert_eq!(series_scale(&[-2.0, 1.0], None, None, false), (-2.0, 1.0));
+        assert_eq!(series_scale(&[3.0], None, Some(100.0), false), (0.0, 100.0));
+        let (lo, hi) = series_scale(&[354.0, 357.0], None, None, true);
+        assert!((lo - 353.85).abs() < 1e-9 && (hi - 357.15).abs() < 1e-9);
+        assert_eq!(
+            series_scale(&[354.0], Some(300.0), None, true),
+            (300.0, 354.0)
+        );
     }
 
     #[test]
