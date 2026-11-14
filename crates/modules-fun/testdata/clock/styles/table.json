@@ -1,0 +1,5 @@
+{
+  "zones": ["America/Chicago", "UTC", "Europe/Berlin", "Asia/Kolkata", { "zone": "Asia/Tokyo", "label": "Tokyo office" }],
+  "style": "table",
+  "now": "2026-10-27T14:05:00Z"
+}

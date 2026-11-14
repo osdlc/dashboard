@@ -4,6 +4,12 @@ The dashboard is pre-1.0: the config format, the module contract and the CLI can
 between minor versions. 0.4.0 is the first public release. The earlier versions were not
 released on their own; they record the stages the project was built in.
 
+## Unreleased
+
+- **Clock styles:** `style: column | table` beside the default `row`. `table` is a world clock
+  with each zone's UTC offset, hours from the first zone, and working hours, day or night. Native
+  only: the `clock-ts` and `clock-py` benchmark copies keep the `row` style.
+
 ## 0.8.0
 
 - **Layout that fits the tile.** A tile's size sets its rows in the TUI and its height in the web

@@ -1,0 +1,65 @@
+{
+  "status": "ok",
+  "summary": "Los Angeles 3:30:15 PM · Adelaide 9:00:15 AM",
+  "root": {
+    "type": "table",
+    "columns": [
+      {
+        "key": "zone",
+        "label": "Zone",
+        "priority": 0
+      },
+      {
+        "key": "time",
+        "label": "Time",
+        "priority": 5
+      },
+      {
+        "key": "date",
+        "label": "Date",
+        "priority": 3
+      },
+      {
+        "key": "diff",
+        "label": "From first",
+        "priority": 4
+      },
+      {
+        "key": "offset",
+        "label": "Offset",
+        "priority": 1
+      },
+      {
+        "key": "part",
+        "label": "Now",
+        "priority": 2
+      }
+    ],
+    "rows": [
+      {
+        "cells": {
+          "date": "Sat 31 Oct",
+          "diff": "—",
+          "offset": "UTC-7",
+          "part": "day",
+          "time": "3:30:15 PM",
+          "zone": "Los Angeles"
+        },
+        "status": "unknown",
+        "action": null
+      },
+      {
+        "cells": {
+          "date": "Sun 1 Nov",
+          "diff": "+17:30",
+          "offset": "UTC+10:30",
+          "part": "day",
+          "time": "9:00:15 AM",
+          "zone": "Adelaide"
+        },
+        "status": "unknown",
+        "action": null
+      }
+    ]
+  }
+}
