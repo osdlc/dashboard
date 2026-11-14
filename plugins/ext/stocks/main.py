@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Stocks: the price and change since the previous close of a few symbols, as a table, with
-a chart of each one's day below it. Clicking a row opens the symbol on Yahoo Finance. No
+Clicking a row opens the symbol on Yahoo Finance. No
 account or key.
 
 It reads Yahoo Finance's unofficial chart endpoint (one request per symbol), which can
@@ -42,7 +42,6 @@ MAX_SYMBOLS = 25
 config: Dict[str, Any] = {
     "symbols": ["SPY", "QQQ", "AAPL", "MSFT", "NVDA"],
     "warn_drop": 2.0,
-    "chart": True,
     "sample": None,
     "timeout": 10,
 }
@@ -63,8 +62,6 @@ def init(c: Any) -> None:
     config["symbols"] = [s.strip().upper() for s in symbols]
     if not is_number(config["warn_drop"]) or config["warn_drop"] <= 0:
         raise config_error("warn_drop: a percent above 0, e.g. 2")
-    if not isinstance(config["chart"], bool):
-        raise config_error("chart: true or false")
     if config["sample"] is not None and not isinstance(config["sample"], str):
         raise config_error("sample: a path to a saved reply or a folder of them")
     if not is_number(config["timeout"]) or not 1 <= config["timeout"] <= 60:
@@ -127,7 +124,7 @@ def render() -> View:
         if "unreachable" in str(first) or "HTTP" in str(first):
             raise upstream_error(str(first))
     now = SAMPLE_NOW if SAMPLE and not config["sample"] else int(time.time())
-    return view(results, float(config["warn_drop"]), config["chart"], now)
+    return view(results, float(config["warn_drop"]), now)
 
 
 serve(

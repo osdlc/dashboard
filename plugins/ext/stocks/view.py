@@ -9,9 +9,6 @@ from dashboard_plugin import Column, Row, View
 # shows the same view whenever it runs.
 SAMPLE_NOW = 1794603601
 
-# Most symbols the chart draws; the table still lists all of them.
-MAX_LINES = 6
-
 SYMBOL_RE = re.compile(r"^[A-Za-z0-9.^=\-]{1,15}$")
 
 CURRENCIES = {"USD": "$", "EUR": "€", "GBP": "£", "JPY": "¥"}
@@ -49,16 +46,6 @@ def parse(reply: Any) -> Dict[str, Any]:
         prev = number(meta.get("previousClose"))
     if price is None:
         raise QuoteError("no price")
-    points: List[Tuple[int, float]] = []
-    if prev:
-        stamps = result.get("timestamp")
-        quotes = (result.get("indicators") or {}).get("quote")
-        closes = quotes[0].get("close") if isinstance(quotes, list) and quotes and isinstance(quotes[0], dict) else None
-        if isinstance(stamps, list) and isinstance(closes, list):
-            for t, c in zip(stamps, closes):
-                c = number(c)
-                if c is not None and number(t) is not None:
-                    points.append((int(t) * 1000, round((c - prev) / prev * 100, 3)))
     regular = ((meta.get("currentTradingPeriod") or {}).get("regular")) or {}
     return {
         "symbol": str(meta.get("symbol") or ""),
@@ -67,7 +54,6 @@ def parse(reply: Any) -> Dict[str, Any]:
         "price": price,
         "prev": prev,
         "open": (number(regular.get("start")), number(regular.get("end"))),
-        "points": points,
     }
 
 
@@ -109,10 +95,9 @@ def closed(quotes: List[Dict[str, Any]], now: int) -> bool:
     return False
 
 
-def view(results: List[Tuple[str, Any]], warn_drop: float, chart: bool, now: int) -> View:
+def view(results: List[Tuple[str, Any]], warn_drop: float, now: int) -> View:
     """The tile. `results` is one (symbol, quote or QuoteError) per configured symbol, in order."""
     rows: List[Row] = []
-    lines: List[Dict[str, Any]] = []
     quotes: List[Dict[str, Any]] = []
     parts: List[str] = []
     warned = False
@@ -145,8 +130,6 @@ def view(results: List[Tuple[str, Any]], warn_drop: float, chart: bool, now: int
         if fell:
             row["status"] = "warn"
         rows.append(row)
-        if len(q["points"]) >= 2 and len(lines) < MAX_LINES:
-            lines.append({"name": symbol, "points": q["points"]})
     col = lambda key, label, priority: {"key": key, "label": label, "priority": priority}  # noqa: E731
     table = {
         "type": "table",
@@ -159,16 +142,6 @@ def view(results: List[Tuple[str, Any]], warn_drop: float, chart: bool, now: int
         ],
         "rows": rows,
     }
-    root: Any = table
-    if chart and lines:
-        series = {
-            "type": "series",
-            "label": "Today, % from previous close",
-            "series": lines,
-            "style": "line",
-            "unit": "%",
-        }
-        root = {"type": "column", "children": [table, series]}
     if not quotes:
         status, summary = "error", "no quotes"
         if rows:
@@ -180,4 +153,4 @@ def view(results: List[Tuple[str, Any]], warn_drop: float, chart: bool, now: int
         summary = " · ".join(parts)
         if closed(quotes, now):
             summary += " · closed"
-    return {"status": status, "summary": summary, "root": root}  # type: ignore[typeddict-item]
+    return {"status": status, "summary": summary, "root": table}  # type: ignore[typeddict-item]

@@ -53,18 +53,14 @@ async fn sample_shows_the_demo_view() {
         view.summary,
         "SPY 754.37 -0.4% · QQQ 679.89 -1.2% · AAPL 356.27 +0.4% · closed"
     );
-    let Widget::Column { children } = &view.root else {
-        panic!("column: {:?}", view.root);
-    };
-    let Widget::Table { rows, .. } = &children[0] else {
-        panic!("table");
+    let Widget::Table { rows, .. } = &view.root else {
+        panic!("table: {:?}", view.root);
     };
     let symbols: Vec<&str> = rows.iter().map(|r| text(&r.cells["symbol"])).collect();
     assert_eq!(symbols, ["SPY", "QQQ", "AAPL", "MSFT", "NVDA"]);
     // NVDA fell 2.0% from the previous close.
     assert_eq!(rows[4].status, Some(Status::Warn));
     assert_eq!(rows[0].status, None);
-    assert!(matches!(children[1], Widget::Series { .. }));
 
     let package = load_package(&dir()).expect("package loads");
     assert_eq!(package.package.demo, view, "demo: in dashboard-plugin.yaml");
@@ -77,11 +73,11 @@ async fn settings_change_the_view() {
     };
     let mut plugin = Plugin::new("stocks", argv);
     plugin
-        .init(json!({ "symbols": ["aapl", "NOSUCHSYMBOLXX"], "chart": false }))
+        .init(json!({ "symbols": ["aapl", "NOSUCHSYMBOLXX"] }))
         .await
         .expect("initialize");
     let view = plugin.render().await.expect("view/render");
-    // No chart: the table alone. The unknown symbol is an error row, so the tile warns.
+    // The unknown symbol is an error row, so the tile warns.
     let Widget::Table { rows, .. } = &view.root else {
         panic!("table: {:?}", view.root);
     };
@@ -100,7 +96,6 @@ async fn bad_settings() {
         (json!({ "symbols": [] }), "symbols"),
         (json!({ "symbols": ["not a symbol"] }), "symbols"),
         (json!({ "warn_drop": 0 }), "warn_drop"),
-        (json!({ "chart": "yes" }), "chart"),
         (json!({ "timeout": 0 }), "timeout"),
         (json!({ "colour": "red" }), "colour"),
     ] {

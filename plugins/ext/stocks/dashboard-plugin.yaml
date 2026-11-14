@@ -36,334 +36,100 @@ demo:
    "status": "warn",
    "summary": "SPY 754.37 -0.4% · QQQ 679.89 -1.2% · AAPL 356.27 +0.4% · closed",
    "root": {
-    "type": "column",
-    "children": [
+    "type": "table",
+    "columns": [
      {
-      "type": "table",
-      "columns": [
-       {
-        "key": "symbol",
-        "label": "Symbol",
-        "priority": 10
-       },
-       {
-        "key": "name",
-        "label": "Name",
-        "priority": 1
-       },
-       {
-        "key": "price",
-        "label": "Price",
-        "priority": 9
-       },
-       {
-        "key": "change",
-        "label": "Change",
-        "priority": 3
-       },
-       {
-        "key": "percent",
-        "label": "%",
-        "priority": 8
-       }
-      ],
-      "rows": [
-       {
-        "cells": {
-         "symbol": "SPY",
-         "name": "State Street SPDR S&P 500 ETF T",
-         "price": "$754.37",
-         "change": "-2.75",
-         "percent": "-0.36%"
-        },
-        "action": {
-         "type": "open_url",
-         "url": "https://finance.yahoo.com/quote/SPY"
-        }
-       },
-       {
-        "cells": {
-         "symbol": "QQQ",
-         "name": "Invesco QQQ Trust, Series 1",
-         "price": "$679.89",
-         "change": "-8.28",
-         "percent": "-1.20%"
-        },
-        "action": {
-         "type": "open_url",
-         "url": "https://finance.yahoo.com/quote/QQQ"
-        }
-       },
-       {
-        "cells": {
-         "symbol": "AAPL",
-         "name": "Apple Inc.",
-         "price": "$356.27",
-         "change": "+1.39",
-         "percent": "+0.39%"
-        },
-        "action": {
-         "type": "open_url",
-         "url": "https://finance.yahoo.com/quote/AAPL"
-        }
-       },
-       {
-        "cells": {
-         "symbol": "MSFT",
-         "name": "Microsoft Corporation",
-         "price": "$523.88",
-         "change": "+0.88",
-         "percent": "+0.17%"
-        },
-        "action": {
-         "type": "open_url",
-         "url": "https://finance.yahoo.com/quote/MSFT"
-        }
-       },
-       {
-        "cells": {
-         "symbol": "NVDA",
-         "name": "NVIDIA Corporation",
-         "price": "$162.85",
-         "change": "-3.34",
-         "percent": "-2.01%"
-        },
-        "action": {
-         "type": "open_url",
-         "url": "https://finance.yahoo.com/quote/NVDA"
-        },
-        "status": "warn"
-       }
-      ]
+      "key": "symbol",
+      "label": "Symbol",
+      "priority": 10
      },
      {
-      "type": "series",
-      "label": "Today, % from previous close",
-      "series": [
-       {
-        "name": "SPY",
-        "points": [
-         [
-          1794580200000,
-          0.129
-         ],
-         [
-          1794582600000,
-          -1.067
-         ],
-         [
-          1794585000000,
-          -0.919
-         ],
-         [
-          1794587400000,
-          -0.838
-         ],
-         [
-          1794589800000,
-          -0.785
-         ],
-         [
-          1794592200000,
-          -0.656
-         ],
-         [
-          1794594600000,
-          -0.641
-         ],
-         [
-          1794597000000,
-          -0.544
-         ],
-         [
-          1794599400000,
-          -0.611
-         ],
-         [
-          1794603600000,
-          -0.363
-         ]
-        ]
-       },
-       {
-        "name": "QQQ",
-        "points": [
-         [
-          1794580200000,
-          -0.257
-         ],
-         [
-          1794582600000,
-          -2.05
-         ],
-         [
-          1794585000000,
-          -2.04
-         ],
-         [
-          1794587400000,
-          -1.87
-         ],
-         [
-          1794589800000,
-          -1.712
-         ],
-         [
-          1794592200000,
-          -1.533
-         ],
-         [
-          1794594600000,
-          -1.499
-         ],
-         [
-          1794597000000,
-          -1.322
-         ],
-         [
-          1794599400000,
-          -1.443
-         ],
-         [
-          1794603600000,
-          -1.203
-         ]
-        ]
-       },
-       {
-        "name": "AAPL",
-        "points": [
-         [
-          1794580200000,
-          1.233
-         ],
-         [
-          1794582600000,
-          0.792
-         ],
-         [
-          1794587400000,
-          0.92
-         ],
-         [
-          1794589800000,
-          0.999
-         ],
-         [
-          1794592200000,
-          0.857
-         ],
-         [
-          1794594600000,
-          0.814
-         ],
-         [
-          1794597000000,
-          0.902
-         ],
-         [
-          1794599400000,
-          0.569
-         ],
-         [
-          1794603600000,
-          0.392
-         ]
-        ]
-       },
-       {
-        "name": "MSFT",
-        "points": [
-         [
-          1794580200000,
-          -1.587
-         ],
-         [
-          1794582600000,
-          -0.776
-         ],
-         [
-          1794585000000,
-          0.318
-         ],
-         [
-          1794587400000,
-          0.159
-         ],
-         [
-          1794589800000,
-          0.203
-         ],
-         [
-          1794592200000,
-          0.297
-         ],
-         [
-          1794594600000,
-          0.221
-         ],
-         [
-          1794597000000,
-          0.275
-         ],
-         [
-          1794599400000,
-          0.323
-         ],
-         [
-          1794603600000,
-          0.168
-         ]
-        ]
-       },
-       {
-        "name": "NVDA",
-        "points": [
-         [
-          1794580200000,
-          -0.451
-         ],
-         [
-          1794582600000,
-          -3.562
-         ],
-         [
-          1794585000000,
-          -4.098
-         ],
-         [
-          1794587400000,
-          -3.52
-         ],
-         [
-          1794589800000,
-          -3.448
-         ],
-         [
-          1794592200000,
-          -3.057
-         ],
-         [
-          1794594600000,
-          -2.747
-         ],
-         [
-          1794597000000,
-          -2.22
-         ],
-         [
-          1794599400000,
-          -2.392
-         ],
-         [
-          1794603600000,
-          -2.01
-         ]
-        ]
-       }
-      ],
-      "style": "line",
-      "unit": "%"
+      "key": "name",
+      "label": "Name",
+      "priority": 1
+     },
+     {
+      "key": "price",
+      "label": "Price",
+      "priority": 9
+     },
+     {
+      "key": "change",
+      "label": "Change",
+      "priority": 3
+     },
+     {
+      "key": "percent",
+      "label": "%",
+      "priority": 8
+     }
+    ],
+    "rows": [
+     {
+      "cells": {
+       "symbol": "SPY",
+       "name": "State Street SPDR S&P 500 ETF T",
+       "price": "$754.37",
+       "change": "-2.75",
+       "percent": "-0.36%"
+      },
+      "action": {
+       "type": "open_url",
+       "url": "https://finance.yahoo.com/quote/SPY"
+      }
+     },
+     {
+      "cells": {
+       "symbol": "QQQ",
+       "name": "Invesco QQQ Trust, Series 1",
+       "price": "$679.89",
+       "change": "-8.28",
+       "percent": "-1.20%"
+      },
+      "action": {
+       "type": "open_url",
+       "url": "https://finance.yahoo.com/quote/QQQ"
+      }
+     },
+     {
+      "cells": {
+       "symbol": "AAPL",
+       "name": "Apple Inc.",
+       "price": "$356.27",
+       "change": "+1.39",
+       "percent": "+0.39%"
+      },
+      "action": {
+       "type": "open_url",
+       "url": "https://finance.yahoo.com/quote/AAPL"
+      }
+     },
+     {
+      "cells": {
+       "symbol": "MSFT",
+       "name": "Microsoft Corporation",
+       "price": "$523.88",
+       "change": "+0.88",
+       "percent": "+0.17%"
+      },
+      "action": {
+       "type": "open_url",
+       "url": "https://finance.yahoo.com/quote/MSFT"
+      }
+     },
+     {
+      "cells": {
+       "symbol": "NVDA",
+       "name": "NVIDIA Corporation",
+       "price": "$162.85",
+       "change": "-3.34",
+       "percent": "-2.01%"
+      },
+      "action": {
+       "type": "open_url",
+       "url": "https://finance.yahoo.com/quote/NVDA"
+      },
+      "status": "warn"
      }
     ]
    }
