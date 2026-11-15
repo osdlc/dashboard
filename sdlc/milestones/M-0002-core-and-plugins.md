@@ -16,8 +16,8 @@ Issue #19.
 
 ## Measure each kind of plugin
 
-The benchmark in `bench/` compares built-in, TypeScript, Python and WASM for eight widgets. It
-leaves out some kinds, and it measures one widget at a time. Add:
+The [benchmark](../../bench/README.md) leaves out some kinds of plugin, and it measures one widget
+at a time. Add:
 
 - **The declarative kinds:** the `http` and `file` built-ins showing the same widgets from a URL
   or a file. No process of the plugin's runs, so the cost is all the host's.
@@ -37,10 +37,7 @@ leaves out some kinds, and it measures one widget at a time. Add:
 
 - Turn the rule in [modules.md](../../docs/modules.md#built-in-or-plugin) into a policy with both
   sides: what is built in, what is never built in, and how a built-in moves out to a plugin.
-- Starting point, to be confirmed by the numbers: core is the host, the TUI and web view, the
-  declarative built-ins (`http`, `file`), and modules that need no account (system metrics, local
-  files, commands on the machine). A module that needs an account or depends on one company's API
-  is a plugin.
+  Confirm or change the rule with the numbers above.
 - A verdict for each of the ~50 built-ins: stays built in, moves to a plugin, or goes. Modules
   marked "untested live" are tested against a real account or moved out.
 - A task for each module that moves. The moves can land in later milestones.

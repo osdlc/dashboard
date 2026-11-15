@@ -53,19 +53,18 @@ Sandboxed WASM plugins are not a level yet: see [experiments](#experiments).
 
 ## Milestones
 
-One file each in [sdlc/milestones/](../sdlc/milestones/), with the work, what "done" means and
-the open questions. In order:
+The milestones are the files in [sdlc/milestones/](../sdlc/milestones/). Each one holds its
+version, its work, what "done" means and its open questions, and this file does not repeat them.
+Their ids run in release order:
 
-| Milestone | Version | What it does |
-|---|---|---|
-| [M-0001 Foundation](../sdlc/milestones/M-0001-foundation.md) | 0.9 | CI on every pull request, tiers shown where each surface is documented, the open pull requests settled. |
-| [M-0002 Core and plugins](../sdlc/milestones/M-0002-core-and-plugins.md) | 0.10 | Measure what each kind of plugin costs, alone and 100 at a time; decide what is core and what is a plugin (#19). |
-| [M-0003 API levels written down](../sdlc/milestones/M-0003-api-levels.md) | 0.11 | One document for what each level is and promises (#18), the same widget at every level (#17). |
-| [M-0004 Interactive level and actions](../sdlc/milestones/M-0004-interactive.md) | 0.12 | Level 3, and acting on items from their tiles: acknowledge an incident, re-run a CI job, close a todo. |
-| [M-0005 Alerts and history](../sdlc/milestones/M-0005-alerts-and-history.md) | 0.13 | OS notifications when a tile goes bad, history kept across restarts. Can run alongside M-0004. |
-| [M-0006 Network](../sdlc/milestones/M-0006-network.md) | 0.14 | Dashboards find each other on the network and use each other's screens and modules. |
-| [M-0007 Refine](../sdlc/milestones/M-0007-refine.md) | 0.15 | Use the levels for real, change them, pick what 1.0 publishes. |
-| [M-0008 First published release](../sdlc/milestones/M-0008-first-published-release.md) | 1.0 | Published surfaces, the deprecation policy, release binaries and packages. |
+1. [Foundation](../sdlc/milestones/M-0001-foundation.md)
+2. [Core and plugins](../sdlc/milestones/M-0002-core-and-plugins.md)
+3. [API levels written down](../sdlc/milestones/M-0003-api-levels.md)
+4. [Interactive level and actions](../sdlc/milestones/M-0004-interactive.md)
+5. [Alerts and history](../sdlc/milestones/M-0005-alerts-and-history.md)
+6. [Network](../sdlc/milestones/M-0006-network.md)
+7. [Refine](../sdlc/milestones/M-0007-refine.md)
+8. [First published release](../sdlc/milestones/M-0008-first-published-release.md)
 
 ## Experiments
 

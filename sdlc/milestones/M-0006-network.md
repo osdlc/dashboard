@@ -11,20 +11,13 @@ description: Dashboards on a network find each other and use each other's screen
 
 # Network (0.14)
 
-Dashboards on a network find each other. One can show another's shared screens, and put another's
-modules on its own screens as tiles. The design is the
-[network-mode experiment](../../docs/experiments/network-mode.md). This milestone is that
-experiment's steps, built as experimental and off unless the config turns it on.
+Build the [network-mode experiment](../../docs/experiments/network-mode.md) as experimental, off
+unless the config turns it on. The experiment has the design, what is sent and what never is.
 
 ## Work
 
-- **Discovery:** mDNS on the local network. `dashboard peers` lists the dashboards it finds, and
-  the web view's settings show them under "Network".
-- **Shared screens:** a dashboard names the screens and modules it shares. Nothing else is visible
-  from the network. A peer sees them after entering the password, read-only and encrypted.
-- **Remote modules:** the `remote` built-in puts a peer's tile on a local screen, in the TUI and
-  the web view. The module runs on the peer. Its config and tokens stay there; the viewer gets
-  only its views.
+- **Steps 1 to 3 of the experiment:** discovery, one shared screen, and the `remote` module that
+  puts a peer's module on a local screen.
 - **Remote tiles are tiles:** they go stale like any tile when the peer goes away, and they raise
   alerts ([M-0005](M-0005-alerts-and-history.md)) like any tile.
 - **The protocol written down:** a new row in the roadmap's surfaces table, experimental. It
@@ -35,8 +28,8 @@ experiment's steps, built as experimental and off unless the config turns it on.
 
 ## Done when
 
-- Two machines on one network see each other. One shows the other's shared screen after the
-  password is entered, and a packet capture shows no plaintext.
+The experiment's "Done when", and:
+
 - A peer's module runs as a tile on a local screen in both views.
 - With network mode off, nothing listens on the network.
 
