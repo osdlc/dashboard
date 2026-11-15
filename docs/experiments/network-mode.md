@@ -1,6 +1,7 @@
 # Experiment: network mode
 
-Status: idea. Nothing is built. See the [roadmap](../roadmap.md#experiments).
+Status: idea. Nothing is built. See the [roadmap](../roadmap.md#experiments); planned as
+milestone [M-0006](../../sdlc/milestones/M-0006-network.md).
 
 ## Goal
 
