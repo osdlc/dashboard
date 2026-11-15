@@ -7,13 +7,14 @@ license.workspace = true
 # One feature per module, named after its id. dashboard-modules turns them on
 # through its `bundle-system` and `module-<id>` features.
 [features]
-default = ["cpu", "memory", "gpu", "network", "disk", "processes", "log", "uptime", "textfile", "battery", "cmdrunner", "security", "http", "file"]
+default = ["cpu", "memory", "gpu", "network", "disk", "processes", "process", "log", "uptime", "textfile", "battery", "cmdrunner", "security", "http", "file"]
 cpu = ["dep:sysinfo"]
 memory = ["dep:sysinfo"]
 gpu = ["dep:sysinfo"]
 network = ["dep:sysinfo"]
 disk = ["dep:sysinfo"]
 processes = ["dep:sysinfo"]
+process = ["dep:sysinfo"]
 log = []
 uptime = []
 textfile = []

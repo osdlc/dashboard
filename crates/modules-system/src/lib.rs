@@ -36,6 +36,8 @@ pub mod log;
 pub mod memory;
 #[cfg(feature = "network")]
 pub mod network;
+#[cfg(feature = "process")]
+pub mod process;
 #[cfg(feature = "processes")]
 pub mod processes;
 #[cfg(feature = "security")]
@@ -88,6 +90,13 @@ pub const MODULES: &[Builtin] = &[
         core: true,
         new: || Box::new(processes::Processes::default()),
         catalog: processes::catalog,
+    },
+    #[cfg(feature = "process")]
+    Builtin {
+        id: "process",
+        core: false,
+        new: || Box::new(process::Process::default()),
+        catalog: process::catalog,
     },
     #[cfg(feature = "log")]
     Builtin {
