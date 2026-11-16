@@ -395,6 +395,7 @@ mod tests {
             screens: vec![],
             modules: vec![],
             rotate: None,
+            tui_fps: dashboard_contract::DEFAULT_TUI_FPS,
             config: ConfigInfo::default(),
         });
         let (actions, _) = mpsc::unbounded_channel();

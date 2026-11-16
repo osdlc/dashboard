@@ -722,6 +722,11 @@ export interface UiSettings {
    */
   screens: ScreenLayout[];
   theme: Theme;
+  /**
+   * The most times a second the terminal view draws the screen again when
+   * tiles change. The web view does not use it.
+   */
+  tui_fps?: number;
 }
 /**
  * The color theme in use, both variants; `theme` picks one.
