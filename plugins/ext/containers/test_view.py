@@ -15,7 +15,7 @@ def read(name):
 
 def engines(show_all=False):
     out = []
-    for ctx in view.json_lines(read("contexts.jsonl")):
+    for ctx in view.json_records(read("contexts.jsonl")):
         if view.socket_path(ctx) is not None:
             out.append(view.engine_down(ctx))
         else:
@@ -34,12 +34,25 @@ def tables(v):
 
 
 class ParseTest(unittest.TestCase):
-    def test_json_lines_reads_objects_arrays_and_nothing(self):
-        self.assertEqual(view.json_lines(""), [])
-        self.assertEqual(view.json_lines('{"a":1}\n\n{"a":2}\n'), [{"a": 1}, {"a": 2}])
-        self.assertEqual(view.json_lines('[{"a":1}]'), [{"a": 1}])
+    def test_json_records_reads_objects_arrays_and_nothing(self):
+        self.assertEqual(view.json_records(""), [])
+        self.assertEqual(view.json_records('{"a":1}\n\n{"a":2}\n'), [{"a": 1}, {"a": 2}])
+        self.assertEqual(view.json_records('[{"a":1}]'), [{"a": 1}])
         with self.assertRaises(ValueError):
-            view.json_lines("not json")
+            view.json_records("not json")
+
+    def test_json_records_drops_what_is_not_an_object(self):
+        self.assertEqual(view.json_records("null"), [])
+        self.assertEqual(view.json_records('[1, "x", null, {"a": 1}]'), [{"a": 1}])
+        self.assertEqual(view.json_records('"x"\n{"a": 1}'), [{"a": 1}])
+
+    def test_null_fields_still_sort(self):
+        rows = view.lima_rows('[{"name": null, "status": null}, {"name": "b", "status": "Running"}]')
+        self.assertEqual([r["name"] for r in rows], ["?", "b"])
+        v = view.build(rows, [], False, True, 30)
+        self.assertEqual([r["cells"]["name"] for r in tables(v)[0]["rows"]], ["b", "?"])
+        _, cs = view.engine_up({"Name": "x"}, '{"Names": null, "State": "running"}\n{"Names": "a"}')
+        self.assertEqual([c["name"] for c in cs], ["?", "a"])
 
     def test_size(self):
         self.assertEqual(view.size(8 * 1024**3), "8 GiB")
@@ -76,20 +89,38 @@ class BuildTest(unittest.TestCase):
         self.assertEqual(by_engine["colima"]["cells"]["current"], "●")
         self.assertEqual(by_engine["colima"]["cells"]["count"], "2 running")
         self.assertEqual([r["cells"]["name"] for r in containers["rows"]], ["cache", "postgres", "web"])
-        self.assertEqual(containers["empty_text"], "No running containers")
+        self.assertEqual(v["root"]["children"][0]["children"][0]["label"], "VMs up")
 
     def test_show_exited_lists_exited_containers_after_running_ones(self):
         v = view.build(all_vms(), engines(show_all=True), True, True, 30)
         rows = tables(v)[2]["rows"]
         self.assertEqual([r["cells"]["name"] for r in rows], ["cache", "postgres", "web", "old-build"])
         self.assertEqual(rows[-1]["status"], "unknown")
-        self.assertEqual(tables(v)[2]["empty_text"], "No containers")
         self.assertIn("3 containers", v["summary"])
 
-    def test_limit(self):
+    def test_no_containers_is_a_line_of_text(self):
+        ctx = {"Name": "colima", "DockerEndpoint": "tcp://192.0.2.10:2375"}
+        v = view.build([], [view.engine_up(ctx, "")], False, True, 30)
+        self.assertEqual(v["root"]["children"][-1], {"type": "text", "text": "No running containers"})
+        v = view.build([], [view.engine_up(ctx, "")], True, True, 30)
+        self.assertEqual(v["root"]["children"][-1]["text"], "No containers")
+
+    def test_paused_and_restarting_need_a_look_and_do_not_count(self):
+        ctx = {"Name": "c"}
+        _, cs = view.engine_up(ctx, '{"Names":"p","State":"paused"}\n{"Names":"r","State":"restarting"}\n'
+                                    '{"Names":"u","State":"running"}')
+        self.assertEqual({c["name"]: c["tone"] for c in cs}, {"p": "warn", "r": "warn", "u": "ok"})
+        v = view.build([], [view.engine_up(ctx, '{"Names":"p","State":"paused"}')], False, True, 30)
+        self.assertIn("0 containers", v["summary"])
+
+    def test_limit_says_how_many_are_left_out(self):
         v = view.build(all_vms(), engines(), False, True, 2)
         self.assertEqual(len(tables(v)[2]["rows"]), 2)
+        self.assertEqual(v["root"]["children"][-1], {"type": "text", "text": "1 more not shown (limit 2)"})
         self.assertIn("3 containers", v["summary"])
+        v = view.build(all_vms(), engines(), False, True, 3)
+        self.assertEqual(tables(v)[2]["type"], "table")
+        self.assertEqual(v["root"]["children"][-1]["type"], "table")
 
     def test_hide_stopped_vms(self):
         v = view.build(all_vms(), engines(), False, False, 30)
@@ -103,6 +134,8 @@ class BuildTest(unittest.TestCase):
         row = tables(v)[0]["rows"][-1]
         self.assertEqual(row["status"], "error")
         self.assertEqual(row["cells"]["status"], "instance store is corrupt")
+        # The failed source is not counted as a VM.
+        self.assertTrue(v["summary"].startswith("1/2 VMs up"), v["summary"])
         # Error rows stay when stopped VMs are hidden.
         v = view.build(vms, [], False, False, 30)
         self.assertEqual(len(tables(v)[0]["rows"]), 2)
@@ -112,6 +145,16 @@ class BuildTest(unittest.TestCase):
         v = view.build([], [view.engine_error(ctx, "cannot connect")], False, True, 30)
         self.assertEqual(v["status"], "warn")
         self.assertEqual(tables(v)[0]["rows"][0]["status"], "error")
+        # An engine that does not answer is still an engine; its containers are unknown.
+        self.assertIn("0/1 engines", v["summary"])
+        self.assertEqual(len(tables(v)), 1)
+
+    def test_a_failed_context_list_is_not_counted_as_an_engine(self):
+        ctx = {"Name": "docker", "Error": "cannot list", "Listing": True}
+        v = view.build([], [view.engine_error(ctx, "cannot list")], False, True, 30)
+        self.assertEqual(v["status"], "warn")
+        self.assertIn("0/0 engines", v["summary"])
+        self.assertEqual(tables(v)[0]["rows"][0]["cells"]["state"], "cannot list")
 
     def test_nothing_found(self):
         v = view.build([], [], False, True, 30)
@@ -121,12 +164,12 @@ class BuildTest(unittest.TestCase):
         self.assertEqual(tables(v), [])
 
 
-
 class SizeTest(unittest.TestCase):
     def test_podman_sizes_are_spaced_like_the_others(self):
-        self.assertEqual(view._res(2, "2GiB", "100GiB"), "2 · 2 GiB · 100 GiB")
-        self.assertEqual(view._res(4, "8 GiB", "1.5TB"), "4 · 8 GiB · 1.5 TB")
-        self.assertEqual(view._res("?", "?", "?"), "? · ? · ?")
+        rows = view.podman_rows('[{"Name": "a", "CPUs": 2, "Memory": "2GiB", "DiskSize": "1.5TB"},'
+                                ' {"Name": "b"}]')
+        self.assertEqual([r["res"] for r in rows], ["2 · 2 GiB · 1.5 TB", "? · ? · ?"])
+
 
 if __name__ == "__main__":
     unittest.main()

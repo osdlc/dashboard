@@ -1,8 +1,7 @@
 //! The containers plugin package (`plugins/ext/containers`, Python): VMs and
 //! Docker engines read with the colima, limactl, podman and docker CLIs. Here
 //! those are fake scripts in the package's `testdata/`, so no real runtime is
-//! needed. Checks the demo view, each source being skipped or failing, a missing
-//! socket, `show_exited`, `limit` and bad settings. Skipped without python3.
+//! needed. Skipped without python3.
 
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -30,7 +29,7 @@ fn fake(folder: &str, program: &str) -> String {
         .to_string()
 }
 
-/// A config with all four programs the fake ones in `testdata/ok`.
+/// A config that points all four programs at the fakes in `testdata/ok`.
 fn ok_config() -> Value {
     json!({
         "docker": fake("ok", "docker"),
@@ -124,7 +123,7 @@ async fn a_missing_or_disabled_cli_is_skipped() {
         return;
     }
     let mut config = ok_config();
-    config["podman"] = json!(fake("ok", "no-such-podman"));
+    config["podman"] = json!("dashboard-no-such-podman");
     config["limactl"] = json!("");
     config["colima"] = json!(false);
     let view = render(config).await;
@@ -133,6 +132,19 @@ async fn a_missing_or_disabled_cli_is_skipped() {
     assert!(!has_row(&view, "podman"));
     assert!(!has_row(&view, "lima&dev"));
     assert!(!has_row(&view, "colima&default"));
+
+    // A path that does not exist was named on purpose, so it is an error row,
+    // not a skipped source, and it is not counted as a VM.
+    let mut config = ok_config();
+    config["podman"] = json!(fake("ok", "no-such-podman"));
+    let view = render(config).await;
+    assert_eq!(view.status, Status::Warn);
+    assert!(
+        has_row(&view, "podman&no-such-podman: not found"),
+        "{:?}",
+        rows(&view)
+    );
+    assert_eq!(view.summary, "2/3 VMs up · 2/3 engines · 3 containers");
 
     // No docker either: nothing is found, which is not an error.
     let view = render(json!({
@@ -270,8 +282,10 @@ async fn bad_settings_are_config_errors() {
     }
     for (config, msg) in [
         (json!({ "limit": -1 }), "limit"),
+        (json!({ "limit": 0 }), "limit"),
         (json!({ "limit": "ten" }), "limit"),
         (json!({ "timeout": 0 }), "timeout"),
+        (json!({ "timeout": 11 }), "timeout"),
         (json!({ "show_exited": "yes" }), "show_exited"),
         (json!({ "docker": true }), "docker"),
         (json!({ "podman": 3 }), "podman"),

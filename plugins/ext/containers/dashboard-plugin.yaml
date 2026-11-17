@@ -7,7 +7,8 @@ description: >-
   Podman machines), every Docker context with whether its engine answers, and
   the containers on each engine. Each CLI is optional: one that is not
   installed is skipped, one that fails shows an error row. Set a program
-  setting to "" or false to turn that source off.
+  setting to "" or false to turn that source off; a program given as a path
+  that does not exist shows an error row.
 tags: [containers, docker, colima, lima, podman, vm, ops, local]
 # Run in this folder.
 run: [python3, main.py]
@@ -21,8 +22,8 @@ config_schema:
   properties:
     show_exited: { type: boolean, description: "Also list containers that are not running (docker ps -a). Default false." }
     show_stopped_vms: { type: boolean, description: "Also list VMs that are stopped. Default true." }
-    limit: { type: integer, minimum: 0, description: "Container rows shown. Default 30." }
-    timeout: { type: number, description: "Seconds each CLI call may take. Default 4." }
+    limit: { type: integer, minimum: 1, description: "Container rows shown; a line says how many more there are. Default 30." }
+    timeout: { type: number, exclusiveMinimum: 0, maximum: 10, description: "Seconds each CLI call may take, at most 10 (a render makes two calls in a row and the host allows 30 s). Default 4." }
     docker: { type: [string, boolean], description: 'The docker program, e.g. a full path. "" or false turns the Docker engines and containers off. Default docker.' }
     limactl: { type: [string, boolean], description: 'The limactl program. "" or false turns Lima VMs off. Default limactl.' }
     colima: { type: [string, boolean], description: 'The colima program. "" or false turns Colima VMs off. Default colima.' }
@@ -35,7 +36,7 @@ demo:
         {
           "children": [
             {
-              "label": "VMs running",
+              "label": "VMs up",
               "type": "stat",
               "value": "2/4"
             },

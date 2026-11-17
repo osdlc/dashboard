@@ -90,8 +90,10 @@ HEALTHCHECKS_API_KEY=... dashboard plugin-check -- python3 plugins/ext/healthche
 optional: one that is not on PATH is skipped, one that fails shows an error row and a warning tile,
 and a unix-socket context whose socket file is missing shows "not running" without calling docker.
 Its `docker`, `limactl`, `colima` and `podman` settings name the program (default the bare name);
-`""` or `false` turns that source off. Other settings: `show_exited`, `show_stopped_vms`, `limit`
-and `timeout`. `view.py` builds the tile from the CLI text (unit tests in `test_view.py`);
+`""` or `false` turns that source off, and a path that does not exist shows an error row. A source
+that fails to list is not counted in the VM and engine totals. Other settings: `show_exited`,
+`show_stopped_vms`, `limit` (container rows; a line says how many more there are) and `timeout`
+(seconds per CLI call, at most 10, since a render makes two calls in a row within the host's 30 s). `view.py` builds the tile from the CLI text (unit tests in `test_view.py`);
 `main.py` runs the commands. `testdata/` holds fake CLIs printing recorded output, and the `demo:`
 is what the ones in `testdata/ok` produce. The test is `crates/cli/tests/ext_containers.rs`.
 

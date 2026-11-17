@@ -14,7 +14,7 @@ if [ "$1" = --context ]; then
     file="$here/ps-$ctx.jsonl"
     [ "$2" = -a ] && file="$here/ps-$ctx-all.jsonl"
     if [ -f "$file" ]; then cat "$file"; exit 0; fi
-    echo "Cannot connect to the Docker daemon at tcp://192.0.2.99:2375. Is the docker daemon running?" >&2
+    echo "Cannot connect to the Docker daemon for context $ctx. Is the docker daemon running?" >&2
     exit 1
   fi
 fi
