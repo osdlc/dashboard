@@ -1,7 +1,7 @@
 //! Graphs, meter grids and bar lists, drawn straight into the buffer.
 
 use dashboard_contract::{
-    Bar, ColorScale, Meter, SeriesData, SeriesStyle, ValueFormat, format_value,
+    Bar, ColorScale, Meter, SeriesData, SeriesStyle, ValueFormat, format_value, series_scale,
 };
 use ratatui::layout::{Constraint, Layout, Rect};
 use ratatui::style::{Color, Style};
@@ -21,6 +21,8 @@ pub struct SeriesSpec<'a> {
     pub label: &'a str,
     pub unit: Option<&'a str>,
     pub y_max: Option<f64>,
+    pub y_min: Option<f64>,
+    pub fit: bool,
     pub style: SeriesStyle,
     pub color: ColorScale,
     pub mirrored: bool,
@@ -32,22 +34,38 @@ pub fn draw_series(f: &mut Canvas, p: &Palette, area: Rect, s: &SeriesSpec) {
     let [head, body] = Layout::vertical([Constraint::Length(1), Constraint::Min(0)]).areas(area);
 
     let mut spans = vec![Span::raw(format!("{} ", s.label))];
-    let arrows = if s.mirrored { ["↓", "↑"] } else { ["", ""] };
-    for (i, data) in s.series.iter().take(2).enumerate() {
-        if let Some(last) = data.points.last() {
-            let text = format_value(last.1, s.format, s.unit);
-            spans.push(Span::styled(
-                format!(" {}{text}", arrows[i]),
-                Style::new().fg(p.accent),
-            ));
+    let mirrored = s.mirrored && s.series.len() >= 2;
+    if mirrored {
+        for (i, data) in s.series.iter().take(2).enumerate() {
+            if let Some(last) = data.points.last() {
+                let text = format_value(last.1, s.format, s.unit);
+                let arrow = ["↓", "↑"][i];
+                spans.push(Span::styled(
+                    format!(" {arrow}{text}"),
+                    Style::new().fg(p.accent),
+                ));
+            }
         }
+    } else if s.series.len() > 1 {
+        // Several lines: each latest value in its line's color, with its name.
+        for (i, data) in s.series.iter().take(6).enumerate() {
+            if let Some(last) = data.points.last() {
+                let text = format_value(last.1, s.format, s.unit);
+                spans.push(Span::styled(
+                    format!(" {} {text}", data.name),
+                    Style::new().fg(series_color(p, i, data)),
+                ));
+            }
+        }
+    } else if let Some(last) = s.series.first().and_then(|d| d.points.last()) {
+        let text = format_value(last.1, s.format, s.unit);
+        spans.push(Span::styled(format!(" {text}"), Style::new().fg(p.accent)));
     }
     f.render_widget(Paragraph::new(Line::from(spans)), head);
     if body.height == 0 || body.width == 0 {
         return;
     }
 
-    // Shared scale: y_max, else the largest value shown.
     let width = body.width as usize * 2; // two braille samples per cell
     let visible = |d: &'_ SeriesData| -> Vec<f64> {
         d.points
@@ -55,26 +73,26 @@ pub fn draw_series(f: &mut Canvas, p: &Palette, area: Rect, s: &SeriesSpec) {
             .rev()
             .take(width)
             .rev()
-            .map(|p| p.1.max(0.0))
+            .map(|p| p.1)
             .collect()
     };
-    let max = s.y_max.unwrap_or_else(|| {
-        s.series
-            .iter()
-            .flat_map(&visible)
-            .fold(0.0, f64::max)
-            .max(1.0)
-    });
+    // Mirrored charts draw magnitudes: negatives count as 0.
+    let up = |v: Vec<f64>| -> Vec<f64> { v.into_iter().map(|x| x.max(0.0)).collect() };
 
-    if s.mirrored && s.series.len() >= 2 {
+    if mirrored {
+        let shown: Vec<Vec<f64>> = s.series.iter().take(2).map(|d| up(visible(d))).collect();
+        let max = s
+            .y_max
+            .unwrap_or_else(|| shown.iter().flatten().copied().fold(0.0, f64::max).max(1.0));
+        let scale = Scale { lo: 0.0, hi: max };
         let [top, bottom] =
             Layout::vertical([Constraint::Fill(1), Constraint::Fill(1)]).areas(body);
         fill_columns(
             f,
             p,
             top,
-            &visible(&s.series[0]),
-            max,
+            &shown[0],
+            scale,
             Paint::of(p, &s.series[0], s.color),
             Direction::Up,
         );
@@ -82,28 +100,67 @@ pub fn draw_series(f: &mut Canvas, p: &Palette, area: Rect, s: &SeriesSpec) {
             f,
             p,
             bottom,
-            &visible(&s.series[1]),
-            max,
+            &shown[1],
+            scale,
             Paint::of(p, &s.series[1], s.color),
             Direction::Down,
         );
         return;
     }
+    let all: Vec<f64> = s.series.iter().flat_map(&visible).collect();
+    let scale = Scale::of(&all, s);
     match s.style {
         SeriesStyle::Area => {
             if let Some(d) = s.series.first() {
                 let paint = Paint::of(p, d, s.color);
-                fill_columns(f, p, body, &visible(d), max, paint, Direction::Up);
+                fill_columns(f, p, body, &visible(d), scale, paint, Direction::Up);
             }
         }
         SeriesStyle::Bars => {
             if let Some(d) = s.series.first() {
                 let values = visible(d);
                 let tail = &values[values.len().saturating_sub(body.width as usize)..];
-                draw_bars_chart(f, p, body, tail, max, Paint::of(p, d, s.color));
+                draw_bars_chart(f, p, body, tail, scale, Paint::of(p, d, s.color));
             }
         }
-        SeriesStyle::Line => draw_lines(f, p, body, s.series, max),
+        SeriesStyle::Line => draw_lines(f, p, body, s.series, scale),
+    }
+}
+
+/// A line's color: its `tone`, else the next categorical color.
+fn series_color(p: &Palette, i: usize, d: &SeriesData) -> Color {
+    d.tone.map(|t| p.tone(t)).unwrap_or(p.series[i % 6])
+}
+
+/// The vertical range of a chart, bottom to top.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Scale {
+    pub lo: f64,
+    pub hi: f64,
+}
+
+impl Scale {
+    fn of(values: &[f64], s: &SeriesSpec) -> Self {
+        let (lo, hi) = series_scale(values, s.y_min, s.y_max, s.fit);
+        Scale { lo, hi }
+    }
+
+    fn span(self) -> f64 {
+        self.hi - self.lo
+    }
+
+    /// Where a value sits from the bottom, 0 to 1.
+    fn ratio(self, v: f64) -> f64 {
+        ((v - self.lo) / self.span()).clamp(0.0, 1.0)
+    }
+
+    /// Where bars and fills start: zero, or the nearer edge when zero is off the scale.
+    fn base(self) -> f64 {
+        0.0_f64.clamp(self.lo, self.hi)
+    }
+
+    fn spans_zero(self) -> bool {
+        self.lo < 0.0 && self.hi > 0.0
     }
 }
 
@@ -140,32 +197,50 @@ enum Direction {
 const EIGHTHS: [char; 8] = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'];
 
 /// Column chart: one sample per cell, eighth-block resolution, newest on the right.
+/// Columns grow from the zero line (or the nearer edge); negatives hang below it in
+/// whole cells.
 fn draw_bars_chart(
     f: &mut Canvas,
     p: &Palette,
     area: Rect,
     values: &[f64],
-    max: f64,
+    scale: Scale,
     color: Paint,
 ) {
     let rows = area.height as usize;
+    let base = scale.base();
+    // Rows under the baseline, so the baseline sits on a cell edge.
+    let below = ((base - scale.lo) / scale.span() * rows as f64).round() as usize;
+    let above = rows - below;
     let buf = f.buffer_mut();
     let offset = area.width as usize - values.len();
     for (i, v) in values.iter().enumerate() {
-        let ratio = (v / max).clamp(0.0, 1.0);
-        let units = (ratio * (rows * 8) as f64).round() as usize;
-        // Whole column takes the color of its top, so bars read as one value each.
-        let fg = color.at(p, ratio);
-        for row in 0..rows {
-            let filled = units.saturating_sub(row * 8).min(8);
-            if filled == 0 {
-                break;
+        let x = area.x + (offset + i) as u16;
+        // Whole column takes the color of its tip, so bars read as one value each.
+        let fg = color.at(p, scale.ratio(*v));
+        if *v >= base {
+            let ratio = if scale.hi > base {
+                ((v - base) / (scale.hi - base)).clamp(0.0, 1.0)
+            } else {
+                0.0
+            };
+            let units = (ratio * (above * 8) as f64).round() as usize;
+            for row in 0..above {
+                let filled = units.saturating_sub(row * 8).min(8);
+                if filled == 0 {
+                    break;
+                }
+                let y = area.y + (above - 1 - row) as u16;
+                buf[(x, y)].set_char(EIGHTHS[filled - 1]).set_fg(fg);
             }
-            let (x, y) = (
-                area.x + (offset + i) as u16,
-                area.y + area.height - 1 - row as u16,
-            );
-            buf[(x, y)].set_char(EIGHTHS[filled - 1]).set_fg(fg);
+        } else if below > 0 {
+            let ratio = ((base - v) / (base - scale.lo)).clamp(0.0, 1.0);
+            let cells = ((ratio * below as f64).round() as usize).max(1);
+            for row in 0..cells.min(below) {
+                buf[(x, area.y + (above + row) as u16)]
+                    .set_char('█')
+                    .set_fg(fg);
+            }
         }
     }
 }
@@ -174,19 +249,22 @@ fn draw_bars_chart(
 const BRAILLE: [[u8; 4]; 2] = [[0x01, 0x02, 0x04, 0x40], [0x08, 0x10, 0x20, 0x80]];
 
 /// Area fill in braille: two samples per cell, four dots tall, newest on the
-/// right. `Up` fills from the bottom, `Down` from the top.
+/// right. `Up` fills from the bottom, `Down` from the top. The fill meets the
+/// zero line (or the nearer edge); where the scale spans zero a faint line marks it.
 fn fill_columns(
     f: &mut Canvas,
     p: &Palette,
     area: Rect,
     values: &[f64],
-    max: f64,
+    scale: Scale,
     color: Paint,
     dir: Direction,
 ) {
     let rows = area.height as usize;
     let cols = area.width as usize;
     let dots = rows * 4;
+    let dot_at = |v: f64| (scale.ratio(v) * dots as f64).round() as usize;
+    let base = dot_at(scale.base());
     let buf = f.buffer_mut();
     // Right-align: the newest sample sits in the right half of the last cell.
     let offset = (cols * 2).saturating_sub(values.len());
@@ -194,11 +272,17 @@ fn fill_columns(
     for (i, v) in values.iter().enumerate() {
         let slot = offset + i;
         let (cx, half) = (slot / 2, slot % 2);
-        let mut height = ((v / max).clamp(0.0, 1.0) * dots as f64).round() as usize;
-        if height == 0 && *v > 0.0 {
-            height = 1; // show that something happened
+        let mut end = dot_at(*v);
+        let mut start = base;
+        if end == start && *v > 0.0 {
+            end += 1; // show that something happened
+        } else if end == start && *v < 0.0 && start > 0 {
+            end -= 1;
         }
-        for d in 0..height {
+        if end < start {
+            std::mem::swap(&mut end, &mut start);
+        }
+        for d in start..end.min(dots) {
             // Dot row counted from the top of the whole area.
             let dy = match dir {
                 Direction::Up => dots - 1 - d,
@@ -207,10 +291,22 @@ fn fill_columns(
             cells[(dy / 4) * cols + cx] |= BRAILLE[half][dy % 4];
         }
     }
+    let zero_row = scale.spans_zero().then(|| {
+        let at = base.min(dots - 1);
+        let dy = match dir {
+            Direction::Up => dots - 1 - at,
+            Direction::Down => at,
+        };
+        dy / 4
+    });
     for row in 0..rows {
         for cx in 0..cols {
             let bits = cells[row * cols + cx];
+            let (x, y) = (area.x + cx as u16, area.y + row as u16);
             if bits == 0 {
+                if zero_row == Some(row) {
+                    buf[(x, y)].set_char('─').set_fg(p.muted);
+                }
                 continue;
             }
             let level = match dir {
@@ -220,14 +316,12 @@ fn fill_columns(
             // Colored by height, so the top of a tall heat column is red.
             let fg = color.at(p, (level as f64 + 0.5) / rows as f64);
             let ch = char::from_u32(0x2800 + bits as u32).unwrap();
-            buf[(area.x + cx as u16, area.y + row as u16)]
-                .set_char(ch)
-                .set_fg(fg);
+            buf[(x, y)].set_char(ch).set_fg(fg);
         }
     }
 }
 
-fn draw_lines(f: &mut Canvas, p: &Palette, area: Rect, series: &[SeriesData], max: f64) {
+fn draw_lines(f: &mut Canvas, p: &Palette, area: Rect, series: &[SeriesData], scale: Scale) {
     let width = area.width as usize * 2; // braille has two dots per cell
     let data: Vec<Vec<(f64, f64)>> = series
         .iter()
@@ -254,23 +348,28 @@ fn draw_lines(f: &mut Canvas, p: &Palette, area: Rect, series: &[SeriesData], ma
     if !t0.is_finite() || !t1.is_finite() {
         return;
     }
-    let datasets = data
-        .iter()
-        .zip(series)
-        .enumerate()
-        .map(|(i, (d, s))| {
-            // Each series its own categorical color unless it names one.
-            let c = s.tone.map(|t| p.tone(t)).unwrap_or(p.series[i % 6]);
+    let t1 = t1.max(t0 + 1.0);
+    let zero = [(t0, 0.0), (t1, 0.0)];
+    let mut datasets = vec![];
+    if scale.spans_zero() {
+        datasets.push(
             Dataset::default()
                 .marker(Marker::Braille)
                 .graph_type(GraphType::Line)
-                .style(Style::new().fg(c))
-                .data(d)
-        })
-        .collect();
+                .style(Style::new().fg(p.muted))
+                .data(&zero),
+        );
+    }
+    datasets.extend(data.iter().zip(series).enumerate().map(|(i, (d, s))| {
+        Dataset::default()
+            .marker(Marker::Braille)
+            .graph_type(GraphType::Line)
+            .style(Style::new().fg(series_color(p, i, s)))
+            .data(d)
+    }));
     let chart = Chart::new(datasets)
-        .x_axis(Axis::default().bounds([t0, t1.max(t0 + 1.0)]))
-        .y_axis(Axis::default().bounds([0.0, max]));
+        .x_axis(Axis::default().bounds([t0, t1]))
+        .y_axis(Axis::default().bounds([scale.lo, scale.hi]));
     f.render_widget(chart, area);
 }
 
@@ -454,6 +553,150 @@ pub fn heat_color(stops: &[(u8, u8, u8); 3], t: f64) -> Color {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use dashboard_contract::Theme;
+    use ratatui::buffer::Buffer;
+
+    fn data(name: &str, values: &[f64]) -> SeriesData {
+        SeriesData {
+            tone: None,
+            name: name.into(),
+            points: values
+                .iter()
+                .enumerate()
+                .map(|(i, v)| (i as i64, *v))
+                .collect(),
+        }
+    }
+
+    fn spec<'a>(series: &'a [SeriesData], style: SeriesStyle) -> SeriesSpec<'a> {
+        SeriesSpec {
+            label: "L",
+            unit: Some("%"),
+            y_max: None,
+            y_min: None,
+            fit: false,
+            style,
+            color: ColorScale::Accent,
+            mirrored: false,
+            format: ValueFormat::Plain,
+            series,
+        }
+    }
+
+    fn render(s: &SeriesSpec, w: u16, h: u16) -> Vec<String> {
+        let area = Rect::new(0, 0, w, h);
+        let mut buf = Buffer::empty(area);
+        let p = Palette::for_theme(Theme::Dark, false);
+        draw_series(&mut Canvas(&mut buf), &p, area, s);
+        (0..h)
+            .map(|y| (0..w).map(|x| buf[(x, y)].symbol()).collect())
+            .collect()
+    }
+
+    #[test]
+    fn scale_without_negatives_is_unchanged() {
+        let d = [data("a", &[3.0, 40.0, 12.0])];
+        let sp = spec(&d, SeriesStyle::Area);
+        assert_eq!(
+            Scale::of(&[3.0, 40.0, 12.0], &sp),
+            Scale { lo: 0.0, hi: 40.0 }
+        );
+        assert_eq!(Scale::of(&[0.2, 0.5], &sp), Scale { lo: 0.0, hi: 1.0 });
+        let capped = SeriesSpec {
+            y_max: Some(100.0),
+            ..spec(&d, SeriesStyle::Area)
+        };
+        assert_eq!(Scale::of(&[3.0], &capped), Scale { lo: 0.0, hi: 100.0 });
+    }
+
+    #[test]
+    fn scale_reaches_negative_values_and_fits() {
+        let d = [data("a", &[])];
+        let sp = spec(&d, SeriesStyle::Line);
+        assert_eq!(Scale::of(&[-2.0, 1.0], &sp), Scale { lo: -2.0, hi: 1.0 });
+        let pinned = SeriesSpec {
+            y_min: Some(-5.0),
+            y_max: Some(5.0),
+            ..spec(&d, SeriesStyle::Line)
+        };
+        assert_eq!(
+            Scale::of(&[-2.0, 1.0], &pinned),
+            Scale { lo: -5.0, hi: 5.0 }
+        );
+        let fit = SeriesSpec {
+            fit: true,
+            ..spec(&d, SeriesStyle::Line)
+        };
+        let s = Scale::of(&[354.0, 357.0], &fit);
+        assert!(
+            (s.lo - 353.85).abs() < 1e-9 && (s.hi - 357.15).abs() < 1e-9,
+            "{s:?}"
+        );
+    }
+
+    #[test]
+    fn an_area_chart_with_negatives_fills_to_a_zero_line() {
+        let d = [data("a", &[-2.0, -1.0, 1.0, 2.0])];
+        let rows = render(&spec(&d, SeriesStyle::Area), 2, 9);
+        let body = &rows[1..];
+        // The zero line is drawn in the row where the fill meets it, in cells with no fill.
+        assert!(body.iter().any(|r| r.contains('─')), "{rows:#?}");
+        let line = body.iter().position(|r| r.contains('─')).unwrap();
+        // Positive samples (right) fill above the line, negative ones (left) below it.
+        assert!(body[..line].iter().any(|r| r.chars().nth(1) != Some(' ')));
+        assert!(body[line + 1..].iter().any(|r| !r.starts_with(' ')));
+        assert!(body[..line].iter().all(|r| r.starts_with(' ')));
+    }
+
+    #[test]
+    fn bars_hang_below_the_zero_line() {
+        let d = [data("a", &[-2.0, -2.0, 2.0, 2.0])];
+        let rows = render(&spec(&d, SeriesStyle::Bars), 4, 5);
+        let body = &rows[1..];
+        let col = |c: usize| -> String { body.iter().map(|r| r.chars().nth(c).unwrap()).collect() };
+        assert_eq!(col(0), "  ██", "{rows:#?}");
+        assert_eq!(col(3), "██  ");
+    }
+
+    #[test]
+    fn lines_draw_a_zero_line_only_when_spanning_zero() {
+        let d = [data("a", &[-1.0, 1.0, -1.0, 1.0])];
+        let spanning = render(&spec(&d, SeriesStyle::Line), 6, 5);
+        let flat = [data("a", &[1.0, 2.0, 1.0, 2.0])];
+        let positive = render(&spec(&flat, SeriesStyle::Line), 6, 5);
+        let dots = |rows: &[String]| {
+            rows[1..]
+                .iter()
+                .flat_map(|r| r.chars())
+                .filter(|c| *c != ' ')
+                .count()
+        };
+        assert!(dots(&spanning) > 0 && dots(&positive) > 0);
+        // Zero sits mid-height: the middle body row carries the faint line.
+        assert!(
+            spanning[1..].iter().any(|r| r.chars().all(|c| c != ' ')),
+            "{spanning:#?}"
+        );
+    }
+
+    #[test]
+    fn positive_area_looks_as_before() {
+        // Full-scale samples fill every dot of their half cell, and no zero line appears.
+        let d = [data("a", &[100.0, 100.0])];
+        let sp = SeriesSpec {
+            y_max: Some(100.0),
+            ..spec(&d, SeriesStyle::Area)
+        };
+        let rows = render(&sp, 1, 3);
+        assert_eq!(&rows[1..], ["⣿", "⣿"]);
+    }
+
+    #[test]
+    fn legend_shows_signed_values_with_one_decimal() {
+        let d = [data("SPY", &[0.3, -1.24]), data("QQQ", &[0.1, 0.04])];
+        let rows = render(&spec(&d, SeriesStyle::Line), 40, 3);
+        assert_eq!(rows[0].trim_end(), "L  SPY -1.2% QQQ 0.0%");
+    }
 
     #[test]
     fn bar_widths() {

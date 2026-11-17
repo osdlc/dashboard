@@ -14,7 +14,7 @@ pub struct Rotation {
     last_switch: Instant,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum State {
     On,
     /// Waiting for the user to be idle.
