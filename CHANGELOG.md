@@ -4,6 +4,21 @@ The dashboard is pre-1.0: the config format, the module contract and the CLI can
 between minor versions. 0.4.0 is the first public release. The earlier versions were not
 released on their own; they record the stages the project was built in.
 
+## Unreleased
+
+- **Clock face and display widgets:** `clock_face` is an analog dial (hour, minute and optional
+  second hand) and `display` is one value as large as the tile allows, with a block font in the
+  TUI. Any module can use them; the clock uses both in its new styles.
+- **Clock styles:** `style: column | table | analog | digital` beside the default `row`. `table` is
+  a world clock with each zone's UTC offset, hours from the first zone, and working hours, day or
+  night; `analog` draws a dial per zone and `digital` shows each time as big text. Native only: the
+  `clock-ts` and `clock-py` benchmark copies keep the `row` style.
+- **`series` takes negative values and a fitted scale.** The chart no longer clamps to 0: the
+  bottom is `y_min`, else 0 or the lowest value, and a faint zero line shows when the scale spans
+  zero (`area` fills to it, `bars` grow from it). `fit: true` scales to the data's own range, for
+  prices. Several lines are named in the legend in their colors, and small percentages keep one
+  decimal ("-1.2%"). Charts with no negative values draw as before.
+
 ## 0.8.0
 
 - **Layout that fits the tile.** A tile's size sets its rows in the TUI and its height in the web

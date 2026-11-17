@@ -110,7 +110,29 @@ fn widget(w: &Widget, at: &str, out: &mut Vec<Finding>) {
                 percent(out, &format!("meter {:?}", m.label), m.percent);
             }
         }
-        Widget::Series { series, .. } => {
+        Widget::Series {
+            series,
+            mirrored,
+            y_min,
+            y_max,
+            ..
+        } => {
+            if let (Some(lo), Some(hi)) = (y_min, y_max)
+                && lo >= hi
+            {
+                problem(
+                    out,
+                    format!("{at}: series y_min {lo} is not below y_max {hi}"),
+                );
+            }
+            if *mirrored && series.iter().any(|s| s.points.iter().any(|p| p.1 < 0.0)) {
+                note(
+                    out,
+                    format!(
+                        "{at}: mirrored series draw negative values as 0; use two series above and below zero without `mirrored`"
+                    ),
+                );
+            }
             for s in series {
                 let times: Vec<i64> = s.points.iter().map(|p| p.0).collect();
                 if times.windows(2).any(|w| w[1] < w[0]) {
@@ -159,6 +181,24 @@ fn widget(w: &Widget, at: &str, out: &mut Vec<Finding>) {
                 note(out, format!("{at}: every slice is 0, shown as \"no data\""));
             }
         }
+        Widget::ClockFace {
+            hour,
+            minute,
+            second,
+            ..
+        } => {
+            if *hour > 23 {
+                problem(out, format!("{at}: hour is {hour}; use 0-23"));
+            }
+            if *minute > 59 {
+                problem(out, format!("{at}: minute is {minute}; use 0-59"));
+            }
+            if let Some(s) = second
+                && *s > 59
+            {
+                problem(out, format!("{at}: second is {s}; use 0-59"));
+            }
+        }
         Widget::Uptime { checks } => {
             for c in checks {
                 if let Some(u) = c.uptime {
@@ -185,14 +225,18 @@ fn widget(w: &Widget, at: &str, out: &mut Vec<Finding>) {
                     if let Cell::Widget(inner) = cell {
                         if matches!(
                             inner,
-                            Widget::Stat { .. } | Widget::Gauge { .. } | Widget::Pie { .. }
+                            Widget::Stat { .. }
+                                | Widget::Gauge { .. }
+                                | Widget::Pie { .. }
+                                | Widget::Display { .. }
+                                | Widget::ClockFace { .. }
                         ) {
                             widget(inner, &format!("{here}.cells[{key:?}]"), out);
                         } else {
                             problem(
                                 out,
                                 format!(
-                                    "{here}: cell {key:?} holds a widget other than stat, gauge or pie, shown as text"
+                                    "{here}: cell {key:?} holds a widget other than stat, gauge, pie, display or clock_face, shown as text"
                                 ),
                             );
                         }
@@ -206,7 +250,11 @@ fn widget(w: &Widget, at: &str, out: &mut Vec<Finding>) {
                 widget(child, &format!("{at}.children[{i}]"), out);
             }
         }
-        Widget::Text { .. } | Widget::Stat { .. } | Widget::Bars { .. } | Widget::Log { .. } => {}
+        Widget::Text { .. }
+        | Widget::Stat { .. }
+        | Widget::Display { .. }
+        | Widget::Bars { .. }
+        | Widget::Log { .. } => {}
     }
 }
 
@@ -260,6 +308,8 @@ mod tests {
                         label: "s".into(),
                         unit: None,
                         y_max: None,
+                        y_min: None,
+                        fit: false,
                         id: None,
                         history: None,
                         style: Default::default(),
@@ -368,5 +418,23 @@ mod tests {
         let found = findings(table);
         assert_eq!(found.len(), 1, "{found:#?}");
         assert!(found[0].text.contains("root.rows[0].cells[\"use\"]"));
+    }
+
+    #[test]
+    fn clock_face_ranges_are_checked() {
+        let face = |hour, minute, second| Widget::ClockFace {
+            hour,
+            minute,
+            second,
+            label: None,
+            caption: None,
+            status: None,
+        };
+        assert!(findings(face(23, 59, Some(59))).is_empty());
+        assert!(findings(face(0, 0, None)).is_empty());
+        let found = findings(face(24, 60, Some(60)));
+        assert_eq!(found.len(), 3, "{found:#?}");
+        assert!(found[0].text.contains("hour is 24"));
+        assert!(found[2].text.contains("second is 60"));
     }
 }

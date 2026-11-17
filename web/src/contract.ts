@@ -59,6 +59,12 @@ export type Widget =
        */
       color?: "accent" | "heat" | "cool" | "sunset";
       /**
+       * Scale to the data's own range with a little padding (for prices that
+       * sit far from 0). Ignored when `y_min` or `y_max` is set, and when
+       * `mirrored`.
+       */
+      fit?: boolean;
+      /**
        * How values are written: plain, bytes or count.
        */
       format?: "plain" | "bytes" | "count";
@@ -75,7 +81,8 @@ export type Widget =
       label: string;
       /**
        * Draw the first series above the axis and the second below it,
-       * e.g. network download and upload.
+       * e.g. network download and upload. Negative values count as 0 here
+       * (`dashboard check` flags them).
        */
       mirrored?: boolean;
       /**
@@ -92,9 +99,15 @@ export type Widget =
        */
       unit?: string | null;
       /**
-       * The top of the chart. Default: the largest value.
+       * The top of the chart. Default: the largest value (at least 1 when no
+       * value is negative and `y_min` is unset).
        */
       y_max?: number | null;
+      /**
+       * The bottom of the chart. Default: 0, or the smallest value when that
+       * is negative. Set it to chart values that never reach 0.
+       */
+      y_min?: number | null;
     }
   | {
       /**
@@ -142,6 +155,58 @@ export type Widget =
       type: "pie";
       /**
        * Shown after each value in the legend.
+       */
+      unit?: string | null;
+    }
+  | {
+      /**
+       * Shown below the face, e.g. a date.
+       */
+      caption?: string | null;
+      /**
+       * 0-23.
+       */
+      hour: number;
+      /**
+       * Shown above the face, e.g. "Tokyo".
+       */
+      label?: string | null;
+      /**
+       * 0-59.
+       */
+      minute: number;
+      /**
+       * 0-59. No second hand when absent.
+       */
+      second?: number | null;
+      /**
+       * Colors the face's outline.
+       */
+      status?: Status | null;
+      type: "clock_face";
+    }
+  | {
+      /**
+       * Shown below the text.
+       */
+      caption?: string | null;
+      /**
+       * Shown above the text.
+       */
+      label?: string | null;
+      /**
+       * Colors the text.
+       */
+      status?: Status | null;
+      /**
+       * Already formatted, e.g. "14:05". The TUI draws it in a block font
+       * when it has a glyph for every character, else as plain text; see
+       * docs/contract.md, "Clock face and display".
+       */
+      text: string;
+      type: "display";
+      /**
+       * Shown after the text, smaller, e.g. "PM".
        */
       unit?: string | null;
     }
@@ -265,6 +330,12 @@ export type Cell =
            */
           color?: "accent" | "heat" | "cool" | "sunset";
           /**
+           * Scale to the data's own range with a little padding (for prices that
+           * sit far from 0). Ignored when `y_min` or `y_max` is set, and when
+           * `mirrored`.
+           */
+          fit?: boolean;
+          /**
            * How values are written: plain, bytes or count.
            */
           format?: "plain" | "bytes" | "count";
@@ -281,7 +352,8 @@ export type Cell =
           label: string;
           /**
            * Draw the first series above the axis and the second below it,
-           * e.g. network download and upload.
+           * e.g. network download and upload. Negative values count as 0 here
+           * (`dashboard check` flags them).
            */
           mirrored?: boolean;
           /**
@@ -298,9 +370,15 @@ export type Cell =
            */
           unit?: string | null;
           /**
-           * The top of the chart. Default: the largest value.
+           * The top of the chart. Default: the largest value (at least 1 when no
+           * value is negative and `y_min` is unset).
            */
           y_max?: number | null;
+          /**
+           * The bottom of the chart. Default: 0, or the smallest value when that
+           * is negative. Set it to chart values that never reach 0.
+           */
+          y_min?: number | null;
         }
       | {
           /**
@@ -348,6 +426,58 @@ export type Cell =
           type: "pie";
           /**
            * Shown after each value in the legend.
+           */
+          unit?: string | null;
+        }
+      | {
+          /**
+           * Shown below the face, e.g. a date.
+           */
+          caption?: string | null;
+          /**
+           * 0-23.
+           */
+          hour: number;
+          /**
+           * Shown above the face, e.g. "Tokyo".
+           */
+          label?: string | null;
+          /**
+           * 0-59.
+           */
+          minute: number;
+          /**
+           * 0-59. No second hand when absent.
+           */
+          second?: number | null;
+          /**
+           * Colors the face's outline.
+           */
+          status?: Status | null;
+          type: "clock_face";
+        }
+      | {
+          /**
+           * Shown below the text.
+           */
+          caption?: string | null;
+          /**
+           * Shown above the text.
+           */
+          label?: string | null;
+          /**
+           * Colors the text.
+           */
+          status?: Status | null;
+          /**
+           * Already formatted, e.g. "14:05". The TUI draws it in a block font
+           * when it has a glyph for every character, else as plain text; see
+           * docs/contract.md, "Clock face and display".
+           */
+          text: string;
+          type: "display";
+          /**
+           * Shown after the text, smaller, e.g. "PM".
            */
           unit?: string | null;
         }
@@ -722,6 +852,11 @@ export interface UiSettings {
    */
   screens: ScreenLayout[];
   theme: Theme;
+  /**
+   * The most times a second the terminal view draws the screen again when
+   * tiles change. The web view does not use it.
+   */
+  tui_fps?: number;
 }
 /**
  * The color theme in use, both variants; `theme` picks one.

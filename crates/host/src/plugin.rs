@@ -201,13 +201,14 @@ impl Module for Plugin {
     }
 }
 
-#[cfg(test)]
+// Unix only: the test uses `sh` and `kill`. On Windows the module would be
+// empty, and its `use super::*` an unused import.
+#[cfg(all(test, unix))]
 mod tests {
     use super::*;
 
     /// A plugin that fails is dropped with everything it started, not only
     /// its own process: here the `sh` exits at once and leaves a `sleep`.
-    #[cfg(unix)]
     #[tokio::test]
     async fn failed_plugin_takes_its_children_with_it() {
         let dir = std::env::temp_dir().join(format!("plugin-tree-{}", std::process::id()));

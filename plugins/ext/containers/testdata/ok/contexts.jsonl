@@ -1,0 +1,3 @@
+{"Current":false,"Description":"Docker Desktop","DockerEndpoint":"unix:///nonexistent/dashboard-demo/docker.sock","Error":"","Name":"desktop"}
+{"Current":true,"Description":"colima","DockerEndpoint":"tcp://192.0.2.10:2375","Error":"","Name":"colima"}
+{"Current":false,"Description":"Staging box","DockerEndpoint":"tcp://192.0.2.20:2375","Error":"","Name":"staging"}

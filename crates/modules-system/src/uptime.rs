@@ -216,6 +216,8 @@ fn view(checks: Vec<UptimeCheck>, latency: Vec<SeriesData>, history: Option<u32>
                     label: "Response time".into(),
                     unit: Some("ms".into()),
                     y_max: None,
+                    y_min: None,
+                    fit: false,
                     id: history.map(|_| "latency".into()),
                     history,
                     style: Default::default(),
