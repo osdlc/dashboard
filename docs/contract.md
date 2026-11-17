@@ -100,11 +100,11 @@ pub enum Widget {
     Text   { text: String, #[serde(default)] markdown: bool },
     Stat   { label: String, value: String, unit: Option<String>, delta: Option<String>, status: Option<Status> },
     Gauge  { label: String, percent: f64, marker: Option<f64>, thresholds: Option<Thresholds>, caption: Option<String> },
-    Series { label: String, unit: Option<String>, y_max: Option<f64>,
+    Series { label: String, unit: Option<String>, y_max: Option<f64>, y_min: Option<f64>, fit: bool,
              id: Option<String>, history: Option<u32>,   // host-kept history, see below
              style: SeriesStyle,      // line | area | bars
              color: ColorScale,       // accent | heat | cool | sunset (colored by value)
-             mirrored: bool,          // first series above the axis, second below (e.g. net down/up)
+             mirrored: bool,          // first series above the axis, second below (e.g. net down/up); negatives count as 0
              format: ValueFormat,     // plain | bytes (KiB/MiB/GiB) | count (12.3k, 4.2M), then `unit`
              series: Vec<SeriesData> },
     MeterGrid { label: Option<String>, meters: Vec<Meter>, color: ColorScale },   // e.g. per-core CPU
@@ -193,6 +193,18 @@ pub trait Module: Send {
 /// the last good view, marked stale (or the error, before the first view).
 pub type ViewSender = mpsc::Sender<Result<View>>;
 ```
+
+### Series scale
+
+Values can be negative. The bottom of the chart is `y_min`, else 0 or the lowest value if that is
+lower. The top is `y_max`, else the highest value (at least 1 when nothing is negative and
+`y_min` is unset, so a chart of small positive values draws as it always has). `fit: true`, with
+no `y_min` or `y_max`, scales to the data's own range with 5% padding: use it for values far from
+0, such as a price. When the scale spans zero a faint zero line is drawn; `area` fills to that
+line and `bars` grow from it, down for negative values. A `mirrored` chart draws magnitudes, so
+negative values count as 0 there (`dashboard check` notes it). Values keep their sign in the
+legend; with `unit: "%"`, a non-whole value under 10 shows one decimal ("-1.2%"). A chart of
+several lines names each one in the legend, in its line's color.
 
 ### Series history
 

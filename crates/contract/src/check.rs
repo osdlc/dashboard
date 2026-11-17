@@ -110,7 +110,29 @@ fn widget(w: &Widget, at: &str, out: &mut Vec<Finding>) {
                 percent(out, &format!("meter {:?}", m.label), m.percent);
             }
         }
-        Widget::Series { series, .. } => {
+        Widget::Series {
+            series,
+            mirrored,
+            y_min,
+            y_max,
+            ..
+        } => {
+            if let (Some(lo), Some(hi)) = (y_min, y_max)
+                && lo >= hi
+            {
+                problem(
+                    out,
+                    format!("{at}: series y_min {lo} is not below y_max {hi}"),
+                );
+            }
+            if *mirrored && series.iter().any(|s| s.points.iter().any(|p| p.1 < 0.0)) {
+                note(
+                    out,
+                    format!(
+                        "{at}: mirrored series draw negative values as 0; use two series above and below zero without `mirrored`"
+                    ),
+                );
+            }
             for s in series {
                 let times: Vec<i64> = s.points.iter().map(|p| p.0).collect();
                 if times.windows(2).any(|w| w[1] < w[0]) {
@@ -260,6 +282,8 @@ mod tests {
                         label: "s".into(),
                         unit: None,
                         y_max: None,
+                        y_min: None,
+                        fit: false,
                         id: None,
                         history: None,
                         style: Default::default(),
