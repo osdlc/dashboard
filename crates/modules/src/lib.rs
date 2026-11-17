@@ -105,6 +105,7 @@ mod tests {
                 "security",
                 "http",
                 "file",
+                "screensaver",
                 "jira",
                 "linear",
                 "forgejo",
@@ -170,7 +171,8 @@ mod tests {
                 "cmdrunner",
                 "security",
                 "http",
-                "file"
+                "file",
+                "screensaver"
             ]
         );
         assert!(builtin("jira").is_none());

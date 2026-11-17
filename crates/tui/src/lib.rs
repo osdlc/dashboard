@@ -29,6 +29,7 @@ mod clockface;
 mod display;
 mod fit;
 mod help;
+mod images;
 mod layout;
 mod mouse;
 mod nav;
@@ -261,6 +262,7 @@ fn frame(fps: u32) -> Duration {
 
 fn init_terminal() -> Result<ratatui::DefaultTerminal> {
     let terminal = ratatui::init();
+    images::detect();
     execute!(std::io::stdout(), EnableMouseCapture)?;
     Ok(terminal)
 }
