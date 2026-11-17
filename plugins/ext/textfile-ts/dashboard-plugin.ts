@@ -503,7 +503,7 @@ export interface ClockFaceWidget {
   minute: number;
   /** 0-59. No second hand when absent. */
   second?: number | null;
-  /** Colors the face's outline: ok, warn or error. */
+  /** Colors the face's outline. */
   status?: Status | null;
   type: "clock_face";
 }
@@ -514,12 +514,12 @@ export interface DisplayWidget {
   caption?: string | null;
   /** Shown above the text. */
   label?: string | null;
-  /** Colors the text: ok, warn or error. */
+  /** Colors the text. */
   status?: Status | null;
   /**
-   * Already formatted, e.g. "14:05". The TUI's block font covers
-   * digits and a few symbols (`: . - + %`, space, A, M, P); other
-   * characters show the whole text small.
+   * Already formatted, e.g. "14:05". The TUI draws it in a block font
+   * when it has a glyph for every character, else as plain text; see
+   * docs/contract.md, "Clock face and display".
    */
   text: string;
   type: "display";

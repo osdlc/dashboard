@@ -509,14 +509,14 @@ class ClockFaceWidget(_ClockFaceWidgetRequired, total=False):
     label: Optional[str]
     # 0-59. No second hand when absent.
     second: Optional[int]
-    # Colors the face's outline: ok, warn or error.
+    # Colors the face's outline.
     status: Optional["Status"]
 
 
 class _DisplayWidgetRequired(TypedDict):
-    # Already formatted, e.g. "14:05". The TUI's block font covers
-    # digits and a few symbols (`: . - + %`, space, A, M, P); other
-    # characters show the whole text small.
+    # Already formatted, e.g. "14:05". The TUI draws it in a block font
+    # when it has a glyph for every character, else as plain text; see
+    # docs/contract.md, "Clock face and display".
     text: str
     type: Literal["display"]
 
@@ -527,7 +527,7 @@ class DisplayWidget(_DisplayWidgetRequired, total=False):
     caption: Optional[str]
     # Shown above the text.
     label: Optional[str]
-    # Colors the text: ok, warn or error.
+    # Colors the text.
     status: Optional["Status"]
     # Shown after the text, smaller, e.g. "PM".
     unit: Optional[str]
