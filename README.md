@@ -220,6 +220,8 @@ modules:
 | `row` | One time per zone, side by side (the default). |
 | `column` | The same, stacked: for a `tall` tile. |
 | `table` | A world clock: time, date, UTC offset, hours from the first zone, and whether it is working hours (9 to 5 on a weekday), day or night there. Working-hours rows are marked green. |
+| `analog` | An analog dial per zone with the date under it; `seconds: true` adds a second hand. For a `large` tile. |
+| `digital` | Each time as big text, as large as the tile allows, with the date under it. For a `wide` tile. |
 
 List your own zone first to read `table` as "hours from me".
 
@@ -230,7 +232,7 @@ modules:
       zones: [local, UTC, America/New_York, { zone: Asia/Tokyo, label: Tokyo office }]
       hour12: false              # true: 2:05 PM
       seconds: false             # true: also refreshes every second
-      style: table               # row | column | table
+      style: table               # row | column | table | analog | digital
 ```
 
 GitHub uses the `gh` CLI's login (`github-prs`, `github-issues`), so it needs no token setting.

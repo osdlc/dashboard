@@ -9,6 +9,8 @@ use ratatui::widgets::{Block, Borders, Cell, Paragraph, Row, Table, Wrap};
 
 use crate::canvas::Canvas;
 use crate::charts;
+use crate::clockface;
+use crate::display;
 use crate::fit;
 use crate::mouse::{Click, Hits};
 use crate::pie;
@@ -181,6 +183,40 @@ fn draw_widget(f: &mut Canvas, p: &Palette, area: Rect, widget: &Widget, hits: &
                 color: *color,
             };
             pie::draw_pie(f, p, area, &spec);
+        }
+        Widget::ClockFace {
+            hour,
+            minute,
+            second,
+            label,
+            caption,
+            status,
+        } => {
+            let spec = clockface::FaceSpec {
+                hour: *hour,
+                minute: *minute,
+                second: *second,
+                label: label.as_deref(),
+                caption: caption.as_deref(),
+                status: *status,
+            };
+            clockface::draw_face(f, p, area, &spec);
+        }
+        Widget::Display {
+            text,
+            label,
+            caption,
+            unit,
+            status,
+        } => {
+            let spec = display::DisplaySpec {
+                text,
+                label: label.as_deref(),
+                caption: caption.as_deref(),
+                unit: unit.as_deref(),
+                status: *status,
+            };
+            display::draw_display(f, p, area, &spec);
         }
         Widget::List { items, empty_text } => draw_list(f, p, area, items, empty_text, hits),
         Widget::Table { columns, rows } => {
@@ -621,6 +657,12 @@ fn want(widget: &Widget, width: u16) -> Want {
                 width,
             )),
         ),
+        Widget::ClockFace { label, caption, .. } => {
+            grows(clockface::wanted_height(label.is_some(), caption.is_some()))
+        }
+        Widget::Display { label, caption, .. } => {
+            grows(display::wanted_height(label.is_some(), caption.is_some()))
+        }
         Widget::List { items, .. } => fixed(
             items
                 .iter()
@@ -762,7 +804,7 @@ fn table_columns(
 }
 
 /// Plain-text form of a table cell. Inline gauges become "81%", pies their
-/// largest slice, "photos 60%".
+/// largest slice, "photos 60%"; clock faces show "14:05", displays their text.
 fn cell_text(cell: Option<&ViewCell>) -> String {
     match cell {
         None => String::new(),
@@ -777,6 +819,15 @@ fn cell_text(cell: Option<&ViewCell>) -> String {
         Some(ViewCell::Widget(Widget::Stat { value, unit, .. })) => {
             format!(
                 "{value}{}",
+                unit.as_deref().map(|u| format!(" {u}")).unwrap_or_default()
+            )
+        }
+        Some(ViewCell::Widget(Widget::ClockFace { hour, minute, .. })) => {
+            clockface::time_text(*hour, *minute)
+        }
+        Some(ViewCell::Widget(Widget::Display { text, unit, .. })) => {
+            format!(
+                "{text}{}",
                 unit.as_deref().map(|u| format!(" {u}")).unwrap_or_default()
             )
         }
@@ -1002,6 +1053,99 @@ mod tests {
         (0..height)
             .map(|y| text(&buf, y).trim_end().to_string())
             .collect()
+    }
+
+    fn face(label: &str) -> Widget {
+        Widget::ClockFace {
+            hour: 14,
+            minute: 5,
+            second: None,
+            label: Some(label.into()),
+            caption: None,
+            status: None,
+        }
+    }
+
+    fn display(text: &str) -> Widget {
+        Widget::Display {
+            text: text.into(),
+            label: Some("Tokyo".into()),
+            caption: None,
+            unit: Some("PM".into()),
+            status: None,
+        }
+    }
+
+    #[test]
+    fn clock_faces_and_displays_in_table_cells_are_text() {
+        assert_eq!(cell_text(Some(&ViewCell::Widget(face("Tokyo")))), "14:05");
+        assert_eq!(
+            cell_text(Some(&ViewCell::Widget(display("2:05")))),
+            "2:05 PM"
+        );
+    }
+
+    #[test]
+    fn faces_in_a_wide_row_are_spread_evenly() {
+        let row = Widget::Row {
+            children: ["Chicago", "UTC", "Berlin", "Tokyo"].map(face).to_vec(),
+        };
+        let rows = draw(&row, 120, 12);
+        // Each share is (120 - 3 * 2) / 4 = 28 or 29 cells wide, 2 apart.
+        let shares = [(0, 29), (31, 60), (62, 90), (92, 120)];
+        let mut centers = vec![];
+        for (from, to) in shares {
+            let cols: Vec<usize> = rows[1..]
+                .iter()
+                .flat_map(|r| r.chars().enumerate().skip(from).take(to - from))
+                .filter(|(_, c)| ('\u{2801}'..='\u{28ff}').contains(c))
+                .map(|(i, _)| i)
+                .collect();
+            let (lo, hi) = (*cols.iter().min().unwrap(), *cols.iter().max().unwrap());
+            centers.push((lo + hi) as f64 / 2.0);
+            assert!(hi - lo >= 15, "dial too small: {rows:#?}");
+        }
+        // Equal steps between the dial centers, so equal space around each.
+        let steps: Vec<f64> = centers.windows(2).map(|w| w[1] - w[0]).collect();
+        assert!(
+            steps.iter().all(|s| (s - steps[0]).abs() <= 1.5),
+            "{centers:?}"
+        );
+        // And the first and last sit in from the edges alike.
+        assert!(
+            (centers[0] - (119.0 - centers[3])).abs() <= 1.5,
+            "{centers:?}"
+        );
+    }
+
+    #[test]
+    fn a_row_of_faces_and_displays_draws_in_a_tile() {
+        let row = Widget::Row {
+            children: vec![face("Tokyo"), face("Paris")],
+        };
+        let rows = draw(&row, 60, 10);
+        assert!(
+            rows[0].contains("Tokyo") && rows[0].contains("Paris"),
+            "{rows:#?}"
+        );
+        assert!(
+            rows[1..].iter().any(|r| r.contains('⠒') || r.contains('⠤')),
+            "{rows:#?}"
+        );
+        // Too small for dials: the times as text.
+        let rows = draw(&row, 60, 2);
+        assert!(rows[0].starts_with("Tokyo 14:05"), "{rows:#?}");
+        assert!(rows[0].ends_with("Paris 14:05"), "{rows:#?}");
+
+        let row = Widget::Row {
+            children: vec![display("2:05"), display("9:30")],
+        };
+        let rows = draw(&row, 40, 6);
+        assert!(
+            rows[1].contains("PM") || rows[5].contains("PM"),
+            "{rows:#?}"
+        );
+        assert!(want(&row, 40).grows);
     }
 
     #[test]

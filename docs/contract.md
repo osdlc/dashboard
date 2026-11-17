@@ -113,6 +113,10 @@ pub enum Widget {
              donut: bool,             // default true; false draws a full disc
              format: ValueFormat, unit: Option<String>,
              color: ColorScale },     // accent: a color per slice; heat | cool | sunset: spread along the scale
+    ClockFace { hour: u8, minute: u8, second: Option<u8>,               // an analog dial, see below
+             label: Option<String>, caption: Option<String>, status: Option<Status> },
+    Display { text: String, label: Option<String>, caption: Option<String>,   // one value as large as it fits
+             unit: Option<String>, status: Option<Status> },
     List   { items: Vec<ListItem>, empty_text: Option<String> },
     Table  { columns: Vec<Column>, rows: Vec<Row> },
     Log    { label: Option<String>, lines: Vec<LogLine> },               // newest last
@@ -163,7 +167,7 @@ pub struct Row {
 pub enum Cell {
     Text(String),
     Number(f64),
-    Widget(Widget),                    // Stat, Gauge and Pie are rendered inline; others fall back to text
+    Widget(Widget),                    // Stat, Gauge, Pie, Display and ClockFace are rendered inline; others fall back to text
 }
 
 // ---- Actions ----
@@ -225,6 +229,32 @@ its value (with `format` and `unit`) and its percent.
   a braille disc with the legend beside it when there is room, and otherwise one bar split into
   the slices, with the legend packed below. In a table cell the web view shows a small disc and the
   TUI the largest slice as text ("photos 60%").
+
+### Clock face and display
+
+A `clock_face` is an analog dial for a time the module already worked out (the renderer never
+reads a clock). `hour` is 0-23 and `minute` 0-59; `second` is optional and adds a second hand.
+The hour hand moves with the minutes. `label` goes above the dial and `caption` below it, and
+`status` colors the rim. `dashboard plugin-check` reports values out of range.
+
+```json
+{"type": "clock_face", "hour": 14, "minute": 5, "second": 9, "label": "Tokyo", "caption": "Tue 27 Oct"}
+```
+
+A `display` shows one `text` as large as the tile allows: a big number or a clock. `unit` follows
+it, smaller (for example "PM"), and `status` colors it like a `stat`.
+
+```json
+{"type": "display", "text": "14:05", "label": "Tokyo", "caption": "Tue 27 Oct", "unit": "PM"}
+```
+
+- The web view draws the dial as an SVG and scales the display's text to its box. Several of
+  either in a `row` share the width evenly, each centered in its share.
+- The TUI draws the dial in braille when the area is at least 10 columns by 5 rows, else the text
+  "Tokyo 14:05". It draws a display in a block font 5 rows tall, else 3, else as plain text; the
+  font has digits, `: . - + %`, space, and A, M and P. Any other character makes the whole text
+  plain.
+- In a table cell a clock face shows as "14:05" and a display as its text.
 
 Pies compose like the other widgets. A donut next to two stats:
 
