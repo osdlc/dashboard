@@ -1,15 +1,24 @@
-# Coverage and complexity of the Rust crates: per-crate tables in the run's
-# summary, the total beside main's, and one line on each pull request. It
-# reports only; nothing fails. The work is osdlc/osdlc's reports.yml, called
-# here; see "Reports" in packages/gh-actions/README.md there.
+# Coverage and complexity of the Rust crates and the TypeScript packages:
+# per-package tables in the run's summary, the total beside main's, and one
+# line on each pull request. It reports only; nothing fails. The work is
+# osdlc/osdlc's reports.yml, called here; see "Reports" in
+# packages/gh-actions/README.md there.
 #
 # Settings are this repository's variables:
-#   REPORTS_RUST_DIR      .  (the workspace is at the root)
-#   REPORTS_RUST_ARGS     --workspace --exclude dashboard-desktop  (the Tauri
-#                         app needs WebKitGTK; plain `cargo test` leaves it out too)
-#   REPORTS_NODE_VERSION  24  (the plugin tests run the TypeScript plugins)
-#   REPORTS_ENV           DASHBOARD_SKIP_UI_BUILD=1  (embed the placeholder page)
-# TypeScript is not reported: web/ and site/ test with node --test, not vitest.
+#   REPORTS_RUST_DIR       .  (the workspace is at the root)
+#   REPORTS_RUST_ARGS      --workspace --exclude dashboard-desktop  (the Tauri
+#                          app needs WebKitGTK; plain `cargo test` leaves it out too)
+#   REPORTS_NODE_VERSION   24  (the plugin tests run the TypeScript plugins)
+#   REPORTS_ENV            DASHBOARD_SKIP_UI_BUILD=1  (embed the placeholder page)
+#   REPORTS_TS_PACKAGES    web site
+#   REPORTS_TS_SETUP       none  (the tests import only src/ and node:, so
+#                          nothing is installed)
+#   REPORTS_TS_COVERAGE    node --test --experimental-test-coverage
+#                          --test-reporter=spec --test-reporter-destination=stderr
+#                          --test-reporter=lcov
+#                          --test-reporter-destination=coverage/lcov.info
+#                          test/*.test.ts  (one line in the variable)
+#   REPORTS_OXLINT_IGNORE  site/public/**  (the committed demo build)
 name: reports
 
 on:
@@ -26,4 +35,4 @@ jobs:
       contents: read
       actions: read # octocov reads main's report
       pull-requests: write # the coverage comment
-    uses: osdlc/osdlc/.github/workflows/reports.yml@main
+    uses: osdlc/osdlc/.github/workflows/reports.yml@48026e129c13a7371e99e3c9ef6c114cb622d6f9 # osdlc/osdlc#862; back to @main once it merges
