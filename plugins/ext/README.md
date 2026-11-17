@@ -99,6 +99,19 @@ is what the ones in `testdata/ok` produce. The test is `crates/cli/tests/ext_con
 dashboard plugin-check -- python3 plugins/ext/containers/main.py
 ```
 
+## Stocks (unofficial API)
+
+| Package | What | Test |
+|---|---|---|
+| `stocks` (Python) | Prices and the day's change of a few symbols from Yahoo Finance's unofficial chart endpoint, with a chart of each day. A plugin because that API is one company's and changes without notice | `crates/cli/tests/ext_stocks.rs` |
+
+With `--sample` it reads the saved replies in `stocks/samples/` instead of calling Yahoo.
+
+```sh
+dashboard plugin-check -- python3 plugins/ext/stocks/main.py --sample
+dashboard plugin-check -- python3 plugins/ext/stocks/main.py
+```
+
 ## Ops widgets (token APIs)
 
 `datadog`, `newrelic`, `pagerduty`, `opsgenie` and `sentry` call a service that needs a token.
