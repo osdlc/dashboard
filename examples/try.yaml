@@ -282,6 +282,10 @@ modules:
     config: { subreddit: rust, sort: hot, limit: 10 }
   crypto:
     config: { coins: [bitcoin, ethereum, solana, dogecoin], currency: usd, warn_drop: 5 }
+  stocks:
+    package: stocks
+    demo: true            # real: drop `demo`; public Yahoo Finance endpoint, no key
+    config: { symbols: [SPY, QQQ, AAPL, MSFT, NVDA], warn_drop: 2 }
   mempool:
     config: { blocks: 6, warn_fee: 50 }
   scores:
@@ -476,6 +480,7 @@ screens:
       - { module: devto, size: tall }
       - { module: subreddit, size: tall }
       - { module: crypto, size: medium }
+      - { module: stocks, size: medium }
       - { module: mempool, size: medium }
       - { module: scores, size: medium }
       - { module: football, size: medium }
