@@ -166,6 +166,34 @@
    "group": "compositions"
   },
   {
+   "id": "clock-face",
+   "name": "Clock face",
+   "version": "",
+   "description": "An analog dial with hour and minute hands, and a second hand when `second` is given. The hour hand moves with the minutes. In a terminal that is too small for a dial it shows as text, and in a table cell as the time.",
+   "tags": [],
+   "kind": "block",
+   "source": "examples/blocks/clock-face.json",
+   "default_size": "small",
+   "requirements": {
+    "binaries": [],
+    "env": [],
+    "hosts": []
+   },
+   "demo": {
+    "status": "ok",
+    "summary": "Tokyo 14:05",
+    "root": {
+     "type": "clock_face",
+     "hour": 14,
+     "minute": 5,
+     "second": 9,
+     "label": "Tokyo",
+     "caption": "Tue 27 Oct"
+    }
+   },
+   "group": "primitives"
+  },
+  {
    "id": "column",
    "name": "Column",
    "version": "",
@@ -206,6 +234,33 @@
        "text": "Discharging. Full charge 4,512 mAh of 5,000 (90% health)."
       }
      ]
+    }
+   },
+   "group": "primitives"
+  },
+  {
+   "id": "display",
+   "name": "Display",
+   "version": "",
+   "description": "One value as large as the tile allows, such as a big number or a clock. The terminal draws it in a block font for digits and a few symbols, and in plain text for anything else.",
+   "tags": [],
+   "kind": "block",
+   "source": "examples/blocks/display.json",
+   "default_size": "small",
+   "requirements": {
+    "binaries": [],
+    "env": [],
+    "hosts": []
+   },
+   "demo": {
+    "status": "ok",
+    "summary": "Tokyo 2:05 PM",
+    "root": {
+     "type": "display",
+     "text": "2:05",
+     "label": "Tokyo",
+     "caption": "Tue 27 Oct",
+     "unit": "PM"
     }
    },
    "group": "primitives"

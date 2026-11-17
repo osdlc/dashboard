@@ -1,0 +1,7 @@
+{
+  "zones": ["America/Los_Angeles", "Australia/Adelaide"],
+  "style": "table",
+  "hour12": true,
+  "seconds": true,
+  "now": "2026-10-31T22:30:15Z"
+}

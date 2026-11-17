@@ -1,0 +1,19 @@
+{
+  "id": "clock-face",
+  "title": "Clock face",
+  "group": "primitives",
+  "default_size": "small",
+  "description": "An analog dial with hour and minute hands, and a second hand when `second` is given. The hour hand moves with the minutes. In a terminal that is too small for a dial it shows as text, and in a table cell as the time.",
+  "view": {
+    "status": "ok",
+    "summary": "Tokyo 14:05",
+    "root": {
+      "type": "clock_face",
+      "hour": 14,
+      "minute": 5,
+      "second": 9,
+      "label": "Tokyo",
+      "caption": "Tue 27 Oct"
+    }
+  }
+}
