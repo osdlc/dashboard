@@ -166,6 +166,20 @@ modules:
     config: { repos: [~/dev/api, ~/dev/web] }
 ```
 
+### The dashboard's own cost
+
+`process` shows the CPU, memory and process count of one process and everything it started. With
+no settings that is the dashboard itself and its plugins. CPU is in percent of one core; memory is
+resident memory added up, so memory shared between the processes is counted more than once.
+
+```yaml
+modules:
+  process: {}                  # the dashboard and its plugins
+  postgres:
+    builtin: process
+    config: { name: postgres } # every process with this name, and their children
+```
+
 ### AI agent usage
 
 How much of each agent's limits you have used, with a marker for where an even pace would be:

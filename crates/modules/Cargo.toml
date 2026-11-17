@@ -23,6 +23,7 @@ bundle-system = [
     "module-network",
     "module-disk",
     "module-processes",
+    "module-process",
     "module-log",
     "module-uptime",
     "module-textfile",
@@ -85,6 +86,7 @@ module-gpu = ["dashboard-modules-system/gpu"]
 module-network = ["dashboard-modules-system/network"]
 module-disk = ["dashboard-modules-system/disk"]
 module-processes = ["dashboard-modules-system/processes"]
+module-process = ["dashboard-modules-system/process"]
 module-log = ["dashboard-modules-system/log"]
 module-uptime = ["dashboard-modules-system/uptime"]
 module-textfile = ["dashboard-modules-system/textfile"]
