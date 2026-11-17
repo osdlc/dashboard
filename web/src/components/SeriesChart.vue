@@ -5,6 +5,7 @@ import { formatValue } from '../format'
 import { reducedMotion } from '../motion'
 import { scaleColor } from '../scale'
 import { seriesColor, toneColor } from '../colors'
+import { baseline, ratio, seriesScale, spansZero } from '../seriesScale'
 
 type Series = Extract<Widget, { type: 'series' }>
 const props = defineProps<{ widget: Series }>()
@@ -13,22 +14,35 @@ const W = 600
 const H = 100
 const gid = useId()
 
-const data = computed(() => props.widget.series.map((s) => s.points.map(([t, v]) => [Number(t), Math.max(0, Number(v))] as const)))
-const mirrored = computed(() => props.widget.mirrored === true && data.value.length >= 2)
+const mirrored = computed(() => props.widget.mirrored === true && props.widget.series.length >= 2)
+// Mirrored charts draw magnitudes: negatives count as 0.
+const data = computed(() =>
+  props.widget.series.map((s) =>
+    s.points.map(([t, v]) => [Number(t), mirrored.value ? Math.max(0, Number(v)) : Number(v)] as const),
+  ),
+)
 
 const range = computed(() => {
   const flat = data.value.flat()
   const t0 = Math.min(...flat.map((p) => p[0]))
   const t1 = Math.max(...flat.map((p) => p[0]))
-  const yMax = props.widget.y_max ?? Math.max(1, ...flat.map((p) => p[1]))
-  return { t0, t1, yMax, ok: flat.length >= 2 }
+  const values = flat.map((p) => p[1])
+  const scale = mirrored.value
+    ? { lo: 0, hi: props.widget.y_max ?? Math.max(1, ...values) }
+    : seriesScale(values, { yMin: props.widget.y_min, yMax: props.widget.y_max, fit: props.widget.fit })
+  return { t0, t1, scale, ok: flat.length >= 2 }
 })
 
-/** Path for one series. `up` grows from `base` upward, otherwise downward. */
-function path(pts: ReadonlyArray<readonly [number, number]>, base: number, height: number, up: boolean, area: boolean) {
-  const { t0, t1, yMax } = range.value
+/** SVG y of a value on the full-height scale (top is 0). */
+const yOf = (v: number) => H - ratio(range.value.scale, v) * H
+/** Where fills and bars start, and the zero line when the scale spans zero. */
+const baseY = computed(() => yOf(baseline(range.value.scale)))
+const zeroY = computed(() => (!mirrored.value && range.value.ok && spansZero(range.value.scale) ? yOf(0) : null))
+
+/** Path for one series; `y` maps a value to its SVG y and `base` is where an area closes. */
+function path(pts: ReadonlyArray<readonly [number, number]>, base: number, y: (v: number) => number, area: boolean) {
+  const { t0, t1 } = range.value
   const x = (t: number) => ((t - t0) / Math.max(1, t1 - t0)) * W
-  const y = (v: number) => base + (up ? -1 : 1) * (Math.min(v, yMax) / yMax) * height
   const line = pts.map(([t, v], i) => `${i ? 'L' : 'M'}${x(t).toFixed(1)},${y(v).toFixed(1)}`).join('')
   const first = pts[0]
   const last = pts.at(-1)
@@ -48,24 +62,33 @@ const paths = computed(() => {
   }
   if (mirrored.value) {
     const [down = [], up = []] = data.value
+    const top = range.value.scale.hi
+    const half = (dir: number) => (v: number) => H / 2 + dir * (Math.min(v, top) / top) * (H / 2)
     return [
-      { d: path(down, H / 2, H / 2, true, area), cls: 'a', style: look(0) },
-      { d: path(up, H / 2, H / 2, false, area), cls: 'b', style: look(1) },
+      { d: path(down, H / 2, half(-1), area), cls: 'a', style: look(0) },
+      { d: path(up, H / 2, half(1), area), cls: 'b', style: look(1) },
     ]
   }
-  return data.value.map((pts, i) => ({ d: path(pts, H, H, true, area), cls: `${i === 0 ? 'a' : 'b'} s${i}`, style: look(i) }))
+  return data.value.map((pts, i) => ({ d: path(pts, baseY.value, yOf, area), cls: `${i === 0 ? 'a' : 'b'} s${i}`, style: look(i) }))
 })
 
+/** Latest value of each series. Several lines also name themselves, in their own color. */
 const latest = computed(() => {
+  const w = props.widget
   const arrows = mirrored.value ? ['↓', '↑'] : ['', '']
-  return props.widget.series
-    .slice(0, 2)
+  const named = !mirrored.value && w.series.length > 1
+  return w.series
+    .slice(0, mirrored.value ? 2 : 6)
     .map((s, i) => {
       const last = s.points.at(-1)
-      return last ? `${arrows[i]}${formatValue(Number(last[1]), props.widget.format, props.widget.unit)}` : ''
+      if (!last) return null
+      const value = formatValue(Number(last[1]), w.format, w.unit)
+      return {
+        text: named ? `${s.name} ${value}` : `${arrows[i]}${value}`,
+        color: named ? seriesColor(i, s.tone) : undefined,
+      }
     })
-    .filter(Boolean)
-    .join(' ')
+    .filter((x) => x !== null)
 })
 
 /** Gradient stops' CSS var prefix, or null for the flat accent color. */
@@ -76,13 +99,14 @@ const fill = computed(() => (colorScale.value ? `url(#${gid})` : 'var(--accent)'
 const bars = computed(() => {
   const pts = data.value[0] ?? []
   if (props.widget.style !== 'bars' || mirrored.value || pts.length === 0) return []
-  const { yMax } = range.value
   const w = W / pts.length
   const tone = props.widget.series[0]?.tone
+  const base = baseY.value
   return pts.map(([, v], i) => {
-    const t = Math.min(v, yMax) / yMax
+    const t = ratio(range.value.scale, v)
     const color = tone ? toneColor(tone) : scaleColor(props.widget.color, t)
-    return { x: i * w + w * 0.1, w: w * 0.8, y: H - t * H, h: t * H, color }
+    const y = yOf(v)
+    return { x: i * w + w * 0.1, w: w * 0.8, y: Math.min(y, base), h: Math.abs(base - y), color }
   })
 })
 
@@ -123,7 +147,9 @@ const slide = computed(() => ({
   <figure class="w-series" :data-style="widget.style ?? 'line'" :data-mirrored="mirrored || undefined">
     <figcaption>
       {{ widget.label }}
-      <strong v-if="latest">{{ latest }}</strong>
+      <strong v-if="latest.length">
+        <span v-for="(l, i) in latest" :key="i" :style="l.color ? { color: l.color } : undefined">{{ i ? ' ' : '' }}{{ l.text }}</span>
+      </strong>
     </figcaption>
     <svg :viewBox="`0 0 ${W} ${H}`" preserveAspectRatio="none" role="img" :aria-label="widget.label">
       <defs v-if="colorScale">
@@ -135,6 +161,7 @@ const slide = computed(() => ({
         </linearGradient>
       </defs>
       <line v-if="mirrored" class="axis" x1="0" :y1="H / 2" :x2="W" :y2="H / 2" vector-effect="non-scaling-stroke" />
+      <line v-if="zeroY !== null" class="axis zero" x1="0" :y1="zeroY" :x2="W" :y2="zeroY" vector-effect="non-scaling-stroke" />
       <g :style="slide">
       <rect v-for="(b, i) in bars" :key="`b${i}`" :x="b.x" :y="b.y" :width="b.w" :height="b.h" :fill="b.color" rx="1" />
       <path

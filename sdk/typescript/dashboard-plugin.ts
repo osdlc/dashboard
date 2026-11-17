@@ -352,6 +352,8 @@ export type Widget =
   | MeterGridWidget
   | BarsWidget
   | PieWidget
+  | ClockFaceWidget
+  | DisplayWidget
   | ListWidget
   | TableWidget
   | LogWidget
@@ -400,6 +402,12 @@ export interface GaugeWidget {
 export interface SeriesWidget {
   /** The color of a single series. */
   color?: ColorScale;
+  /**
+   * Scale to the data's own range with a little padding (for prices that
+   * sit far from 0). Ignored when `y_min` or `y_max` is set, and when
+   * `mirrored`.
+   */
+  fit?: boolean;
   /** How values are written: plain, bytes or count. */
   format?: ValueFormat;
   /** Points the host keeps per series when `id` is set. Default 300. */
@@ -413,7 +421,8 @@ export interface SeriesWidget {
   label: string;
   /**
    * Draw the first series above the axis and the second below it,
-   * e.g. network download and upload.
+   * e.g. network download and upload. Negative values count as 0 here
+   * (`dashboard check` flags them).
    */
   mirrored?: boolean;
   /** One or more lines, each with its points. */
@@ -423,8 +432,16 @@ export interface SeriesWidget {
   type: "series";
   /** Shown after values, e.g. "%" or "/s". */
   unit?: string | null;
-  /** The top of the chart. Default: the largest value. */
+  /**
+   * The top of the chart. Default: the largest value (at least 1 when no
+   * value is negative and `y_min` is unset).
+   */
   y_max?: number | null;
+  /**
+   * The bottom of the chart. Default: 0, or the smallest value when that
+   * is negative. Set it to chart values that never reach 0.
+   */
+  y_min?: number | null;
 }
 
 /** Many small meters in a compact grid, e.g. one per CPU core. */
@@ -471,6 +488,45 @@ export interface PieWidget {
   unit?: string | null;
 }
 
+/**
+ * An analog clock face with hour and minute hands, and a second hand
+ * when `second` is given. The renderer draws it; it never reads a clock.
+ */
+export interface ClockFaceWidget {
+  /** Shown below the face, e.g. a date. */
+  caption?: string | null;
+  /** 0-23. */
+  hour: number;
+  /** Shown above the face, e.g. "Tokyo". */
+  label?: string | null;
+  /** 0-59. */
+  minute: number;
+  /** 0-59. No second hand when absent. */
+  second?: number | null;
+  /** Colors the face's outline. */
+  status?: Status | null;
+  type: "clock_face";
+}
+
+/** One value as large as the space allows: a big number or a clock. */
+export interface DisplayWidget {
+  /** Shown below the text. */
+  caption?: string | null;
+  /** Shown above the text. */
+  label?: string | null;
+  /** Colors the text. */
+  status?: Status | null;
+  /**
+   * Already formatted, e.g. "14:05". The TUI draws it in a block font
+   * when it has a glyph for every character, else as plain text; see
+   * docs/contract.md, "Clock face and display".
+   */
+  text: string;
+  type: "display";
+  /** Shown after the text, smaller, e.g. "PM". */
+  unit?: string | null;
+}
+
 /** Items with a title, a subtitle, a status marker and tags. */
 export interface ListWidget {
   /** Shown when there are no items. */
@@ -479,7 +535,7 @@ export interface ListWidget {
   type: "list";
 }
 
-/** Rows and columns. A cell holds text, a number, or a stat, gauge or pie. */
+/** Rows and columns. A cell holds text, a number, or a stat, gauge, pie, display or clock face. */
 export interface TableWidget {
   columns: Column[];
   rows: Row[];

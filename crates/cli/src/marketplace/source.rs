@@ -210,11 +210,12 @@ impl Record {
     }
 }
 
-#[cfg(test)]
+// Unix only: the tests use Unix paths such as `/srv/market`. On Windows the
+// module would be empty, and its `use super::*` an unused import.
+#[cfg(all(test, unix))]
 mod tests {
     use super::*;
 
-    #[cfg(unix)]
     #[test]
     fn locations() {
         let index = Location::parse("/srv/market/index.json").unwrap();
@@ -247,7 +248,6 @@ mod tests {
         );
     }
 
-    #[cfg(unix)]
     #[test]
     fn index_entries_stay_checked() {
         // The index gives the hash, so it can't come over plain http.

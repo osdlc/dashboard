@@ -467,6 +467,7 @@ impl Runtime {
             color_theme: self.config.color_theme().unwrap_or_default(),
             color_themes: self.config.color_theme_names(),
             rotate: self.config.rotate_settings(&screens),
+            tui_fps: self.config.tui.fps,
             screens,
             modules: modules
                 .iter()
@@ -799,6 +800,7 @@ fn placeholder_settings() -> UiSettings {
         screens: vec![],
         modules: vec![],
         rotate: None,
+        tui_fps: dashboard_contract::DEFAULT_TUI_FPS,
         config: ConfigInfo::default(),
     }
 }

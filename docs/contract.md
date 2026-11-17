@@ -100,11 +100,11 @@ pub enum Widget {
     Text   { text: String, #[serde(default)] markdown: bool },
     Stat   { label: String, value: String, unit: Option<String>, delta: Option<String>, status: Option<Status> },
     Gauge  { label: String, percent: f64, marker: Option<f64>, thresholds: Option<Thresholds>, caption: Option<String> },
-    Series { label: String, unit: Option<String>, y_max: Option<f64>,
+    Series { label: String, unit: Option<String>, y_max: Option<f64>, y_min: Option<f64>, fit: bool,
              id: Option<String>, history: Option<u32>,   // host-kept history, see below
              style: SeriesStyle,      // line | area | bars
              color: ColorScale,       // accent | heat | cool | sunset (colored by value)
-             mirrored: bool,          // first series above the axis, second below (e.g. net down/up)
+             mirrored: bool,          // first series above the axis, second below (e.g. net down/up); negatives count as 0
              format: ValueFormat,     // plain | bytes (KiB/MiB/GiB) | count (12.3k, 4.2M), then `unit`
              series: Vec<SeriesData> },
     MeterGrid { label: Option<String>, meters: Vec<Meter>, color: ColorScale },   // e.g. per-core CPU
@@ -113,6 +113,10 @@ pub enum Widget {
              donut: bool,             // default true; false draws a full disc
              format: ValueFormat, unit: Option<String>,
              color: ColorScale },     // accent: a color per slice; heat | cool | sunset: spread along the scale
+    ClockFace { hour: u8, minute: u8, second: Option<u8>,               // an analog dial, see below
+             label: Option<String>, caption: Option<String>, status: Option<Status> },
+    Display { text: String, label: Option<String>, caption: Option<String>,   // one value as large as it fits
+             unit: Option<String>, status: Option<Status> },
     List   { items: Vec<ListItem>, empty_text: Option<String> },
     Table  { columns: Vec<Column>, rows: Vec<Row> },
     Log    { label: Option<String>, lines: Vec<LogLine> },               // newest last
@@ -163,7 +167,7 @@ pub struct Row {
 pub enum Cell {
     Text(String),
     Number(f64),
-    Widget(Widget),                    // Stat, Gauge and Pie are rendered inline; others fall back to text
+    Widget(Widget),                    // Stat, Gauge, Pie, Display and ClockFace are rendered inline; others fall back to text
 }
 
 // ---- Actions ----
@@ -193,6 +197,18 @@ pub trait Module: Send {
 /// the last good view, marked stale (or the error, before the first view).
 pub type ViewSender = mpsc::Sender<Result<View>>;
 ```
+
+### Series scale
+
+Values can be negative. The bottom of the chart is `y_min`, else 0 or the lowest value if that is
+lower. The top is `y_max`, else the highest value (at least 1 when nothing is negative and
+`y_min` is unset, so a chart of small positive values draws as it always has). `fit: true`, with
+no `y_min` or `y_max`, scales to the data's own range with 5% padding: use it for values far from
+0, such as a price. When the scale spans zero a faint zero line is drawn; `area` fills to that
+line and `bars` grow from it, down for negative values. A `mirrored` chart draws magnitudes, so
+negative values count as 0 there (`dashboard check` notes it). Values keep their sign in the
+legend; with `unit: "%"`, a non-whole value under 10 shows one decimal ("-1.2%"). A chart of
+several lines names each one in the legend, in its line's color.
 
 ### Series history
 
@@ -225,6 +241,32 @@ its value (with `format` and `unit`) and its percent.
   a braille disc with the legend beside it when there is room, and otherwise one bar split into
   the slices, with the legend packed below. In a table cell the web view shows a small disc and the
   TUI the largest slice as text ("photos 60%").
+
+### Clock face and display
+
+A `clock_face` is an analog dial for a time the module already worked out (the renderer never
+reads a clock). `hour` is 0-23 and `minute` 0-59; `second` is optional and adds a second hand.
+The hour hand moves with the minutes, and the minute hand with the seconds. `label` goes above the dial and `caption` below it, and
+`status` colors the rim. `dashboard plugin-check` reports values out of range.
+
+```json
+{"type": "clock_face", "hour": 14, "minute": 5, "second": 9, "label": "Tokyo", "caption": "Tue 27 Oct"}
+```
+
+A `display` shows one `text` as large as the tile allows: a big number or a clock. `unit` follows
+it, smaller (for example "PM"), and `status` colors it like a `stat`.
+
+```json
+{"type": "display", "text": "14:05", "label": "Tokyo", "caption": "Tue 27 Oct", "unit": "PM"}
+```
+
+- The web view draws the dial as an SVG and scales the display's text to its box. Several of
+  either in a `row` share the width evenly, each centered in its share.
+- The TUI draws the dial in braille when the area is at least 10 columns by 5 rows, else the text
+  "Tokyo 14:05". It draws a display in a block font 5 rows tall, else 3, else as plain text; the
+  font has digits, `: . - + %`, space, and A, M and P. Any other character makes the whole text
+  plain.
+- In a table cell a clock face shows as "14:05" and a display as its text.
 
 Pies compose like the other widgets. A donut next to two stats:
 
@@ -350,6 +392,7 @@ On connect, the web view first gets renderer settings, then a tile message per t
     "screens": [{ "name": "main", "tiles": [{ "tile_id": "sysperf", "size": "large" }] }],
     "modules": [{ "tile_id": "sysperf", "name": "System", "refresh_ms": 1000, "refresh_overridden": false, "commands": [] }],
     "rotate": null,
+    "tui_fps": 4,
     "config": { "path": "/Users/me/.config/dashboard/config.yaml", "exists": true, "error": null } } }
 ```
 

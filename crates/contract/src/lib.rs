@@ -155,9 +155,19 @@ pub enum Widget {
         /// Shown after values, e.g. "%" or "/s".
         #[serde(default)]
         unit: Option<String>,
-        /// The top of the chart. Default: the largest value.
+        /// The top of the chart. Default: the largest value (at least 1 when no
+        /// value is negative and `y_min` is unset).
         #[serde(default)]
         y_max: Option<f64>,
+        /// The bottom of the chart. Default: 0, or the smallest value when that
+        /// is negative. Set it to chart values that never reach 0.
+        #[serde(default)]
+        y_min: Option<f64>,
+        /// Scale to the data's own range with a little padding (for prices that
+        /// sit far from 0). Ignored when `y_min` or `y_max` is set, and when
+        /// `mirrored`.
+        #[serde(default)]
+        fit: bool,
         /// When set, the host keeps history for this widget: each update's
         /// `points` are new samples, appended to what the host already holds
         /// for (tile, `id`, series name). Renderers always get the full history.
@@ -173,7 +183,8 @@ pub enum Widget {
         #[serde(default)]
         color: ColorScale,
         /// Draw the first series above the axis and the second below it,
-        /// e.g. network download and upload.
+        /// e.g. network download and upload. Negative values count as 0 here
+        /// (`dashboard check` flags them).
         #[serde(default)]
         mirrored: bool,
         /// How values are written: plain, bytes or count.
@@ -227,6 +238,45 @@ pub enum Widget {
         #[serde(default)]
         color: ColorScale,
     },
+    /// An analog clock face with hour and minute hands, and a second hand
+    /// when `second` is given. The renderer draws it; it never reads a clock.
+    ClockFace {
+        /// 0-23.
+        hour: u8,
+        /// 0-59.
+        minute: u8,
+        /// 0-59. No second hand when absent.
+        #[serde(default)]
+        second: Option<u8>,
+        /// Shown above the face, e.g. "Tokyo".
+        #[serde(default)]
+        label: Option<String>,
+        /// Shown below the face, e.g. a date.
+        #[serde(default)]
+        caption: Option<String>,
+        /// Colors the face's outline.
+        #[serde(default)]
+        status: Option<Status>,
+    },
+    /// One value as large as the space allows: a big number or a clock.
+    Display {
+        /// Already formatted, e.g. "14:05". The TUI draws it in a block font
+        /// when it has a glyph for every character, else as plain text; see
+        /// docs/contract.md, "Clock face and display".
+        text: String,
+        /// Shown above the text.
+        #[serde(default)]
+        label: Option<String>,
+        /// Shown below the text.
+        #[serde(default)]
+        caption: Option<String>,
+        /// Shown after the text, smaller, e.g. "PM".
+        #[serde(default)]
+        unit: Option<String>,
+        /// Colors the text.
+        #[serde(default)]
+        status: Option<Status>,
+    },
     /// Items with a title, a subtitle, a status marker and tags.
     List {
         items: Vec<ListItem>,
@@ -234,7 +284,7 @@ pub enum Widget {
         #[serde(default)]
         empty_text: Option<String>,
     },
-    /// Rows and columns. A cell holds text, a number, or a stat, gauge or pie.
+    /// Rows and columns. A cell holds text, a number, or a stat, gauge, pie, display or clock face.
     Table {
         columns: Vec<Column>,
         rows: Vec<Row>,
@@ -328,11 +378,66 @@ fn yes() -> bool {
     true
 }
 
+/// The vertical range of a `series` chart as (bottom, top), shared by every renderer.
+///
+/// Bottom is `y_min`, else the smaller of 0 and the lowest value. Top is `y_max`, else
+/// the highest value, which is at least 1 when the bottom is 0 or more and `y_min` is
+/// unset (so a chart of small positive values draws as it always has). With `fit` and
+/// no bounds, the range is the data's own with 5% padding. The top is always above the
+/// bottom.
+pub fn series_scale(
+    values: &[f64],
+    y_min: Option<f64>,
+    y_max: Option<f64>,
+    fit: bool,
+) -> (f64, f64) {
+    const EPS: f64 = 1e-9;
+    let (lo, hi) = values
+        .iter()
+        .filter(|v| v.is_finite())
+        .fold((f64::INFINITY, f64::NEG_INFINITY), |(l, h), v| {
+            (l.min(*v), h.max(*v))
+        });
+    let has_data = lo.is_finite();
+    if fit && y_min.is_none() && y_max.is_none() && has_data {
+        let pad = if hi > lo {
+            (hi - lo) * 0.05
+        } else {
+            lo.abs().max(1.0) * 0.01
+        };
+        return (lo - pad, hi + pad);
+    }
+    let data_lo = if has_data { lo } else { 0.0 };
+    let data_hi = if has_data { hi } else { 0.0 };
+    let bottom = y_min.unwrap_or(data_lo.min(0.0));
+    let top = y_max.unwrap_or(if y_min.is_none() && bottom >= 0.0 {
+        data_hi.max(1.0)
+    } else {
+        data_hi
+    });
+    (bottom, top.max(bottom + EPS))
+}
+
 /// Formats a value for display. Shared so every renderer shows the same text.
 pub fn format_value(value: f64, format: ValueFormat, unit: Option<&str>) -> String {
     let unit = unit.unwrap_or("");
     match format {
-        ValueFormat::Plain => format!("{value:.0}{unit}"),
+        ValueFormat::Plain => {
+            // Small percentages keep one decimal ("-1.2%"), unless they are whole.
+            let decimals = usize::from(unit == "%" && value.abs() < 10.0 && value.fract() != 0.0);
+            let text = format!("{value:.decimals$}");
+            // Never "-0" or "-0.0": a value that rounds to zero has no sign.
+            let text = if text
+                .trim_start_matches('-')
+                .chars()
+                .all(|c| c == '0' || c == '.')
+            {
+                text.trim_start_matches('-').to_string()
+            } else {
+                text
+            };
+            format!("{text}{unit}")
+        }
         ValueFormat::Bytes => {
             const STEPS: [&str; 5] = ["B", "KiB", "MiB", "GiB", "TiB"];
             let mut v = value.abs();
@@ -469,8 +574,9 @@ pub struct Row {
 pub enum Cell {
     Text(String),
     Number(f64),
-    /// `Stat`, `Gauge` and `Pie` are rendered inline (the TUI shows a pie as
-    /// its largest slice); others fall back to text.
+    /// `Stat`, `Gauge`, `Pie`, `Display` and `ClockFace` are rendered inline (the
+    /// TUI shows a pie as its largest slice, a clock face as "14:05"); others
+    /// fall back to text.
     Widget(Widget),
 }
 
@@ -533,7 +639,18 @@ pub struct UiSettings {
     /// Automatic screen rotation, if configured.
     #[serde(default)]
     pub rotate: Option<RotateSettings>,
+    /// The most times a second the terminal view draws the screen again when
+    /// tiles change. The web view does not use it.
+    #[serde(default = "default_tui_fps")]
+    pub tui_fps: u32,
     pub config: ConfigInfo,
+}
+
+/// The terminal view's redraw limit when the config sets none.
+pub const DEFAULT_TUI_FPS: u32 = 4;
+
+fn default_tui_fps() -> u32 {
+    DEFAULT_TUI_FPS
 }
 
 /// Where the config came from, for the settings screen.
@@ -711,6 +828,27 @@ mod tests {
             "3.0 GiB"
         );
         assert_eq!(format_value(42.4, ValueFormat::Plain, Some("%")), "42%");
+        assert_eq!(format_value(-1.24, ValueFormat::Plain, Some("%")), "-1.2%");
+        assert_eq!(format_value(-0.04, ValueFormat::Plain, Some("%")), "0.0%");
+        assert_eq!(format_value(5.0, ValueFormat::Plain, Some("%")), "5%");
+        assert_eq!(
+            format_value(-1.24, ValueFormat::Plain, Some(" ms")),
+            "-1 ms"
+        );
+    }
+
+    #[test]
+    fn series_scale_rules() {
+        assert_eq!(series_scale(&[3.0, 40.0], None, None, false), (0.0, 40.0));
+        assert_eq!(series_scale(&[0.2], None, None, false), (0.0, 1.0));
+        assert_eq!(series_scale(&[-2.0, 1.0], None, None, false), (-2.0, 1.0));
+        assert_eq!(series_scale(&[3.0], None, Some(100.0), false), (0.0, 100.0));
+        let (lo, hi) = series_scale(&[354.0, 357.0], None, None, true);
+        assert!((lo - 353.85).abs() < 1e-9 && (hi - 357.15).abs() < 1e-9);
+        assert_eq!(
+            series_scale(&[354.0], Some(300.0), None, true),
+            (300.0, 354.0)
+        );
     }
 
     #[test]

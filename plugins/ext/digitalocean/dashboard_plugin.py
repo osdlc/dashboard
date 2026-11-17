@@ -415,6 +415,10 @@ class _SeriesWidgetRequired(TypedDict):
 class SeriesWidget(_SeriesWidgetRequired, total=False):
     # The color of a single series.
     color: "ColorScale"
+    # Scale to the data's own range with a little padding (for prices that
+    # sit far from 0). Ignored when `y_min` or `y_max` is set, and when
+    # `mirrored`.
+    fit: bool
     # How values are written: plain, bytes or count.
     format: "ValueFormat"
     # Points the host keeps per series when `id` is set. Default 300.
@@ -424,14 +428,19 @@ class SeriesWidget(_SeriesWidgetRequired, total=False):
     # for (tile, `id`, series name). Renderers always get the full history.
     id: Optional[str]
     # Draw the first series above the axis and the second below it,
-    # e.g. network download and upload.
+    # e.g. network download and upload. Negative values count as 0 here
+    # (`dashboard check` flags them).
     mirrored: bool
     # A line, a filled area or one bar per sample.
     style: "SeriesStyle"
     # Shown after values, e.g. "%" or "/s".
     unit: Optional[str]
-    # The top of the chart. Default: the largest value.
+    # The top of the chart. Default: the largest value (at least 1 when no
+    # value is negative and `y_min` is unset).
     y_max: Optional[float]
+    # The bottom of the chart. Default: 0, or the smallest value when that
+    # is negative. Set it to chart values that never reach 0.
+    y_min: Optional[float]
 
 
 class _MeterGridWidgetRequired(TypedDict):
@@ -483,6 +492,47 @@ class PieWidget(_PieWidgetRequired, total=False):
     unit: Optional[str]
 
 
+class _ClockFaceWidgetRequired(TypedDict):
+    # 0-23.
+    hour: int
+    # 0-59.
+    minute: int
+    type: Literal["clock_face"]
+
+
+# An analog clock face with hour and minute hands, and a second hand
+# when `second` is given. The renderer draws it; it never reads a clock.
+class ClockFaceWidget(_ClockFaceWidgetRequired, total=False):
+    # Shown below the face, e.g. a date.
+    caption: Optional[str]
+    # Shown above the face, e.g. "Tokyo".
+    label: Optional[str]
+    # 0-59. No second hand when absent.
+    second: Optional[int]
+    # Colors the face's outline.
+    status: Optional["Status"]
+
+
+class _DisplayWidgetRequired(TypedDict):
+    # Already formatted, e.g. "14:05". The TUI draws it in a block font
+    # when it has a glyph for every character, else as plain text; see
+    # docs/contract.md, "Clock face and display".
+    text: str
+    type: Literal["display"]
+
+
+# One value as large as the space allows: a big number or a clock.
+class DisplayWidget(_DisplayWidgetRequired, total=False):
+    # Shown below the text.
+    caption: Optional[str]
+    # Shown above the text.
+    label: Optional[str]
+    # Colors the text.
+    status: Optional["Status"]
+    # Shown after the text, smaller, e.g. "PM".
+    unit: Optional[str]
+
+
 class _ListWidgetRequired(TypedDict):
     items: List["ListItem"]
     type: Literal["list"]
@@ -494,7 +544,7 @@ class ListWidget(_ListWidgetRequired, total=False):
     empty_text: Optional[str]
 
 
-# Rows and columns. A cell holds text, a number, or a stat, gauge or pie.
+# Rows and columns. A cell holds text, a number, or a stat, gauge, pie, display or clock face.
 class TableWidget(TypedDict):
     columns: List["Column"]
     rows: List["Row"]
@@ -562,6 +612,6 @@ SeriesStyle = Union[Literal["line"], Literal["area"], Literal["bars"]]
 
 ValueFormat = Union[Literal["plain"], Literal["bytes"], Literal["count"]]
 
-Widget = Union["TextWidget", "StatWidget", "GaugeWidget", "SeriesWidget", "MeterGridWidget", "BarsWidget", "PieWidget", "ListWidget", "TableWidget", "LogWidget", "UptimeWidget", "RowWidget", "ColumnWidget"]
+Widget = Union["TextWidget", "StatWidget", "GaugeWidget", "SeriesWidget", "MeterGridWidget", "BarsWidget", "PieWidget", "ClockFaceWidget", "DisplayWidget", "ListWidget", "TableWidget", "LogWidget", "UptimeWidget", "RowWidget", "ColumnWidget"]
 
 # ---- END GENERATED ----

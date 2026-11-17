@@ -9,6 +9,13 @@ export function formatMs(ms: number): string {
   return `${ms}ms`
 }
 
+/** Whole numbers, but small non-whole percentages keep a decimal ("-1.2%"); never "-0". */
+function plain(value: number, unit: string): string {
+  const decimals = unit === '%' && Math.abs(value) < 10 && !Number.isInteger(value) ? 1 : 0
+  const text = value.toFixed(decimals)
+  return /^-[0.]+$/.test(text) ? text.slice(1) : text
+}
+
 /** Same output as `format_value` in the Rust contract crate. */
 export function formatValue(value: number, format: ValueFormat | undefined, unit?: string | null): string {
   const u = unit ?? ''
@@ -23,7 +30,7 @@ export function formatValue(value: number, format: ValueFormat | undefined, unit
     const sign = value < 0 ? '-' : ''
     return `${sign}${i === 0 || v >= 100 ? v.toFixed(0) : v.toFixed(1)}${steps[i]}${u}`
   }
-  if (format !== 'bytes') return `${value.toFixed(0)}${u}`
+  if (format !== 'bytes') return `${plain(value, u)}${u}`
   const steps = ['B', 'KiB', 'MiB', 'GiB', 'TiB']
   let v = Math.abs(value)
   let i = 0
