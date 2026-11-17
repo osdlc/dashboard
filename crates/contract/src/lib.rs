@@ -254,15 +254,15 @@ pub enum Widget {
         /// Shown below the face, e.g. a date.
         #[serde(default)]
         caption: Option<String>,
-        /// Colors the face's outline: ok, warn or error.
+        /// Colors the face's outline.
         #[serde(default)]
         status: Option<Status>,
     },
     /// One value as large as the space allows: a big number or a clock.
     Display {
-        /// Already formatted, e.g. "14:05". The TUI's block font covers
-        /// digits and a few symbols (`: . - + %`, space, A, M, P); other
-        /// characters show the whole text small.
+        /// Already formatted, e.g. "14:05". The TUI draws it in a block font
+        /// when it has a glyph for every character, else as plain text; see
+        /// docs/contract.md, "Clock face and display".
         text: String,
         /// Shown above the text.
         #[serde(default)]
@@ -273,7 +273,7 @@ pub enum Widget {
         /// Shown after the text, smaller, e.g. "PM".
         #[serde(default)]
         unit: Option<String>,
-        /// Colors the text: ok, warn or error.
+        /// Colors the text.
         #[serde(default)]
         status: Option<Status>,
     },

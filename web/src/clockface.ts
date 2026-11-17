@@ -10,9 +10,9 @@ export function hourAngle(hour: number, minute: number): number {
   return (hour % 12) * 30 + minute * 0.5
 }
 
-/** Minute hand angle in degrees; the seconds are left out, so it ticks. */
-export function minuteAngle(minute: number): number {
-  return minute * 6
+/** Minute hand angle in degrees: it moves with the seconds, as in the terminal view. */
+export function minuteAngle(minute: number, second = 0): number {
+  return minute * 6 + second * 0.1
 }
 
 /** Second hand angle in degrees. */
@@ -21,14 +21,16 @@ export function secondAngle(second: number): number {
 }
 
 /**
- * The angle to turn a hand to so it only ever moves forward: from `prev`
- * (which may already be past 360) to the next time `target` comes round.
- * Going from 354 to 0 degrees gives 360, not a spin backwards, and a CSS
- * rotate transition then takes the short way.
+ * The angle to turn a hand to so it takes the short way round: from `prev`
+ * (which may be past 360 or below 0) to the nearest angle that points at
+ * `target`. Going from 354 to 0 degrees gives 360, not a spin backwards, and
+ * a time that steps back (a DST change, a fixed `now` edited) turns the hand
+ * back a little instead of nearly a full turn forward.
  */
 export function forward(prev: number | undefined, target: number): number {
   if (prev === undefined) return target
-  const delta = (((target - prev) % 360) + 360) % 360
+  let delta = (((target - prev) % 360) + 360) % 360
+  if (delta > 180) delta -= 360
   return prev + delta
 }
 

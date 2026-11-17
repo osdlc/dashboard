@@ -95,9 +95,9 @@ fn render<const N: usize>(
     Some(rows)
 }
 
-/// The biggest rendering that fits `width` columns and `height` rows:
-/// the rows, and the font height. The unit goes after the last row, one
-/// column on, so it counts toward the width.
+/// The rows of the biggest rendering that fits `width` columns and `height`
+/// rows. The unit goes after the last row, one column on, so it counts toward
+/// the width.
 fn biggest(text: &str, unit: Option<&str>, width: u16, height: u16) -> Option<Vec<String>> {
     let extra = unit.map_or(0, |u| 1 + fit::width(u));
     let fits = |rows: &[String]| !text.is_empty() && fit::width(&rows[0]) + extra <= width as usize;
@@ -163,14 +163,18 @@ pub fn draw_display(f: &mut Canvas, p: &Palette, area: Rect, s: &DisplaySpec) {
             lines.push(center(c));
         }
     } else {
-        // Plain: the text and its unit, with the label before and the caption after.
+        // Plain: the text and its unit, with the label before and the caption
+        // after. Only the label is cut to make room: a cut time reads as a
+        // different time.
+        let unit = s.unit.map(|u| format!(" {u}")).unwrap_or_default();
+        let room = (area.width as usize).saturating_sub(fit::width(s.text) + fit::width(&unit) + 1);
         let mut spans = vec![];
-        if let Some(l) = s.label {
-            spans.push(Span::styled(format!("{l} "), muted));
+        if let Some(l) = s.label.filter(|_| room > 0) {
+            spans.push(Span::styled(format!("{} ", fit::truncate(l, room)), muted));
         }
         spans.push(Span::styled(s.text.to_string(), value));
-        if let Some(u) = s.unit {
-            spans.push(Span::raw(format!(" {u}")));
+        if !unit.is_empty() {
+            spans.push(Span::styled(unit, muted));
         }
         lines.push(Line::from(spans));
         if let Some(c) = s.caption.filter(|_| area.height > 1) {
@@ -262,8 +266,11 @@ mod tests {
         // 5 wide digits need 21 columns; 3-row ones need 16.
         let rows = draw(&spec("14:05"), 17, 6);
         assert!(rows[1].contains('█') && rows.len() == 6);
+        // The label is cut, never the time.
         let plain = draw(&spec("14:05"), 10, 6);
-        assert_eq!(plain[0], "Tokyo 14:0");
+        assert_eq!(plain[0], "Tok… 14:05");
+        let no_room = draw(&spec("14:05"), 6, 6);
+        assert_eq!(no_room[0], "14:05");
     }
 
     #[test]

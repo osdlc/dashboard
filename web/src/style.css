@@ -185,7 +185,6 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 .cf-minute { stroke-width: 2.2; }
 .cf-second { stroke: var(--accent); stroke-width: 1; transition-duration: 0.25s; }
 .cf-pin { fill: var(--accent); }
-@media (prefers-reduced-motion: reduce) { .cf-hand { transition: none; } }
 .dp-box { flex: 1; min-height: 2rem; align-self: stretch; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
 .dp-text { font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1; white-space: nowrap; }
 .dp-text small { font-size: 0.4em; font-weight: 500; color: var(--muted); margin-left: 0.2em; }

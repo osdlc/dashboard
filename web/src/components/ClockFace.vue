@@ -6,16 +6,16 @@ import { forward, hourAngle, minuteAngle, secondAngle, ticks, timeText } from '.
 type Face = Extract<Widget, { type: 'clock_face' }>
 const props = defineProps<{ widget: Face }>()
 
-// Angles only grow, so a hand going from 59 to 0 turns on instead of
-// spinning back across the dial.
 const hour = ref(hourAngle(props.widget.hour, props.widget.minute))
-const minute = ref(minuteAngle(props.widget.minute))
-const second = ref(secondAngle(props.widget.second ?? 0))
+const minute = ref(minuteAngle(props.widget.minute, props.widget.second ?? 0))
+// Unset until there is a second, so a second hand that appears later starts
+// where it belongs rather than turning in from twelve.
+const second = ref(props.widget.second == null ? undefined : secondAngle(props.widget.second))
 watch(
   () => props.widget,
   (w) => {
     hour.value = forward(hour.value, hourAngle(w.hour, w.minute))
-    minute.value = forward(minute.value, minuteAngle(w.minute))
+    minute.value = forward(minute.value, minuteAngle(w.minute, w.second ?? 0))
     if (w.second != null) second.value = forward(second.value, secondAngle(w.second))
   },
 )
@@ -47,7 +47,7 @@ const turn = (deg: number) => ({ transform: `rotate(${deg}deg)` })
       />
       <line class="cf-hand cf-hour" :style="turn(hour)" x1="0" y1="4" x2="0" y2="-25" />
       <line class="cf-hand cf-minute" :style="turn(minute)" x1="0" y1="5" x2="0" y2="-37" />
-      <line v-if="widget.second != null" class="cf-hand cf-second" :style="turn(second)" x1="0" y1="9" x2="0" y2="-40" />
+      <line v-if="widget.second != null" class="cf-hand cf-second" :style="turn(second ?? 0)" x1="0" y1="9" x2="0" y2="-40" />
       <circle class="cf-pin" r="2.4" />
     </svg>
     <div v-if="widget.caption" class="cf-caption">{{ widget.caption }}</div>

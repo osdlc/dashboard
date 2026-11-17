@@ -66,7 +66,6 @@ pub fn draw_face(f: &mut Canvas, p: &Palette, area: Rect, s: &FaceSpec) {
     let mut area = area;
     let mut label = None;
     let mut caption = None;
-    // Text lines only while the dial keeps ROWS_FOR_TEXT or more rows.
     if s.label.is_some() && area.height > ROWS_FOR_TEXT {
         label = s.label;
         area.y += 1;
@@ -181,10 +180,7 @@ fn draw_text(f: &mut Canvas, p: &Palette, area: Rect, s: &FaceSpec) {
             Style::new().fg(p.muted),
         ));
     }
-    spans.push(Span::styled(
-        time,
-        Style::new().fg(s.status.map_or(Color::Reset, |st| p.status(st))),
-    ));
+    spans.push(Span::styled(time, Style::new().fg(p.opt_status(s.status))));
     let mut lines = vec![Line::from(spans)];
     if let Some(caption) = s.caption.filter(|_| area.height > 1) {
         lines.push(Line::styled(

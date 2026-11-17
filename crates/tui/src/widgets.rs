@@ -820,20 +820,19 @@ fn cell_text(cell: Option<&ViewCell>) -> String {
             Some(c) => format!("{percent:.0}% {c}"),
             None => format!("{percent:.0}%"),
         },
-        Some(ViewCell::Widget(Widget::Stat { value, unit, .. })) => {
+        Some(ViewCell::Widget(
+            Widget::Stat {
+                value: text, unit, ..
+            }
+            | Widget::Display { text, unit, .. },
+        )) => {
             format!(
-                "{value}{}",
+                "{text}{}",
                 unit.as_deref().map(|u| format!(" {u}")).unwrap_or_default()
             )
         }
         Some(ViewCell::Widget(Widget::ClockFace { hour, minute, .. })) => {
             clockface::time_text(*hour, *minute)
-        }
-        Some(ViewCell::Widget(Widget::Display { text, unit, .. })) => {
-            format!(
-                "{text}{}",
-                unit.as_deref().map(|u| format!(" {u}")).unwrap_or_default()
-            )
         }
         Some(ViewCell::Widget(Widget::Pie { slices, .. })) => {
             let total: f64 = slices.iter().map(|s| s.value.max(0.0)).sum();

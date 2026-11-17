@@ -244,7 +244,7 @@ modules:
 |---|---|
 | `row` | One time per zone, side by side (the default). |
 | `column` | The same, stacked: for a `tall` tile. |
-| `table` | A world clock: time, date, UTC offset, hours from the first zone, and whether it is working hours (9 to 5 on a weekday), day or night there. Working-hours rows are marked green. |
+| `table` | A world clock: time, date, UTC offset, hours from the first zone, and whether it is working hours (9 to 5, Monday to Friday), day or night there. The terminal view marks working-hours rows green. |
 | `analog` | An analog dial per zone with the date under it; `seconds: true` adds a second hand. For a `large` tile. |
 | `digital` | Each time as big text, as large as the tile allows, with the date under it. For a `wide` tile. |
 

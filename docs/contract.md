@@ -246,7 +246,7 @@ its value (with `format` and `unit`) and its percent.
 
 A `clock_face` is an analog dial for a time the module already worked out (the renderer never
 reads a clock). `hour` is 0-23 and `minute` 0-59; `second` is optional and adds a second hand.
-The hour hand moves with the minutes. `label` goes above the dial and `caption` below it, and
+The hour hand moves with the minutes, and the minute hand with the seconds. `label` goes above the dial and `caption` below it, and
 `status` colors the rim. `dashboard plugin-check` reports values out of range.
 
 ```json

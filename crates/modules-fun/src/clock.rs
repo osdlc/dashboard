@@ -25,8 +25,9 @@ use std::collections::BTreeMap;
 
 use dashboard_contract::{CatalogEntry, Cell, Column, Manifest, Row, Size, Status, View, Widget};
 use dashboard_host::Module;
-use jiff::Timestamp;
+use jiff::civil::Weekday;
 use jiff::tz::TimeZone;
+use jiff::{Timestamp, Zoned};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
@@ -158,10 +159,13 @@ impl Module for Clock {
 
     async fn render(&mut self) -> Result<View> {
         let now = self.now.unwrap_or_else(Timestamp::now);
-        Ok(match self.style {
-            Style::Row => view(&self.zones, now, self.hour12, self.seconds),
-            style => styled(style, &self.zones, now, self.hour12, self.seconds),
-        })
+        Ok(view(
+            self.style,
+            &self.zones,
+            now,
+            self.hour12,
+            self.seconds,
+        ))
     }
 }
 
@@ -266,13 +270,7 @@ fn days_from_civil(year: i64, month: i64, day: i64) -> i64 {
 
 /// The wall time in one zone: ("14:05", None) or ("2:05", Some("PM")), and
 /// the date as "Tue 27 Oct".
-fn wall(
-    tz: &TimeZone,
-    now: Timestamp,
-    hour12: bool,
-    seconds: bool,
-) -> (String, Option<String>, String) {
-    let z = now.to_zoned(tz.clone());
+fn wall(z: &Zoned, hour12: bool, seconds: bool) -> (String, Option<String>, String) {
     let (h, m, s) = (z.hour(), z.minute(), z.second());
     let secs = if seconds {
         format!(":{s:02}")
@@ -291,88 +289,71 @@ fn wall(
     (time, unit, date)
 }
 
-fn view(zones: &[Zone], now: Timestamp, hour12: bool, seconds: bool) -> View {
-    let mut summary = vec![];
-    let mut children = vec![];
-    for zone in zones {
-        let (time, unit, date) = wall(&zone.tz, now, hour12, seconds);
-        summary.push(match &unit {
-            Some(u) => format!("{} {time} {u}", zone.label),
-            None => format!("{} {time}", zone.label),
-        });
-        children.push(Widget::Stat {
-            label: zone.label.clone(),
-            value: time,
-            unit,
-            delta: Some(date),
-            status: None,
-        });
-    }
-    View {
-        status: Status::Ok,
-        summary: summary.join(" · "),
-        root: Widget::Row { children },
-    }
-}
-
-/// "Tokyo 23:05" or "Tokyo 11:05 PM", for summaries and captions.
-fn clock_text(time: &str, unit: &Option<String>) -> String {
+/// "23:05", or "11:05 PM" with a unit.
+fn clock_text(time: &str, unit: Option<&str>) -> String {
     match unit {
         Some(u) => format!("{time} {u}"),
         None => time.to_string(),
     }
 }
 
+/// An offset in seconds as its sign, whole hours and leftover minutes.
+fn hours_and_minutes(seconds: i32) -> (char, u32, u32) {
+    let sign = if seconds < 0 { '-' } else { '+' };
+    let m = seconds.unsigned_abs() / 60;
+    (sign, m / 60, m % 60)
+}
+
 /// "UTC", "UTC+5:30", "UTC-4".
 fn utc_offset(seconds: i32) -> String {
-    if seconds == 0 {
-        return "UTC".into();
-    }
-    let sign = if seconds < 0 { '-' } else { '+' };
-    let m = seconds.unsigned_abs() / 60;
-    match m % 60 {
-        0 => format!("UTC{sign}{}", m / 60),
-        r => format!("UTC{sign}{}:{r:02}", m / 60),
+    match hours_and_minutes(seconds) {
+        _ if seconds == 0 => "UTC".into(),
+        (sign, h, 0) => format!("UTC{sign}{h}"),
+        (sign, h, m) => format!("UTC{sign}{h}:{m:02}"),
     }
 }
 
-/// Hours from the first zone: "—" (same), "+9h", "-5h", "+3:30".
+/// Hours from the first zone: "—" (same), "+9h", "-5h", "+3h30". Not
+/// "+3:30", which would read as a time of day next to the Time column.
 fn relative(seconds: i32) -> String {
-    if seconds == 0 {
-        return "—".into();
-    }
-    let sign = if seconds < 0 { '-' } else { '+' };
-    let m = seconds.unsigned_abs() / 60;
-    match m % 60 {
-        0 => format!("{sign}{}h", m / 60),
-        r => format!("{sign}{}:{r:02}", m / 60),
+    match hours_and_minutes(seconds) {
+        _ if seconds == 0 => "—".into(),
+        (sign, h, 0) => format!("{sign}{h}h"),
+        (sign, h, m) => format!("{sign}{h}h{m:02}"),
     }
 }
 
-/// Working hours (9 to 17 on a weekday), day (7 to 21) or night.
-fn part_of_day(hour: i8, weekday: usize) -> (&'static str, Status) {
-    let weekend = weekday == 0 || weekday == 6;
+/// Working hours (9 to 17, Monday to Friday), day (7 to 21) or night. Only
+/// working hours get a status: the others are not stale, so they are not
+/// dimmed.
+fn part_of_day(hour: i8, weekday: Weekday) -> (&'static str, Option<Status>) {
+    let weekend = matches!(weekday, Weekday::Saturday | Weekday::Sunday);
     match hour {
-        9..=16 if !weekend => ("working hours", Status::Ok),
-        7..=20 => ("day", Status::Unknown),
-        _ => ("night", Status::Unknown),
+        9..=16 if !weekend => ("working hours", Some(Status::Ok)),
+        7..=20 => ("day", None),
+        _ => ("night", None),
     }
 }
 
-/// The column, table, analog and digital styles.
-fn styled(style: Style, zones: &[Zone], now: Timestamp, hour12: bool, seconds: bool) -> View {
+/// The tile in any style.
+fn view(style: Style, zones: &[Zone], now: Timestamp, hour12: bool, seconds: bool) -> View {
     let first = zones.first().map_or(0, |z| z.tz.to_offset(now).seconds());
     let mut summary = vec![];
     let mut children = vec![];
     let mut rows = vec![];
     for zone in zones {
-        let (time, unit, date) = wall(&zone.tz, now, hour12, seconds);
         let z = now.to_zoned(zone.tz.clone());
-        let offset = zone.tz.to_offset(now).seconds();
-        let shown = clock_text(&time, &unit);
+        let (time, unit, date) = wall(&z, hour12, seconds);
+        let shown = clock_text(&time, unit.as_deref());
         summary.push(format!("{} {shown}", zone.label));
-        let (part, status) = part_of_day(z.hour(), z.weekday().to_sunday_zero_offset() as usize);
         match style {
+            Style::Row | Style::Column => children.push(Widget::Stat {
+                label: zone.label.clone(),
+                value: time,
+                unit,
+                delta: Some(date),
+                status: None,
+            }),
             Style::Analog => children.push(Widget::ClockFace {
                 hour: z.hour() as u8,
                 minute: z.minute() as u8,
@@ -388,29 +369,22 @@ fn styled(style: Style, zones: &[Zone], now: Timestamp, hour12: bool, seconds: b
                 unit,
                 status: None,
             }),
-            Style::Column => children.push(Widget::Stat {
-                label: zone.label.clone(),
-                value: time,
-                unit,
-                delta: Some(date),
-                status: None,
-            }),
             Style::Table => {
-                let text = |s: String| Cell::Text(s);
+                let offset = z.offset().seconds();
+                let (part, status) = part_of_day(z.hour(), z.weekday());
                 rows.push(Row {
                     cells: BTreeMap::from([
-                        ("zone".into(), text(zone.label.clone())),
-                        ("time".into(), text(shown)),
-                        ("date".into(), text(date)),
-                        ("offset".into(), text(utc_offset(offset))),
-                        ("diff".into(), text(relative(offset - first))),
-                        ("part".into(), text(part.into())),
+                        ("zone".into(), Cell::Text(zone.label.clone())),
+                        ("time".into(), Cell::Text(shown)),
+                        ("date".into(), Cell::Text(date)),
+                        ("offset".into(), Cell::Text(utc_offset(offset))),
+                        ("diff".into(), Cell::Text(relative(offset - first))),
+                        ("part".into(), Cell::Text(part.into())),
                     ]),
-                    status: Some(status),
+                    status,
                     action: None,
                 });
             }
-            Style::Row => unreachable!("the row style uses view()"),
         }
     }
     let root = match style {
@@ -432,8 +406,8 @@ fn styled(style: Style, zones: &[Zone], now: Timestamp, hour12: bool, seconds: b
                 rows,
             }
         }
-        Style::Analog | Style::Digital => Widget::Row { children },
-        _ => Widget::Column { children },
+        Style::Row | Style::Analog | Style::Digital => Widget::Row { children },
+        Style::Column => Widget::Column { children },
     };
     View {
         status: Status::Ok,
@@ -459,7 +433,7 @@ pub fn catalog() -> CatalogEntry {
             "clock",
             "Clock",
             Size::Small,
-            view(&zones, now, false, false),
+            view(Style::Row, &zones, now, false, false),
         )
     }
 }
@@ -604,12 +578,16 @@ mod tests {
         assert_eq!(utc_offset(-14_400), "UTC-4");
         assert_eq!(relative(0), "—");
         assert_eq!(relative(-18_000), "-5h");
-        assert_eq!(relative(34_200), "+9:30");
-        assert_eq!(part_of_day(10, 2).0, "working hours");
-        assert_eq!(part_of_day(10, 6).0, "day");
-        assert_eq!(part_of_day(17, 3).0, "day");
-        assert_eq!(part_of_day(22, 3).0, "night");
-        assert_eq!(part_of_day(6, 3).0, "night");
+        assert_eq!(relative(34_200), "+9h30");
+        assert_eq!(relative(-34_200), "-9h30");
+        assert_eq!(
+            part_of_day(10, Weekday::Tuesday),
+            ("working hours", Some(Status::Ok))
+        );
+        assert_eq!(part_of_day(10, Weekday::Saturday), ("day", None));
+        assert_eq!(part_of_day(17, Weekday::Wednesday), ("day", None));
+        assert_eq!(part_of_day(22, Weekday::Wednesday), ("night", None));
+        assert_eq!(part_of_day(6, Weekday::Wednesday), ("night", None));
     }
 
     #[tokio::test]

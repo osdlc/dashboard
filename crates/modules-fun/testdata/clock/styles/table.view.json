@@ -75,13 +75,13 @@
       {
         "cells": {
           "date": "Tue 27 Oct",
-          "diff": "+10:30",
+          "diff": "+10h30",
           "offset": "UTC+5:30",
           "part": "day",
           "time": "19:35",
           "zone": "Kolkata"
         },
-        "status": "unknown",
+        "status": null,
         "action": null
       },
       {
@@ -93,7 +93,7 @@
           "time": "23:05",
           "zone": "Tokyo office"
         },
-        "status": "unknown",
+        "status": null,
         "action": null
       }
     ]

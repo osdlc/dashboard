@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import type { Widget } from '../contract'
 import { fitFontSize } from '../display'
 
 type Display = Extract<Widget, { type: 'display' }>
-const props = defineProps<{ widget: Display }>()
+defineProps<{ widget: Display }>()
 
 /** The area the text may fill, and a hidden copy of the text at PROBE px to measure. */
 const box = ref<HTMLElement>()
@@ -20,15 +20,18 @@ function fit() {
   size.value = fitFontSize(b.clientWidth, b.clientHeight, m.width, m.height, PROBE)
 }
 
+// Refit when the box or the measured text changes size. Watching the probe
+// rather than the text means a tick that keeps the same width (tabular digits)
+// forces no layout.
 let resized: ResizeObserver | undefined
 onMounted(() => {
   fit()
   resized = new ResizeObserver(fit)
   if (box.value) resized.observe(box.value)
+  if (probe.value) resized.observe(probe.value)
   void document.fonts?.ready.then(fit)
 })
 onBeforeUnmount(() => resized?.disconnect())
-watch(() => [props.widget.text, props.widget.unit], fit, { flush: 'post' })
 </script>
 
 <template>

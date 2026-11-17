@@ -10,15 +10,20 @@ test('the hour hand moves with the minutes', () => {
   assert.equal(hourAngle(12, 30), 15)
   assert.equal(hourAngle(23, 59), 330 + 29.5)
   assert.equal(minuteAngle(5), 30)
+  // The minute hand moves with the seconds, as in the terminal view.
+  assert.equal(minuteAngle(5, 30), 33)
   assert.equal(secondAngle(59), 354)
 })
 
-test('a hand only moves forward across the wrap', () => {
+test('a hand takes the short way round', () => {
   assert.equal(forward(undefined, 30), 30)
   assert.equal(forward(354, 0), 360)
   assert.equal(forward(360, 6), 366)
   assert.equal(forward(366, 12), 372)
   assert.equal(forward(30, 36), 36)
+  // Time stepping back turns the hand back, not nearly a full turn on.
+  assert.equal(forward(60, 30), 30)
+  assert.equal(forward(0, 330), -30)
 })
 
 test('twelve ticks, quarters heavier', () => {
