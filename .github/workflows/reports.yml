@@ -26,4 +26,4 @@ jobs:
       contents: read
       actions: read # octocov reads main's report
       pull-requests: write # the coverage comment
-    uses: osdlc/osdlc/.github/workflows/reports.yml@e246737e8c08e23a566b8a45220ad7419d7a9ccc # osdlc/osdlc#857
+    uses: osdlc/osdlc/.github/workflows/reports.yml@main
