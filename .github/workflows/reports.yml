@@ -1,0 +1,29 @@
+# Coverage and complexity of the Rust crates: per-crate tables in the run's
+# summary, the total beside main's, and one line on each pull request. It
+# reports only; nothing fails. The work is osdlc/osdlc's reports.yml, called
+# here; see "Reports" in packages/gh-actions/README.md there.
+#
+# Settings are this repository's variables:
+#   REPORTS_RUST_DIR      .  (the workspace is at the root)
+#   REPORTS_RUST_ARGS     --workspace --exclude dashboard-desktop  (the Tauri
+#                         app needs WebKitGTK; plain `cargo test` leaves it out too)
+#   REPORTS_NODE_VERSION  24  (the plugin tests run the TypeScript plugins)
+#   REPORTS_ENV           DASHBOARD_SKIP_UI_BUILD=1  (embed the placeholder page)
+# TypeScript is not reported: web/ and site/ test with node --test, not vitest.
+name: reports
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  reports:
+    permissions:
+      contents: read
+      actions: read # octocov reads main's report
+      pull-requests: write # the coverage comment
+    uses: osdlc/osdlc/.github/workflows/reports.yml@8e2ffb6d6d5fadc1159e485ef7cf935214266b16 # osdlc/osdlc#857
