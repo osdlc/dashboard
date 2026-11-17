@@ -88,6 +88,17 @@ modules:
 
 A plugin given only as a command (`plugin: [...]`) has no catalog entry, so its demo tile just says there is no demo view. Remove the line (or set `demo: false`) to run the module for real.
 
+### Terminal view
+
+The terminal view draws the screen only when something on it changed: a tile on the current screen
+got new data, you pressed a key or used the mouse, the terminal was resized, or the screen rotated.
+Tile updates are gathered and drawn together at most `fps` times a second; input is drawn at once.
+
+```yaml
+tui:
+  fps: 4               # 1 to 60; default 4. Lower uses less CPU, higher shows fast tiles sooner
+```
+
 ### Themes
 
 `theme:` picks light or dark (`auto` follows the OS in the web view and the terminal's background in
@@ -164,6 +175,20 @@ modules:
 modules:
   git:
     config: { repos: [~/dev/api, ~/dev/web] }
+```
+
+### The dashboard's own cost
+
+`process` shows the CPU, memory and process count of one process and everything it started. With
+no settings that is the dashboard itself and its plugins. CPU is in percent of one core; memory is
+resident memory added up, so memory shared between the processes is counted more than once.
+
+```yaml
+modules:
+  process: {}                  # the dashboard and its plugins
+  postgres:
+    builtin: process
+    config: { name: postgres } # every process with this name, and their children
 ```
 
 ### AI agent usage

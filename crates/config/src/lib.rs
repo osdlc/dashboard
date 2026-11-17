@@ -45,6 +45,8 @@ pub struct Config {
     /// If empty, one screen shows every enabled module, auto-placed.
     pub screens: Vec<Screen>,
     pub rotate: Option<Rotate>,
+    /// Settings for the terminal view.
+    pub tui: Tui,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
@@ -128,6 +130,24 @@ pub struct Rotate {
     #[serde(default = "default_resume_after", with = "humantime_serde")]
     #[schemars(with = "String")]
     pub resume_after: Duration,
+}
+
+/// Settings for the terminal view (`dashboard tui`).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(default, deny_unknown_fields)]
+pub struct Tui {
+    /// The most times a second the screen is drawn again when tiles change,
+    /// from 1 to 60. The screen is only drawn when something on it changed;
+    /// a key press or click is always drawn at once.
+    pub fps: u32,
+}
+
+impl Default for Tui {
+    fn default() -> Self {
+        Self {
+            fps: dashboard_contract::DEFAULT_TUI_FPS,
+        }
+    }
 }
 
 fn default_resume_after() -> Duration {
@@ -369,6 +389,12 @@ impl Config {
         }
         self.color_theme()
             .map_err(|e| key("color_theme", e.to_string()))?;
+        if !(1..=60).contains(&self.tui.fps) {
+            return Err(Invalid {
+                part: Part::Key("tui".into()),
+                message: format!("tui.fps must be from 1 to 60, not {}", self.tui.fps),
+            });
+        }
         if let Some(rotate) = &self.rotate {
             let rotate_err = |message: String| Invalid {
                 part: Part::Rotate,
@@ -671,6 +697,18 @@ rotate:
         // A screen tile for a module that isn't running is dropped.
         let screens = c.screen_layouts(&running[..1]);
         assert!(screens[0].tiles.is_empty());
+    }
+
+    #[test]
+    fn tui_fps_defaults_to_four_and_has_limits() {
+        assert_eq!(parse("theme: dark\n").unwrap().tui.fps, 4);
+        let c = parse("tui:\n  fps: 2\n").unwrap();
+        assert_eq!(c.tui.fps, 2);
+        assert!(c.validate(&available()).is_ok());
+        for bad in ["tui:\n  fps: 0\n", "tui:\n  fps: 61\n"] {
+            let err = parse(bad).unwrap().validate(&available()).unwrap_err();
+            assert_eq!(err.part, Part::Key("tui".into()));
+        }
     }
 
     #[test]

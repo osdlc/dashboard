@@ -1,0 +1,73 @@
+{
+ "chart": {
+  "result": [
+   {
+    "meta": {
+     "currency": "USD",
+     "symbol": "NVDA",
+     "exchangeName": "NMS",
+     "instrumentType": "EQUITY",
+     "regularMarketTime": 1794603601,
+     "longName": "NVIDIA Corporation",
+     "shortName": "NVIDIA Corporation",
+     "chartPreviousClose": 166.19,
+     "previousClose": 166.19,
+     "regularMarketPrice": 162.85,
+     "currentTradingPeriod": {
+      "pre": {
+       "timezone": "EST",
+       "start": 1794560400,
+       "end": 1794580200,
+       "gmtoffset": -18000
+      },
+      "regular": {
+       "timezone": "EST",
+       "start": 1794580200,
+       "end": 1794603600,
+       "gmtoffset": -18000
+      },
+      "post": {
+       "timezone": "EST",
+       "start": 1794603600,
+       "end": 1794618000,
+       "gmtoffset": -18000
+      }
+     },
+     "dataGranularity": "5m",
+     "range": "1d"
+    },
+    "timestamp": [
+     1794580200,
+     1794582600,
+     1794585000,
+     1794587400,
+     1794589800,
+     1794592200,
+     1794594600,
+     1794597000,
+     1794599400,
+     1794603600
+    ],
+    "indicators": {
+     "quote": [
+      {
+       "close": [
+        165.44,
+        160.27,
+        159.3801,
+        160.34,
+        160.46,
+        161.11,
+        161.625,
+        162.5,
+        162.215,
+        162.85
+       ]
+      }
+     ]
+    }
+   }
+  ],
+  "error": null
+ }
+}
