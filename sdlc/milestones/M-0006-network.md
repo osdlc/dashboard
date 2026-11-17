@@ -6,18 +6,18 @@ state: open/draft
 created: 2026-11-14
 version: 0.14.0
 tags: [network, experimental]
-description: Dashboards on a network find each other and use each other's screens and modules.
+description: Dashboards on a network find each other and use each other's screens and tiles.
 ---
 
 # Network (0.14)
 
-Build the [network-mode experiment](../../docs/experiments/network-mode.md) as experimental, off
-unless the config turns it on. The experiment has the design, what is sent and what never is.
+Build the [network-mode experiment](../../docs/experiments/network-mode.md) as experimental. The
+experiment has the design, what is sent and what never is.
 
 ## Work
 
 - **Steps 1 to 3 of the experiment:** discovery, one shared screen, and the `remote` module that
-  puts a peer's module on a local screen.
+  puts a peer's tile on a local screen.
 - **Remote tiles are tiles:** they go stale like any tile when the peer goes away, and they raise
   alerts ([M-0005](M-0005-alerts-and-history.md)) like any tile.
 - **The protocol written down:** a new row in the roadmap's surfaces table, experimental. It
@@ -30,12 +30,14 @@ unless the config turns it on. The experiment has the design, what is sent and w
 
 The experiment's "Done when", and:
 
-- A peer's module runs as a tile on a local screen in both views.
+- A peer's tile is shown on a local screen in both views.
 - With network mode off, nothing listens on the network.
 
 ## Depends on
 
+- [M-0002](M-0002-core-and-plugins.md): the benchmark it is measured with.
 - [M-0003](M-0003-api-levels.md): the `View` JSON and the levels are written down first.
+- [M-0005](M-0005-alerts-and-history.md): remote tiles raise alerts.
 
 ## Open questions
 

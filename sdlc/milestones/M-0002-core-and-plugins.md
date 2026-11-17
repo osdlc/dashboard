@@ -29,9 +29,10 @@ at a time. Add:
   time from a module's update to the renderers.
 - **Recorded numbers:** commit `bench/results/runtime.json` and `build.tsv` from one run, with the
   machine, OS, toolchain and commit. The docs quote that run.
-- **A regression gate:** a short benchmark in CI that fails on a budget, not an exact number:
-  binary size per bundle and per module, startup and render p95 with the default bundles, host
-  memory with a typical screen.
+- **A regression gate:** a short benchmark in CI that fails on a budget, not an exact number,
+  for the numbers a shared runner measures the same each time: binary size per bundle and per
+  module. Startup and render p95 with the default bundles, and host memory with a typical
+  screen, are reported on each run but don't fail it: timings on shared runners are too noisy.
 
 ## Decide core and plugins
 

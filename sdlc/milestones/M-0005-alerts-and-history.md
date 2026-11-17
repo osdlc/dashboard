@@ -26,7 +26,8 @@ happened across restarts.
 
 ## History
 
-- Series history kept across restarts. Today it is an in-memory buffer of 300 points per series.
+- Series history kept across restarts. Today it is kept in memory only
+  ([series history](../../docs/contract.md#series-history)).
 - Status history per tile: when it went to warn or error and when it came back, shown on the tile.
 - "Since you last looked": items that are new since the screen was last shown are marked.
 - A size cap per tile, and one setting to turn history off.
@@ -46,4 +47,3 @@ Nothing after [M-0002](M-0002-core-and-plugins.md). This can run alongside
 ## Open questions
 
 - How history is stored: SQLite, or append-only files. It changes the binary size.
-- Does a peer on the network ([M-0006](M-0006-network.md)) get the history, or only new points?

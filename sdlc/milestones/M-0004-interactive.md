@@ -23,14 +23,17 @@ Build API level 3, as experimental, and use it so a user can act on an item from
 
 - Acknowledge an incident (PagerDuty, Opsgenie), re-run a failed CI job (GitHub, Buildkite,
   CircleCI), close a todo (Todoist, todo.txt, Taskwarrior), from the TUI and the web view. The
-  list has both built-ins (GitHub, todo.txt, Taskwarrior) and plugins, so both paths are used.
+  list mixes built-ins and plugins, so both paths are used. Several of these plugins have not
+  been run against the real service yet; [M-0002](M-0002-core-and-plugins.md) may move or drop
+  them first.
 - Every action that changes something outside the dashboard asks first, shows what it will run or
   send, and is written to the log.
-- Ambient mode and the screensaver show no actions.
+- Ambient mode shows no actions (nor the screensaver, if draft #6 lands).
 
 ## Done when
 
-- One built-in and one plugin each take an action from both views, after approval.
+- One built-in and one plugin each take an action from both views, after approval. The plugin
+  is one that has been run against its real service.
 - An action that fails shows its error on the tile, and the tile keeps its last good view.
 
 ## Depends on

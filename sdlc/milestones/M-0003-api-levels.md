@@ -22,8 +22,9 @@ in the [roadmap](../../docs/roadmap.md#api-levels).
 - The same widget written at each level and in several languages, tested to render the same view
   (#17).
 - `dashboard plugin-check` reports which level a plugin uses.
-- The "Not yet" lists in [contract.md](../../docs/contract.md) and
-  [plugins.md](../../docs/plugins.md) point here instead, so there is one list.
+- The lists of what is not built yet point here instead, so there is one list: "Not in v0.1"
+  in [contract.md](../../docs/contract.md), and "Not yet" in [plugins.md](../../docs/plugins.md)
+  and [marketplace.md](../../docs/marketplace.md).
 
 ## Done when
 
