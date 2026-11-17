@@ -350,6 +350,7 @@ On connect, the web view first gets renderer settings, then a tile message per t
     "screens": [{ "name": "main", "tiles": [{ "tile_id": "sysperf", "size": "large" }] }],
     "modules": [{ "tile_id": "sysperf", "name": "System", "refresh_ms": 1000, "refresh_overridden": false, "commands": [] }],
     "rotate": null,
+    "tui_fps": 4,
     "config": { "path": "/Users/me/.config/dashboard/config.yaml", "exists": true, "error": null } } }
 ```
 

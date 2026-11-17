@@ -533,7 +533,18 @@ pub struct UiSettings {
     /// Automatic screen rotation, if configured.
     #[serde(default)]
     pub rotate: Option<RotateSettings>,
+    /// The most times a second the terminal view draws the screen again when
+    /// tiles change. The web view does not use it.
+    #[serde(default = "default_tui_fps")]
+    pub tui_fps: u32,
     pub config: ConfigInfo,
+}
+
+/// The terminal view's redraw limit when the config sets none.
+pub const DEFAULT_TUI_FPS: u32 = 4;
+
+fn default_tui_fps() -> u32 {
+    DEFAULT_TUI_FPS
 }
 
 /// Where the config came from, for the settings screen.

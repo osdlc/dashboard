@@ -161,10 +161,16 @@ pub async fn run(
     };
 
     let mut terminal = init_terminal()?;
+    // The screen is drawn only when something on it changed. Tile updates
+    // are gathered for one frame (`tui.fps`) and drawn together; a key, the
+    // mouse or a resize ends the wait, so input is drawn at once.
+    let mut dirty = true;
+    let mut shown_rotation = None;
     let result = loop {
         loop {
             match rx.try_recv() {
                 Ok(update) => {
+                    dirty |= app.shows(&update.tile_id);
                     app.tiles.insert(update.tile_id.clone(), update);
                 }
                 Err(TryRecvError::Lagged(_)) => continue,
@@ -175,19 +181,33 @@ pub async fn run(
         if settings_rx.has_changed().unwrap_or(false) {
             let settings = settings_rx.borrow_and_update().clone();
             app.apply_settings(settings, Instant::now());
+            dirty = true;
         }
 
-        app.tick(Instant::now());
-        let mut hits = Hits::default();
-        if let Err(err) = terminal.draw(|f| hits = draw(f, &app, Instant::now())) {
-            break Err(err.into());
+        let now = Instant::now();
+        let screen = app.screen;
+        app.tick(now);
+        // The footer says whether rotation is on, paused or off; "paused"
+        // ends by itself.
+        let rotation = app.rotation.as_ref().map(|r| r.state(now));
+        dirty |= app.screen != screen || rotation != shown_rotation;
+        if dirty {
+            let mut hits = Hits::default();
+            if let Err(err) = terminal.draw(|f| hits = draw(f, &app, now)) {
+                break Err(err.into());
+            }
+            app.hits = hits;
+            shown_rotation = rotation;
+            dirty = false;
         }
-        app.hits = hits;
 
+        let wait = frame(app.settings.tui_fps);
         let input = tokio::task::block_in_place(|| -> Result<Option<Input>> {
-            if !event::poll(Duration::from_millis(100))? {
+            if !event::poll(wait)? {
                 return Ok(None);
             }
+            // Anything from the terminal, a resize included, is drawn.
+            dirty = true;
             Ok(match event::read()? {
                 Event::Key(key) if key.kind == KeyEventKind::Press => Some(Input::Key(key)),
                 Event::Mouse(m) => match m.kind {
@@ -221,6 +241,7 @@ pub async fn run(
                 Ok(t) => t,
                 Err(err) => break Err(err),
             };
+            dirty = true;
             if let Err(err) = edited {
                 break Err(err);
             }
@@ -228,6 +249,12 @@ pub async fn run(
     };
     restore_terminal();
     result
+}
+
+/// How long tile updates are gathered before they are drawn: one frame at
+/// `fps` draws a second, kept between 1 and 60.
+fn frame(fps: u32) -> Duration {
+    Duration::from_millis(1000 / u64::from(fps.clamp(1, 60)))
 }
 
 fn init_terminal() -> Result<ratatui::DefaultTerminal> {
@@ -265,6 +292,17 @@ impl App {
             .as_ref()
             .and_then(|r| rotate::Rotation::new(r, &settings.screens, now));
         self.settings = settings;
+    }
+
+    /// Whether this tile is on screen: on the current screen, or the tile
+    /// shown full-size. An update to any other tile changes nothing drawn.
+    fn shows(&self, tile_id: &str) -> bool {
+        self.expanded.as_deref() == Some(tile_id)
+            || self
+                .settings
+                .screens
+                .get(self.screen)
+                .is_some_and(|s| s.tiles.iter().any(|t| t.tile_id == tile_id))
     }
 
     fn tick(&mut self, now: Instant) {
@@ -851,6 +889,7 @@ mod tests {
                 default_size: Size::Medium,
             }],
             rotate: None,
+            tui_fps: dashboard_contract::DEFAULT_TUI_FPS,
             config: Default::default(),
         };
         let view = View {
@@ -1294,6 +1333,28 @@ mod tests {
         assert_eq!(app.focus, Focus::Tile("cswap".into()));
     }
 
+    #[test]
+    fn only_tiles_on_screen_need_a_redraw() {
+        let mut app = app();
+        assert!(app.shows("sysperf"));
+        assert!(app.shows("cswap"));
+        assert!(!app.shows("elsewhere"));
+        // The other screen has no tiles.
+        app.screen = 1;
+        assert!(!app.shows("sysperf"));
+        // A tile shown full-size is on screen whichever screen is behind it.
+        app.expanded = Some("sysperf".into());
+        assert!(app.shows("sysperf"));
+    }
+
+    #[test]
+    fn a_frame_is_one_draw_at_the_fps() {
+        assert_eq!(frame(4), Duration::from_millis(250));
+        assert_eq!(frame(2), Duration::from_millis(500));
+        assert_eq!(frame(0), Duration::from_secs(1));
+        assert_eq!(frame(1000), Duration::from_millis(16));
+    }
+
     fn app_with_links() -> App {
         let mut app = app();
         app.tiles.insert("cswap".into(), links(&["one", "two"]));
@@ -1440,6 +1501,7 @@ mod tests_support {
                 screens: vec![],
                 modules: vec![],
                 rotate: None,
+                tui_fps: dashboard_contract::DEFAULT_TUI_FPS,
                 config: Default::default(),
             },
             palette: Palette::for_theme(Theme::Dark, false),
@@ -1638,6 +1700,7 @@ mod tests_support {
                 default_size: Size::Medium,
             }],
             rotate: None,
+            tui_fps: dashboard_contract::DEFAULT_TUI_FPS,
             config: Default::default(),
         };
         let view = View {
