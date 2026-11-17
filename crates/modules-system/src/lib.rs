@@ -40,6 +40,8 @@ pub mod network;
 pub mod process;
 #[cfg(feature = "processes")]
 pub mod processes;
+#[cfg(feature = "screensaver")]
+pub mod screensaver;
 #[cfg(feature = "security")]
 pub mod security;
 #[cfg(feature = "textfile")]
@@ -153,6 +155,13 @@ pub const MODULES: &[Builtin] = &[
         core: false,
         new: || Box::new(file::File::default()),
         catalog: file::catalog,
+    },
+    #[cfg(feature = "screensaver")]
+    Builtin {
+        id: "screensaver",
+        core: false,
+        new: || Box::new(screensaver::Screensaver::default()),
+        catalog: screensaver::catalog,
     },
 ];
 
