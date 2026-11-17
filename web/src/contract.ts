@@ -233,6 +233,17 @@ export type Widget =
       type: "uptime";
     }
   | {
+      /**
+       * A line under the picture, e.g. the file name.
+       */
+      caption?: string | null;
+      /**
+       * Image file: PNG, JPEG, GIF (first frame), WebP or BMP.
+       */
+      path: string;
+      type: "image";
+    }
+  | {
       children: Widget[];
       type: "row";
     }
@@ -502,6 +513,17 @@ export type Cell =
       | {
           checks: UptimeCheck[];
           type: "uptime";
+        }
+      | {
+          /**
+           * A line under the picture, e.g. the file name.
+           */
+          caption?: string | null;
+          /**
+           * Image file: PNG, JPEG, GIF (first frame), WebP or BMP.
+           */
+          path: string;
+          type: "image";
         }
       | {
           children: Widget[];
