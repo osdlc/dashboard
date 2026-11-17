@@ -9,9 +9,9 @@
 #                       a PR comment from a trigger user: that PR now
 #
 # Settings are this repository's (or the organization's) variables:
-# RELEASE_PLZ_APP_CLIENT_ID (the osdlc-release App) and
-# PR_UPDATE_TRIGGER_USERS. Secrets: RELEASE_PLZ_APP_PRIVATE_KEY and
-# ANTHROPIC_API_KEY, passed by `secrets: inherit`.
+# PR_UPDATE_APP_CLIENT_ID (the osdlc-release App) and PR_UPDATE_TRIGGER_USERS.
+# Secrets: PR_UPDATE_APP_PRIVATE_KEY and ANTHROPIC_API_KEY, passed by
+# `secrets: inherit`.
 name: pr-update
 
 on:
