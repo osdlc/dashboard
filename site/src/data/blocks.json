@@ -1,0 +1,2912 @@
+{
+ "entries": [
+  {
+   "id": "bars",
+   "name": "Bars",
+   "version": "",
+   "description": "Labeled horizontal bars, in the order given. A full bar is the largest value unless `max` sets it. Each bar can carry a status (ok, warn, error) or a tone for its color.",
+   "tags": [],
+   "kind": "block",
+   "source": "examples/blocks/bars.json",
+   "default_size": "medium",
+   "requirements": {
+    "binaries": [],
+    "env": [],
+    "hosts": []
+   },
+   "demo": {
+    "status": "warn",
+    "summary": "atlas 1.1k builds",
+    "root": {
+     "type": "bars",
+     "label": "Builds this week",
+     "format": "count",
+     "bars": [
+      {
+       "label": "atlas",
+       "value": 1054
+      },
+      {
+       "label": "ember",
+       "value": 999
+      },
+      {
+       "label": "iris",
+       "value": 829
+      },
+      {
+       "label": "harbor",
+       "value": 815,
+       "status": "warn"
+      },
+      {
+       "label": "fjord",
+       "value": 593
+      },
+      {
+       "label": "quill",
+       "value": 212,
+       "tone": "muted"
+      }
+     ]
+    }
+   },
+   "group": "primitives"
+  },
+  {
+   "id": "checks-log",
+   "name": "Checks over a log",
+   "version": "",
+   "description": "What is down, then why: a column with uptime checks on top and the log of the failing service under them.",
+   "tags": [],
+   "kind": "block",
+   "source": "examples/blocks/checks-log.json",
+   "default_size": "tall",
+   "requirements": {
+    "binaries": [],
+    "env": [],
+    "hosts": []
+   },
+   "demo": {
+    "status": "error",
+    "summary": "api down",
+    "root": {
+     "type": "column",
+     "children": [
+      {
+       "type": "uptime",
+       "checks": [
+        {
+         "name": "web",
+         "status": "ok",
+         "uptime": 100,
+         "latency_ms": 88,
+         "history": [
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok"
+         ]
+        },
+        {
+         "name": "api",
+         "status": "error",
+         "uptime": 85,
+         "detail": "HTTP 503",
+         "history": [
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "ok",
+          "error",
+          "error",
+          "error",
+          "error"
+         ]
+        }
+       ]
+      },
+      {
+       "type": "log",
+       "label": "api",
+       "lines": [
+        {
+         "time": "04:16:58",
+         "level": "info",
+         "text": "deploy v2.4.0 started"
+        },
+        {
+         "time": "04:17:01",
+         "level": "warn",
+         "text": "pool size 2 below minimum 4"
+        },
+        {
+         "time": "04:17:02",
+         "level": "error",
+         "text": "connection reset by peer"
+        },
+        {
+         "time": "04:17:04",
+         "level": "error",
+         "text": "health check failed: 503"
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "group": "compositions"
+  },
+  {
+   "id": "column",
+   "name": "Column",
+   "version": "",
+   "description": "Widgets stacked top to bottom. A column has only `children`. Most tiles are a column at the top: a headline number, then a chart or a list under it.",
+   "tags": [],
+   "kind": "block",
+   "source": "examples/blocks/column.json",
+   "default_size": "small",
+   "requirements": {
+    "binaries": [],
+    "env": [],
+    "hosts": []
+   },
+   "demo": {
+    "status": "ok",
+    "summary": "Battery 76%, 4:12 left",
+    "root": {
+     "type": "column",
+     "children": [
+      {
+       "type": "stat",
+       "label": "Battery",
+       "value": "76",
+       "unit": "%",
+       "delta": "4:12 left"
+      },
+      {
+       "type": "gauge",
+       "label": "Charge",
+       "percent": 76,
+       "thresholds": {
+        "warn": 80,
+        "error": 95
+       }
+      },
+      {
+       "type": "text",
+       "text": "Discharging. Full charge 4,512 mAh of 5,000 (90% health)."
+      }
+     ]
+    }
+   },
+   "group": "primitives"
+  },
+  {
+   "id": "donut",
+   "name": "Pie: donut",
+   "version": "",
+   "description": "The same widget as a ring, which is the default. `format: bytes` writes the legend in GiB. A slice's status (here warn on the free space) overrides its color.",
+   "tags": [],
+   "kind": "block",
+   "source": "examples/blocks/donut.json",
+   "default_size": "small",
+   "requirements": {
+    "binaries": [],
+    "env": [],
+    "hosts": []
+   },
+   "demo": {
+    "status": "warn",
+    "summary": "Disk 93% used",
+    "root": {
+     "type": "pie",
+     "label": "Disk",
+     "format": "bytes",
+     "slices": [
+      {
+       "label": "photos",
+       "value": 64424509440
+      },
+      {
+       "label": "apps",
+       "value": 32212254720
+      },
+      {
+       "label": "system",
+       "value": 21474836480
+      },
+      {
+       "label": "free",
+       "value": 8589934592,
+       "status": "warn"
+      }
+     ]
+    }
+   },
+   "group": "primitives"
+  },
+  {
+   "id": "gauge",
+   "name": "Gauge",
+   "version": "",
+   "description": "A meter from 0 to 100%. Thresholds turn the fill the warn and error colors as it rises; a marker puts a tick on the track, for example where usage should be by now; a caption adds a line of detail under it.",
+   "tags": [],
+   "kind": "block",
+   "source": "examples/blocks/gauge.json",
+   "default_size": "small",
+   "requirements": {
+    "binaries": [],
+    "env": [],
+    "hosts": []
+   },
+   "demo": {
+    "status": "warn",
+    "summary": "5-hour limit 81%",
+    "root": {
+     "type": "gauge",
+     "label": "5-hour limit",
+     "percent": 81,
+     "marker": 60,
+     "thresholds": {
+      "warn": 75,
+      "error": 90
+     },
+     "caption": "ahead of pace · resets in 1 h 12 m"
+    }
+   },
+   "group": "primitives"
+  },
+  {
+   "id": "gauges",
+   "name": "Column of gauges",
+   "version": "",
+   "description": "Several limits at once: a column of gauges, each with its own thresholds. The marker on the first two shows where usage should be by now, so \"ahead of pace\" is easy to see.",
+   "tags": [],
+   "kind": "block",
+   "source": "examples/blocks/gauges.json",
+   "default_size": "small",
+   "requirements": {
+    "binaries": [],
+    "env": [],
+    "hosts": []
+   },
+   "demo": {
+    "status": "warn",
+    "summary": "5 hours 81% · week 40%",
+    "root": {
+     "type": "column",
+     "children": [
+      {
+       "type": "gauge",
+       "label": "5 hours",
+       "percent": 81,
+       "marker": 60,
+       "thresholds": {
+        "warn": 75,
+        "error": 90
+       }
+      },
+      {
+       "type": "gauge",
+       "label": "7 days",
+       "percent": 40,
+       "marker": 52,
+       "thresholds": {
+        "warn": 75,
+        "error": 90
+       }
+      },
+      {
+       "type": "gauge",
+       "label": "Disk",
+       "percent": 93,
+       "thresholds": {
+        "warn": 80,
+        "error": 90
+       },
+       "caption": "1721 of 1858 GiB used"
+      }
+     ]
+    }
+   },
+   "group": "compositions"
+  },
+  {
+   "id": "kpi",
+   "name": "Stats over a chart",
+   "version": "",
+   "description": "The usual KPI tile: a row of stats across the top and a chart of the main number under it. A column holding a row and a series.",
+   "tags": [],
+   "kind": "block",
+   "source": "examples/blocks/kpi.json",
+   "default_size": "wide",
+   "requirements": {
+    "binaries": [],
+    "env": [],
+    "hosts": []
+   },
+   "demo": {
+    "status": "warn",
+    "summary": "3451 req/s · errors 1.2%",
+    "root": {
+     "type": "column",
+     "children": [
+      {
+       "type": "row",
+       "children": [
+        {
+         "type": "stat",
+         "label": "Requests",
+         "value": "3451",
+         "unit": "/s",
+         "delta": "+2.8%"
+        },
+        {
+         "type": "stat",
+         "label": "Errors",
+         "value": "1.2",
+         "unit": "%",
+         "delta": "+0.8",
+         "status": "warn"
+        },
+        {
+         "type": "stat",
+         "label": "p99",
+         "value": "107",
+         "unit": "ms",
+         "status": "ok"
+        },
+        {
+         "type": "stat",
+         "label": "Hosts",
+         "value": "12",
+         "delta": "of 12"
+        }
+       ]
+      },
+      {
+       "type": "series",
+       "label": "Requests a second",
+       "unit": "/s",
+       "style": "area",
+       "series": [
+        {
+         "name": "requests",
+         "points": [
+          [
+           1793160000000,
+           3300
+          ],
+          [
+           1793160060000,
+           3472.6
+          ],
+          [
+           1793160120000,
+           3613.7
+          ],
+          [
+           1793160180000,
+           3701.3
+          ],
+          [
+           1793160240000,
+           3729.2
+          ],
+          [
+           1793160300000,
+           3708.5
+          ],
+          [
+           1793160360000,
+           3662.7
+          ],
+          [
+           1793160420000,
+           3619.2
+          ],
+          [
+           1793160480000,
+           3599.8
+          ],
+          [
+           1793160540000,
+           3612.9
+          ],
+          [
+           1793160600000,
+           3650.7
+          ],
+          [
+           1793160660000,
+           3691.8
+          ],
+          [
+           1793160720000,
+           3709
+          ],
+          [
+           1793160780000,
+           3678.8
+          ],
+          [
+           1793160840000,
+           3590
+          ],
+          [
+           1793160900000,
+           3448.4
+          ],
+          [
+           1793160960000,
+           3275.7
+          ],
+          [
+           1793161020000,
+           3103.4
+          ],
+          [
+           1793161080000,
+           2963.1
+          ],
+          [
+           1793161140000,
+           2877.1
+          ],
+          [
+           1793161200000,
+           2851.7
+          ],
+          [
+           1793161260000,
+           2876
+          ],
+          [
+           1793161320000,
+           2926.7
+          ],
+          [
+           1793161380000,
+           2976
+          ],
+          [
+           1793161440000,
+           3001.7
+          ],
+          [
+           1793161500000,
+           2994.9
+          ],
+          [
+           1793161560000,
+           2962.8
+          ],
+          [
+           1793161620000,
+           2926.2
+          ],
+          [
+           1793161680000,
+           2912.3
+          ],
+          [
+           1793161740000,
+           2944.5
+          ],
+          [
+           1793161800000,
+           3034.3
+          ],
+          [
+           1793161860000,
+           3176.2
+          ],
+          [
+           1793161920000,
+           3348.5
+          ],
+          [
+           1793161980000,
+           3520.2
+          ],
+          [
+           1793162040000,
+           3659.3
+          ],
+          [
+           1793162100000,
+           3743.5
+          ],
+          [
+           1793162160000,
+           3766.3
+          ],
+          [
+           1793162220000,
+           3738.1
+          ],
+          [
+           1793162280000,
+           3682.5
+          ],
+          [
+           1793162340000,
+           3627.3
+          ],
+          [
+           1793162400000,
+           3595.3
+          ],
+          [
+           1793162460000,
+           3595.9
+          ],
+          [
+           1793162520000,
+           3622.5
+          ],
+          [
+           1793162580000,
+           3654.6
+          ],
+          [
+           1793162640000,
+           3665.4
+          ],
+          [
+           1793162700000,
+           3631.4
+          ],
+          [
+           1793162760000,
+           3540.9
+          ],
+          [
+           1793162820000,
+           3399.2
+          ],
+          [
+           1793162880000,
+           3227.4
+          ],
+          [
+           1793162940000,
+           3056.8
+          ],
+          [
+           1793163000000,
+           2919.1
+          ],
+          [
+           1793163060000,
+           2836.9
+          ],
+          [
+           1793163120000,
+           2817
+          ],
+          [
+           1793163180000,
+           2849.2
+          ],
+          [
+           1793163240000,
+           2909.8
+          ],
+          [
+           1793163300000,
+           2970.9
+          ],
+          [
+           1793163360000,
+           3009.2
+          ],
+          [
+           1793163420000,
+           3014.8
+          ],
+          [
+           1793163480000,
+           2993.6
+          ],
+          [
+           1793163540000,
+           2965.7
+          ]
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "group": "compositions"
+  },
+  {
+   "id": "list",
+   "name": "List",
+   "version": "",
+   "description": "Items with a title, a quieter subtitle, a marker colored by status or tone, and tags shown as chips. An `open_url` action makes an item a link. `empty_text` is what shows when there are no items.",
+   "tags": [],
+   "kind": "block",
+   "source": "examples/blocks/list.json",
+   "default_size": "medium",
+   "requirements": {
+    "binaries": [],
+    "env": [],
+    "hosts": []
+   },
+   "demo": {
+    "status": "error",
+    "summary": "1 failed, 1 rolling back",
+    "root": {
+     "type": "list",
+     "empty_text": "No deploys today",
+     "items": [
+      {
+       "title": "Deploy finished · atlas",
+       "subtitle": "prod · 12s ago",
+       "status": "ok",
+       "tags": [
+        "prod"
+       ],
+       "action": {
+        "type": "open_url",
+        "url": "https://example.com/deploys/atlas"
+       }
+      },
+      {
+       "title": "Build failed on main · ember",
+       "subtitle": "ci · 38s ago",
+       "status": "error",
+       "tags": [
+        "main",
+        "ci"
+       ],
+       "action": {
+        "type": "open_url",
+        "url": "https://example.com/builds/ember"
+       }
+      },
+      {
+       "title": "Rollback started · harbor",
+       "subtitle": "deploy · 2m ago",
+       "status": "warn",
+       "tags": [
+        "manual"
+       ]
+      },
+      {
+       "title": "Review requested · iris",
+       "subtitle": "pull request #482 · 5m ago",
+       "tone": "info",
+       "tags": [
+        "review"
+       ]
+      },
+      {
+       "title": "Nightly backup · quill",
+       "subtitle": "cron · 6h ago",
+       "tone": "muted"
+      }
+     ]
+    }
+   },
+   "group": "primitives"
+  },
+  {
+   "id": "log",
+   "name": "Log",
+   "version": "",
+   "description": "Log lines, oldest first; renderers show the newest that fit. Each line can have a time, shown before it, and a level (error, warn, info, debug) that colors it.",
+   "tags": [],
+   "kind": "block",
+   "source": "examples/blocks/log.json",
+   "default_size": "medium",
+   "requirements": {
+    "binaries": [],
+    "env": [],
+    "hosts": []
+   },
+   "demo": {
+    "status": "error",
+    "summary": "1 error in the last minute",
+    "root": {
+     "type": "log",
+     "label": "api",
+     "lines": [
+      {
+       "time": "04:16:52",
+       "level": "debug",
+       "text": "cache hit ratio 0.93"
+      },
+      {
+       "time": "04:16:58",
+       "level": "info",
+       "text": "worker 409 picked up job 18233"
+      },
+      {
+       "time": "04:16:59",
+       "level": "warn",
+       "text": "slow query took 540ms: SELECT * FROM runs"
+      },
+      {
+       "time": "04:16:59",
+       "level": "error",
+       "text": "connection reset by peer (10.0.4.12:5432)"
+      },
+      {
+       "time": "04:17:00",
+       "level": "info",
+       "text": "POST /api/runs 201 in 293ms"
+      },
+      {
+       "time": "04:17:02",
+       "level": "info",
+       "text": "GET /api/health 200 in 3ms"
+      },
+      {
+       "time": "04:17:05",
+       "text": "retrying connection, attempt 2"
+      }
+     ]
+    }
+   },
+   "group": "primitives"
+  },
+  {
+   "id": "meter-grid",
+   "name": "Meter grid",
+   "version": "",
+   "description": "Many small meters in a compact grid, one per CPU core, disk or queue. The grid's `color` scale colors each meter by its value; a meter's own `tone` overrides it.",
+   "tags": [],
+   "kind": "block",
+   "source": "examples/blocks/meter-grid.json",
+   "default_size": "medium",
+   "requirements": {
+    "binaries": [],
+    "env": [],
+    "hosts": []
+   },
+   "demo": {
+    "status": "ok",
+    "summary": "16 cores, 46% average",
+    "root": {
+     "type": "meter_grid",
+     "label": "CPU cores",
+     "color": "heat",
+     "meters": [
+      {
+       "label": "1",
+       "percent": 28
+      },
+      {
+       "label": "2",
+       "percent": 52
+      },
+      {
+       "label": "3",
+       "percent": 29
+      },
+      {
+       "label": "4",
+       "percent": 97
+      },
+      {
+       "label": "5",
+       "percent": 15
+      },
+      {
+       "label": "6",
+       "percent": 16
+      },
+      {
+       "label": "7",
+       "percent": 45
+      },
+      {
+       "label": "8",
+       "percent": 67
+      },
+      {
+       "label": "9",
+       "percent": 64
+      },
+      {
+       "label": "10",
+       "percent": 13
+      },
+      {
+       "label": "11",
+       "percent": 34
+      },
+      {
+       "label": "12",
+       "percent": 26
+      },
+      {
+       "label": "13",
+       "percent": 62
+      },
+      {
+       "label": "14",
+       "percent": 87
+      },
+      {
+       "label": "15",
+       "percent": 71
+      },
+      {
+       "label": "16",
+       "percent": 25
+      }
+     ]
+    }
+   },
+   "group": "primitives"
+  },
+  {
+   "id": "nested",
+   "name": "Row in a column in a row",
+   "version": "",
+   "description": "Layouts nest as deep as you like. Here the outer row has a column on the left, holding a row of two stats over a gauge, and a list on the right.",
+   "tags": [],
+   "kind": "block",
+   "source": "examples/blocks/nested.json",
+   "default_size": "large",
+   "requirements": {
+    "binaries": [],
+    "env": [],
+    "hosts": []
+   },
+   "demo": {
+    "status": "ok",
+    "summary": "42 open · 7 in review",
+    "root": {
+     "type": "row",
+     "children": [
+      {
+       "type": "column",
+       "children": [
+        {
+         "type": "row",
+         "children": [
+          {
+           "type": "stat",
+           "label": "Open",
+           "value": "42",
+           "delta": "-5 this week",
+           "status": "ok"
+          },
+          {
+           "type": "stat",
+           "label": "In review",
+           "value": "7"
+          }
+         ]
+        },
+        {
+         "type": "gauge",
+         "label": "Sprint done",
+         "percent": 64,
+         "marker": 70,
+         "caption": "18 of 28 points, day 7 of 10"
+        }
+       ]
+      },
+      {
+       "type": "list",
+       "items": [
+        {
+         "title": "Fix login redirect",
+         "subtitle": "ana · 2h ago",
+         "status": "ok",
+         "tags": [
+          "bug"
+         ]
+        },
+        {
+         "title": "Rate limit the export API",
+         "subtitle": "sam · yesterday",
+         "tone": "info",
+         "tags": [
+          "api"
+         ]
+        },
+        {
+         "title": "Flaky test in checkout",
+         "subtitle": "lee · 3 days ago",
+         "status": "warn",
+         "tags": [
+          "ci"
+         ]
+        },
+        {
+         "title": "Dark mode for settings",
+         "subtitle": "kim · last week",
+         "tone": "muted",
+         "tags": [
+          "ui"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "group": "compositions"
+  },
+  {
+   "id": "pie-stats",
+   "name": "Pie next to stats",
+   "version": "",
+   "description": "A donut beside the numbers it stands for: a row holding a pie and a column of stats. The pie gives the shape at a glance, the stats the exact values.",
+   "tags": [],
+   "kind": "block",
+   "source": "examples/blocks/pie-stats.json",
+   "default_size": "medium",
+   "requirements": {
+    "binaries": [],
+    "env": [],
+    "hosts": []
+   },
+   "demo": {
+    "status": "ok",
+    "summary": "Disk 60% used",
+    "root": {
+     "type": "row",
+     "children": [
+      {
+       "type": "pie",
+       "label": "Disk",
+       "format": "bytes",
+       "slices": [
+        {
+         "label": "used",
+         "value": 300000000000
+        },
+        {
+         "label": "free",
+         "value": 200000000000
+        }
+       ]
+      },
+      {
+       "type": "column",
+       "children": [
+        {
+         "type": "stat",
+         "label": "Used",
+         "value": "279",
+         "unit": "GiB"
+        },
+        {
+         "type": "stat",
+         "label": "Free",
+         "value": "186",
+         "unit": "GiB",
+         "status": "ok"
+        },
+        {
+         "type": "stat",
+         "label": "Snapshots",
+         "value": "14",
+         "delta": "+2 today"
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "group": "compositions"
+  },
+  {
+   "id": "pie",
+   "name": "Pie",
+   "version": "",
+   "description": "Shares of a whole, as a full disc with `donut: false`. Slices go clockwise from twelve o'clock in the order given and take the theme's series colors in turn; the legend shows each value and its percent.",
+   "tags": [],
+   "kind": "block",
+   "source": "examples/blocks/pie.json",
+   "default_size": "small",
+   "requirements": {
+    "binaries": [],
+    "env": [],
+    "hosts": []
+   },
+   "demo": {
+    "status": "ok",
+    "summary": "Rust 61%",
+    "root": {
+     "type": "pie",
+     "label": "Languages",
+     "donut": false,
+     "unit": " lines",
+     "format": "count",
+     "slices": [
+      {
+       "label": "Rust",
+       "value": 48210
+      },
+      {
+       "label": "TypeScript",
+       "value": 17330
+      },
+      {
+       "label": "Vue",
+       "value": 8120
+      },
+      {
+       "label": "Python",
+       "value": 3260
+      },
+      {
+       "label": "other",
+       "value": 1870,
+       "tone": "muted"
+      }
+     ]
+    }
+   },
+   "group": "primitives"
+  },
+  {
+   "id": "row",
+   "name": "Row",
+   "version": "",
+   "description": "Widgets side by side, sharing the width. A row has only `children`; it is how a tile puts things next to each other. In a narrow space the children get narrow too, so keep rows short.",
+   "tags": [],
+   "kind": "block",
+   "source": "examples/blocks/row.json",
+   "default_size": "medium",
+   "requirements": {
+    "binaries": [],
+    "env": [],
+    "hosts": []
+   },
+   "demo": {
+    "status": "ok",
+    "summary": "3451 req/s · 0.4% errors · p99 107 ms",
+    "root": {
+     "type": "row",
+     "children": [
+      {
+       "type": "stat",
+       "label": "Requests",
+       "value": "3451",
+       "unit": "/s",
+       "delta": "+2.8%"
+      },
+      {
+       "type": "stat",
+       "label": "Errors",
+       "value": "0.4",
+       "unit": "%",
+       "status": "ok"
+      },
+      {
+       "type": "stat",
+       "label": "p99",
+       "value": "107",
+       "unit": "ms"
+      }
+     ]
+    }
+   },
+   "group": "primitives"
+  },
+  {
+   "id": "series-area",
+   "name": "Series: area",
+   "version": "",
+   "description": "The same series filled under the line, with `style: area`. `y_max` fixes the top of the chart, here 100%, so a quiet hour doesn't look busy. A single series takes its color from `color`: the accent, or a scale (heat, cool, sunset).",
+   "tags": [],
+   "kind": "block",
+   "source": "examples/blocks/series-area.json",
+   "default_size": "medium",
+   "requirements": {
+    "binaries": [],
+    "env": [],
+    "hosts": []
+   },
+   "demo": {
+    "status": "ok",
+    "summary": "CPU 38%",
+    "root": {
+     "type": "series",
+     "label": "CPU",
+     "unit": "%",
+     "y_max": 100,
+     "style": "area",
+     "color": "sunset",
+     "series": [
+      {
+       "name": "cpu",
+       "points": [
+        [
+         1793160000000,
+         40
+        ],
+        [
+         1793160060000,
+         48.4
+        ],
+        [
+         1793160120000,
+         55.3
+        ],
+        [
+         1793160180000,
+         59.6
+        ],
+        [
+         1793160240000,
+         61
+        ],
+        [
+         1793160300000,
+         60
+        ],
+        [
+         1793160360000,
+         57.7
+        ],
+        [
+         1793160420000,
+         55.6
+        ],
+        [
+         1793160480000,
+         54.7
+        ],
+        [
+         1793160540000,
+         55.3
+        ],
+        [
+         1793160600000,
+         57.1
+        ],
+        [
+         1793160660000,
+         59.2
+        ],
+        [
+         1793160720000,
+         60
+        ],
+        [
+         1793160780000,
+         58.5
+        ],
+        [
+         1793160840000,
+         54.2
+        ],
+        [
+         1793160900000,
+         47.3
+        ],
+        [
+         1793160960000,
+         38.8
+        ],
+        [
+         1793161020000,
+         30.4
+        ],
+        [
+         1793161080000,
+         23.5
+        ],
+        [
+         1793161140000,
+         19.3
+        ],
+        [
+         1793161200000,
+         18.1
+        ],
+        [
+         1793161260000,
+         19.3
+        ],
+        [
+         1793161320000,
+         21.7
+        ],
+        [
+         1793161380000,
+         24.2
+        ],
+        [
+         1793161440000,
+         25.4
+        ],
+        [
+         1793161500000,
+         25.1
+        ],
+        [
+         1793161560000,
+         23.5
+        ],
+        [
+         1793161620000,
+         21.7
+        ],
+        [
+         1793161680000,
+         21
+        ],
+        [
+         1793161740000,
+         22.6
+        ],
+        [
+         1793161800000,
+         27
+        ],
+        [
+         1793161860000,
+         33.9
+        ],
+        [
+         1793161920000,
+         42.4
+        ],
+        [
+         1793161980000,
+         50.8
+        ],
+        [
+         1793162040000,
+         57.6
+        ],
+        [
+         1793162100000,
+         61.7
+        ],
+        [
+         1793162160000,
+         62.8
+        ],
+        [
+         1793162220000,
+         61.4
+        ],
+        [
+         1793162280000,
+         58.7
+        ],
+        [
+         1793162340000,
+         56
+        ],
+        [
+         1793162400000,
+         54.4
+        ],
+        [
+         1793162460000,
+         54.5
+        ],
+        [
+         1793162520000,
+         55.8
+        ],
+        [
+         1793162580000,
+         57.3
+        ],
+        [
+         1793162640000,
+         57.9
+        ],
+        [
+         1793162700000,
+         56.2
+        ],
+        [
+         1793162760000,
+         51.8
+        ],
+        [
+         1793162820000,
+         44.8
+        ],
+        [
+         1793162880000,
+         36.5
+        ],
+        [
+         1793162940000,
+         28.1
+        ],
+        [
+         1793163000000,
+         21.4
+        ],
+        [
+         1793163060000,
+         17.4
+        ],
+        [
+         1793163120000,
+         16.4
+        ],
+        [
+         1793163180000,
+         18
+        ],
+        [
+         1793163240000,
+         20.9
+        ],
+        [
+         1793163300000,
+         23.9
+        ],
+        [
+         1793163360000,
+         25.8
+        ],
+        [
+         1793163420000,
+         26.1
+        ],
+        [
+         1793163480000,
+         25
+        ],
+        [
+         1793163540000,
+         23.7
+        ]
+       ]
+      }
+     ]
+    }
+   },
+   "group": "primitives"
+  },
+  {
+   "id": "series-bars",
+   "name": "Series: bars",
+   "version": "",
+   "description": "One column per sample, with `style: bars`. With the heat scale each bar is colored by its value, green to red. `format: count` writes big numbers short (12.3k).",
+   "tags": [],
+   "kind": "block",
+   "source": "examples/blocks/series-bars.json",
+   "default_size": "medium",
+   "requirements": {
+    "binaries": [],
+    "env": [],
+    "hosts": []
+   },
+   "demo": {
+    "status": "ok",
+    "summary": "1.4k requests a minute",
+    "root": {
+     "type": "series",
+     "label": "Requests a minute",
+     "format": "count",
+     "style": "bars",
+     "color": "heat",
+     "series": [
+      {
+       "name": "requests",
+       "points": [
+        [
+         1793160000000,
+         900
+        ],
+        [
+         1793160060000,
+         1221.9
+        ],
+        [
+         1793160120000,
+         1280.4
+        ],
+        [
+         1793160180000,
+         1185.2
+        ],
+        [
+         1793160240000,
+         1245.9
+        ],
+        [
+         1793160300000,
+         1508.1
+        ],
+        [
+         1793160360000,
+         1678.2
+        ],
+        [
+         1793160420000,
+         1547.8
+        ],
+        [
+         1793160480000,
+         1296.6
+        ],
+        [
+         1793160540000,
+         1229.7
+        ],
+        [
+         1793160600000,
+         1334.7
+        ],
+        [
+         1793160660000,
+         1306.6
+        ],
+        [
+         1793160720000,
+         1004.1
+        ],
+        [
+         1793160780000,
+         797.7
+        ],
+        [
+         1793160840000,
+         1001.6
+        ],
+        [
+         1793160900000,
+         1351.9
+        ],
+        [
+         1793160960000,
+         1521.3
+        ],
+        [
+         1793161020000,
+         1417.4
+        ],
+        [
+         1793161080000,
+         1308.9
+        ],
+        [
+         1793161140000,
+         1424.1
+        ],
+        [
+         1793161200000,
+         1612.6
+        ],
+        [
+         1793161260000,
+         1564.3
+        ],
+        [
+         1793161320000,
+         1265.7
+        ],
+        [
+         1793161380000,
+         1025.2
+        ],
+        [
+         1793161440000,
+         1029.1
+        ],
+        [
+         1793161500000,
+         1079
+        ],
+        [
+         1793161560000,
+         1152.8
+        ],
+        [
+         1793161620000,
+         1077.1
+        ],
+        [
+         1793161680000,
+         1120.8
+        ],
+        [
+         1793161740000,
+         1394
+        ],
+        [
+         1793161800000,
+         1636.3
+        ],
+        [
+         1793161860000,
+         1589.4
+        ],
+        [
+         1793161920000,
+         1369.7
+        ],
+        [
+         1793161980000,
+         1294.6
+        ],
+        [
+         1793162040000,
+         1418
+        ],
+        [
+         1793162100000,
+         1454.6
+        ]
+       ]
+      }
+     ]
+    }
+   },
+   "group": "primitives"
+  },
+  {
+   "id": "series-line",
+   "name": "Series: line",
+   "version": "",
+   "description": "Values over time as lines. Points are `[unix milliseconds, value]`. Several series get the theme's series colors in order, or a `tone` each. Set `id` and the dashboard keeps the history, so a module can send one new point per update.",
+   "tags": [],
+   "kind": "block",
+   "source": "examples/blocks/series-line.json",
+   "default_size": "medium",
+   "requirements": {
+    "binaries": [],
+    "env": [],
+    "hosts": []
+   },
+   "demo": {
+    "status": "ok",
+    "summary": "p50 42 ms · p99 118 ms",
+    "root": {
+     "type": "series",
+     "label": "Latency",
+     "unit": " ms",
+     "series": [
+      {
+       "name": "p99",
+       "points": [
+        [
+         1793160000000,
+         110
+        ],
+        [
+         1793160060000,
+         119.3
+        ],
+        [
+         1793160120000,
+         126.9
+        ],
+        [
+         1793160180000,
+         131.6
+        ],
+        [
+         1793160240000,
+         133.1
+        ],
+        [
+         1793160300000,
+         131.9
+        ],
+        [
+         1793160360000,
+         129
+        ],
+        [
+         1793160420000,
+         125.8
+        ],
+        [
+         1793160480000,
+         123.5
+        ],
+        [
+         1793160540000,
+         122.4
+        ],
+        [
+         1793160600000,
+         122.3
+        ],
+        [
+         1793160660000,
+         122.3
+        ],
+        [
+         1793160720000,
+         121.3
+        ],
+        [
+         1793160780000,
+         118.2
+        ],
+        [
+         1793160840000,
+         112.6
+        ],
+        [
+         1793160900000,
+         105
+        ],
+        [
+         1793160960000,
+         96.5
+        ],
+        [
+         1793161020000,
+         88.7
+        ],
+        [
+         1793161080000,
+         83.2
+        ],
+        [
+         1793161140000,
+         81.2
+        ],
+        [
+         1793161200000,
+         82.8
+        ],
+        [
+         1793161260000,
+         87.4
+        ],
+        [
+         1793161320000,
+         93.7
+        ],
+        [
+         1793161380000,
+         100.1
+        ],
+        [
+         1793161440000,
+         105.5
+        ],
+        [
+         1793161500000,
+         109
+        ],
+        [
+         1793161560000,
+         110.9
+        ],
+        [
+         1793161620000,
+         111.9
+        ],
+        [
+         1793161680000,
+         113.2
+        ],
+        [
+         1793161740000,
+         115.7
+        ],
+        [
+         1793161800000,
+         119.8
+        ],
+        [
+         1793161860000,
+         125.4
+        ],
+        [
+         1793161920000,
+         131.2
+        ],
+        [
+         1793161980000,
+         135.9
+        ],
+        [
+         1793162040000,
+         138.1
+        ],
+        [
+         1793162100000,
+         136.8
+        ],
+        [
+         1793162160000,
+         131.9
+        ],
+        [
+         1793162220000,
+         124.3
+        ],
+        [
+         1793162280000,
+         115.5
+        ],
+        [
+         1793162340000,
+         107.1
+        ]
+       ],
+       "tone": "series-2"
+      },
+      {
+       "name": "p50",
+       "points": [
+        [
+         1793160000000,
+         42
+        ],
+        [
+         1793160060000,
+         45
+        ],
+        [
+         1793160120000,
+         47.5
+        ],
+        [
+         1793160180000,
+         48.9
+        ],
+        [
+         1793160240000,
+         49.2
+        ],
+        [
+         1793160300000,
+         48.4
+        ],
+        [
+         1793160360000,
+         46.8
+        ],
+        [
+         1793160420000,
+         45
+        ],
+        [
+         1793160480000,
+         43.2
+        ],
+        [
+         1793160540000,
+         41.7
+        ],
+        [
+         1793160600000,
+         40.7
+        ],
+        [
+         1793160660000,
+         40
+        ],
+        [
+         1793160720000,
+         39.4
+        ],
+        [
+         1793160780000,
+         38.7
+        ],
+        [
+         1793160840000,
+         38
+        ],
+        [
+         1793160900000,
+         37.2
+        ],
+        [
+         1793160960000,
+         36.6
+        ],
+        [
+         1793161020000,
+         36.6
+        ],
+        [
+         1793161080000,
+         37.4
+        ],
+        [
+         1793161140000,
+         39.1
+        ],
+        [
+         1793161200000,
+         41.6
+        ],
+        [
+         1793161260000,
+         44.4
+        ],
+        [
+         1793161320000,
+         47.1
+        ],
+        [
+         1793161380000,
+         49.1
+        ],
+        [
+         1793161440000,
+         50
+        ],
+        [
+         1793161500000,
+         49.6
+        ],
+        [
+         1793161560000,
+         48
+        ],
+        [
+         1793161620000,
+         45.6
+        ],
+        [
+         1793161680000,
+         42.9
+        ],
+        [
+         1793161740000,
+         40.5
+        ],
+        [
+         1793161800000,
+         38.6
+        ],
+        [
+         1793161860000,
+         37.6
+        ],
+        [
+         1793161920000,
+         37.3
+        ],
+        [
+         1793161980000,
+         37.4
+        ],
+        [
+         1793162040000,
+         37.8
+        ],
+        [
+         1793162100000,
+         38.2
+        ],
+        [
+         1793162160000,
+         38.6
+        ],
+        [
+         1793162220000,
+         38.9
+        ],
+        [
+         1793162280000,
+         39.5
+        ],
+        [
+         1793162340000,
+         40.5
+        ]
+       ],
+       "tone": "series-1"
+      }
+     ]
+    }
+   },
+   "group": "primitives"
+  },
+  {
+   "id": "series-mirrored",
+   "name": "Series: mirrored",
+   "version": "",
+   "description": "Two series on one axis, the first above it and the second below, with `mirrored: true`. Made for pairs like download and upload. `format: bytes` writes values as KiB, MiB and GiB, and `unit` is added after.",
+   "tags": [],
+   "kind": "block",
+   "source": "examples/blocks/series-mirrored.json",
+   "default_size": "medium",
+   "requirements": {
+    "binaries": [],
+    "env": [],
+    "hosts": []
+   },
+   "demo": {
+    "status": "ok",
+    "summary": "down 3.1 MiB/s · up 420 KiB/s",
+    "root": {
+     "type": "series",
+     "label": "Network",
+     "format": "bytes",
+     "unit": "/s",
+     "style": "area",
+     "mirrored": true,
+     "series": [
+      {
+       "name": "down",
+       "points": [
+        [
+         1793160000000,
+         2600000
+        ],
+        [
+         1793160060000,
+         3080654.8
+        ],
+        [
+         1793160120000,
+         3082559.9
+        ],
+        [
+         1793160180000,
+         2908992.7
+        ],
+        [
+         1793160240000,
+         3192276.2
+        ],
+        [
+         1793160300000,
+         3878339.5
+        ],
+        [
+         1793160360000,
+         4210659.1
+        ],
+        [
+         1793160420000,
+         3773430.7
+        ],
+        [
+         1793160480000,
+         3045950.5
+        ],
+        [
+         1793160540000,
+         2659832.9
+        ],
+        [
+         1793160600000,
+         2690685.3
+        ],
+        [
+         1793160660000,
+         3142976.5
+        ],
+        [
+         1793160720000,
+         3877160.9
+        ],
+        [
+         1793160780000,
+         4210318.1
+        ],
+        [
+         1793160840000,
+         3777219.2
+        ],
+        [
+         1793160900000,
+         3111130.3
+        ],
+        [
+         1793160960000,
+         2917593.1
+        ],
+        [
+         1793161020000,
+         3109902.9
+        ],
+        [
+         1793161080000,
+         3034610.7
+        ],
+        [
+         1793161140000,
+         2689821
+        ],
+        [
+         1793161200000,
+         3114016.1
+        ],
+        [
+         1793161260000,
+         3050453
+        ],
+        [
+         1793161320000,
+         2912323.3
+        ],
+        [
+         1793161380000,
+         3284179.3
+        ],
+        [
+         1793161440000,
+         3970665.7
+        ],
+        [
+         1793161500000,
+         4191509.3
+        ],
+        [
+         1793161560000,
+         3662804.2
+        ],
+        [
+         1793161620000,
+         2958403
+        ],
+        [
+         1793161680000,
+         2635332.8
+        ],
+        [
+         1793161740000,
+         2729684.9
+        ],
+        [
+         1793161800000,
+         3247962.4
+        ],
+        [
+         1793161860000,
+         3971099.7
+        ],
+        [
+         1793161920000,
+         4190551.3
+        ],
+        [
+         1793161980000,
+         3670430.3
+        ],
+        [
+         1793162040000,
+         3042529.1
+        ],
+        [
+         1793162100000,
+         2936235.8
+        ],
+        [
+         1793162160000,
+         3130062.2
+        ],
+        [
+         1793162220000,
+         2976675.6
+        ],
+        [
+         1793162280000,
+         2776991.5
+        ],
+        [
+         1793162340000,
+         3134445.3
+        ],
+        [
+         1793162400000,
+         3016235.3
+        ],
+        [
+         1793162460000,
+         2929008.2
+        ],
+        [
+         1793162520000,
+         3384571.5
+        ],
+        [
+         1793162580000,
+         4051302.8
+        ],
+        [
+         1793162640000,
+         4153410.4
+        ],
+        [
+         1793162700000,
+         3548270.4
+        ],
+        [
+         1793162760000,
+         2881337.2
+        ],
+        [
+         1793162820000,
+         2615090.4
+        ]
+       ]
+      },
+      {
+       "name": "up",
+       "points": [
+        [
+         1793160000000,
+         560000
+        ],
+        [
+         1793160060000,
+         542466.3
+        ],
+        [
+         1793160120000,
+         492427
+        ],
+        [
+         1793160180000,
+         417193.7
+        ],
+        [
+         1793160240000,
+         327759
+        ],
+        [
+         1793160300000,
+         402809.4
+        ],
+        [
+         1793160360000,
+         481278.2
+        ],
+        [
+         1793160420000,
+         536181.9
+        ],
+        [
+         1793160480000,
+         559498.3
+        ],
+        [
+         1793160540000,
+         547820.6
+        ],
+        [
+         1793160600000,
+         502855
+        ],
+        [
+         1793160660000,
+         431171.7
+        ],
+        [
+         1793160720000,
+         343244.6
+        ],
+        [
+         1793160780000,
+         388078.9
+        ],
+        [
+         1793160840000,
+         469455.1
+        ],
+        [
+         1793160900000,
+         528993.7
+        ],
+        [
+         1793160960000,
+         557995.4
+        ],
+        [
+         1793161020000,
+         552222.5
+        ],
+        [
+         1793161080000,
+         512518.5
+        ],
+        [
+         1793161140000,
+         444684.8
+        ],
+        [
+         1793161200000,
+         358632.9
+        ],
+        [
+         1793161260000,
+         373063.8
+        ],
+        [
+         1793161320000,
+         457007.2
+        ],
+        [
+         1793161380000,
+         520931.8
+        ],
+        [
+         1793161440000,
+         555497.4
+        ],
+        [
+         1793161500000,
+         555653.5
+        ],
+        [
+         1793161560000,
+         521377.2
+        ],
+        [
+         1793161620000,
+         457676.8
+        ],
+        [
+         1793161680000,
+         373859.8
+        ],
+        [
+         1793161740000,
+         357826.9
+        ],
+        [
+         1793161800000,
+         443986.5
+        ],
+        [
+         1793161860000,
+         512029.9
+        ],
+        [
+         1793161920000,
+         552014.9
+        ],
+        [
+         1793161980000,
+         558099.3
+        ],
+        [
+         1793162040000,
+         529393.9
+        ],
+        [
+         1793162100000,
+         470093.1
+        ],
+        [
+         1793162160000,
+         388861.5
+        ],
+        [
+         1793162220000,
+         342431.8
+        ],
+        [
+         1793162280000,
+         430447.4
+        ],
+        [
+         1793162340000,
+         502325.1
+        ],
+        [
+         1793162400000,
+         547562.5
+        ],
+        [
+         1793162460000,
+         559549.7
+        ],
+        [
+         1793162520000,
+         536535.3
+        ],
+        [
+         1793162580000,
+         481881.9
+        ],
+        [
+         1793162640000,
+         403575.3
+        ],
+        [
+         1793162700000,
+         326942.9
+        ],
+        [
+         1793162760000,
+         416446.6
+        ],
+        [
+         1793162820000,
+         491858.1
+        ]
+       ]
+      }
+     ]
+    }
+   },
+   "group": "primitives"
+  },
+  {
+   "id": "stat",
+   "name": "Stat",
+   "version": "",
+   "description": "One number with a label. The value is a string, already formatted, so the module decides how it reads (\"3451\", \"1.2k\", \"4:12\"). A unit, a change since last time (delta) and a status (ok, warn, error) are optional; the status colors the value.",
+   "tags": [],
+   "kind": "block",
+   "source": "examples/blocks/stat.json",
+   "default_size": "small",
+   "requirements": {
+    "binaries": [],
+    "env": [],
+    "hosts": []
+   },
+   "demo": {
+    "status": "warn",
+    "summary": "p99 184 ms",
+    "root": {
+     "type": "stat",
+     "label": "p99 latency",
+     "value": "184",
+     "unit": "ms",
+     "delta": "+41 ms",
+     "status": "warn"
+    }
+   },
+   "group": "primitives"
+  },
+  {
+   "id": "table-widgets",
+   "name": "Table with widgets in cells",
+   "version": "",
+   "description": "A table whose cells hold widgets: a gauge per limit, a pie of what the usage went to and a stat with its status. Stat, gauge and pie draw inline in a cell; other widgets fall back to text. In the terminal a pie cell shows its largest slice.",
+   "tags": [],
+   "kind": "block",
+   "source": "examples/blocks/table-widgets.json",
+   "default_size": "wide",
+   "requirements": {
+    "binaries": [],
+    "env": [],
+    "hosts": []
+   },
+   "demo": {
+    "status": "warn",
+    "summary": "2 accounts, 1 near its limit",
+    "root": {
+     "type": "table",
+     "columns": [
+      {
+       "key": "account",
+       "label": "Account"
+      },
+      {
+       "key": "five",
+       "label": "5 hours"
+      },
+      {
+       "key": "week",
+       "label": "Week"
+      },
+      {
+       "key": "mix",
+       "label": "Models"
+      },
+      {
+       "key": "cost",
+       "label": "Cost"
+      }
+     ],
+     "rows": [
+      {
+       "status": "warn",
+       "cells": {
+        "account": "work@example.com",
+        "five": {
+         "type": "gauge",
+         "label": "5h",
+         "percent": 81,
+         "thresholds": {
+          "warn": 75,
+          "error": 90
+         }
+        },
+        "week": {
+         "type": "gauge",
+         "label": "week",
+         "percent": 40,
+         "marker": 52
+        },
+        "mix": {
+         "type": "pie",
+         "slices": [
+          {
+           "label": "large",
+           "value": 70
+          },
+          {
+           "label": "small",
+           "value": 30
+          }
+         ]
+        },
+        "cost": {
+         "type": "stat",
+         "label": "today",
+         "value": "$41",
+         "status": "warn"
+        }
+       }
+      },
+      {
+       "status": "ok",
+       "cells": {
+        "account": "personal@example.com",
+        "five": {
+         "type": "gauge",
+         "label": "5h",
+         "percent": 12,
+         "thresholds": {
+          "warn": 75,
+          "error": 90
+         }
+        },
+        "week": {
+         "type": "gauge",
+         "label": "week",
+         "percent": 23,
+         "marker": 52
+        },
+        "mix": {
+         "type": "pie",
+         "slices": [
+          {
+           "label": "large",
+           "value": 25
+          },
+          {
+           "label": "small",
+           "value": 75
+          }
+         ]
+        },
+        "cost": {
+         "type": "stat",
+         "label": "today",
+         "value": "$3",
+         "status": "ok"
+        }
+       }
+      },
+      {
+       "cells": {
+        "account": "team@example.com",
+        "five": 0,
+        "week": {
+         "type": "gauge",
+         "label": "week",
+         "percent": 5
+        },
+        "mix": "none yet",
+        "cost": {
+         "type": "stat",
+         "label": "today",
+         "value": "$0"
+        }
+       }
+      }
+     ]
+    }
+   },
+   "group": "compositions"
+  },
+  {
+   "id": "table",
+   "name": "Table",
+   "version": "",
+   "description": "Rows and columns. Columns have a key and a heading; each row's `cells` are keyed by column. A cell is text or a number, and a row can have a status and an action. Cells can also hold a stat, a gauge or a pie (see the table with widgets).",
+   "tags": [],
+   "kind": "block",
+   "source": "examples/blocks/table.json",
+   "default_size": "medium",
+   "requirements": {
+    "binaries": [],
+    "env": [],
+    "hosts": []
+   },
+   "demo": {
+    "status": "warn",
+    "summary": "4 services, 1 slow",
+    "root": {
+     "type": "table",
+     "columns": [
+      {
+       "key": "service",
+       "label": "Service"
+      },
+      {
+       "key": "version",
+       "label": "Version"
+      },
+      {
+       "key": "rps",
+       "label": "Req/s"
+      },
+      {
+       "key": "p99",
+       "label": "p99"
+      }
+     ],
+     "rows": [
+      {
+       "cells": {
+        "service": "atlas",
+        "version": "v1.4.0",
+        "rps": 1220,
+        "p99": "96 ms"
+       },
+       "status": "ok",
+       "action": {
+        "type": "open_url",
+        "url": "https://example.com/services/atlas"
+       }
+      },
+      {
+       "cells": {
+        "service": "ember",
+        "version": "v1.5.8",
+        "rps": 845,
+        "p99": "412 ms"
+       },
+       "status": "warn"
+      },
+      {
+       "cells": {
+        "service": "fjord",
+        "version": "v1.6.5",
+        "rps": 310,
+        "p99": "71 ms"
+       },
+       "status": "ok"
+      },
+      {
+       "cells": {
+        "service": "iris",
+        "version": "v0.9.2",
+        "rps": 57,
+        "p99": "120 ms"
+       },
+       "status": "ok"
+      }
+     ]
+    }
+   },
+   "group": "primitives"
+  },
+  {
+   "id": "text",
+   "name": "Text",
+   "version": "",
+   "description": "A paragraph of text. With `markdown: true`, two stars on each side make bold and backticks make code; nothing else is markup, so text from an API shows as written. Good for a note, a status line, or the one thing a tile has to say.",
+   "tags": [],
+   "kind": "block",
+   "source": "examples/blocks/text.json",
+   "default_size": "small",
+   "requirements": {
+    "binaries": [],
+    "env": [],
+    "hosts": []
+   },
+   "demo": {
+    "status": "ok",
+    "summary": "Release freeze Thursday 18:00",
+    "root": {
+     "type": "text",
+     "markdown": true,
+     "text": "**Release freeze** starts Thursday at 18:00. Ask in `#deploys` before merging, and tag the release with `v2.4.0`."
+    }
+   },
+   "group": "primitives"
+  },
+  {
+   "id": "tones",
+   "name": "Tones",
+   "version": "",
+   "description": "Widgets never carry raw colors. They name a tone, and each renderer looks it up in the color theme in use: accent, the status colors, muted, and six series colors. Here every tone is one bar; switch the color theme to see them change.",
+   "tags": [],
+   "kind": "block",
+   "source": "examples/blocks/tones.json",
+   "default_size": "tall",
+   "requirements": {
+    "binaries": [],
+    "env": [],
+    "hosts": []
+   },
+   "demo": {
+    "status": "ok",
+    "summary": "12 tones",
+    "root": {
+     "type": "bars",
+     "label": "Tones",
+     "max": 100,
+     "bars": [
+      {
+       "label": "accent",
+       "value": 100,
+       "tone": "accent"
+      },
+      {
+       "label": "ok",
+       "value": 94,
+       "tone": "ok"
+      },
+      {
+       "label": "warn",
+       "value": 88,
+       "tone": "warn"
+      },
+      {
+       "label": "error",
+       "value": 82,
+       "tone": "error"
+      },
+      {
+       "label": "info",
+       "value": 76,
+       "tone": "info"
+      },
+      {
+       "label": "muted",
+       "value": 70,
+       "tone": "muted"
+      },
+      {
+       "label": "series-1",
+       "value": 64,
+       "tone": "series-1"
+      },
+      {
+       "label": "series-2",
+       "value": 58,
+       "tone": "series-2"
+      },
+      {
+       "label": "series-3",
+       "value": 52,
+       "tone": "series-3"
+      },
+      {
+       "label": "series-4",
+       "value": 46,
+       "tone": "series-4"
+      },
+      {
+       "label": "series-5",
+       "value": 40,
+       "tone": "series-5"
+      },
+      {
+       "label": "series-6",
+       "value": 34,
+       "tone": "series-6"
+      }
+     ]
+    }
+   },
+   "group": "primitives"
+  },
+  {
+   "id": "uptime",
+   "name": "Uptime",
+   "version": "",
+   "description": "Availability checks, one row each: the latest result, the share of recent checks that passed, the response time, a detail such as \"HTTP 200\", and a strip of recent results. A `url` makes the row a link.",
+   "tags": [],
+   "kind": "block",
+   "source": "examples/blocks/uptime.json",
+   "default_size": "medium",
+   "requirements": {
+    "binaries": [],
+    "env": [],
+    "hosts": []
+   },
+   "demo": {
+    "status": "error",
+    "summary": "1 of 4 down",
+    "root": {
+     "type": "uptime",
+     "checks": [
+      {
+       "name": "github.com",
+       "status": "ok",
+       "uptime": 100,
+       "latency_ms": 624,
+       "detail": "HTTP 200",
+       "history": [
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok"
+       ],
+       "url": "https://github.com"
+      },
+      {
+       "name": "codeberg.org",
+       "status": "ok",
+       "uptime": 97,
+       "latency_ms": 1210,
+       "detail": "HTTP 200",
+       "history": [
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "warn",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok"
+       ]
+      },
+      {
+       "name": "status page",
+       "status": "warn",
+       "uptime": 93,
+       "latency_ms": 2890,
+       "detail": "slow: 2.9 s",
+       "history": [
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "warn",
+        "warn",
+        "ok",
+        "warn",
+        "warn"
+       ]
+      },
+      {
+       "name": "local dev",
+       "status": "error",
+       "uptime": 80,
+       "detail": "connection refused",
+       "history": [
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "error",
+        "error",
+        "error",
+        "error",
+        "error"
+       ]
+      }
+     ]
+    }
+   },
+   "group": "primitives"
+  }
+ ]
+}

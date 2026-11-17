@@ -1,0 +1,34 @@
+ 1 showcase │ 2 charts │ 3 meters │ 4 lists │ 5 logs                                                                    
+┌ app-log ─────────────────────────────────────────────────────────────────────┐┌ kpis ────────────────────────────────┐
+│api server                                                                    ││Requests 3943 /s +0.0%                │
+│05:55:41 GET /api/builds 200 in 528ms                                         ││Errors 0.67 % last 1m                 │
+│05:55:41 POST /api/runs 201 in 679ms                                          ││p99 121 ms target 150                 │
+│05:55:41 GET /api/builds 200 in 62ms                                          ││                                      │
+│05:55:41 connection reset by peer after 371 bytes                             ││                                      │
+│05:55:41 deployed revision r630 to staging                                    ││                                      │
+│05:55:41 retrying upload (attempt 866)                                        ││                                      │
+│05:55:41 gc pause 130ms                                                       ││                                      │
+│05:55:41 gc pause 683ms                                                       ││                                      │
+│05:55:41 POST /api/runs 201 in 144ms                                          ││                                      │
+└──────────────────────────────────────────────────────────────────────────────┘└──────────────────────────────────────┘
+┌ worker-log ──────────────────────────────────────────────┐┌ budgets ─────────────────────────────────────────────────┐
+│build worker                                              ││Build cache ┃███████████████████████████████████·····  88%│
+│05:55:41 retrying upload (attempt 673)                    ││                                                          │
+│05:55:41 slow query took 702ms                            ││Token budget ███████┃█████████████▊··················  54%│
+│05:55:41 deployed revision r701 to staging                ││                                                          │
+│05:55:41 deployed revision r440 to staging                ││Disk quota ███████████▏··┃···························  27%│
+│05:55:41 connection reset by peer after 525 bytes         ││                                                          │
+│05:55:41 cache hit for key build:526                      ││Error budget ████████████████····┃···················  40%│
+│05:55:41 POST /api/runs 201 in 612ms                      ││                                                          │
+│05:55:41 deployed revision r384 to staging                ││                                                          │
+│05:55:41 slow query took 764ms                            ││                                                          │
+│05:55:41 POST /api/runs 201 in 532ms                      ││                                                          │
+│05:55:41 gc pause 827ms                                   ││                                                          │
+│05:55:41 connection reset by peer after 594 bytes         ││                                                          │
+│05:55:41 connection reset by peer after 886 bytes         ││                                                          │
+│05:55:41 POST /api/runs 201 in 414ms                      ││                                                          │
+│05:55:41 deployed revision r450 to staging                ││                                                          │
+│05:55:41 retrying upload (attempt 321)                    ││                                                          │
+│05:55:41 retrying upload (attempt 491)                    ││                                                          │
+└──────────────────────────────────────────────────────────┘└──────────────────────────────────────────────────────────┘
+ ? help  s settings  Tab screens  arrows move  Enter open  q quit                                                       

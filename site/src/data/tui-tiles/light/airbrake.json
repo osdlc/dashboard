@@ -1,0 +1,73 @@
+{"width": 120, "styles": [["#c7363b","",""],["#976800","",""],["","",""],["#6b7280","",""]],
+"sizes": {
+"small": {"cols": 30, "rows": 5, "lines": [
+[[0,"┌ airbrake ──────────────────┐"]],
+[[0,"│"],[1,"● "],[2,"ActiveRecord::RecordNotFo…"],[0,"│"]],
+[[0,"│  "],[3,"1.2k notices · production…"],[0,"│"]],
+[[0,"│  "],[3,"+2 more                   "],[0,"│"]],
+[[0,"└────────────────────────────┘"]]
+]},
+"medium": {"cols": 40, "rows": 10, "lines": [
+[[0,"┌ airbrake ────────────────────────────┐"]],
+[[0,"│"],[1,"● "],[2,"ActiveRecord::RecordNotFound: Could…"],[0,"│"]],
+[[0,"│  "],[3,"1.2k notices · production · users#s…"],[0,"│"]],
+[[0,"│● "],[2,"Net::ReadTimeout: Net::ReadTimeout …"],[0,"│"]],
+[[0,"│  "],[3,"87 notices · production · PaymentsJ…"],[0,"│"]],
+[[0,"│"],[2,"● I18n::MissingTranslationData: trans…"],[0,"│"]],
+[[0,"│  "],[3,"5 notices · staging · checkout#inde…"],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"└──────────────────────────────────────┘"]]
+]},
+"large": {"cols": 60, "rows": 15, "lines": [
+[[0,"┌ airbrake ────────────────────────────────────────────────┐"]],
+[[0,"│"],[1,"● "],[2,"ActiveRecord::RecordNotFound: Couldn't find User with '…"],[0,"│"]],
+[[0,"│  "],[3,"1.2k notices · production · users#show · 7m ago         "],[0,"│"]],
+[[0,"│● "],[2,"Net::ReadTimeout: Net::ReadTimeout with #<TCPSocket:(cl…"],[0,"│"]],
+[[0,"│  "],[3,"87 notices · production · PaymentsJob · 30m ago         "],[0,"│"]],
+[[0,"│"],[2,"● I18n::MissingTranslationData: translation missing: de.c…"],[0,"│"]],
+[[0,"│  "],[3,"5 notices · staging · checkout#index · 12h ago          "],[0,"│"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"└──────────────────────────────────────────────────────────┘"]]
+]},
+"wide": {"cols": 80, "rows": 10, "lines": [
+[[0,"┌ airbrake ────────────────────────────────────────────────────────────────────┐"]],
+[[0,"│"],[1,"● "],[2,"ActiveRecord::RecordNotFound: Couldn't find User with 'id'=42               "],[0,"│"]],
+[[0,"│  "],[3,"1.2k notices · production · users#show · 7m ago                             "],[0,"│"]],
+[[0,"│● "],[2,"Net::ReadTimeout: Net::ReadTimeout with #<TCPSocket:(closed)>               "],[0,"│"]],
+[[0,"│  "],[3,"87 notices · production · PaymentsJob · 30m ago                             "],[0,"│"]],
+[[0,"│"],[2,"● I18n::MissingTranslationData: translation missing: de.checkout.title "],[3,"[muted]"],[0,"│"]],
+[[0,"│  "],[3,"5 notices · staging · checkout#index · 12h ago                              "],[0,"│"]],
+[[0,"│                                                                              │"]],
+[[0,"│                                                                              │"]],
+[[0,"└──────────────────────────────────────────────────────────────────────────────┘"]]
+]},
+"tall": {"cols": 40, "rows": 20, "lines": [
+[[0,"┌ airbrake ────────────────────────────┐"]],
+[[0,"│"],[1,"● "],[2,"ActiveRecord::RecordNotFound: Could…"],[0,"│"]],
+[[0,"│  "],[3,"1.2k notices · production · users#s…"],[0,"│"]],
+[[0,"│● "],[2,"Net::ReadTimeout: Net::ReadTimeout …"],[0,"│"]],
+[[0,"│  "],[3,"87 notices · production · PaymentsJ…"],[0,"│"]],
+[[0,"│"],[2,"● I18n::MissingTranslationData: trans…"],[0,"│"]],
+[[0,"│  "],[3,"5 notices · staging · checkout#inde…"],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"└──────────────────────────────────────┘"]]
+]}
+}}

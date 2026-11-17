@@ -1,0 +1,24 @@
+{
+  "name": "dashboard-site",
+  "private": true,
+  "description": "The dashboard marketing site, published to GitHub Pages.",
+  "type": "module",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "tui": "sh scripts/tui-snapshots.sh",
+    "registry": "node scripts/registry.mjs",
+    "test": "node --test test/*.test.ts"
+  },
+  "dependencies": {
+    "@fontsource-variable/jetbrains-mono": "5.3.0",
+    "@fontsource-variable/martian-mono": "5.3.0",
+    "@fontsource/ibm-plex-sans": "5.3.0",
+    "astro": "7.3.5"
+  }
+}

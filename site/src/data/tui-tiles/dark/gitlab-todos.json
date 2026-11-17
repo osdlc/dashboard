@@ -1,0 +1,73 @@
+{"width": 120, "styles": [["#3fbf74","",""],["#e0a826","",""],["","",""],["#9097a1","",""],["#ef5b5f","",""]],
+"sizes": {
+"small": {"cols": 30, "rows": 5, "lines": [
+[[0,"┌ gitlab-todos ──────────────┐"]],
+[[0,"│"],[1,"● "],[2,"Add retry to the upload c…"],[0,"│"]],
+[[0,"│  "],[3,"acme/web!47 · @sam asked …"],[0,"│"]],
+[[0,"│  "],[3,"+3 more                   "],[0,"│"]],
+[[0,"└────────────────────────────┘"]]
+]},
+"medium": {"cols": 40, "rows": 10, "lines": [
+[[0,"┌ gitlab-todos ────────────────────────┐"]],
+[[0,"│"],[1,"● "],[2,"Add retry to the upload client "],[3,"[MR] "],[0,"│"]],
+[[0,"│  "],[3,"acme/web!47 · @sam asked for your r…"],[0,"│"]],
+[[0,"│"],[4,"● "],[2,"Move the billing worker to the new …"],[0,"│"]],
+[[0,"│  "],[3,"acme/api!118 · pipeline failed · 2h…"],[0,"│"]],
+[[0,"│"],[2,"● Invoices show the wrong currency fo…"],[0,"│"]],
+[[0,"│  "],[3,"acme/api#231 · @kim mentioned you ·…"],[0,"│"]],
+[[0,"│"],[2,"● Rotate the staging certificates "],[3,"[is…"],[0,"│"]],
+[[0,"│  "],[3,"acme/infra#12 · @sam assigned you ·…"],[0,"│"]],
+[[0,"└──────────────────────────────────────┘"]]
+]},
+"large": {"cols": 60, "rows": 15, "lines": [
+[[0,"┌ gitlab-todos ────────────────────────────────────────────┐"]],
+[[0,"│"],[1,"● "],[2,"Add retry to the upload client "],[3,"[MR]                     "],[0,"│"]],
+[[0,"│  "],[3,"acme/web!47 · @sam asked for your review · 25m ago      "],[0,"│"]],
+[[0,"│"],[4,"● "],[2,"Move the billing worker to the new queue "],[3,"[MR]           "],[0,"│"]],
+[[0,"│  "],[3,"acme/api!118 · pipeline failed · 2h ago                 "],[0,"│"]],
+[[0,"│"],[2,"● Invoices show the wrong currency for CHF accounts "],[3,"[issu…"],[0,"│"]],
+[[0,"│  "],[3,"acme/api#231 · @kim mentioned you · 19h ago             "],[0,"│"]],
+[[0,"│"],[2,"● Rotate the staging certificates "],[3,"[issue]                 "],[0,"│"]],
+[[0,"│  "],[3,"acme/infra#12 · @sam assigned you · 3d ago              "],[0,"│"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"└──────────────────────────────────────────────────────────┘"]]
+]},
+"wide": {"cols": 80, "rows": 10, "lines": [
+[[0,"┌ gitlab-todos ────────────────────────────────────────────────────────────────┐"]],
+[[0,"│"],[1,"● "],[2,"Add retry to the upload client "],[3,"[MR]                                         "],[0,"│"]],
+[[0,"│  "],[3,"acme/web!47 · @sam asked for your review · 25m ago                          "],[0,"│"]],
+[[0,"│"],[4,"● "],[2,"Move the billing worker to the new queue "],[3,"[MR]                               "],[0,"│"]],
+[[0,"│  "],[3,"acme/api!118 · pipeline failed · 2h ago                                     "],[0,"│"]],
+[[0,"│"],[2,"● Invoices show the wrong currency for CHF accounts "],[3,"[issue]                   "],[0,"│"]],
+[[0,"│  "],[3,"acme/api#231 · @kim mentioned you · 19h ago                                 "],[0,"│"]],
+[[0,"│"],[2,"● Rotate the staging certificates "],[3,"[issue]                                     "],[0,"│"]],
+[[0,"│  "],[3,"acme/infra#12 · @sam assigned you · 3d ago                                  "],[0,"│"]],
+[[0,"└──────────────────────────────────────────────────────────────────────────────┘"]]
+]},
+"tall": {"cols": 40, "rows": 20, "lines": [
+[[0,"┌ gitlab-todos ────────────────────────┐"]],
+[[0,"│"],[1,"● "],[2,"Add retry to the upload client "],[3,"[MR] "],[0,"│"]],
+[[0,"│  "],[3,"acme/web!47 · @sam asked for your r…"],[0,"│"]],
+[[0,"│"],[4,"● "],[2,"Move the billing worker to the new …"],[0,"│"]],
+[[0,"│  "],[3,"acme/api!118 · pipeline failed · 2h…"],[0,"│"]],
+[[0,"│"],[2,"● Invoices show the wrong currency fo…"],[0,"│"]],
+[[0,"│  "],[3,"acme/api#231 · @kim mentioned you ·…"],[0,"│"]],
+[[0,"│"],[2,"● Rotate the staging certificates "],[3,"[is…"],[0,"│"]],
+[[0,"│  "],[3,"acme/infra#12 · @sam assigned you ·…"],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"└──────────────────────────────────────┘"]]
+]}
+}}

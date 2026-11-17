@@ -1,0 +1,59 @@
+---
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/')
+const repo = 'https://github.com/osdlc/dashboard'
+const blob = (path: string) => `${repo}/blob/main/${path}`
+---
+
+<footer class="foot">
+  <div class="wrap foot-grid">
+    <div>
+      <a class="brand" href={base}>
+        <span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        dashboard
+      </a>
+      <p>
+        Part of <a href="https://github.com/osdlc">osdlc</a>. MIT or Apache-2.0 license. This site has no analytics and loads
+        nothing from other servers.
+      </p>
+    </div>
+    <div class="foot-links">
+      <a href={repo}>Source on GitHub</a>
+      <a href={`${base}tutorial/`}>Tutorial</a>
+      <a href={`${base}widgets/`}>Widget registry</a>
+      <a href={blob('README.md')}>README</a>
+      <a href={blob('docs/contract.md')}>Plugin contract</a>
+      <a href={`${repo}/issues`}>Issues</a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  /* ---- footer ---- */
+
+  .foot {
+    border-top: 1px solid var(--line);
+    padding: 44px 0 56px;
+    background: var(--bg-sunk);
+  }
+
+  .foot-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 28px;
+  }
+
+  .foot p {
+    margin: 12px 0 0;
+    max-width: 46ch;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .foot-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 24px;
+    font-size: 14.5px;
+  }
+</style>

@@ -1,0 +1,73 @@
+{"width": 120, "styles": [["#3fbf74","",""],["","",""],["#9097a1","",""]],
+"sizes": {
+"small": {"cols": 30, "rows": 5, "lines": [
+[[0,"┌ subreddit ─────────────────┐"]],
+[[0,"│"],[1,"● Announcing a faster termi…"],[0,"│"]],
+[[0,"│  "],[2,"1.5k points · 212 comment…"],[0,"│"]],
+[[0,"│  "],[2,"+3 more                   "],[0,"│"]],
+[[0,"└────────────────────────────┘"]]
+]},
+"medium": {"cols": 40, "rows": 10, "lines": [
+[[0,"┌ subreddit ───────────────────────────┐"]],
+[[0,"│"],[1,"● Announcing a faster terminal UI cra…"],[0,"│"]],
+[[0,"│  "],[2,"1.5k points · 212 comments · u/ferr…"],[0,"│"]],
+[[0,"│"],[1,"● How do I share state between async …"],[0,"│"]],
+[[0,"│  "],[2,"87 points · 1 comment · u/new_to_as…"],[0,"│"]],
+[[0,"│"],[1,"● Rust in the kernel: a year later "],[2,"[l…"],[0,"│"]],
+[[0,"│  "],[2,"1 point · 0 comments · u/kernel_wat…"],[0,"│"]],
+[[0,"│"],[1,"● Benchmarks of five allocators on a …"],[0,"│"]],
+[[0,"│  "],[2,"402 points · 96 comments · 2d ago   "],[0,"│"]],
+[[0,"└──────────────────────────────────────┘"]]
+]},
+"large": {"cols": 60, "rows": 15, "lines": [
+[[0,"┌ subreddit ───────────────────────────────────────────────┐"]],
+[[0,"│"],[1,"● Announcing a faster terminal UI crate "],[2,"[🛠️ project] [git…"],[0,"│"]],
+[[0,"│  "],[2,"1.5k points · 212 comments · u/ferris_dev · 2h ago      "],[0,"│"]],
+[[0,"│"],[1,"● How do I share state between async tasks without a Mute…"],[0,"│"]],
+[[0,"│  "],[2,"87 points · 1 comment · u/new_to_async · 30m ago        "],[0,"│"]],
+[[0,"│"],[1,"● Rust in the kernel: a year later "],[2,"[lwn.net]              "],[0,"│"]],
+[[0,"│  "],[2,"1 point · 0 comments · u/kernel_watcher · just now      "],[0,"│"]],
+[[0,"│"],[1,"● Benchmarks of five allocators on a busy web server "],[2,"[📡 …"],[0,"│"]],
+[[0,"│  "],[2,"402 points · 96 comments · 2d ago                       "],[0,"│"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"└──────────────────────────────────────────────────────────┘"]]
+]},
+"wide": {"cols": 80, "rows": 10, "lines": [
+[[0,"┌ subreddit ───────────────────────────────────────────────────────────────────┐"]],
+[[0,"│"],[1,"● Announcing a faster terminal UI crate "],[2,"[🛠️ project] [github.com]             "],[0,"│"]],
+[[0,"│  "],[2,"1.5k points · 212 comments · u/ferris_dev · 2h ago                          "],[0,"│"]],
+[[0,"│"],[1,"● How do I share state between async tasks without a Mutex? "],[2,"[🙋 seeking help …"],[0,"│"]],
+[[0,"│  "],[2,"87 points · 1 comment · u/new_to_async · 30m ago                            "],[0,"│"]],
+[[0,"│"],[1,"● Rust in the kernel: a year later "],[2,"[lwn.net]                                  "],[0,"│"]],
+[[0,"│  "],[2,"1 point · 0 comments · u/kernel_watcher · just now                          "],[0,"│"]],
+[[0,"│"],[1,"● Benchmarks of five allocators on a busy web server "],[2,"[📡 official blog] [blog…"],[0,"│"]],
+[[0,"│  "],[2,"402 points · 96 comments · 2d ago                                           "],[0,"│"]],
+[[0,"└──────────────────────────────────────────────────────────────────────────────┘"]]
+]},
+"tall": {"cols": 40, "rows": 20, "lines": [
+[[0,"┌ subreddit ───────────────────────────┐"]],
+[[0,"│"],[1,"● Announcing a faster terminal UI cra…"],[0,"│"]],
+[[0,"│  "],[2,"1.5k points · 212 comments · u/ferr…"],[0,"│"]],
+[[0,"│"],[1,"● How do I share state between async …"],[0,"│"]],
+[[0,"│  "],[2,"87 points · 1 comment · u/new_to_as…"],[0,"│"]],
+[[0,"│"],[1,"● Rust in the kernel: a year later "],[2,"[l…"],[0,"│"]],
+[[0,"│  "],[2,"1 point · 0 comments · u/kernel_wat…"],[0,"│"]],
+[[0,"│"],[1,"● Benchmarks of five allocators on a …"],[0,"│"]],
+[[0,"│  "],[2,"402 points · 96 comments · 2d ago   "],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"└──────────────────────────────────────┘"]]
+]}
+}}

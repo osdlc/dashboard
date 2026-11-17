@@ -1,0 +1,514 @@
+---
+// Small drawings of each widget type in the view contract. Values are fixed
+// sample numbers, not live data.
+const wave = Array.from({ length: 40 }, (_, i) => 50 + 28 * Math.sin(i / 4.2) + 10 * Math.sin(i / 1.7))
+const path = (vals: number[], w: number, h: number) =>
+  vals.map((v, i) => `${i ? 'L' : 'M'}${((i / (vals.length - 1)) * w).toFixed(1)},${(h - (v / 100) * h).toFixed(1)}`).join(' ')
+const line = path(wave, 200, 56)
+const area = `${line} L200,56 L0,56 Z`
+const down = Array.from({ length: 24 }, (_, i) => 30 + 55 * Math.abs(Math.sin(i / 3)) * (0.6 + 0.4 * Math.cos(i)))
+const up = Array.from({ length: 24 }, (_, i) => 15 + 30 * Math.abs(Math.cos(i / 2.6)))
+const meters = [28, 52, 29, 97, 15, 16, 45, 67, 64, 13, 34, 26, 62, 87, 71, 25, 19, 10, 58, 39, 75, 3, 85, 71]
+const heat = (v: number) => (v >= 80 ? 'hot' : v >= 50 ? 'warm' : 'cool')
+const strip = 'uuuuuuuuuuuuuuuuuuuuuusu uuuuuuuuuuuuuuuuuuuuuuuu uuuuuuuuuuuuuuuuuuduuuuuu'.split(' ')
+---
+
+<div class="specimens">
+  <article>
+    <header><h3>text</h3><span>plain or markdown</span></header>
+    <p class="w-text"><strong>Release freeze</strong> starts Thursday at 18:00. Ask in <em>#deploys</em> before merging.</p>
+  </article>
+
+  <article>
+    <header><h3>stat</h3><span>value, unit, delta</span></header>
+    <div class="w-stat">
+      <div><small>p99</small><b>107<i>ms</i></b><small>target 150</small></div>
+      <div><small>Requests</small><b>3451<i>/s</i></b><small class="up">+2.8%</small></div>
+    </div>
+  </article>
+
+  <article>
+    <header><h3>gauge</h3><span>thresholds, pace marker</span></header>
+    <div class="w-gauges">
+      <div class="g"><span>7 days</span><em style="--p:40%; --m:52%" class="cool"></em><b>40%</b></div>
+      <div class="g"><span>5 hours</span><em style="--p:81%; --m:60%" class="warm"></em><b>81%</b></div>
+      <div class="g"><span>Disk</span><em style="--p:93%" class="hot"></em><b>93%</b></div>
+    </div>
+  </article>
+
+  <article>
+    <header><h3>series</h3><span>line, area or bars</span></header>
+    <div class="w-series">
+      <svg viewBox="0 0 200 56" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="sunset" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ff8a5c" stop-opacity="0.85"></stop>
+            <stop offset="1" stop-color="#8a5cf0" stop-opacity="0.25"></stop>
+          </linearGradient>
+        </defs>
+        <path d={area} fill="url(#sunset)"></path>
+        <path d={line} fill="none" stroke="#ff8a5c" stroke-width="1.4" vector-effect="non-scaling-stroke"></path>
+      </svg>
+      <div class="bars-v" aria-hidden="true">
+        {wave.slice(0, 24).map((v) => <i style={`height:${v}%`} class={heat(v)} />)}
+      </div>
+    </div>
+  </article>
+
+  <article>
+    <header><h3>mirrored</h3><span>e.g. down / up</span></header>
+    <div class="w-mirror" aria-hidden="true">
+      <div class="top">{down.map((v) => <i style={`height:${v}%`} />)}</div>
+      <div class="bot">{up.map((v) => <i style={`height:${v}%`} />)}</div>
+    </div>
+  </article>
+
+  <article>
+    <header><h3>meter grid</h3><span>e.g. per CPU core</span></header>
+    <div class="w-meters" aria-hidden="true">
+      {
+        meters.map((v, i) => (
+          <div>
+            <span>{i + 1}</span>
+            <em style={`--p:${v}%`} class={heat(v)} />
+          </div>
+        ))
+      }
+    </div>
+  </article>
+
+  <article>
+    <header><h3>bars</h3><span>labeled, in order</span></header>
+    <div class="w-bars">
+      {
+        [
+          ['atlas', 1054],
+          ['ember', 999],
+          ['iris', 829],
+          ['harbor', 815],
+          ['fjord', 593],
+        ].map(([n, v]) => (
+          <div>
+            <span>{n}</span>
+            <em style={`--p:${(Number(v) / 1054) * 100}%`} />
+            <b>{v}</b>
+          </div>
+        ))
+      }
+    </div>
+  </article>
+
+  <article>
+    <header><h3>list</h3><span>status, tags, links</span></header>
+    <ul class="w-list">
+      <li class="ok"><span class="t">Deploy finished · atlas</span><span>prod</span><small>ok · 12s ago</small></li>
+      <li class="err"><span class="t">Build failed on main · ember</span><span>main</span><small>ci · 38s ago</small></li>
+      <li class="warn"><span class="t">Rollback started · harbor</span><span>manual</span><small>deploy · 2m ago</small></li>
+    </ul>
+  </article>
+
+  <article>
+    <header><h3>table</h3><span>gauges in cells</span></header>
+    <table class="w-table">
+      <thead><tr><th>Service</th><th>Load</th><th>Ver</th></tr></thead>
+      <tbody>
+        <tr><td>atlas</td><td><em style="--p:12%" class="cool"></em></td><td>v1.4.0</td></tr>
+        <tr class="warn"><td>ember</td><td><em style="--p:87%" class="warm"></em></td><td>v1.5.8</td></tr>
+        <tr><td>fjord</td><td><em style="--p:49%" class="cool"></em></td><td>v1.6.5</td></tr>
+      </tbody>
+    </table>
+  </article>
+
+  <article>
+    <header><h3>log</h3><span>newest lines that fit</span></header>
+    <pre class="w-log"><span class="d">04:16:58</span> <span class="i">INFO </span> worker 409 picked up job
+<span class="d">04:16:59</span> <span class="w">WARN </span> <span class="w">slow query took 540ms</span>
+<span class="d">04:16:59</span> <span class="e">ERROR</span> <span class="e">connection reset by peer</span>
+<span class="d">04:17:00</span> <span class="i">INFO </span> POST /api/runs 201 in 293ms</pre>
+  </article>
+
+  <article>
+    <header><h3>uptime</h3><span>recent results</span></header>
+    <div class="w-uptime">
+      {
+        [
+          ['github', strip[0], '100%', '624ms'],
+          ['codeberg', strip[1], '100%', '1.2s'],
+          ['local dev', strip[2], '96%', '—'],
+        ].map(([n, s, pct, ms]) => (
+          <div>
+            <span>{n}</span>
+            <i aria-hidden="true">
+              {[...s].map((c) => (
+                <b class={c === 'u' ? 'u' : c === 's' ? 's' : 'd'} />
+              ))}
+            </i>
+            <em>{pct}</em>
+            <small>{ms}</small>
+          </div>
+        ))
+      }
+    </div>
+  </article>
+
+  <article>
+    <header><h3>row · column</h3><span>layout in a tile</span></header>
+    <div class="w-layout" aria-hidden="true">
+      <div class="col"><i></i><i></i></div>
+      <div class="col"><i class="tall"></i></div>
+      <div class="col"><i></i><i></i><i></i></div>
+    </div>
+  </article>
+</div>
+
+<style>
+  .specimens {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+  }
+
+  article {
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 16px 16px;
+    min-width: 0;
+  }
+
+  @media (min-width: 900px) {
+    article.wide {
+      grid-column: span 2;
+    }
+  }
+
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  header h3 {
+    font-size: 13.5px;
+    white-space: nowrap;
+  }
+
+  header span {
+    font: 11.5px/1.3 var(--font-code);
+    color: var(--muted);
+    text-align: right;
+  }
+
+  .cool {
+    --c: var(--ok);
+  }
+  .warm {
+    --c: var(--warn);
+  }
+  .hot {
+    --c: var(--err);
+  }
+
+  .w-text {
+    margin: 0;
+    font-size: 15px;
+  }
+
+  .w-stat {
+    display: flex;
+    gap: 28px;
+  }
+  .w-stat div {
+    display: flex;
+    flex-direction: column;
+  }
+  .w-stat small {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .w-stat b {
+    font: 600 26px/1.15 var(--font-body);
+    letter-spacing: -0.02em;
+  }
+  .w-stat i {
+    font-style: normal;
+    font-size: 15px;
+    margin-left: 1px;
+  }
+  .w-stat .up {
+    color: var(--ok);
+  }
+
+  .w-gauges {
+    display: grid;
+    gap: 9px;
+  }
+  .g {
+    display: grid;
+    grid-template-columns: 64px 1fr 38px;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+  }
+  .g b {
+    font: 500 12px var(--font-code);
+    text-align: right;
+  }
+  .g em,
+  .w-meters em,
+  .w-bars em,
+  .w-table em {
+    position: relative;
+    display: block;
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--c, var(--link)) var(--p), var(--bg-sunk) var(--p));
+  }
+  .g em::after {
+    content: '';
+    position: absolute;
+    left: var(--m);
+    top: -3px;
+    bottom: -3px;
+    width: 2px;
+    border-radius: 1px;
+    background: var(--ink);
+    display: var(--show, block);
+  }
+  .g em:not([style*='--m'])::after {
+    display: none;
+  }
+
+  .w-series {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 16px;
+    height: 64px;
+  }
+  .w-series svg {
+    width: 100%;
+    height: 100%;
+  }
+  .bars-v {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+  }
+  .bars-v i {
+    flex: 1;
+    background: var(--c);
+    border-radius: 1px 1px 0 0;
+    opacity: 0.9;
+  }
+
+  .w-mirror {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    height: 64px;
+  }
+  .w-mirror > div {
+    display: flex;
+    gap: 2px;
+  }
+  .w-mirror .top {
+    align-items: flex-end;
+    border-bottom: 1px solid var(--line-strong);
+  }
+  .w-mirror .top i {
+    flex: 1;
+    background: #3fb6c9;
+  }
+  .w-mirror .bot {
+    align-items: flex-start;
+  }
+  .w-mirror .bot i {
+    flex: 1;
+    background: #7a8cf0;
+  }
+
+  .w-meters {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px 10px;
+  }
+  .w-meters div {
+    display: grid;
+    grid-template-columns: 16px 1fr;
+    align-items: center;
+    gap: 5px;
+    font: 10px/1 var(--font-code);
+    color: var(--muted);
+  }
+  .w-meters span {
+    text-align: right;
+  }
+  .w-meters em {
+    height: 4px;
+  }
+
+  .w-bars {
+    display: grid;
+    gap: 6px;
+  }
+  .w-bars div {
+    display: grid;
+    grid-template-columns: 54px 1fr 40px;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+  }
+  .w-bars em {
+    --c: var(--accent);
+  }
+  .w-bars b {
+    font: 500 12px var(--font-code);
+    text-align: right;
+  }
+
+  .w-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+  }
+  .w-list li {
+    border-left: 3px solid var(--c, var(--line-strong));
+    padding: 1px 0 1px 9px;
+    font-size: 13.5px;
+    line-height: 1.35;
+  }
+  .w-list li.ok {
+    --c: var(--ok);
+  }
+  .w-list li.err {
+    --c: var(--err);
+  }
+  .w-list li.warn {
+    --c: var(--warn);
+  }
+  .w-list .t {
+    color: var(--link);
+  }
+  .w-list span:not(.t) {
+    margin-left: 6px;
+    font: 10.5px var(--font-code);
+    border: 1px solid var(--line-strong);
+    border-radius: 4px;
+    padding: 0 4px;
+    color: var(--muted);
+  }
+  .w-list small {
+    display: block;
+    font-size: 11.5px;
+    color: var(--muted);
+  }
+
+  .w-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .w-table th {
+    text-align: left;
+    font-weight: 500;
+    color: var(--muted);
+    font-size: 12px;
+    padding: 0 6px 4px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .w-table td {
+    padding: 5px 6px 5px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .w-table td:nth-child(2) {
+    width: 45%;
+  }
+  .w-table td:last-child {
+    font: 12px var(--font-code);
+  }
+  .w-table tr.warn td:first-child {
+    color: var(--warn);
+  }
+
+  .w-log {
+    margin: 0;
+    padding: 8px 10px;
+    background: var(--term-bg);
+    color: var(--term-ink);
+    border-radius: 5px;
+    font-size: 11px;
+    line-height: 1.6;
+    overflow: hidden;
+    white-space: pre;
+  }
+  .w-log .d {
+    color: var(--term-dim);
+  }
+  .w-log .i {
+    color: #9a968a;
+  }
+  .w-log .w {
+    color: #f0c43c;
+  }
+  .w-log .e {
+    color: #ff6f5e;
+  }
+
+  .w-uptime {
+    display: grid;
+    gap: 7px;
+  }
+  .w-uptime div {
+    display: grid;
+    grid-template-columns: 62px 1fr 38px 42px;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+  }
+  .w-uptime i {
+    display: flex;
+    gap: 1px;
+    height: 14px;
+  }
+  .w-uptime b {
+    flex: 1;
+    border-radius: 1px;
+    background: var(--ok);
+  }
+  .w-uptime b.s {
+    background: var(--warn);
+  }
+  .w-uptime b.d {
+    background: var(--err);
+  }
+  .w-uptime em,
+  .w-uptime small {
+    font: 11.5px var(--font-code);
+    font-style: normal;
+    text-align: right;
+  }
+  .w-uptime small {
+    color: var(--muted);
+  }
+
+  .w-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.4fr;
+    gap: 6px;
+    height: 64px;
+  }
+  .w-layout .col {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .w-layout i {
+    flex: 1;
+    border: 1px dashed var(--line-strong);
+    border-radius: 4px;
+    background: var(--bg-sunk);
+  }
+</style>

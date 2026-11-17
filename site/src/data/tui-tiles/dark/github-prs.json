@@ -1,0 +1,73 @@
+{"width": 120, "styles": [["#3fbf74","",""],["","","b"],["","",""],["#9097a1","",""]],
+"sizes": {
+"small": {"cols": 30, "rows": 5, "lines": [
+[[0,"┌ github-prs ────────────────┐"]],
+[[0,"│"],[1,"Review requested            "],[0,"│"]],
+[[0,"│"],[2,"● Add rate limiting to the …"],[0,"│"]],
+[[0,"│  "],[3,"+1 more                   "],[0,"│"]],
+[[0,"└────────────────────────────┘"]]
+]},
+"medium": {"cols": 40, "rows": 10, "lines": [
+[[0,"┌ github-prs ──────────────────────────┐"]],
+[[0,"│"],[1,"Review requested                      "],[0,"│"]],
+[[0,"│"],[2,"● Add rate limiting to the search end…"],[0,"│"]],
+[[0,"│  "],[3,"acme/api#482 · updated 25m ago      "],[0,"│"]],
+[[0,"│"],[2,"● Move settings page to the new form …"],[0,"│"]],
+[[0,"│  "],[3,"acme/web#1310 · updated 3h ago      "],[0,"│"]],
+[[0,"│"],[1,"Mine                                  "],[0,"│"]],
+[[0,"│"],[2,"● Retry webhook deliveries with backo…"],[0,"│"]],
+[[0,"│  "],[3,"+1 more                             "],[0,"│"]],
+[[0,"└──────────────────────────────────────┘"]]
+]},
+"large": {"cols": 60, "rows": 15, "lines": [
+[[0,"┌ github-prs ──────────────────────────────────────────────┐"]],
+[[0,"│"],[1,"Review requested                                          "],[0,"│"]],
+[[0,"│                                                          │"]],
+[[0,"│"],[2,"● Add rate limiting to the search endpoint                "],[0,"│"]],
+[[0,"│  "],[3,"acme/api#482 · updated 25m ago                          "],[0,"│"]],
+[[0,"│"],[2,"● Move settings page to the new form components           "],[0,"│"]],
+[[0,"│  "],[3,"acme/web#1310 · updated 3h ago                          "],[0,"│"]],
+[[0,"│                                                          │"]],
+[[0,"│"],[1,"Mine                                                      "],[0,"│"]],
+[[0,"│                                                          │"]],
+[[0,"│"],[2,"● Retry webhook deliveries with backoff                   "],[0,"│"]],
+[[0,"│  "],[3,"acme/api#479 · updated 1h ago                           "],[0,"│"]],
+[[0,"│"],[2,"● Upgrade Postgres to 17 "],[3,"[draft]                          "],[0,"│"]],
+[[0,"│  "],[3,"acme/infra#88 · updated 2d ago                          "],[0,"│"]],
+[[0,"└──────────────────────────────────────────────────────────┘"]]
+]},
+"wide": {"cols": 80, "rows": 10, "lines": [
+[[0,"┌ github-prs ──────────────────────────────────────────────────────────────────┐"]],
+[[0,"│"],[1,"Review requested                                                              "],[0,"│"]],
+[[0,"│"],[2,"● Add rate limiting to the search endpoint                                    "],[0,"│"]],
+[[0,"│  "],[3,"acme/api#482 · updated 25m ago                                              "],[0,"│"]],
+[[0,"│"],[2,"● Move settings page to the new form components                               "],[0,"│"]],
+[[0,"│  "],[3,"acme/web#1310 · updated 3h ago                                              "],[0,"│"]],
+[[0,"│"],[1,"Mine                                                                          "],[0,"│"]],
+[[0,"│"],[2,"● Retry webhook deliveries with backoff                                       "],[0,"│"]],
+[[0,"│  "],[3,"+1 more                                                                     "],[0,"│"]],
+[[0,"└──────────────────────────────────────────────────────────────────────────────┘"]]
+]},
+"tall": {"cols": 40, "rows": 20, "lines": [
+[[0,"┌ github-prs ──────────────────────────┐"]],
+[[0,"│"],[1,"Review requested                      "],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│"],[2,"● Add rate limiting to the search end…"],[0,"│"]],
+[[0,"│  "],[3,"acme/api#482 · updated 25m ago      "],[0,"│"]],
+[[0,"│"],[2,"● Move settings page to the new form …"],[0,"│"]],
+[[0,"│  "],[3,"acme/web#1310 · updated 3h ago      "],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│"],[1,"Mine                                  "],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│"],[2,"● Retry webhook deliveries with backo…"],[0,"│"]],
+[[0,"│  "],[3,"acme/api#479 · updated 1h ago       "],[0,"│"]],
+[[0,"│"],[2,"● Upgrade Postgres to 17 "],[3,"[draft]      "],[0,"│"]],
+[[0,"│  "],[3,"acme/infra#88 · updated 2d ago      "],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"└──────────────────────────────────────┘"]]
+]}
+}}

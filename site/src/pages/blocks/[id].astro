@@ -1,0 +1,395 @@
+---
+import { Code } from 'astro:components'
+import Base from '../../layouts/Base.astro'
+import SiteFooter from '../../components/SiteFooter.astro'
+import SiteHeader from '../../components/SiteHeader.astro'
+import SizesPreview from '../../components/SizesPreview.astro'
+import {
+  aboutType,
+  blockFor,
+  blocks,
+  blockShot,
+  blockShotThemes,
+  blockTiles,
+  inlineCode,
+  typeFields,
+  typeOf,
+  typesOf,
+  viewJson,
+  widgetsUsing,
+  type Block,
+} from '../../lib/blocks'
+
+export function getStaticPaths() {
+  return blocks.map((b, i) => ({
+    params: { id: b.id },
+    props: { b, prev: blocks[i - 1], next: blocks[i + 1] },
+  }))
+}
+
+interface Props {
+  b: Block
+  prev: Block | undefined
+  next: Block | undefined
+}
+const { b, prev, next } = Astro.props
+
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/')
+const repo = 'https://github.com/osdlc/dashboard'
+const type = typeOf(b)
+const primitive = b.group === 'primitives'
+const liveSrc = `demo-app/index.html?${new URLSearchParams({ mode: 'demo', fill: '', catalog: `blocks/${b.id}.json`, id: b.id, size: b.default_size })}`
+const json = viewJson(b)
+const fields = typeFields(type)
+/** Compositions: the widget types inside, each linked to its own block. */
+const parts = typesOf(b).map((t) => ({ type: t, block: blockFor(t) }))
+const users = primitive ? widgetsUsing(type) : []
+const SHOWN = 30
+---
+
+<Base title={`${b.name} · building blocks · dashboard`} description={b.description.replace(/`/g, '')}>
+  <SiteHeader here="blocks" />
+
+  <main class="wrap page">
+    <p class="crumbs"><a href={`${base}blocks/`}>Building blocks</a> <span aria-hidden="true">/</span> {b.id}</p>
+
+    <h1>{b.name}</h1>
+    <p class="facts">
+      <code>type: {type}</code>
+      <span>{primitive ? 'primitive' : 'composition'}</span>
+      <span>default size {b.default_size}</span>
+    </p>
+    <p class="lede" set:html={inlineCode(b.description)} />
+
+    <SizesPreview
+      name={b.name}
+      defaultSize={b.default_size}
+      liveSrc={liveSrc}
+      shot={(theme, size) => blockShot(b, theme, size)}
+      shotThemes={blockShotThemes}
+      tui={blockTiles(b)}
+      summary={b.demo.summary}
+      what="example view"
+    />
+
+    <div class="cols">
+      <section>
+        <h2>The view</h2>
+        <div class="window">
+          <div class="window-bar">
+            <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="title">{b.id}.json</span>
+            <button type="button" class="copy" data-copy={json}>Copy</button>
+          </div>
+          <div class="scroll">
+            <Code code={json} lang="json" theme="vitesse-dark" class="code" />
+          </div>
+        </div>
+        <p class="hint">
+          What a module returns from <code>render</code>: a status, a one-line summary for when the tile is too small,
+          and the widget tree in <code>root</code>. Kept in the repository as{' '}
+          <a href={`${repo}/blob/main/${b.source}`}>{b.source}</a>, where a test runs the contract's checks on it.
+        </p>
+      </section>
+
+      <section>
+        {
+          primitive ? (
+            <>
+              <h2>Widgets that use it</h2>
+              {users.length ? (
+                <>
+                  <ul class="chips">
+                    {users.slice(0, SHOWN).map((w) => (
+                      <li>
+                        <a href={`${base}widgets/${w.id}/`}>{w.name}</a>
+                      </li>
+                    ))}
+                  </ul>
+                  <p class="hint">
+                    {users.length > SHOWN
+                      ? `${users.length} widgets in the registry have a ${type} in their demo view; here are the first ${SHOWN}.`
+                      : `${users.length === 1 ? 'One widget' : `${users.length} widgets`} in the registry ${users.length === 1 ? 'has' : 'have'} a ${type} in ${users.length === 1 ? 'its' : 'their'} demo view.`}
+                  </p>
+                </>
+              ) : (
+                <p class="plain">No widget in the registry has one in its demo view yet.</p>
+              )}
+            </>
+          ) : (
+            <>
+              <h2>Built from</h2>
+              <ul class="chips">
+                {parts.map((p) => (
+                  <li>{p.block ? <a href={`${base}blocks/${p.block.id}/`}>{p.type}</a> : <span>{p.type}</span>}</li>
+                ))}
+              </ul>
+              <p class="hint">The widget types in this view; each links to its own example and fields.</p>
+            </>
+          )
+        }
+      </section>
+    </div>
+
+    <section class="fields">
+      <h2>Fields of <code>{type}</code></h2>
+      {aboutType(type) && <p class="plain about" set:html={inlineCode(aboutType(type))} />}
+      <div class="table">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Field</th>
+              <th scope="col">Type</th>
+              <th scope="col">Default</th>
+              <th scope="col">What it does</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              fields.map((f) => (
+                <tr class={f.nested ? 'nested' : undefined}>
+                  <th scope="row">
+                    <code>{f.key}</code>
+                    {f.required && <span class="req">required</span>}
+                  </th>
+                  <td class="type">{f.type}</td>
+                  <td class="default">{f.default && <code>{f.default}</code>}</td>
+                  <td class="what" set:html={inlineCode(f.description)} />
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="hint">
+        From the contract's JSON Schema (<code>dashboard schema view</code>). Colors are never raw: <code>tone</code> names
+        a color of the theme in use (accent, ok, warn, error, info, muted, series-1 to series-6).{' '}
+        <a href={`${repo}/blob/main/docs/contract.md`}>docs/contract.md</a> has the whole contract.
+      </p>
+    </section>
+
+    <nav class="pager" aria-label="Other building blocks">
+      {prev ? <a href={`${base}blocks/${prev.id}/`}>← {prev.name}</a> : <span />}
+      {next && <a href={`${base}blocks/${next.id}/`}>{next.name} →</a>}
+    </nav>
+  </main>
+
+  <SiteFooter />
+
+  <script>
+    import { wireCopyButtons } from '../../lib/copy'
+    wireCopyButtons()
+  </script>
+</Base>
+
+<style>
+  .page {
+    padding-top: 40px;
+    padding-bottom: 96px;
+  }
+
+  .crumbs {
+    margin: 0 0 28px;
+    font: 13px var(--font-code);
+    color: var(--muted);
+  }
+
+  .crumbs span {
+    margin: 0 6px;
+    color: var(--faint);
+  }
+
+  h1 {
+    font-size: clamp(30px, 4.2vw, 46px);
+    margin-bottom: 14px;
+  }
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    margin: 0 0 18px;
+    font: 13px var(--font-code);
+    color: var(--muted);
+  }
+
+  .lede :global(code) {
+    font-size: 0.8em;
+  }
+
+  h2 {
+    font-size: 20px;
+    margin: 0 0 16px;
+  }
+
+  h2 code {
+    font-size: 0.9em;
+  }
+
+  .cols {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: 40px;
+    margin-top: 56px;
+  }
+
+  @media (max-width: 860px) {
+    .cols {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  /* Long views (a chart's points) scroll inside the window. */
+  .scroll {
+    max-height: 560px;
+    overflow: auto;
+  }
+
+  .copy {
+    flex: none;
+    height: 22px;
+    padding: 0 8px;
+    border: 1px solid var(--term-line);
+    border-radius: 5px;
+    background: none;
+    color: var(--term-dim);
+    font: 11.5px var(--font-code);
+    cursor: pointer;
+  }
+
+  .copy:hover {
+    color: var(--term-ink);
+  }
+
+  .hint,
+  .plain {
+    margin: 14px 0 0;
+    font-size: 14.5px;
+    color: var(--muted);
+  }
+
+  .plain {
+    margin-top: 0;
+    color: var(--ink-2);
+  }
+
+  .about {
+    margin-bottom: 16px;
+  }
+
+  .chips {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+  }
+
+  .chips a,
+  .chips span {
+    display: inline-block;
+    padding: 3px 9px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font: 12.5px/1.4 var(--font-code);
+    color: var(--ink-2);
+    text-decoration: none;
+  }
+
+  .chips a:hover {
+    border-color: var(--accent);
+    color: var(--ink);
+  }
+
+  .fields {
+    margin-top: 56px;
+  }
+
+  .table {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14.5px;
+  }
+
+  th,
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  tbody tr:last-child > * {
+    border-bottom: 0;
+  }
+
+  thead th {
+    background: var(--bg-sunk);
+    font: 500 12px var(--font-code);
+    color: var(--muted);
+    text-transform: lowercase;
+  }
+
+  tbody th {
+    font-weight: 400;
+    white-space: nowrap;
+  }
+
+  /* A field of each item (items[].title): set in under its list. */
+  .nested th {
+    padding-left: 30px;
+  }
+
+  .nested th code {
+    color: var(--ink-2);
+  }
+
+  .req {
+    display: block;
+    margin-top: 2px;
+    font: 11px var(--font-code);
+    color: var(--warn);
+  }
+
+  .type {
+    font: 12.5px var(--font-code);
+    color: var(--ink-2);
+    min-width: 9ch;
+  }
+
+  .default {
+    min-width: 10ch;
+  }
+
+  td code {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .what {
+    color: var(--ink-2);
+    min-width: 24ch;
+  }
+
+  .pager {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    font: 14px var(--font-code);
+  }
+
+  /* Shiki output: keep the frame's background and our sizing. */
+  :global(.astro-code.code) {
+    background-color: var(--term-bg) !important;
+  }
+</style>

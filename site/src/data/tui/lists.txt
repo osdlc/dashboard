@@ -1,0 +1,34 @@
+ 1 showcase │ 2 charts │ 3 meters │ 4 lists │ 5 logs                                                                    
+┌ fleet ───────────────────────────────────────────────────────────────────────┐┌ activity ────────────────────────────┐
+│Service             Region              Load               Version            ││● Deploy finished · atlas [prod]      │
+│atlas               us-east             3%                 v1.4.0             ││  ok · 0s ago                         │
+│borealis            eu-west             67%                v1.5.7             ││● Flaky test quarantined · borealis [t│
+│cinder              ap-south            48%                v1.6.4             ││  ci · 37s ago                        │
+│drift               us-east             3%                 v1.4.1             ││● Build failed on main · cinder [main]│
+│ember               eu-west             53%                v1.5.8             ││  ci · 74s ago                        │
+│fjord               ap-south            48%                v1.6.5             ││● PR merged · drift                   │
+│glimmer             us-east             61%                v1.4.2             ││  git · 111s ago                      │
+│harbor              eu-west             92%                v1.5.9             ││● Cache warmed · ember [cache]        │
+│iris                ap-south            79%                v1.6.6             ││  infra · 148s ago                    │
+│juniper             us-east             36%                v1.4.3             ││● Rollback started · fjord [prod] [man│
+│                                                                              ││  deploy · 185s ago                   │
+│                                                                              ││● Deploy finished · glimmer [prod]    │
+│                                                                              ││  ok · 222s ago                       │
+│                                                                              ││● Flaky test quarantined · harbor [tes│
+│                                                                              ││  ci · 259s ago                       │
+│                                                                              ││● Build failed on main · iris [main]  │
+│                                                                              ││  ci · 296s ago                       │
+└──────────────────────────────────────────────────────────────────────────────┘└──────────────────────────────────────┘
+┌ kpis ────────────────────────────────────┐┌ leaders ────────────────────────────────┐┌ shares ───────────────────────┐
+│Requests 3943 /s +0.0%                    ││Builds this week                         ││Shares                         │
+│Errors 0.67 % last 1m                     ││atlas           ███████████▍·       1054 ││███████████████████████████████│
+│p99 121 ms target 150                     ││ember           ██████████▉··        999 ││● photos 27%  ● apps 29%       │
+│                                          ││iris            █████████····        829 ││● code 12%  ● free 32%         │
+│                                          ││harbor          ████████▉····        815 ││Used 339 GiB of 500            │
+│                                          ││borealis        ███████▏·····        653 ││                               │
+│                                          ││fjord           ██████▍······        593 ││Free 161 GiB left              │
+│                                          ││juniper         █████▋·······        519 ││                               │
+│                                          ││drift           █████▏·······        478 ││                               │
+│                                          ││cinder          ███▌·········        319 ││                               │
+└──────────────────────────────────────────┘└─────────────────────────────────────────┘└───────────────────────────────┘
+ ? help  s settings  Tab screens  arrows move  Enter open  q quit                                                       

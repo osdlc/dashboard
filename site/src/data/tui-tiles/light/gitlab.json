@@ -1,0 +1,73 @@
+{"width": 120, "styles": [["#197e44","",""],["","","b"],["","",""],["#6b7280","",""],["#c7363b","",""]],
+"sizes": {
+"small": {"cols": 30, "rows": 5, "lines": [
+[[0,"┌ gitlab ────────────────────┐"]],
+[[0,"│"],[1,"My merge requests           "],[0,"│"]],
+[[0,"│● "],[2,"Cache the pipeline graph …"],[0,"│"]],
+[[0,"│  "],[3,"+2 more                   "],[0,"│"]],
+[[0,"└────────────────────────────┘"]]
+]},
+"medium": {"cols": 40, "rows": 10, "lines": [
+[[0,"┌ gitlab ──────────────────────────────┐"]],
+[[0,"│"],[1,"My merge requests                     "],[0,"│"]],
+[[0,"│● "],[2,"Cache the pipeline graph between re…"],[0,"│"]],
+[[0,"│  "],[3,"acme/web!42 · by @dana · updated 1h…"],[0,"│"]],
+[[0,"│"],[4,"● "],[2,"Move the billing worker to the new …"],[0,"│"]],
+[[0,"│  "],[3,"acme/api!118 · by @dana · updated 1…"],[0,"│"]],
+[[0,"│"],[2,"● Draft: Try the new chart library "],[3,"[d…"],[0,"│"]],
+[[0,"│  "],[3,"acme/web!44 · by @dana · updated 20…"],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"└──────────────────────────────────────┘"]]
+]},
+"large": {"cols": 60, "rows": 15, "lines": [
+[[0,"┌ gitlab ──────────────────────────────────────────────────┐"]],
+[[0,"│"],[1,"My merge requests                                         "],[0,"│"]],
+[[0,"│● "],[2,"Cache the pipeline graph between renders "],[3,"[performance] …"],[0,"│"]],
+[[0,"│  "],[3,"acme/web!42 · by @dana · updated 1h ago                 "],[0,"│"]],
+[[0,"│"],[4,"● "],[2,"Move the billing worker to the new queue "],[3,"[conflicts] [b…"],[0,"│"]],
+[[0,"│  "],[3,"acme/api!118 · by @dana · updated 18h ago               "],[0,"│"]],
+[[0,"│"],[2,"● Draft: Try the new chart library "],[3,"[draft]                "],[0,"│"]],
+[[0,"│  "],[3,"acme/web!44 · by @dana · updated 20m ago                "],[0,"│"]],
+[[0,"│"],[1,"Assigned issues                                           "],[0,"│"]],
+[[0,"│"],[4,"● "],[2,"Invoices show the wrong currency for CHF accounts "],[3,"[due …"],[0,"│"]],
+[[0,"│  "],[3,"acme/api#231 · updated 2h ago                           "],[0,"│"]],
+[[0,"│"],[2,"● Dark mode for the settings page "],[3,"[feature]               "],[0,"│"]],
+[[0,"│  "],[3,"acme/web#77 · updated 2d ago                            "],[0,"│"]],
+[[0,"│                                                          │"]],
+[[0,"└──────────────────────────────────────────────────────────┘"]]
+]},
+"wide": {"cols": 80, "rows": 10, "lines": [
+[[0,"┌ gitlab ──────────────────────────────────────────────────────────────────────┐"]],
+[[0,"│"],[1,"My merge requests                                                             "],[0,"│"]],
+[[0,"│● "],[2,"Cache the pipeline graph between renders "],[3,"[performance] [frontend]           "],[0,"│"]],
+[[0,"│  "],[3,"acme/web!42 · by @dana · updated 1h ago                                     "],[0,"│"]],
+[[0,"│"],[4,"● "],[2,"Move the billing worker to the new queue "],[3,"[conflicts] [backend]              "],[0,"│"]],
+[[0,"│  "],[3,"acme/api!118 · by @dana · updated 18h ago                                   "],[0,"│"]],
+[[0,"│"],[2,"● Draft: Try the new chart library "],[3,"[draft]                                    "],[0,"│"]],
+[[0,"│  "],[3,"acme/web!44 · by @dana · updated 20m ago                                    "],[0,"│"]],
+[[0,"│                                                                              │"]],
+[[0,"└──────────────────────────────────────────────────────────────────────────────┘"]]
+]},
+"tall": {"cols": 40, "rows": 20, "lines": [
+[[0,"┌ gitlab ──────────────────────────────┐"]],
+[[0,"│"],[1,"My merge requests                     "],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│● "],[2,"Cache the pipeline graph between re…"],[0,"│"]],
+[[0,"│  "],[3,"acme/web!42 · by @dana · updated 1h…"],[0,"│"]],
+[[0,"│"],[4,"● "],[2,"Move the billing worker to the new …"],[0,"│"]],
+[[0,"│  "],[3,"acme/api!118 · by @dana · updated 1…"],[0,"│"]],
+[[0,"│"],[2,"● Draft: Try the new chart library "],[3,"[d…"],[0,"│"]],
+[[0,"│  "],[3,"acme/web!44 · by @dana · updated 20…"],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│"],[1,"Assigned issues                       "],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│"],[4,"● "],[2,"Invoices show the wrong currency fo…"],[0,"│"]],
+[[0,"│  "],[3,"acme/api#231 · updated 2h ago       "],[0,"│"]],
+[[0,"│"],[2,"● Dark mode for the settings page "],[3,"[fe…"],[0,"│"]],
+[[0,"│  "],[3,"acme/web#77 · updated 2d ago        "],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"└──────────────────────────────────────┘"]]
+]}
+}}

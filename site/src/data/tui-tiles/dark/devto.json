@@ -1,0 +1,73 @@
+{"width": 120, "styles": [["#3fbf74","",""],["","",""],["#9097a1","",""]],
+"sizes": {
+"small": {"cols": 30, "rows": 5, "lines": [
+[[0,"┌ devto ─────────────────────┐"]],
+[[0,"│"],[1,"● Building a terminal dashb…"],[0,"│"]],
+[[0,"│  "],[2,"238 reactions · 14 commen…"],[0,"│"]],
+[[0,"│  "],[2,"+2 more                   "],[0,"│"]],
+[[0,"└────────────────────────────┘"]]
+]},
+"medium": {"cols": 40, "rows": 10, "lines": [
+[[0,"┌ devto ───────────────────────────────┐"]],
+[[0,"│"],[1,"● Building a terminal dashboard in a …"],[0,"│"]],
+[[0,"│  "],[2,"238 reactions · 14 comments · by fe…"],[0,"│"]],
+[[0,"│"],[1,"● Error handling without the boilerpl…"],[0,"│"]],
+[[0,"│  "],[2,"1 reaction · 1 comment · by errata …"],[0,"│"]],
+[[0,"│"],[1,"● Five async pitfalls I hit in produc…"],[0,"│"]],
+[[0,"│  "],[2,"57 reactions · 0 comments · by onca…"],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"└──────────────────────────────────────┘"]]
+]},
+"large": {"cols": 60, "rows": 15, "lines": [
+[[0,"┌ devto ───────────────────────────────────────────────────┐"]],
+[[0,"│"],[1,"● Building a terminal dashboard in a weekend "],[2,"[#rust] [#tu…"],[0,"│"]],
+[[0,"│  "],[2,"238 reactions · 14 comments · by ferris · 7 min read · …"],[0,"│"]],
+[[0,"│"],[1,"● Error handling without the boilerplate "],[2,"[#rust]          "],[0,"│"]],
+[[0,"│  "],[2,"1 reaction · 1 comment · by errata · 4 min read · 45m a…"],[0,"│"]],
+[[0,"│"],[1,"● Five async pitfalls I hit in production                 "],[0,"│"]],
+[[0,"│  "],[2,"57 reactions · 0 comments · by oncall · 1 min read · 17…"],[0,"│"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"│                                                          │"]],
+[[0,"└──────────────────────────────────────────────────────────┘"]]
+]},
+"wide": {"cols": 80, "rows": 10, "lines": [
+[[0,"┌ devto ───────────────────────────────────────────────────────────────────────┐"]],
+[[0,"│"],[1,"● Building a terminal dashboard in a weekend "],[2,"[#rust] [#tui] [#showdev]        "],[0,"│"]],
+[[0,"│  "],[2,"238 reactions · 14 comments · by ferris · 7 min read · 2d ago               "],[0,"│"]],
+[[0,"│"],[1,"● Error handling without the boilerplate "],[2,"[#rust]                              "],[0,"│"]],
+[[0,"│  "],[2,"1 reaction · 1 comment · by errata · 4 min read · 45m ago                   "],[0,"│"]],
+[[0,"│"],[1,"● Five async pitfalls I hit in production                                     "],[0,"│"]],
+[[0,"│  "],[2,"57 reactions · 0 comments · by oncall · 1 min read · 17h ago                "],[0,"│"]],
+[[0,"│                                                                              │"]],
+[[0,"│                                                                              │"]],
+[[0,"└──────────────────────────────────────────────────────────────────────────────┘"]]
+]},
+"tall": {"cols": 40, "rows": 20, "lines": [
+[[0,"┌ devto ───────────────────────────────┐"]],
+[[0,"│"],[1,"● Building a terminal dashboard in a …"],[0,"│"]],
+[[0,"│  "],[2,"238 reactions · 14 comments · by fe…"],[0,"│"]],
+[[0,"│"],[1,"● Error handling without the boilerpl…"],[0,"│"]],
+[[0,"│  "],[2,"1 reaction · 1 comment · by errata …"],[0,"│"]],
+[[0,"│"],[1,"● Five async pitfalls I hit in produc…"],[0,"│"]],
+[[0,"│  "],[2,"57 reactions · 0 comments · by onca…"],[0,"│"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"│                                      │"]],
+[[0,"└──────────────────────────────────────┘"]]
+]}
+}}

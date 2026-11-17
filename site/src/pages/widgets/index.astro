@@ -1,0 +1,576 @@
+---
+import Base from '../../layouts/Base.astro'
+import SiteFooter from '../../components/SiteFooter.astro'
+import SiteHeader from '../../components/SiteHeader.astro'
+import { sections } from '../../lib/areas'
+import { kindLabel, shot, shotThemes, tagCounts, untestedLive, widgets } from '../../lib/registry'
+
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/')
+// Tags on one widget only are still found by the search box.
+const tags = tagCounts().filter(([, n]) => n > 1)
+const builtins = widgets.filter((w) => w.kind === 'builtin').length
+const kinds = [
+  {
+    kind: 'builtin' as const,
+    title: 'Built-in',
+    blurb: 'Compiled into the dashboard. Nothing to install: name one in your config, or add it from the editor.',
+    sections: sections(widgets, 'builtin'),
+  },
+  {
+    kind: 'plugin' as const,
+    title: 'Plugins',
+    blurb:
+      'Packages that run beside the dashboard, in Python, TypeScript or anything that speaks the plugin protocol. Most are for services that need a token.',
+    sections: sections(widgets, 'plugin'),
+  },
+]
+---
+
+<Base
+  title="Widget registry · dashboard"
+  description={`All ${widgets.length} dashboard widgets, built-in and plugin, with demo screenshots, settings and config examples.`}
+>
+  <SiteHeader here="widgets" />
+
+  <main>
+    <section class="head">
+      <div class="wrap">
+        <p class="label"><span class="n">registry</span> widgets</p>
+        <h1>Every widget, with a demo.</h1>
+        <p class="lede">
+          {builtins} built-in modules and {widgets.length - builtins} plugin packages. Each page has the widget's settings,
+          what it needs and a config to copy. The pictures are the widgets' demo views, the made-up data a tile shows with
+          <code>demo: true</code>.
+        </p>
+        <p class="blocks-link">
+          Making your own? The <a href={`${base}blocks/`}>building blocks</a> show every widget type a tile can hold,
+          live, with its fields and how they combine.
+        </p>
+
+        <form class="filters" role="search" onsubmit="return false">
+          <label class="search">
+            <span class="visually-hidden">Search widgets</span>
+            <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"></circle><path d="m13 13 4.5 4.5"></path></svg>
+            <input type="search" name="q" placeholder="Search by name, tag or description" autocomplete="off" data-search />
+          </label>
+          <div class="kinds" role="group" aria-label="Kind">
+            <button type="button" data-kind="" aria-pressed="true">All</button>
+            <button type="button" data-kind="builtin" aria-pressed="false">Built-in</button>
+            <button type="button" data-kind="plugin" aria-pressed="false">Plugin</button>
+          </div>
+        </form>
+        <div class="tags" aria-label="Filter by tag">
+          {
+            tags.map(([tag, n]) => (
+              <button type="button" class="tag" data-tag={tag} aria-pressed="false">
+                {tag} <span class="count">{n}</span>
+              </button>
+            ))
+          }
+        </div>
+        <p class="status" aria-live="polite" data-status>{widgets.length} widgets</p>
+
+        <nav class="jump" aria-label="Sections">
+          {
+            kinds.map((k) => (
+              <div class="jump-kind" data-jump-kind={k.kind}>
+                <a class="jump-title" href={`#${k.kind}`}>
+                  {k.title} <span class="count" data-count={k.kind}>{k.sections.reduce((n, s) => n + s.widgets.length, 0)}</span>
+                </a>
+                {k.sections.map((s) => (
+                  <a href={`#${k.kind}-${s.area.id}`} data-jump={`${k.kind}-${s.area.id}`}>
+                    {s.area.name} <span class="count" data-count={`${k.kind}-${s.area.id}`}>{s.widgets.length}</span>
+                  </a>
+                ))}
+              </div>
+            ))
+          }
+        </nav>
+      </div>
+    </section>
+
+    <div class="list">
+      <div class="wrap">
+        {
+          kinds.map((k) => (
+            <section class="kind" id={k.kind} data-kind-section={k.kind} aria-labelledby={`${k.kind}-title`}>
+              <header class="kind-head">
+                <h2 id={`${k.kind}-title`}>{k.title}</h2>
+                <p>{k.blurb}</p>
+              </header>
+              {k.sections.map((s) => (
+                <section class="area" id={`${k.kind}-${s.area.id}`} data-area={`${k.kind}-${s.area.id}`}>
+                  <h3>
+                    {s.area.name} <span class="count" data-count={`${k.kind}-${s.area.id}`}>{s.widgets.length}</span>
+                  </h3>
+                  <p class="area-blurb">{s.area.blurb}</p>
+                  <ul class="cards">
+                    {s.widgets.map((w) => {
+                      const pics = shotThemes.map((theme) => ({ theme, pic: shot(w, theme) }))
+                      return (
+                        <li
+                          class="card"
+                          data-id={w.id}
+                          data-kind={w.kind}
+                          data-tags={w.tags.join(' ')}
+                          data-text={`${w.id} ${w.name} ${w.description} ${w.tags.join(' ')}`.toLowerCase()}
+                        >
+                          <a href={`${base}widgets/${w.id}/`}>
+                            <div class="thumb">
+                              {pics.map(
+                                ({ theme, pic }) =>
+                                  pic && (
+                                    <img
+                                      src={base + pic.path}
+                                      width={pic.width}
+                                      height={pic.height}
+                                      style={`width: min(100%, ${Math.round(pic.width * 0.85)}px)`}
+                                      loading="lazy"
+                                      data-shows-theme={theme}
+                                      alt=""
+                                    />
+                                  ),
+                              )}
+                            </div>
+                            <div class="body">
+                              <h4>
+                                {w.name} <code>{w.id}</code>
+                              </h4>
+                              <p class="meta">
+                                {kindLabel(w)}
+                                {untestedLive(w) && <span class="untested">untested live</span>}
+                              </p>
+                              <p class="desc">{w.description}</p>
+                            </div>
+                          </a>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </section>
+              ))}
+            </section>
+          ))
+        }
+        <p class="empty" hidden data-empty>Nothing matches. Try fewer words, or clear the tag.</p>
+      </div>
+    </div>
+  </main>
+
+  <SiteFooter />
+
+  <script>
+    // Search, kind and tag filters, kept in the URL (?q=, ?kind=, ?tag=) so a
+    // filtered list can be linked to. A tag link on a widget page lands here.
+    const cards = [...document.querySelectorAll<HTMLElement>('.card')]
+    const search = document.querySelector<HTMLInputElement>('[data-search]')!
+    const kinds = [...document.querySelectorAll<HTMLButtonElement>('.kinds button')]
+    const tagButtons = [...document.querySelectorAll<HTMLButtonElement>('[data-tag]')]
+    const status = document.querySelector<HTMLElement>('[data-status]')!
+    const empty = document.querySelector<HTMLElement>('[data-empty]')!
+
+    const params = new URLSearchParams(location.search)
+    // A kind or tag with no button (an old link, say) is dropped, not left hiding every card.
+    const known = (value: string | null, buttons: string[]) => (value && buttons.includes(value) ? value : '')
+    const state = {
+      q: params.get('q') ?? '',
+      kind: known(params.get('kind'), kinds.map((b) => b.dataset.kind!)),
+      tag: known(params.get('tag'), tagButtons.map((b) => b.dataset.tag!)),
+    }
+    search.value = state.q
+
+    function apply() {
+      const words = state.q.toLowerCase().split(/\s+/).filter(Boolean)
+      let shown = 0
+      for (const card of cards) {
+        const ok =
+          (!state.kind || card.dataset.kind === state.kind) &&
+          (!state.tag || (card.dataset.tags ?? '').split(' ').includes(state.tag)) &&
+          words.every((w) => card.dataset.text!.includes(w))
+        card.hidden = !ok
+        if (ok) shown++
+      }
+      for (const b of kinds) b.setAttribute('aria-pressed', String(b.dataset.kind === state.kind))
+      for (const b of tagButtons) b.setAttribute('aria-pressed', String(b.dataset.tag === state.tag))
+      // A section, and its menu link, shows only while it has a card left; counts follow the filters.
+      const visible = new Map<string, number>()
+      const count = (key: string) => visible.set(key, (visible.get(key) ?? 0) + 1)
+      for (const area of document.querySelectorAll<HTMLElement>('[data-area]')) {
+        const n = area.querySelectorAll('.card:not([hidden])').length
+        area.hidden = n === 0
+        for (let i = 0; i < n; i++) count(area.dataset.area!)
+      }
+      for (const card of cards) if (!card.hidden) count(card.dataset.kind!)
+      for (const el of document.querySelectorAll<HTMLElement>('[data-count]')) {
+        el.textContent = String(visible.get(el.dataset.count!) ?? 0)
+      }
+      for (const el of document.querySelectorAll<HTMLElement>('[data-kind-section]')) {
+        el.hidden = !visible.get(el.dataset.kindSection!)
+      }
+      for (const el of document.querySelectorAll<HTMLElement>('[data-jump-kind]')) {
+        el.hidden = !visible.get(el.dataset.jumpKind!)
+      }
+      for (const el of document.querySelectorAll<HTMLElement>('[data-jump]')) {
+        el.hidden = !visible.get(el.dataset.jump!)
+      }
+      status.textContent = shown === cards.length ? `${shown} widgets` : `${shown} of ${cards.length} widgets`
+      if (state.tag) status.textContent += ` tagged ${state.tag}`
+      empty.hidden = shown > 0
+
+      const next = new URLSearchParams()
+      for (const [k, v] of Object.entries(state)) if (v) next.set(k, v)
+      const query = next.toString()
+      history.replaceState(null, '', query ? `?${query}` : location.pathname)
+    }
+
+    search.addEventListener('input', () => {
+      state.q = search.value.trim()
+      apply()
+    })
+    for (const b of kinds) {
+      b.addEventListener('click', () => {
+        state.kind = b.dataset.kind ?? ''
+        apply()
+      })
+    }
+    for (const b of tagButtons) {
+      b.addEventListener('click', () => {
+        state.tag = state.tag === b.dataset.tag ? '' : (b.dataset.tag ?? '')
+        apply()
+      })
+    }
+    apply()
+  </script>
+</Base>
+
+<style>
+  .head {
+    padding: 64px 0 28px;
+  }
+
+  h1 {
+    font-size: clamp(30px, 4.2vw, 46px);
+    max-width: 20ch;
+    margin-bottom: 18px;
+  }
+
+  .lede code {
+    font-size: 0.8em;
+  }
+
+  .blocks-link {
+    margin: 14px 0 0;
+    max-width: 62ch;
+    color: var(--ink-2);
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 36px;
+  }
+
+  .search {
+    flex: 1 1 320px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 42px;
+    padding: 0 14px;
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    background: var(--bg-raised);
+  }
+
+  .search:focus-within {
+    border-color: var(--accent);
+  }
+
+  .search svg {
+    width: 16px;
+    height: 16px;
+    flex: none;
+    fill: none;
+    stroke: var(--muted);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+  }
+
+  .search input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: none;
+    color: var(--ink);
+    font: 15px var(--font-body);
+  }
+
+  .kinds {
+    display: inline-flex;
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .kinds button {
+    padding: 0 14px;
+    height: 40px;
+    border: 0;
+    border-right: 1px solid var(--line);
+    background: var(--bg-raised);
+    color: var(--muted);
+    font: 13px var(--font-code);
+    cursor: pointer;
+  }
+
+  .kinds button:last-child {
+    border-right: 0;
+  }
+
+  .kinds button[aria-pressed='true'] {
+    background: var(--ink);
+    color: var(--bg);
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 16px;
+  }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 9px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: none;
+    color: var(--ink-2);
+    font: 12.5px/1.4 var(--font-code);
+    cursor: pointer;
+  }
+
+  .tag:hover {
+    border-color: var(--line-strong);
+  }
+
+  .tag .count {
+    color: var(--faint);
+  }
+
+  .tag[aria-pressed='true'] {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--ink);
+  }
+
+  .status {
+    margin: 22px 0 0;
+    font: 13px var(--font-code);
+    color: var(--muted);
+  }
+
+  .jump {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 10px 28px;
+    margin-top: 26px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+  }
+
+  .jump-kind {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 14px;
+  }
+
+  .jump-kind[hidden],
+  .jump a[hidden] {
+    display: none;
+  }
+
+  .jump a {
+    font: 13px var(--font-code);
+    color: var(--ink-2);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .jump a:hover {
+    color: var(--link);
+  }
+
+  .jump .jump-title {
+    flex-basis: 100%;
+    font: 600 14px var(--font-body);
+    color: var(--ink);
+  }
+
+  .count {
+    color: var(--faint);
+    font: 12px var(--font-code);
+  }
+
+  .list {
+    padding: 0 0 96px;
+  }
+
+  .kind {
+    padding-top: 40px;
+    scroll-margin-top: 16px;
+  }
+
+  .kind[hidden],
+  .area[hidden] {
+    display: none;
+  }
+
+  .kind-head {
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  .kind-head h2 {
+    margin: 0;
+    font-size: clamp(24px, 3vw, 32px);
+  }
+
+  .kind-head p {
+    margin: 8px 0 0;
+    max-width: 70ch;
+    color: var(--ink-2);
+  }
+
+  .area {
+    padding-top: 30px;
+    scroll-margin-top: 16px;
+  }
+
+  .area h3 {
+    margin: 0;
+    font-size: 18px;
+    letter-spacing: -0.01em;
+  }
+
+  .area h3 .count {
+    margin-left: 6px;
+  }
+
+  .area-blurb {
+    margin: 4px 0 16px;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .cards {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 18px;
+  }
+
+  .card[hidden] {
+    display: none;
+  }
+
+  .card a {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--bg-raised);
+    color: inherit;
+    text-decoration: none;
+    overflow: hidden;
+    transition: border-color 0.15s;
+  }
+
+  .card a:hover {
+    border-color: var(--line-strong);
+  }
+
+  .card a:hover h4 {
+    color: var(--link);
+  }
+
+  /* Demo views in the page's own theme (see data-shows-theme in global.css). */
+  .thumb {
+    height: 170px;
+    padding: 14px 14px 0;
+    background: var(--bg-sunk);
+    border-bottom: 1px solid var(--line);
+    overflow: hidden;
+  }
+
+  /* Scaled alike, so a small tile looks smaller than a wide one. */
+  .thumb img {
+    height: auto;
+    object-fit: cover;
+    object-position: top left;
+    border-radius: 6px 6px 0 0;
+  }
+
+  .body {
+    padding: 14px 16px 16px;
+  }
+
+  .card h4 {
+    font-size: 15px;
+    max-width: none;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .card h4 code {
+    margin-left: 4px;
+    font-size: 11.5px;
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  .meta {
+    display: flex;
+    gap: 10px;
+    margin: 6px 0 0;
+    font: 12px var(--font-code);
+    color: var(--muted);
+  }
+
+  .untested {
+    color: var(--warn);
+  }
+
+  .desc {
+    margin: 8px 0 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink-2);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .empty {
+    margin: 32px 0 0;
+    color: var(--muted);
+  }
+</style>
