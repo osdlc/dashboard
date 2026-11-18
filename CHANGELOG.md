@@ -17,6 +17,10 @@ released on their own; they record the stages the project was built in.
   desktop app) save a new dashboard file and open it: **Blank** starts with one empty screen in
   the screen editor, **Copy of current** copies the file in use, comments included. A name in use
   is refused.
+- **Native app (experimental).** `dashboard-native` (`apps/native`) draws the dashboard with
+  GPUI, with no web server or webview, as a window, `--ambient`, wallpaper or screensaver. New
+  `native:` settings: `fps` (default 30) caps how often it draws, and `animations: false` shows
+  new values without motion. See `docs/desktop.md` and `docs/decisions/0001-native-renderer.md`.
 - **`series` takes negative values and a fitted scale.** The chart no longer clamps to 0: the
   bottom is `y_min`, else 0 or the lowest value, and a faint zero line shows when the scale spans
   zero (`area` fills to it, `bars` grow from it). `fit: true` scales to the data's own range, for

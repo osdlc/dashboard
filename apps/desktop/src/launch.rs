@@ -42,6 +42,7 @@ usage: dashboard-desktop [--config FILE] [--port N] [--ambient | --wallpaper | -
   --ambient       open the window in ambient mode: no controls, screens rotating
   --wallpaper     one ambient window per display, on the desktop behind the icons
   --screensaver   one full-screen ambient window per display until a key or mouse move
+                  (dashboard-native: until Esc; a click shows a tile fullscreen)
   --no-tray       no tray / menu-bar icon; quit when the last window closes
                   (not with --wallpaper: nothing could quit it)
 

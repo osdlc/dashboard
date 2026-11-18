@@ -24,13 +24,21 @@ const check = args.includes("--check");
 const dirAt = args.indexOf("--schemas");
 
 function load(name) {
-  if (dirAt >= 0) return JSON.parse(readFileSync(join(args[dirAt + 1], `${name}.json`), "utf8"));
+  if (dirAt >= 0) return sorted(JSON.parse(readFileSync(join(args[dirAt + 1], `${name}.json`), "utf8")));
   const out = execFileSync("cargo", ["run", "-q", "-p", "dashboard", "--", "schema", name], {
     cwd: join(here, ".."),
     encoding: "utf8",
     stdio: ["ignore", "pipe", "inherit"],
   });
-  return JSON.parse(out);
+  return sorted(JSON.parse(out));
+}
+
+/** Object keys in name order. serde_json keeps field order when a crate in the
+ * build turns on its `preserve_order` feature (GPUI does), and names otherwise. */
+function sorted(value) {
+  if (Array.isArray(value)) return value.map(sorted);
+  if (value === null || typeof value !== "object") return value;
+  return Object.fromEntries(Object.keys(value).sort().map((k) => [k, sorted(value[k])]));
 }
 
 // ---- Collect named types ----

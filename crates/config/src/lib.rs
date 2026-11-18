@@ -47,6 +47,8 @@ pub struct Config {
     pub rotate: Option<Rotate>,
     /// Settings for the terminal view.
     pub tui: Tui,
+    /// Settings for the native app.
+    pub native: Native,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
@@ -146,6 +148,28 @@ impl Default for Tui {
     fn default() -> Self {
         Self {
             fps: dashboard_contract::DEFAULT_TUI_FPS,
+        }
+    }
+}
+
+/// Settings for the native app (`dashboard-native`). The web view doesn't use
+/// them: the browser paces its animations.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(default, deny_unknown_fields)]
+pub struct Native {
+    /// The most frames a second the window is drawn, from 1 to 240. The
+    /// display's refresh rate is the limit above that.
+    pub fps: u32,
+    /// False: new data is drawn without motion (numbers, fades, chart
+    /// scrolling).
+    pub animations: bool,
+}
+
+impl Default for Native {
+    fn default() -> Self {
+        Self {
+            fps: dashboard_contract::DEFAULT_NATIVE_FPS,
+            animations: true,
         }
     }
 }
@@ -393,6 +417,12 @@ impl Config {
             return Err(Invalid {
                 part: Part::Key("tui".into()),
                 message: format!("tui.fps must be from 1 to 60, not {}", self.tui.fps),
+            });
+        }
+        if !(1..=240).contains(&self.native.fps) {
+            return Err(Invalid {
+                part: Part::Key("native".into()),
+                message: format!("native.fps must be from 1 to 240, not {}", self.native.fps),
             });
         }
         if let Some(rotate) = &self.rotate {
@@ -708,6 +738,19 @@ rotate:
         for bad in ["tui:\n  fps: 0\n", "tui:\n  fps: 61\n"] {
             let err = parse(bad).unwrap().validate(&available()).unwrap_err();
             assert_eq!(err.part, Part::Key("tui".into()));
+        }
+    }
+
+    #[test]
+    fn native_defaults_and_limits() {
+        let c = parse("theme: dark\n").unwrap();
+        assert_eq!((c.native.fps, c.native.animations), (30, true));
+        let c = parse("native:\n  fps: 2\n  animations: false\n").unwrap();
+        assert_eq!((c.native.fps, c.native.animations), (2, false));
+        assert!(c.validate(&available()).is_ok());
+        for bad in ["native:\n  fps: 0\n", "native:\n  fps: 241\n"] {
+            let err = parse(bad).unwrap().validate(&available()).unwrap_err();
+            assert_eq!(err.part, Part::Key("native".into()));
         }
     }
 

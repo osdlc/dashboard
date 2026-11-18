@@ -1,0 +1,34 @@
+[package]
+name = "dashboard-native"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+description = "The dashboard drawn with GPUI, with no web server or webview"
+
+[dependencies]
+anyhow = "1.0.104"
+dashboard-config = { version = "0.8.0", path = "../../crates/config" }
+dashboard-contract = { version = "0.8.0", path = "../../crates/contract" }
+dashboard-host = { version = "0.8.0", path = "../../crates/host" }
+# Not used directly: its default features put every built-in module in the app.
+dashboard-modules = { version = "0.8.0", path = "../../crates/modules" }
+dashboard-runtime = { version = "0.8.0", path = "../../crates/runtime" }
+gpui = { package = "gpui-pre", version = "=0.3.11" }
+# runtime_shaders: compiling the shaders at build time needs Apple's Metal Toolchain.
+gpui_platform = { package = "gpui-pre-platform", version = "=0.3.11", features = ["font-kit", "runtime_shaders", "wayland", "x11"] }
+raw-window-handle = "0.6.2"
+serde_json = "1.0.154"
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "sync"] }
+
+[target.'cfg(any(target_os = "macos", windows))'.dependencies]
+image = { version = "0.25", default-features = false, features = ["png"] }
+tray-icon = "0.21.3"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2 = "0.6.5"
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.62.2", features = [
+    "Win32_Foundation",
+    "Win32_UI_WindowsAndMessaging",
+] }
