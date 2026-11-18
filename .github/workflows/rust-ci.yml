@@ -1,6 +1,15 @@
 # Rust CI for the workspace, and for the web view and SDK types generated from
-# it. Shaped after rust-ci.yml in osdlc/osdlc and rust.yml in
-# osdlc/skillwright.
+# it.
+#
+# The format check, clippy and the tests on Linux and macOS, and the
+# non-gating Windows run are the `core` job: a call of osdlc/osdlc's
+# rust-ci-core.yml (packages/gh-actions/README.md there lists its settings).
+# Its checks report as `core / <job>`. `features` and `web` are this
+# repository's own. The Rust actions they use come from the same osdlc/osdlc
+# commit as the workflow; move the pins together.
+#
+# The pins are osdlc/osdlc pull request #867's head commit until it merges;
+# then switch them to @main.
 #
 # Unlike upstream there is no `changes` job: the Rust tests read files from
 # most top-level folders, so nearly every pull request touches something they
@@ -38,62 +47,28 @@ defaults:
     shell: bash
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - uses: ./.github/actions/rust-toolchain
-        with:
-          components: rustfmt
-
-      - name: Format check
-        run: cargo fmt --all --check
-
-  rust-test:
-    name: rust test (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 40
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - uses: ./.github/actions/rust-toolchain
-        with:
-          components: clippy
-
-      - uses: ./.github/actions/rust-build-cache
-
+  core:
+    uses: osdlc/osdlc/.github/workflows/rust-ci-core.yml@5bb3827d941cd96a00a1518bf5e6b7245d8da0af # PR #867; @main once it merges
+    with:
+      # Plain `cargo test` covers the default members, which leave out the
+      # Tauri desktop app (see the header).
+      packages: default
+      os: ubuntu-latest macos-latest
+      # Not in the `rust` gate until it passes and stays green (status:
+      # docs/windows.md); then add windows-latest to `os`.
+      windows: 'true'
+      timeout: '40'
       # The plugin tests run the TypeScript and Python plugins in plugins/ext
       # and skip any whose interpreter is missing (Node 24 runs main.ts
-      # directly). Fail here instead, so their Node and Python runs are never
-      # skipped. Bun is optional and not installed: the SDK example tests run
-      # the TypeScript examples under Node either way.
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: '24'
-
-      - name: The plugin interpreters are installed
-        run: |
-          set -euo pipefail
-          node --version
-          python3 --version
-
-      # Per OS, because code behind `cfg(unix)` and `cfg(target_os)` is only
-      # linted on that OS.
-      - name: Clippy
-        run: cargo clippy --all-targets --locked -- -D warnings
-
-      - name: Test
-        run: cargo test --locked
+      # directly). The setup fails instead, so their Node and Python runs are
+      # never skipped. Bun is optional and not installed: the SDK example
+      # tests run the TypeScript examples under Node either way. Not checked on
+      # Windows, whose job never checked them.
+      node-version: '24'
+      setup: node --version && if [ "$RUNNER_OS" != Windows ]; then python3 --version; fi
+      # The web job builds the Vue app; the other jobs embed a placeholder page.
+      env: |
+        DASHBOARD_SKIP_UI_BUILD=1
 
   # Runs scripts/check-features.sh --bundles (see its header). The per-module
   # builds (the script without --bundles) are left to a local run.
@@ -105,11 +80,15 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: ./.github/actions/rust-toolchain
+      - uses: osdlc/osdlc/.github/actions/rust-toolchain@5bb3827d941cd96a00a1518bf5e6b7245d8da0af # as `core`
+        with:
+          workspace: .
 
-      - uses: ./.github/actions/rust-build-cache
+      - uses: osdlc/osdlc/.github/actions/rust-build-cache@5bb3827d941cd96a00a1518bf5e6b7245d8da0af # as `core`
+        with:
+          workspace: .
 
-      # The same interpreters as rust-test: the script runs the plugin tests
+      # The same interpreters as `core`: the script runs the plugin tests
       # in each bundle, and the runner's own Node is older than 24.
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -138,9 +117,13 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: ./.github/actions/rust-toolchain
+      - uses: osdlc/osdlc/.github/actions/rust-toolchain@5bb3827d941cd96a00a1518bf5e6b7245d8da0af # as `core`
+        with:
+          workspace: .
 
-      - uses: ./.github/actions/rust-build-cache
+      - uses: osdlc/osdlc/.github/actions/rust-build-cache@5bb3827d941cd96a00a1518bf5e6b7245d8da0af # as `core`
+        with:
+          workspace: .
 
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
         with:
@@ -178,35 +161,12 @@ jobs:
             exit 1
           fi
 
-  # Not in the `rust` gate until it passes and stays green (status:
-  # docs/windows.md); then move it into the rust-test matrix.
-  windows:
-    runs-on: windows-latest
-    timeout-minutes: 60
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - uses: ./.github/actions/rust-toolchain
-        with:
-          components: clippy
-
-      - uses: ./.github/actions/rust-build-cache
-
-      - name: Clippy
-        run: cargo clippy --all-targets --locked -- -D warnings
-
-      - name: Test
-        run: cargo test --locked
-
   # The job to require in the "Protect main" ruleset. It passes when every job
   # it needs passed or was skipped. `!cancelled()` rather than `always()`: a
   # run superseded by a newer push is cancelled, and should not report a
   # failure; a job that fails or times out still fails it.
   rust:
-    needs: [lint, rust-test, features, web]
+    needs: [core, features, web]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     timeout-minutes: 2
