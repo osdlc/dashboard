@@ -150,38 +150,39 @@ def serve(
 # The contract's types. `node sdk/gen-types.mjs` writes everything between the markers.
 # ---- BEGIN GENERATED (node sdk/gen-types.mjs) ----
 
-Size = Literal["small", "medium", "large", "wide", "tall"]
-
-LogLevel = Literal["error", "warn", "info", "debug"]
-
-Status = Literal["ok", "warn", "error", "unknown"]
-
-# A token a widget can color something with, e.g. one line of a chart.
-Tone = Literal["accent", "ok", "warn", "error", "info", "muted", "series-1", "series-2", "series-3", "series-4", "series-5", "series-6"]
-
-
 class _CommandDeclRequired(TypedDict):
     # Program and arguments. May contain `{name}` placeholders declared in `params`.
     argv: List[str]
+    # Names the command in `run_command` actions, e.g. "switch".
     id: str
+    # Shown to the user, e.g. "Switch to account".
     label: str
 
 
+# A command a module declares. The host runs it only after the user confirms.
 class CommandDecl(_CommandDeclRequired, total=False):
+    # Working directory to run in. `None`: the host's own.
     cwd: Optional[str]
+    # Placeholders `argv` may use, each checked against its pattern.
     params: List["ParamDecl"]
 
 
 class _LayoutHintsRequired(TypedDict):
+    # The size the module suggests; a screen or the config can override it.
     size: "Size"
 
 
+# Size and placement hints for a module's tile.
 class LayoutHints(_LayoutHintsRequired, total=False):
+    # The smallest size the view still works at. `None`: any size.
     min_size: Optional["Size"]
+    # Higher is placed earlier when auto-placing tiles. Default 0.
     priority: int
 
 
+# A `{name}` placeholder in a command's `argv`.
 class ParamDecl(TypedDict):
+    # The placeholder's name, without braces.
     name: str
     # Regex the value must fully match.
     pattern: str
@@ -193,47 +194,65 @@ class _PollRefreshRequired(TypedDict):
     mode: Literal["poll"]
 
 
+# The host asks for a view (`view/render`) every `interval_ms`.
 class PollRefresh(_PollRefreshRequired, total=False):
     # Floor for config overrides, e.g. to stay under an API rate limit.
     min_interval_ms: Optional[int]
 
 
+# The module sends `view/update` notifications when it has a new view.
 class PushRefresh(TypedDict):
     mode: Literal["push"]
 
 
 class _ManifestRequired(TypedDict):
+    # The contract version the module was built for, e.g. "0.1".
     contract_version: str
+    # Unique module ID, e.g. `cswap`.
     id: str
+    # Size and placement hints for the module's tile.
     layout: "LayoutHints"
+    # Display name, shown in the tile header.
     name: str
+    # How the module's view is refreshed: polled by the host or pushed by the module.
     refresh: "Refresh"
 
 
+# What a module declares about itself, in reply to `initialize`.
 class Manifest(_ManifestRequired, total=False):
+    # Commands the host may run for this module after the user confirms.
     commands: List["CommandDecl"]
+    # JSON Schema for the module's `config:` block. `None`: no schema.
     config_schema: Any
 
 
+# Open a link in the browser.
 class OpenUrlAction(TypedDict):
     type: Literal["open_url"]
+    # The link: http or https only.
     url: str
 
 
 class _RunCommandActionRequired(TypedDict):
+    # The command's `id` from the manifest.
     command: str
     type: Literal["run_command"]
 
 
+# Run a command the module declared, after the user confirms.
 class RunCommandAction(_RunCommandActionRequired, total=False):
+    # Values for the command's `{name}` placeholders. Each must match its pattern.
     params: Dict[str, str]
 
 
 class _BarRequired(TypedDict):
+    # Shown beside the bar.
     label: str
+    # Zero or more; the bar's length is this over the widget's `max`.
     value: float
 
 
+# One bar in a `bars` widget.
 class Bar(_BarRequired, total=False):
     # Colors the bar ok, warn or error.
     status: Optional["Status"]
@@ -248,6 +267,7 @@ class _ColumnRequired(TypedDict):
     label: str
 
 
+# A table column.
 class Column(_ColumnRequired, total=False):
     # Which columns to keep when a table is too narrow for all of them:
     # renderers drop the lowest priority first (the rightmost of equal
@@ -256,9 +276,11 @@ class Column(_ColumnRequired, total=False):
 
 
 class _ListItemRequired(TypedDict):
+    # The main line.
     title: str
 
 
+# One item in a `list` widget.
 class ListItem(_ListItemRequired, total=False):
     # What clicking the item does, e.g. open a link.
     action: Optional["Action"]
@@ -273,9 +295,11 @@ class ListItem(_ListItemRequired, total=False):
 
 
 class _LogLineRequired(TypedDict):
+    # The log message.
     text: str
 
 
+# One line in a `log` widget.
 class LogLine(_LogLineRequired, total=False):
     # error, warn, info or debug: colors the line.
     level: Optional["LogLevel"]
@@ -284,11 +308,13 @@ class LogLine(_LogLineRequired, total=False):
 
 
 class _MeterRequired(TypedDict):
+    # Shown beside the meter, e.g. a core number.
     label: str
     # 0-100.
     percent: float
 
 
+# One small meter in a `meter_grid`.
 class Meter(_MeterRequired, total=False):
     # A fixed color for this meter instead of the grid's color scale.
     tone: Optional["Tone"]
@@ -299,6 +325,7 @@ class _RowRequired(TypedDict):
     cells: Dict[str, "Cell"]
 
 
+# A table row.
 class Row(_RowRequired, total=False):
     # What clicking the row does, e.g. open a link.
     action: Optional["Action"]
@@ -313,6 +340,7 @@ class _SeriesDataRequired(TypedDict):
     points: List[Tuple[int, float]]
 
 
+# One line of a `series` chart.
 class SeriesData(_SeriesDataRequired, total=False):
     # This series' color, instead of the widget's `color` (one series) or
     # the next `series-N` token (several).
@@ -320,11 +348,13 @@ class SeriesData(_SeriesDataRequired, total=False):
 
 
 class _SliceRequired(TypedDict):
+    # Shown in the legend.
     label: str
     # Zero or more. Shown with the widget's `format` and `unit`.
     value: float
 
 
+# One slice of a `pie`.
 class Slice(_SliceRequired, total=False):
     # Colors the slice ok, warn or error.
     status: Optional["Status"]
@@ -332,6 +362,7 @@ class Slice(_SliceRequired, total=False):
     tone: Optional["Tone"]
 
 
+# Percents at which a gauge's fill changes color.
 class Thresholds(TypedDict):
     # The percent at which the fill turns the error color.
     error: float
@@ -340,11 +371,13 @@ class Thresholds(TypedDict):
 
 
 class _UptimeCheckRequired(TypedDict):
+    # What is checked, e.g. a host or URL.
     name: str
     # Result of the latest check.
     status: "Status"
 
 
+# One availability check in an `uptime` widget.
 class UptimeCheck(_UptimeCheckRequired, total=False):
     # e.g. "HTTP 200" or the error.
     detail: Optional[str]
@@ -359,6 +392,7 @@ class UptimeCheck(_UptimeCheckRequired, total=False):
 
 
 class _TextWidgetRequired(TypedDict):
+    # The text to show.
     text: str
     type: Literal["text"]
 
@@ -388,6 +422,7 @@ class StatWidget(_StatWidgetRequired, total=False):
 
 
 class _GaugeWidgetRequired(TypedDict):
+    # Shown with the meter.
     label: str
     # How full, 0-100.
     percent: float
@@ -405,6 +440,7 @@ class GaugeWidget(_GaugeWidgetRequired, total=False):
 
 
 class _SeriesWidgetRequired(TypedDict):
+    # The chart's title.
     label: str
     # One or more lines, each with its points.
     series: List["SeriesData"]
@@ -444,6 +480,7 @@ class SeriesWidget(_SeriesWidgetRequired, total=False):
 
 
 class _MeterGridWidgetRequired(TypedDict):
+    # The meters, in order.
     meters: List["Meter"]
     type: Literal["meter_grid"]
 
@@ -452,10 +489,12 @@ class _MeterGridWidgetRequired(TypedDict):
 class MeterGridWidget(_MeterGridWidgetRequired, total=False):
     # The meters' color: `accent`, or a scale colored by each meter's value.
     color: "ColorScale"
+    # A title above the grid.
     label: Optional[str]
 
 
 class _BarsWidgetRequired(TypedDict):
+    # The bars, top to bottom.
     bars: List["Bar"]
     type: Literal["bars"]
 
@@ -464,6 +503,7 @@ class _BarsWidgetRequired(TypedDict):
 class BarsWidget(_BarsWidgetRequired, total=False):
     # How values are written: plain, bytes or count.
     format: "ValueFormat"
+    # A title above the bars.
     label: Optional[str]
     # Value of a full bar. Default: the largest value.
     max: Optional[float]
@@ -472,6 +512,7 @@ class BarsWidget(_BarsWidgetRequired, total=False):
 
 
 class _PieWidgetRequired(TypedDict):
+    # The slices, in order. Values are zero or more.
     slices: List["Slice"]
     type: Literal["pie"]
 
@@ -487,6 +528,7 @@ class PieWidget(_PieWidgetRequired, total=False):
     donut: bool
     # How values are written in the legend: plain, bytes or count.
     format: "ValueFormat"
+    # A title above the chart.
     label: Optional[str]
     # Shown after each value in the legend.
     unit: Optional[str]
@@ -534,6 +576,7 @@ class DisplayWidget(_DisplayWidgetRequired, total=False):
 
 
 class _ListWidgetRequired(TypedDict):
+    # The items, top to bottom.
     items: List["ListItem"]
     type: Literal["list"]
 
@@ -546,23 +589,28 @@ class ListWidget(_ListWidgetRequired, total=False):
 
 # Rows and columns. A cell holds text, a number, or a stat, gauge, pie, display or clock face.
 class TableWidget(TypedDict):
+    # The columns, left to right.
     columns: List["Column"]
+    # The rows, top to bottom.
     rows: List["Row"]
     type: Literal["table"]
 
 
 class _LogWidgetRequired(TypedDict):
+    # The lines, oldest first.
     lines: List["LogLine"]
     type: Literal["log"]
 
 
 # Log output, oldest first. Renderers show the newest lines that fit.
 class LogWidget(_LogWidgetRequired, total=False):
+    # A title above the lines.
     label: Optional[str]
 
 
 # Availability checks, one row each with a strip of recent results.
 class UptimeWidget(TypedDict):
+    # The checks, one row each.
     checks: List["UptimeCheck"]
     type: Literal["uptime"]
 
@@ -583,49 +631,80 @@ class ImageWidget(_ImageWidgetRequired, total=False):
 
 # Widgets side by side, sharing the width.
 class RowWidget(TypedDict):
+    # The widgets, left to right.
     children: List["Widget"]
     type: Literal["row"]
 
 
 # Widgets stacked top to bottom.
 class ColumnWidget(TypedDict):
+    # The widgets, top to bottom.
     children: List["Widget"]
     type: Literal["column"]
 
 
+# What a tile shows: an overall status, a one-line summary and a widget tree.
 class View(TypedDict):
+    # The widget the tile shows; use `row` and `column` to combine several.
     root: "Widget"
+    # The tile's overall health, shown as its status color.
     status: "Status"
     # One line, used when the tile is too small.
     summary: str
 
 
+# Who is running the plugin.
 class HostInfo(TypedDict):
+    # The host's name, e.g. "dashboard".
     name: str
+    # The host's version, e.g. "0.1.0".
     version: str
 
 
 class _InitializeParamsRequired(TypedDict):
+    # The host's contract version, e.g. "0.1".
     contract_version: str
+    # The host running the plugin.
     host: "HostInfo"
 
 
+# Params of the `initialize` request.
 class InitializeParams(_InitializeParamsRequired, total=False):
+    # The module's `config:` block from the config file. Null when absent.
     config: Any
 
 
+# How a tile gets new views.
 Refresh = Union["PollRefresh", "PushRefresh"]
 
+# A tile's size class on the 12-column grid.
+Size = Union[Literal["small"], Literal["medium"], Literal["large"], Literal["wide"], Literal["tall"]]
+
+# What clicking a row or item does.
 Action = Union["OpenUrlAction", "RunCommandAction"]
 
+# A table cell: text, a number or a small widget.
 Cell = Union[str, float, "Widget"]
 
+# A color, or a scale that colors by value.
 ColorScale = Union[Literal["accent"], Literal["heat"], Literal["cool"], Literal["sunset"]]
 
+# How serious a log line is.
+LogLevel = Union[Literal["error"], Literal["warn"], Literal["info"], Literal["debug"]]
+
+# How a `series` chart draws its values.
 SeriesStyle = Union[Literal["line"], Literal["area"], Literal["bars"]]
 
+# Health of a tile, row or item: colors it ok, warn or error.
+Status = Union[Literal["ok"], Literal["warn"], Literal["error"], Literal["unknown"]]
+
+# A token a widget can color something with, e.g. one line of a chart.
+Tone = Union[Literal["accent"], Literal["ok"], Literal["warn"], Literal["error"], Literal["info"], Literal["muted"], Literal["series-1"], Literal["series-2"], Literal["series-3"], Literal["series-4"], Literal["series-5"], Literal["series-6"]]
+
+# How numbers are written.
 ValueFormat = Union[Literal["plain"], Literal["bytes"], Literal["count"]]
 
+# A piece of a view. `type` names the kind: `text`, `stat`, `gauge`, `table` and so on.
 Widget = Union["TextWidget", "StatWidget", "GaugeWidget", "SeriesWidget", "MeterGridWidget", "BarsWidget", "PieWidget", "ClockFaceWidget", "DisplayWidget", "ListWidget", "TableWidget", "LogWidget", "UptimeWidget", "ImageWidget", "RowWidget", "ColumnWidget"]
 
 # ---- END GENERATED ----

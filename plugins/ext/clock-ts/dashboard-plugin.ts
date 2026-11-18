@@ -159,31 +159,44 @@ export function serve<C = Record<string, unknown>>(plugin: Plugin<C>): void {
 // The contract's types. `node sdk/gen-types.mjs` writes everything between the markers.
 // ---- BEGIN GENERATED (node sdk/gen-types.mjs) ----
 
+/** A command a module declares. The host runs it only after the user confirms. */
 export interface CommandDecl {
   /** Program and arguments. May contain `{name}` placeholders declared in `params`. */
   argv: string[];
+  /** Working directory to run in. `None`: the host's own. */
   cwd?: string | null;
+  /** Names the command in `run_command` actions, e.g. "switch". */
   id: string;
+  /** Shown to the user, e.g. "Switch to account". */
   label: string;
+  /** Placeholders `argv` may use, each checked against its pattern. */
   params?: ParamDecl[];
 }
 
+/** Size and placement hints for a module's tile. */
 export interface LayoutHints {
+  /** The smallest size the view still works at. `None`: any size. */
   min_size?: Size | null;
+  /** Higher is placed earlier when auto-placing tiles. Default 0. */
   priority?: number;
+  /** The size the module suggests; a screen or the config can override it. */
   size: Size;
 }
 
+/** A `{name}` placeholder in a command's `argv`. */
 export interface ParamDecl {
+  /** The placeholder's name, without braces. */
   name: string;
   /** Regex the value must fully match. */
   pattern: string;
 }
 
+/** How a tile gets new views. */
 export type Refresh =
   | PollRefresh
   | PushRefresh;
 
+/** The host asks for a view (`view/render`) every `interval_ms`. */
 export interface PollRefresh {
   /** Suggested period. Config can override it. */
   interval_ms: number;
@@ -192,50 +205,72 @@ export interface PollRefresh {
   mode: "poll";
 }
 
+/** The module sends `view/update` notifications when it has a new view. */
 export interface PushRefresh {
   mode: "push";
 }
 
+/** A tile's size class on the 12-column grid. */
 export type Size = "small" | "medium" | "large" | "wide" | "tall";
 
+/** What a module declares about itself, in reply to `initialize`. */
 export interface Manifest {
+  /** Commands the host may run for this module after the user confirms. */
   commands?: CommandDecl[];
+  /** JSON Schema for the module's `config:` block. `None`: no schema. */
   config_schema?: unknown;
+  /** The contract version the module was built for, e.g. "0.1". */
   contract_version: string;
+  /** Unique module ID, e.g. `cswap`. */
   id: string;
+  /** Size and placement hints for the module's tile. */
   layout: LayoutHints;
+  /** Display name, shown in the tile header. */
   name: string;
+  /** How the module's view is refreshed: polled by the host or pushed by the module. */
   refresh: Refresh;
 }
 
+/** What clicking a row or item does. */
 export type Action =
   | OpenUrlAction
   | RunCommandAction;
 
+/** Open a link in the browser. */
 export interface OpenUrlAction {
   type: "open_url";
+  /** The link: http or https only. */
   url: string;
 }
 
+/** Run a command the module declared, after the user confirms. */
 export interface RunCommandAction {
+  /** The command's `id` from the manifest. */
   command: string;
+  /** Values for the command's `{name}` placeholders. Each must match its pattern. */
   params?: Record<string, string>;
   type: "run_command";
 }
 
+/** One bar in a `bars` widget. */
 export interface Bar {
+  /** Shown beside the bar. */
   label: string;
   /** Colors the bar ok, warn or error. */
   status?: Status | null;
   /** Fill color when `status` is not set. Default: `accent`. */
   tone?: Tone | null;
+  /** Zero or more; the bar's length is this over the widget's `max`. */
   value: number;
 }
 
+/** A table cell: text, a number or a small widget. */
 export type Cell = string | number | Widget;
 
+/** A color, or a scale that colors by value. */
 export type ColorScale = "accent" | "heat" | "cool" | "sunset";
 
+/** A table column. */
 export interface Column {
   /** Names the cell in each row's `cells`. */
   key: string;
@@ -249,6 +284,7 @@ export interface Column {
   priority?: number | null;
 }
 
+/** One item in a `list` widget. */
 export interface ListItem {
   /** What clicking the item does, e.g. open a link. */
   action?: Action | null;
@@ -258,22 +294,28 @@ export interface ListItem {
   subtitle?: string | null;
   /** Short labels shown as chips. */
   tags?: string[];
+  /** The main line. */
   title: string;
   /** Color of the item's marker when `status` is not set. */
   tone?: Tone | null;
 }
 
+/** How serious a log line is. */
 export type LogLevel = "error" | "warn" | "info" | "debug";
 
+/** One line in a `log` widget. */
 export interface LogLine {
   /** error, warn, info or debug: colors the line. */
   level?: LogLevel | null;
+  /** The log message. */
   text: string;
   /** Shown before the text, e.g. "14:02:11". */
   time?: string | null;
 }
 
+/** One small meter in a `meter_grid`. */
 export interface Meter {
+  /** Shown beside the meter, e.g. a core number. */
   label: string;
   /** 0-100. */
   percent: number;
@@ -281,6 +323,7 @@ export interface Meter {
   tone?: Tone | null;
 }
 
+/** A table row. */
 export interface Row {
   /** What clicking the row does, e.g. open a link. */
   action?: Action | null;
@@ -290,6 +333,7 @@ export interface Row {
   status?: Status | null;
 }
 
+/** One line of a `series` chart. */
 export interface SeriesData {
   /** Shown in the legend; also keys the history when the widget has an `id`. */
   name: string;
@@ -302,9 +346,12 @@ export interface SeriesData {
   tone?: Tone | null;
 }
 
+/** How a `series` chart draws its values. */
 export type SeriesStyle = "line" | "area" | "bars";
 
+/** One slice of a `pie`. */
 export interface Slice {
+  /** Shown in the legend. */
   label: string;
   /** Colors the slice ok, warn or error. */
   status?: Status | null;
@@ -314,8 +361,10 @@ export interface Slice {
   value: number;
 }
 
+/** Health of a tile, row or item: colors it ok, warn or error. */
 export type Status = "ok" | "warn" | "error" | "unknown";
 
+/** Percents at which a gauge's fill changes color. */
 export interface Thresholds {
   /** The percent at which the fill turns the error color. */
   error: number;
@@ -326,6 +375,7 @@ export interface Thresholds {
 /** A token a widget can color something with, e.g. one line of a chart. */
 export type Tone = "accent" | "ok" | "warn" | "error" | "info" | "muted" | "series-1" | "series-2" | "series-3" | "series-4" | "series-5" | "series-6";
 
+/** One availability check in an `uptime` widget. */
 export interface UptimeCheck {
   /** e.g. "HTTP 200" or the error. */
   detail?: string | null;
@@ -333,6 +383,7 @@ export interface UptimeCheck {
   history?: Status[];
   /** Response time of the latest check. */
   latency_ms?: number | null;
+  /** What is checked, e.g. a host or URL. */
   name: string;
   /** Result of the latest check. */
   status: Status;
@@ -342,8 +393,10 @@ export interface UptimeCheck {
   url?: string | null;
 }
 
+/** How numbers are written. */
 export type ValueFormat = "plain" | "bytes" | "count";
 
+/** A piece of a view. `type` names the kind: `text`, `stat`, `gauge`, `table` and so on. */
 export type Widget =
   | TextWidget
   | StatWidget
@@ -366,6 +419,7 @@ export type Widget =
 export interface TextWidget {
   /** Read markdown in `text`: `**bold**`, and code between backticks. */
   markdown?: boolean;
+  /** The text to show. */
   text: string;
   type: "text";
 }
@@ -389,6 +443,7 @@ export interface StatWidget {
 export interface GaugeWidget {
   /** A line under the meter, e.g. "1721 of 1858 GiB used". */
   caption?: string | null;
+  /** Shown with the meter. */
   label: string;
   /** A tick on the track at this percent, e.g. where usage should be by now. */
   marker?: number | null;
@@ -419,6 +474,7 @@ export interface SeriesWidget {
    * for (tile, `id`, series name). Renderers always get the full history.
    */
   id?: string | null;
+  /** The chart's title. */
   label: string;
   /**
    * Draw the first series above the axis and the second below it,
@@ -449,16 +505,20 @@ export interface SeriesWidget {
 export interface MeterGridWidget {
   /** The meters' color: `accent`, or a scale colored by each meter's value. */
   color?: ColorScale;
+  /** A title above the grid. */
   label?: string | null;
+  /** The meters, in order. */
   meters: Meter[];
   type: "meter_grid";
 }
 
 /** Labeled horizontal bars, in the order given. */
 export interface BarsWidget {
+  /** The bars, top to bottom. */
   bars: Bar[];
   /** How values are written: plain, bytes or count. */
   format?: ValueFormat;
+  /** A title above the bars. */
   label?: string | null;
   /** Value of a full bar. Default: the largest value. */
   max?: number | null;
@@ -482,7 +542,9 @@ export interface PieWidget {
   donut?: boolean;
   /** How values are written in the legend: plain, bytes or count. */
   format?: ValueFormat;
+  /** A title above the chart. */
   label?: string | null;
+  /** The slices, in order. Values are zero or more. */
   slices: Slice[];
   type: "pie";
   /** Shown after each value in the legend. */
@@ -532,26 +594,32 @@ export interface DisplayWidget {
 export interface ListWidget {
   /** Shown when there are no items. */
   empty_text?: string | null;
+  /** The items, top to bottom. */
   items: ListItem[];
   type: "list";
 }
 
 /** Rows and columns. A cell holds text, a number, or a stat, gauge, pie, display or clock face. */
 export interface TableWidget {
+  /** The columns, left to right. */
   columns: Column[];
+  /** The rows, top to bottom. */
   rows: Row[];
   type: "table";
 }
 
 /** Log output, oldest first. Renderers show the newest lines that fit. */
 export interface LogWidget {
+  /** A title above the lines. */
   label?: string | null;
+  /** The lines, oldest first. */
   lines: LogLine[];
   type: "log";
 }
 
 /** Availability checks, one row each with a strip of recent results. */
 export interface UptimeWidget {
+  /** The checks, one row each. */
   checks: UptimeCheck[];
   type: "uptime";
 }
@@ -571,31 +639,43 @@ export interface ImageWidget {
 
 /** Widgets side by side, sharing the width. */
 export interface RowWidget {
+  /** The widgets, left to right. */
   children: Widget[];
   type: "row";
 }
 
 /** Widgets stacked top to bottom. */
 export interface ColumnWidget {
+  /** The widgets, top to bottom. */
   children: Widget[];
   type: "column";
 }
 
+/** What a tile shows: an overall status, a one-line summary and a widget tree. */
 export interface View {
+  /** The widget the tile shows; use `row` and `column` to combine several. */
   root: Widget;
+  /** The tile's overall health, shown as its status color. */
   status: Status;
   /** One line, used when the tile is too small. */
   summary: string;
 }
 
+/** Who is running the plugin. */
 export interface HostInfo {
+  /** The host's name, e.g. "dashboard". */
   name: string;
+  /** The host's version, e.g. "0.1.0". */
   version: string;
 }
 
+/** Params of the `initialize` request. */
 export interface InitializeParams {
+  /** The module's `config:` block from the config file. Null when absent. */
   config?: unknown;
+  /** The host's contract version, e.g. "0.1". */
   contract_version: string;
+  /** The host running the plugin. */
   host: HostInfo;
 }
 
