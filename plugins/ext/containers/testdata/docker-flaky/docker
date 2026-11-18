@@ -1,1 +1,3 @@
-../ok/docker
+#!/bin/sh
+# The fake docker in ../ok, reading the files in this folder.
+FAKE_DOCKER_DATA=$(dirname "$0") exec "$(dirname "$0")/../ok/docker" "$@"
