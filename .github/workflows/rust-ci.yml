@@ -48,7 +48,7 @@ defaults:
 
 jobs:
   core:
-    uses: osdlc/osdlc/.github/workflows/rust-ci-core.yml@5bb3827d941cd96a00a1518bf5e6b7245d8da0af # PR #867; @main once it merges
+    uses: osdlc/osdlc/.github/workflows/rust-ci-core.yml@be0c07080bab7f64d3d1665b79974a46d8e2954f # PR #867; @main once it merges
     with:
       # Plain `cargo test` covers the default members, which leave out the
       # Tauri desktop app (see the header).
@@ -80,11 +80,11 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: osdlc/osdlc/.github/actions/rust-toolchain@5bb3827d941cd96a00a1518bf5e6b7245d8da0af # as `core`
+      - uses: osdlc/osdlc/.github/actions/rust-toolchain@be0c07080bab7f64d3d1665b79974a46d8e2954f # as `core`
         with:
           workspace: .
 
-      - uses: osdlc/osdlc/.github/actions/rust-build-cache@5bb3827d941cd96a00a1518bf5e6b7245d8da0af # as `core`
+      - uses: osdlc/osdlc/.github/actions/rust-build-cache@be0c07080bab7f64d3d1665b79974a46d8e2954f # as `core`
         with:
           workspace: .
 
@@ -117,11 +117,11 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: osdlc/osdlc/.github/actions/rust-toolchain@5bb3827d941cd96a00a1518bf5e6b7245d8da0af # as `core`
+      - uses: osdlc/osdlc/.github/actions/rust-toolchain@be0c07080bab7f64d3d1665b79974a46d8e2954f # as `core`
         with:
           workspace: .
 
-      - uses: osdlc/osdlc/.github/actions/rust-build-cache@5bb3827d941cd96a00a1518bf5e6b7245d8da0af # as `core`
+      - uses: osdlc/osdlc/.github/actions/rust-build-cache@be0c07080bab7f64d3d1665b79974a46d8e2954f # as `core`
         with:
           workspace: .
 
