@@ -80,5 +80,5 @@ request until a milestone takes it on.
 | Experiment | What it tries | Notes |
 |---|---|---|
 | Network mode | Dashboards on a network find each other and show each other's shared screens, behind a password, encrypted | [experiments/network-mode.md](experiments/network-mode.md); built in [M-0006](../sdlc/milestones/M-0006-network.md) |
-| Image widget and screensaver module | An `image` widget and a module that shows pictures | Draft #6 |
+| Image widget and screensaver module | An `image` widget and a module that shows pictures | On main since #6. It adds a widget type, so the config can't turn it off. |
 | Sandboxed WASM plugins | A fourth level for untrusted plugins | Waits on WASI networking and subprocesses ([modules.md](modules.md)); re-measure then |

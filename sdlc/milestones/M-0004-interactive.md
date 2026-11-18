@@ -28,7 +28,7 @@ Build API level 3, as experimental, and use it so a user can act on an item from
   them first.
 - Every action that changes something outside the dashboard asks first, shows what it will run or
   send, and is written to the log.
-- Ambient mode shows no actions (nor the screensaver, if draft #6 lands).
+- Ambient mode shows no actions (nor the screensaver module).
 
 ## Done when
 
