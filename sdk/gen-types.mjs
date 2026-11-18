@@ -220,7 +220,8 @@ function python() {
 // ---- Write ----
 
 function splice(file, body) {
-  const text = readFileSync(file, "utf8");
+  // A Windows checkout may have CRLF line endings; compare as LF.
+  const text = readFileSync(file, "utf8").replace(/\r\n/g, "\n");
   const start = text.indexOf(BEGIN);
   const end = text.indexOf(END);
   if (start < 0 || end < 0) throw new Error(`${file}: missing the GENERATED markers`);

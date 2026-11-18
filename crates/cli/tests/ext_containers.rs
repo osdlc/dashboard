@@ -199,6 +199,8 @@ async fn one_unreachable_engine_warns_and_the_rest_show() {
     assert!(has_row(&view, "postgres"));
 }
 
+// The stand-in docker is a shell script, made executable with Unix permissions.
+#[cfg(unix)]
 #[tokio::test]
 async fn a_unix_socket_that_exists_is_asked_for_its_containers() {
     if !have_python() {

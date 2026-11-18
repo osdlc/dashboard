@@ -2,7 +2,8 @@
 # Stands in for the docker CLI: `context ls --format json` and
 # `--context NAME ps [-a] --format json`, from the files beside it. A context
 # with no ps-NAME.jsonl fails like an engine that cannot be reached.
-here=$(dirname "$0")
+# FAKE_DOCKER_DATA names another folder of those files.
+here=${FAKE_DOCKER_DATA:-$(dirname "$0")}
 if [ "$1" = context ] && [ "$2" = ls ]; then
   cat "$here/contexts.jsonl"
   exit 0
