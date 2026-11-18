@@ -1,6 +1,5 @@
-//! Shows the pictures in a folder one after another, as an `image` widget.
-//! The terminal draws each with the best graphics it supports. Use with
-//! `builtin: screensaver`. The module's `refresh:` is how long each picture
+//! Shows the pictures in a folder one after another. Renders as a
+//! [`Widget::Image`]. Use with `builtin: screensaver`. The module's `refresh:` is how long each picture
 //! stays (30 s by default):
 //!
 //! ```yaml
@@ -12,6 +11,8 @@
 //! ```
 
 use std::path::{Path, PathBuf};
+use std::sync::OnceLock;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::{Context, Result, bail};
@@ -23,10 +24,12 @@ use serde::Deserialize;
 
 use dashboard_modules_common::{expand_home, manifest};
 
-/// File types the renderers can decode.
+/// File types the renderers can decode. Keep in step with the image crate
+/// features in crates/tui/Cargo.toml and the MIME match in crates/web/src/lib.rs.
 const EXTENSIONS: &[&str] = &["png", "jpg", "jpeg", "gif", "webp", "bmp"];
 
-/// Folders with more pictures than this are cut, to keep a scan quick.
+/// Folders with more pictures than this are cut, to keep a scan quick. Which
+/// ones are kept then depends on the order the system lists them in.
 const MAX_FILES: usize = 10_000;
 
 #[derive(Debug, Deserialize, JsonSchema)]
@@ -80,9 +83,12 @@ impl Module for Screensaver {
             bail!("{} is not a folder", self.dir.display());
         }
         self.rng = seed();
+        // The samples' folder name means nothing to the user.
         let name = self
+            .config
             .dir
-            .file_name()
+            .as_ref()
+            .and_then(|_| self.dir.file_name())
             .map(|n| n.to_string_lossy().into_owned())
             .unwrap_or_else(|| "Screensaver".into());
         Ok(manifest(
@@ -95,13 +101,23 @@ impl Module for Screensaver {
         ))
     }
 
-    /// Each refresh shows the next picture. The folder is read again at the
-    /// end of each round, so added and removed files are picked up.
+    /// Each refresh shows the next picture; files removed since the folder was
+    /// read are skipped. The folder is read again at the end of each round, so
+    /// added and removed files are picked up.
     async fn render(&mut self) -> Result<View> {
-        if self.next >= self.order.len() || !self.order[self.next].is_file() {
+        while self.next < self.order.len() && !self.order[self.next].is_file() {
+            self.next += 1;
+        }
+        if self.next >= self.order.len() {
+            let last = self.order.last().cloned();
             let mut files = images(&self.dir, self.config.recursive)?;
             if self.config.shuffle {
                 shuffle(&mut files, &mut self.rng);
+                // A new round doesn't start with the picture that ended the last.
+                if files.len() > 1 && files.first() == last.as_ref() {
+                    let end = files.len() - 1;
+                    files.swap(0, end);
+                }
             }
             self.order = files;
             self.next = 0;
@@ -120,13 +136,17 @@ impl Module for Screensaver {
     }
 }
 
-/// The image files in `dir`, by path.
+/// The image files in `dir`, sorted by path, without hidden entries; at most
+/// [`MAX_FILES`]. A subfolder that can't be read is skipped.
 fn images(dir: &Path, recursive: bool) -> Result<Vec<PathBuf>> {
     let mut out = Vec::new();
     let mut folders = vec![dir.to_path_buf()];
     while let Some(folder) = folders.pop() {
-        let entries =
-            std::fs::read_dir(&folder).with_context(|| format!("reading {}", folder.display()))?;
+        let entries = match std::fs::read_dir(&folder) {
+            Ok(entries) => entries,
+            Err(_) if folder != dir => continue,
+            Err(e) => return Err(e).with_context(|| format!("reading {}", folder.display())),
+        };
         for entry in entries.flatten() {
             let path = entry.path();
             let Ok(kind) = entry.file_type() else {
@@ -152,7 +172,7 @@ fn images(dir: &Path, recursive: bool) -> Result<Vec<PathBuf>> {
 fn is_image(path: &Path) -> bool {
     path.extension()
         .and_then(|e| e.to_str())
-        .is_some_and(|e| EXTENSIONS.contains(&e.to_ascii_lowercase().as_str()))
+        .is_some_and(|e| EXTENSIONS.iter().any(|x| e.eq_ignore_ascii_case(x)))
 }
 
 fn hidden(path: &Path) -> bool {
@@ -210,8 +230,8 @@ fn empty(dir: &Path) -> View {
     }
 }
 
-/// One picture in each format the renderers read, about 37 KB in all. They
-/// are built in so the demo works with no folder of pictures.
+/// One picture in each format the renderers read, built in so the demo works
+/// with no folder of pictures.
 const SAMPLES: &[(&str, &[u8])] = &[
     (
         "ball.gif",
@@ -236,28 +256,67 @@ const SAMPLES: &[(&str, &[u8])] = &[
 ];
 
 /// Writes the built-in samples to a folder of this user's in the temp
-/// folder (once; a file with the wrong size is written again) and returns it.
+/// folder and returns it. A file that is missing or has the wrong size is
+/// written again, under a temporary name and then renamed: a reader never
+/// sees half a file, and a link planted in its place is replaced, not followed.
 fn samples() -> Result<PathBuf> {
+    static WRITES: AtomicUsize = AtomicUsize::new(0);
     #[cfg(unix)]
     // SAFETY: getuid has no preconditions and cannot fail.
-    let user = unsafe { libc::getuid() }.to_string();
+    let user = unsafe { libc::getuid() };
     #[cfg(not(unix))]
     let user = std::env::var("USERNAME").unwrap_or_default();
     let dir = std::env::temp_dir().join(format!("dashboard-screensaver-samples-{user}"));
+    #[cfg(unix)]
+    private_dir(&dir, user)?;
+    #[cfg(not(unix))]
     std::fs::create_dir_all(&dir).with_context(|| format!("creating {}", dir.display()))?;
     for (name, bytes) in SAMPLES {
         let path = dir.join(name);
-        if std::fs::metadata(&path).map(|m| m.len()).ok() != Some(bytes.len() as u64) {
-            std::fs::write(&path, bytes).with_context(|| format!("writing {}", path.display()))?;
+        let len = std::fs::symlink_metadata(&path)
+            .ok()
+            .filter(|m| m.is_file())
+            .map(|m| m.len());
+        if len != Some(bytes.len() as u64) {
+            let n = WRITES.fetch_add(1, Ordering::Relaxed);
+            let temp = dir.join(format!(".{name}.{}.{n}", std::process::id()));
+            std::fs::write(&temp, bytes)
+                .and_then(|()| std::fs::rename(&temp, &path))
+                .with_context(|| format!("writing {}", path.display()))?;
         }
     }
     Ok(dir)
 }
 
+/// Makes `dir` a folder of `user`'s that only they can open. The temp folder
+/// is shared, so a folder or link there that someone else made is refused.
+#[cfg(unix)]
+fn private_dir(dir: &Path, user: u32) -> Result<()> {
+    use std::os::unix::fs::{DirBuilderExt, MetadataExt, PermissionsExt};
+    match std::fs::DirBuilder::new().mode(0o700).create(dir) {
+        Err(e) if e.kind() != std::io::ErrorKind::AlreadyExists => {
+            return Err(e).with_context(|| format!("creating {}", dir.display()));
+        }
+        _ => {}
+    }
+    let m = std::fs::symlink_metadata(dir).with_context(|| format!("reading {}", dir.display()))?;
+    if !m.is_dir() || m.uid() != user {
+        bail!("{} is not a folder of this user's", dir.display());
+    }
+    // Made with the umask's mode before this check existed.
+    if m.mode() & 0o077 != 0 {
+        std::fs::set_permissions(dir, std::fs::Permissions::from_mode(0o700))
+            .with_context(|| format!("securing {}", dir.display()))?;
+    }
+    Ok(())
+}
+
 pub fn catalog() -> CatalogEntry {
-    // The demo is the sunset sample. If the temp folder can't be written, the
-    // renderer says it can't show the picture.
-    let dir = samples().unwrap_or_else(|_| std::env::temp_dir());
+    // The catalog is built often, so the samples are written once per run.
+    // If the temp folder can't be written, the renderer says it can't show
+    // the picture.
+    static DIR: OnceLock<PathBuf> = OnceLock::new();
+    let dir = DIR.get_or_init(|| samples().unwrap_or_else(|_| std::env::temp_dir()));
     let demo = dir.join("sunset.png");
     CatalogEntry {
         description: "Shows the pictures in a folder one after another. The terminal draws \
@@ -271,7 +330,7 @@ pub fn catalog() -> CatalogEntry {
             "screensaver",
             "Screensaver",
             Size::Large,
-            view(&demo, &dir, 1, SAMPLES.len(), true),
+            view(&demo, dir, 1, SAMPLES.len(), true),
         )
     }
 }
@@ -291,13 +350,9 @@ mod tests {
         }
     }
 
-    const NAMES: [&str; 5] = [
-        "ball.gif",
-        "hills.jpg",
-        "night.webp",
-        "peaks.bmp",
-        "sunset.png",
-    ];
+    fn names() -> Vec<&'static str> {
+        SAMPLES.iter().map(|(n, _)| *n).collect()
+    }
 
     #[tokio::test]
     async fn shows_each_picture_in_name_order_then_starts_again() {
@@ -313,7 +368,7 @@ mod tests {
             first.root,
             Widget::Image { caption: Some(ref c), .. } if c == "ball.gif"
         ));
-        for name in &NAMES[1..] {
+        for name in &names()[1..] {
             assert!(shown(&m.render().await.unwrap()).ends_with(name));
         }
         assert!(shown(&m.render().await.unwrap()).ends_with("ball.gif"));
@@ -326,7 +381,7 @@ mod tests {
             .await
             .unwrap();
         let mut seen = Vec::new();
-        for _ in NAMES {
+        for _ in SAMPLES {
             let path = shown(&m.render().await.unwrap());
             seen.push(
                 Path::new(&path)
@@ -337,10 +392,9 @@ mod tests {
             );
         }
         seen.sort();
-        assert_eq!(seen, NAMES);
+        assert_eq!(seen, names());
     }
 
-    /// With no folder, the built-in samples are written out and shown.
     #[tokio::test]
     async fn no_folder_shows_the_built_in_samples() {
         let mut m = Screensaver::default();
@@ -375,6 +429,55 @@ mod tests {
             .unwrap();
         let view = m.render().await.unwrap();
         assert_eq!(view.summary, "trip/beach.JPG · 1 of 1");
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[tokio::test]
+    async fn a_removed_file_is_skipped_and_rounds_do_not_repeat() {
+        let dir = std::env::temp_dir().join(format!("dashboard-saver-gone-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        for name in ["a.png", "b.png", "c.png"] {
+            std::fs::write(dir.join(name), "x").unwrap();
+        }
+        let mut m = Screensaver::default();
+        m.init(serde_json::json!({ "dir": dir, "shuffle": false }))
+            .await
+            .unwrap();
+        assert!(shown(&m.render().await.unwrap()).ends_with("a.png"));
+        std::fs::remove_file(dir.join("b.png")).unwrap();
+        assert!(shown(&m.render().await.unwrap()).ends_with("c.png"));
+        assert!(shown(&m.render().await.unwrap()).ends_with("a.png"));
+
+        let mut m = Screensaver::default();
+        m.init(serde_json::json!({ "dir": dir })).await.unwrap();
+        let mut last = String::new();
+        for _ in 0..20 {
+            let path = shown(&m.render().await.unwrap());
+            assert_ne!(path, last);
+            last = path;
+        }
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn the_samples_folder_must_be_private() {
+        use std::os::unix::fs::PermissionsExt;
+        // SAFETY: getuid has no preconditions and cannot fail.
+        let user = unsafe { libc::getuid() };
+        let dir =
+            std::env::temp_dir().join(format!("dashboard-saver-private-{}", std::process::id()));
+        let mode = |d: &Path| std::fs::metadata(d).unwrap().permissions().mode() & 0o777;
+        private_dir(&dir, user).unwrap();
+        assert_eq!(mode(&dir), 0o700);
+        std::fs::set_permissions(&dir, std::fs::Permissions::from_mode(0o775)).unwrap();
+        private_dir(&dir, user).unwrap();
+        assert_eq!(mode(&dir), 0o700);
+        assert!(private_dir(&dir, user.wrapping_add(1)).is_err());
+        let link = dir.with_extension("link");
+        std::os::unix::fs::symlink(&dir, &link).unwrap();
+        assert!(private_dir(&link, user).is_err());
+        std::fs::remove_file(&link).unwrap();
         std::fs::remove_dir_all(&dir).unwrap();
     }
 

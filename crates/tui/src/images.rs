@@ -1,7 +1,8 @@
 //! The image widget. The terminal's graphics support is detected once at
 //! start: Kitty, iTerm2 or Sixel when it answers for one, colored half blocks
 //! otherwise. `DASHBOARD_IMAGES=halfblocks` skips the query. Each picture is
-//! decoded once and encoded again only when its file or its area changes.
+//! decoded once, shrunk to at most [`MAX_EDGE`] pixels a side, and encoded
+//! again only when its file changes or it is drawn at a new size.
 
 use std::collections::VecDeque;
 use std::sync::{LazyLock, Mutex, OnceLock};
@@ -24,14 +25,22 @@ static PICKER: OnceLock<Picker> = OnceLock::new();
 
 /// Pictures kept decoded. A screensaver shows one at a time, and a screen
 /// rarely has more than a few.
-const KEEP: usize = 6;
+const MAX_DECODED: usize = 6;
+
+/// Encodings kept per picture, one per area size, for a picture shown in
+/// tiles of different sizes.
+const MAX_SIZES: usize = 3;
+
+/// Longest side, in pixels, a picture is kept at. A camera photo decodes to
+/// about 100 MB; this is more than a tile on a large screen needs.
+const MAX_EDGE: u32 = 2560;
 
 struct Entry {
     path: String,
     modified: Option<SystemTime>,
     image: Result<DynamicImage, String>,
-    /// The last encoding, for this area size.
-    encoded: Option<(Size, Result<Protocol, String>)>,
+    /// The latest encodings, oldest first, each for its area size.
+    encoded: Vec<(Size, Result<Protocol, String>)>,
 }
 
 static CACHE: LazyLock<Mutex<VecDeque<Entry>>> = LazyLock::new(Default::default);
@@ -39,6 +48,11 @@ static CACHE: LazyLock<Mutex<VecDeque<Entry>>> = LazyLock::new(Default::default)
 /// Asks the terminal which graphics it supports. Call after entering raw mode
 /// and the alternate screen, before reading events.
 pub fn detect() {
+    // Asked once: the terminal is the same when the app comes back from an
+    // editor, and a terminal that doesn't answer makes the query wait.
+    if PICKER.get().is_some() {
+        return;
+    }
     let picker = match std::env::var("DASHBOARD_IMAGES").as_deref() {
         Ok("halfblocks") => Picker::halfblocks(),
         _ => Picker::from_query_stdio().unwrap_or_else(|_| Picker::halfblocks()),
@@ -52,23 +66,19 @@ fn picker() -> &'static Picker {
 }
 
 pub fn draw(f: &mut Canvas, p: &Palette, area: Rect, path: &str, caption: Option<&str>) {
-    let (picture, line) = match caption {
-        Some(c) if area.height > 2 => (
-            Rect {
-                height: area.height - 1,
-                ..area
-            },
-            Some((c, Rect::new(area.x, area.bottom() - 1, area.width, 1))),
-        ),
-        _ => (area, None),
-    };
-    if let Some((text, rect)) = line {
-        let text = fit::truncate(text, rect.width as usize);
+    let mut picture = area;
+    if let Some(text) = caption.filter(|_| area.height > 2) {
+        picture.height -= 1;
+        let line = Rect {
+            y: picture.bottom(),
+            height: 1,
+            ..area
+        };
         f.render_widget(
-            Paragraph::new(text)
+            Paragraph::new(fit::truncate(text, line.width as usize))
                 .style(Style::new().fg(p.muted))
                 .centered(),
-            rect,
+            line,
         );
     }
     if picture.width == 0 || picture.height == 0 {
@@ -78,21 +88,28 @@ pub fn draw(f: &mut Canvas, p: &Palette, area: Rect, path: &str, caption: Option
     let mut cache = CACHE.lock().unwrap_or_else(|e| e.into_inner());
     let entry = entry(&mut cache, path);
     let size = Size::new(picture.width, picture.height);
-    if entry.encoded.as_ref().is_none_or(|(s, _)| *s != size) {
-        let encoded = match &entry.image {
-            Ok(image) => picker()
-                .new_protocol(
-                    image.clone(),
-                    size,
-                    Resize::Scale(Some(FilterType::Triangle)),
-                )
-                .map_err(|e| e.to_string()),
-            Err(e) => Err(e.clone()),
-        };
-        entry.encoded = Some((size, encoded));
-    }
-    match &entry.encoded {
-        Some((_, Ok(protocol))) => {
+    let i = match entry.encoded.iter().position(|(s, _)| *s == size) {
+        Some(i) => i,
+        None => {
+            let encoded = match &entry.image {
+                Ok(image) => picker()
+                    .new_protocol(
+                        image.clone(),
+                        size,
+                        Resize::Scale(Some(FilterType::Triangle)),
+                    )
+                    .map_err(|e| e.to_string()),
+                Err(e) => Err(e.clone()),
+            };
+            if entry.encoded.len() >= MAX_SIZES {
+                entry.encoded.drain(..1);
+            }
+            entry.encoded.push((size, encoded));
+            entry.encoded.len() - 1
+        }
+    };
+    match &entry.encoded[i].1 {
+        Ok(protocol) => {
             // Centered: the picture keeps its shape, so one side has room left.
             let got = protocol.size();
             let rect = Rect::new(
@@ -103,7 +120,7 @@ pub fn draw(f: &mut Canvas, p: &Palette, area: Rect, path: &str, caption: Option
             );
             f.render_widget(Image::new(protocol), rect);
         }
-        Some((_, Err(e))) => {
+        Err(e) => {
             f.render_widget(
                 Paragraph::new(format!("can't show {path}: {e}"))
                     .style(Style::new().fg(p.warn))
@@ -111,7 +128,6 @@ pub fn draw(f: &mut Canvas, p: &Palette, area: Rect, path: &str, caption: Option
                 picture,
             );
         }
-        None => {}
     }
 }
 
@@ -126,25 +142,30 @@ fn entry<'a>(cache: &'a mut VecDeque<Entry>, path: &str) -> &'a mut Entry {
             return cache.back_mut().expect("just pushed");
         }
     }
-    if cache.len() >= KEEP {
+    if cache.len() >= MAX_DECODED {
         cache.pop_front();
     }
     cache.push_back(Entry {
         path: path.to_string(),
         modified,
         image: decode(path),
-        encoded: None,
+        encoded: Vec::new(),
     });
     cache.back_mut().expect("just pushed")
 }
 
 fn decode(path: &str) -> Result<DynamicImage, String> {
-    image::ImageReader::open(path)
-        .map_err(|e| e.to_string())?
-        .with_guessed_format()
-        .map_err(|e| e.to_string())?
-        .decode()
-        .map_err(|e| e.to_string())
+    let read = || {
+        image::ImageReader::open(path)?
+            .with_guessed_format()?
+            .decode()
+    };
+    let image = read().map_err(|e| e.to_string())?;
+    Ok(if image.width().max(image.height()) > MAX_EDGE {
+        image.resize(MAX_EDGE, MAX_EDGE, FilterType::Triangle)
+    } else {
+        image
+    })
 }
 
 #[cfg(test)]
@@ -184,7 +205,6 @@ mod tests {
         assert_eq!(caption.trim(), "sunset.png");
     }
 
-    /// One sample per format the widget documents: each decodes and draws.
     #[test]
     fn every_sample_format_draws() {
         let dir = concat!(
