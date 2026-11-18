@@ -48,7 +48,7 @@ defaults:
 
 jobs:
   core:
-    uses: osdlc/osdlc/.github/workflows/rust-ci-core.yml@be0c07080bab7f64d3d1665b79974a46d8e2954f # PR #867; @main once it merges
+    uses: osdlc/osdlc/.github/workflows/rust-ci-core.yml@48fcdaf65619da2bb012fa833cb4806d0d3501af # PR #867; @main once it merges
     with:
       # Plain `cargo test` covers the default members, which leave out the
       # Tauri desktop app (see the header).
@@ -58,6 +58,7 @@ jobs:
       # docs/windows.md); then add windows-latest to `os`.
       windows: 'true'
       timeout: '40'
+      test-runner: nextest
       # The plugin tests run the TypeScript and Python plugins in plugins/ext
       # and skip any whose interpreter is missing (Node 24 runs main.ts
       # directly). The setup fails instead, so their Node and Python runs are
@@ -80,11 +81,11 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: osdlc/osdlc/.github/actions/rust-toolchain@be0c07080bab7f64d3d1665b79974a46d8e2954f # as `core`
+      - uses: osdlc/osdlc/.github/actions/rust-toolchain@48fcdaf65619da2bb012fa833cb4806d0d3501af # as `core`
         with:
           workspace: .
 
-      - uses: osdlc/osdlc/.github/actions/rust-build-cache@be0c07080bab7f64d3d1665b79974a46d8e2954f # as `core`
+      - uses: osdlc/osdlc/.github/actions/rust-build-cache@48fcdaf65619da2bb012fa833cb4806d0d3501af # as `core`
         with:
           workspace: .
 
@@ -117,11 +118,11 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: osdlc/osdlc/.github/actions/rust-toolchain@be0c07080bab7f64d3d1665b79974a46d8e2954f # as `core`
+      - uses: osdlc/osdlc/.github/actions/rust-toolchain@48fcdaf65619da2bb012fa833cb4806d0d3501af # as `core`
         with:
           workspace: .
 
-      - uses: osdlc/osdlc/.github/actions/rust-build-cache@be0c07080bab7f64d3d1665b79974a46d8e2954f # as `core`
+      - uses: osdlc/osdlc/.github/actions/rust-build-cache@48fcdaf65619da2bb012fa833cb4806d0d3501af # as `core`
         with:
           workspace: .
 
