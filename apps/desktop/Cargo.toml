@@ -1,8 +1,10 @@
 [package]
 name = "dashboard-desktop"
 edition.workspace = true
+rust-version.workspace = true
 version.workspace = true
 license.workspace = true
+repository.workspace = true
 description = "The dashboard as a desktop app: a window, wallpaper or screensaver"
 
 [build-dependencies]
@@ -28,3 +30,6 @@ windows = { version = "0.62.2", features = [
     "Win32_Foundation",
     "Win32_UI_WindowsAndMessaging",
 ] }
+
+[lints]
+workspace = true

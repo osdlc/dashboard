@@ -1,8 +1,11 @@
 [package]
 name = "dashboard-modules-agents"
+description = "Dashboard modules for AI coding agents: limits, usage and cost"
 edition.workspace = true
+rust-version.workspace = true
 version.workspace = true
 license.workspace = true
+repository.workspace = true
 
 # One feature per module, named after its id. dashboard-modules turns them on
 # through its `bundle-agents` and `module-<id>` features.
@@ -29,3 +32,6 @@ tokio = { version = "1.54.1", features = ["io-util", "process", "rt", "time"] }
 
 [dev-dependencies]
 tokio = { version = "1.54.1", features = ["macros", "rt"] }
+
+[lints]
+workspace = true

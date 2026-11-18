@@ -1,8 +1,11 @@
 [package]
 name = "dashboard-host"
+description = "The dashboard's host runtime: runs modules, keeps the latest view per tile and sends updates to renderers"
 edition.workspace = true
+rust-version.workspace = true
 version.workspace = true
 license.workspace = true
+repository.workspace = true
 
 [dependencies]
 anyhow = "1.0.104"
@@ -23,3 +26,6 @@ windows-sys = { version = "0.61.2", features = [
     "Win32_System_JobObjects",
     "Win32_System_Threading",
 ] }
+
+[lints]
+workspace = true

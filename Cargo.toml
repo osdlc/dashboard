@@ -11,7 +11,17 @@ exclude = ["plugins/ext", "bench/wasm"]
 [workspace.package]
 edition = "2024"
 version = "0.8.0"
+# The MSRV: sysinfo needs 1.95, the highest of any dependency.
+rust-version = "1.95"
 license = "MIT OR Apache-2.0"
+repository = "https://github.com/osdlc/dashboard"
+
+# osdlc's Rust package standard (S-package-shape-rs). Unsafe code is denied
+# rather than forbidden: the few places that call the OS allow it where they
+# do, with a SAFETY comment.
+[workspace.lints.rust]
+unsafe_code = "deny"
+missing_docs = "warn"
 
 # Smallest binary: `cargo build --profile small`. Slower to build.
 [profile.small]

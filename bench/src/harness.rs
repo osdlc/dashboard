@@ -13,6 +13,9 @@
 //! that serves the recorded samples, Hacker News reads its sample file, and
 //! docker runs the fake docker program from the tests.
 
+// Reads child CPU and memory with getrusage, wait4 and proc_pid_rusage.
+#![allow(unsafe_code)]
+
 use std::io::{BufRead, BufReader, Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::path::{Path, PathBuf};

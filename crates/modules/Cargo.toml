@@ -1,8 +1,11 @@
 [package]
 name = "dashboard-modules"
+description = "Gathers the dashboard's built-in modules from the bundles this build includes"
 edition.workspace = true
+rust-version.workspace = true
 version.workspace = true
 license.workspace = true
+repository.workspace = true
 
 # Built-in modules come in bundles, one crate each. A `bundle-<name>` feature
 # turns on every module of that bundle; a `module-<id>` feature turns on one.
@@ -145,3 +148,6 @@ dashboard-modules-personal = { version = "0.8.0", path = "../modules-personal", 
 dashboard-modules-fun = { version = "0.8.0", path = "../modules-fun", default-features = false, optional = true }
 dashboard-modules-system = { version = "0.8.0", path = "../modules-system", default-features = false, optional = true }
 serde_json = "1.0.154"
+
+[lints]
+workspace = true

@@ -1,8 +1,11 @@
 [package]
 name = "dashboard-modules-system"
+description = "Dashboard modules for the machine: CPU, memory, disk, network, logs, files and command output"
 edition.workspace = true
+rust-version.workspace = true
 version.workspace = true
 license.workspace = true
+repository.workspace = true
 
 # One feature per module, named after its id. dashboard-modules turns them on
 # through its `bundle-system` and `module-<id>` features.
@@ -46,3 +49,6 @@ libc = "0.2.191"
 
 [dev-dependencies]
 tokio = { version = "1.54.1", features = ["macros", "net", "rt", "rt-multi-thread"] }
+
+[lints]
+workspace = true

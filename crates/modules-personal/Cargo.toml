@@ -1,8 +1,11 @@
 [package]
 name = "dashboard-modules-personal"
+description = "Dashboard modules for personal use: weather, the moon, calendars and task lists"
 edition.workspace = true
+rust-version.workspace = true
 version.workspace = true
 license.workspace = true
+repository.workspace = true
 
 # One feature per module, named after its id. dashboard-modules turns them on
 # through its `bundle-personal` and `module-<id>` features.
@@ -47,3 +50,6 @@ tokio = { version = "1.54.1", features = ["process", "rt", "time"], optional = t
 [dev-dependencies]
 dashboard-config = { version = "0.8.0", path = "../config" }
 tokio = { version = "1.54.1", features = ["io-util", "macros", "net", "rt"] }
+
+[lints]
+workspace = true
