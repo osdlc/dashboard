@@ -1,361 +1,9 @@
 /* Generated from the Rust contract by pnpm gen:types. Do not edit. */
 
 /**
- * Health of a tile, row or item: colors it ok, warn or error.
+ * A tile's size class on the 12-column grid.
  */
-export type Status = "ok" | "warn" | "error" | "unknown";
-/**
- * A token a widget can color something with, e.g. one line of a chart.
- */
-export type Tone =
-  | "accent"
-  | "ok"
-  | "warn"
-  | "error"
-  | "info"
-  | "muted"
-  | "series-1"
-  | "series-2"
-  | "series-3"
-  | "series-4"
-  | "series-5"
-  | "series-6";
-/**
- * What clicking a row or item does.
- */
-export type Action =
-  | {
-      type: "open_url";
-      /**
-       * The link: http or https only.
-       */
-      url: string;
-    }
-  | {
-      /**
-       * The command's `id` from the manifest.
-       */
-      command: string;
-      /**
-       * Values for the command's `{name}` placeholders. Each must match its pattern.
-       */
-      params?: {
-        [k: string]: string;
-      };
-      type: "run_command";
-    };
-/**
- * A table cell: text, a number or a small widget.
- */
-export type Cell =
-  | string
-  | number
-  | (
-      | {
-          /**
-           * Read markdown in `text`: `**bold**`, and code between backticks.
-           */
-          markdown?: boolean;
-          /**
-           * The text to show.
-           */
-          text: string;
-          type: "text";
-        }
-      | {
-          /**
-           * A change to show beside the value, e.g. "+2.8%".
-           */
-          delta?: string | null;
-          /**
-           * Shown above or before the value.
-           */
-          label: string;
-          /**
-           * Colors the value: ok, warn or error.
-           */
-          status?: Status | null;
-          type: "stat";
-          /**
-           * Shown after the value, smaller, e.g. "ms" or "/s".
-           */
-          unit?: string | null;
-          /**
-           * Already formatted, e.g. "3451" or "1.2k".
-           */
-          value: string;
-        }
-      | {
-          /**
-           * A line under the meter, e.g. "1721 of 1858 GiB used".
-           */
-          caption?: string | null;
-          /**
-           * Shown with the meter.
-           */
-          label: string;
-          /**
-           * A tick on the track at this percent, e.g. where usage should be by now.
-           */
-          marker?: number | null;
-          /**
-           * How full, 0-100.
-           */
-          percent: number;
-          /**
-           * Percents at which the fill turns warn and error colored.
-           */
-          thresholds?: Thresholds | null;
-          type: "gauge";
-        }
-      | {
-          /**
-           * The color of a single series.
-           */
-          color?: "accent" | "heat" | "cool" | "sunset";
-          /**
-           * Scale to the data's own range with a little padding (for prices that
-           * sit far from 0). Ignored when `y_min` or `y_max` is set, and when
-           * `mirrored`.
-           */
-          fit?: boolean;
-          /**
-           * How values are written: plain, bytes or count.
-           */
-          format?: "plain" | "bytes" | "count";
-          /**
-           * Points the host keeps per series when `id` is set. Default 300.
-           */
-          history?: number | null;
-          /**
-           * When set, the host keeps history for this widget: each update's
-           * `points` are new samples, appended to what the host already holds
-           * for (tile, `id`, series name). Renderers always get the full history.
-           */
-          id?: string | null;
-          /**
-           * The chart's title.
-           */
-          label: string;
-          /**
-           * Draw the first series above the axis and the second below it,
-           * e.g. network download and upload. Negative values count as 0 here
-           * (`dashboard check` flags them).
-           */
-          mirrored?: boolean;
-          /**
-           * One or more lines, each with its points.
-           */
-          series: SeriesData[];
-          /**
-           * A line, a filled area or one bar per sample.
-           */
-          style?: "line" | "area" | "bars";
-          type: "series";
-          /**
-           * Shown after values, e.g. "%" or "/s".
-           */
-          unit?: string | null;
-          /**
-           * The top of the chart. Default: the largest value (at least 1 when no
-           * value is negative and `y_min` is unset).
-           */
-          y_max?: number | null;
-          /**
-           * The bottom of the chart. Default: 0, or the smallest value when that
-           * is negative. Set it to chart values that never reach 0.
-           */
-          y_min?: number | null;
-        }
-      | {
-          /**
-           * The meters' color: `accent`, or a scale colored by each meter's value.
-           */
-          color?: "accent" | "heat" | "cool" | "sunset";
-          /**
-           * A title above the grid.
-           */
-          label?: string | null;
-          /**
-           * The meters, in order.
-           */
-          meters: Meter[];
-          type: "meter_grid";
-        }
-      | {
-          /**
-           * The bars, top to bottom.
-           */
-          bars: Bar[];
-          /**
-           * How values are written: plain, bytes or count.
-           */
-          format?: "plain" | "bytes" | "count";
-          /**
-           * A title above the bars.
-           */
-          label?: string | null;
-          /**
-           * Value of a full bar. Default: the largest value.
-           */
-          max?: number | null;
-          type: "bars";
-          /**
-           * Shown after each value.
-           */
-          unit?: string | null;
-        }
-      | {
-          /**
-           * `accent` (the default) gives each slice its own color, the theme's
-           * accent first. The other scales spread the slices along the scale
-           * in order. A slice's `status` overrides its color.
-           */
-          color?: "accent" | "heat" | "cool" | "sunset";
-          /**
-           * A ring with a hole in the middle. Default true; false draws a full disc.
-           */
-          donut?: boolean;
-          /**
-           * How values are written in the legend: plain, bytes or count.
-           */
-          format?: "plain" | "bytes" | "count";
-          /**
-           * A title above the chart.
-           */
-          label?: string | null;
-          /**
-           * The slices, in order. Values are zero or more.
-           */
-          slices: Slice[];
-          type: "pie";
-          /**
-           * Shown after each value in the legend.
-           */
-          unit?: string | null;
-        }
-      | {
-          /**
-           * Shown below the face, e.g. a date.
-           */
-          caption?: string | null;
-          /**
-           * 0-23.
-           */
-          hour: number;
-          /**
-           * Shown above the face, e.g. "Tokyo".
-           */
-          label?: string | null;
-          /**
-           * 0-59.
-           */
-          minute: number;
-          /**
-           * 0-59. No second hand when absent.
-           */
-          second?: number | null;
-          /**
-           * Colors the face's outline.
-           */
-          status?: Status | null;
-          type: "clock_face";
-        }
-      | {
-          /**
-           * Shown below the text.
-           */
-          caption?: string | null;
-          /**
-           * Shown above the text.
-           */
-          label?: string | null;
-          /**
-           * Colors the text.
-           */
-          status?: Status | null;
-          /**
-           * Already formatted, e.g. "14:05". The TUI draws it in a block font
-           * when it has a glyph for every character, else as plain text; see
-           * docs/contract.md, "Clock face and display".
-           */
-          text: string;
-          type: "display";
-          /**
-           * Shown after the text, smaller, e.g. "PM".
-           */
-          unit?: string | null;
-        }
-      | {
-          /**
-           * Shown when there are no items.
-           */
-          empty_text?: string | null;
-          /**
-           * The items, top to bottom.
-           */
-          items: ListItem[];
-          type: "list";
-        }
-      | {
-          /**
-           * The columns, left to right.
-           */
-          columns: Column[];
-          /**
-           * The rows, top to bottom.
-           */
-          rows: Row[];
-          type: "table";
-        }
-      | {
-          /**
-           * A title above the lines.
-           */
-          label?: string | null;
-          /**
-           * The lines, oldest first.
-           */
-          lines: LogLine[];
-          type: "log";
-        }
-      | {
-          /**
-           * The checks, one row each.
-           */
-          checks: UptimeCheck[];
-          type: "uptime";
-        }
-      | {
-          /**
-           * A line under the picture, e.g. the file name.
-           */
-          caption?: string | null;
-          /**
-           * Image file: PNG, JPEG, GIF (first frame), WebP or BMP.
-           */
-          path: string;
-          type: "image";
-        }
-      | {
-          /**
-           * The widgets, left to right.
-           */
-          children: Widget[];
-          type: "row";
-        }
-      | {
-          /**
-           * The widgets, top to bottom.
-           */
-          children: Widget[];
-          type: "column";
-        }
-    );
-/**
- * How serious a log line is.
- */
-export type LogLevel = "error" | "warn" | "info" | "debug";
+export type Size = "small" | "medium" | "large" | "wide" | "tall";
 /**
  * A piece of a view. `type` names the kind: `text`, `stat`, `gauge`, `table` and so on.
  */
@@ -421,7 +69,7 @@ export type Widget =
       /**
        * The color of a single series.
        */
-      color?: "accent" | "heat" | "cool" | "sunset";
+      color?: ColorScale & string;
       /**
        * Scale to the data's own range with a little padding (for prices that
        * sit far from 0). Ignored when `y_min` or `y_max` is set, and when
@@ -431,7 +79,7 @@ export type Widget =
       /**
        * How values are written: plain, bytes or count.
        */
-      format?: "plain" | "bytes" | "count";
+      format?: ValueFormat & string;
       /**
        * Points the host keeps per series when `id` is set. Default 300.
        */
@@ -459,7 +107,7 @@ export type Widget =
       /**
        * A line, a filled area or one bar per sample.
        */
-      style?: "line" | "area" | "bars";
+      style?: SeriesStyle & string;
       type: "series";
       /**
        * Shown after values, e.g. "%" or "/s".
@@ -480,7 +128,7 @@ export type Widget =
       /**
        * The meters' color: `accent`, or a scale colored by each meter's value.
        */
-      color?: "accent" | "heat" | "cool" | "sunset";
+      color?: ColorScale & string;
       /**
        * A title above the grid.
        */
@@ -499,7 +147,7 @@ export type Widget =
       /**
        * How values are written: plain, bytes or count.
        */
-      format?: "plain" | "bytes" | "count";
+      format?: ValueFormat & string;
       /**
        * A title above the bars.
        */
@@ -520,7 +168,7 @@ export type Widget =
        * accent first. The other scales spread the slices along the scale
        * in order. A slice's `status` overrides its color.
        */
-      color?: "accent" | "heat" | "cool" | "sunset";
+      color?: ColorScale & string;
       /**
        * A ring with a hole in the middle. Default true; false draws a full disc.
        */
@@ -528,7 +176,7 @@ export type Widget =
       /**
        * How values are written in the legend: plain, bytes or count.
        */
-      format?: "plain" | "bytes" | "count";
+      format?: ValueFormat & string;
       /**
        * A title above the chart.
        */
@@ -661,6 +309,74 @@ export type Widget =
       type: "column";
     };
 /**
+ * Health of a tile, row or item: colors it ok, warn or error.
+ */
+export type Status = "ok" | "warn" | "error" | "unknown";
+/**
+ * A color, or a scale that colors by value.
+ */
+export type ColorScale = "accent" | "heat" | "cool" | "sunset";
+/**
+ * How numbers are written.
+ */
+export type ValueFormat = "plain" | "bytes" | "count";
+/**
+ * A token a widget can color something with, e.g. one line of a chart.
+ */
+export type Tone =
+  | "accent"
+  | "ok"
+  | "warn"
+  | "error"
+  | "info"
+  | "muted"
+  | "series-1"
+  | "series-2"
+  | "series-3"
+  | "series-4"
+  | "series-5"
+  | "series-6";
+/**
+ * How a `series` chart draws its values.
+ */
+export type SeriesStyle = "line" | "area" | "bars";
+/**
+ * What clicking a row or item does.
+ */
+export type Action =
+  | {
+      type: "open_url";
+      /**
+       * The link: http or https only.
+       */
+      url: string;
+    }
+  | {
+      /**
+       * The command's `id` from the manifest.
+       */
+      command: string;
+      /**
+       * Values for the command's `{name}` placeholders. Each must match its pattern.
+       */
+      params?: {
+        [k: string]: string;
+      };
+      type: "run_command";
+    };
+/**
+ * A table cell: text, a number or a small widget.
+ */
+export type Cell = string | number | Widget;
+/**
+ * How serious a log line is.
+ */
+export type LogLevel = "error" | "warn" | "info" | "debug";
+/**
+ * Whether an entry is compiled in or a separate program.
+ */
+export type EntryKind = "builtin" | "plugin";
+/**
  * Actions from a renderer: the web view sends these over its WebSocket, the
  * TUI over a channel. The host carries them out.
  */
@@ -673,7 +389,7 @@ export type ClientMessage =
       /**
        * Light, dark or auto.
        */
-      theme: "auto" | "light" | "dark";
+      theme: Theme;
       type: "set_theme";
     }
   | {
@@ -716,7 +432,7 @@ export type ClientMessage =
       /**
        * Whether `entry` is a built-in or a plugin.
        */
-      kind: "builtin" | "plugin";
+      kind: EntryKind;
       /**
        * The new module's ID in the config (its key under `modules:`),
        * usually the catalog ID.
@@ -729,7 +445,7 @@ export type ClientMessage =
       /**
        * The new tile's size.
        */
-      size: "small" | "medium" | "large" | "wide" | "tall";
+      size: Size;
       type: "add_module";
     }
   | {
@@ -740,14 +456,24 @@ export type ClientMessage =
       type: "switch_dashboard";
     };
 /**
+ * Light or dark, for the whole dashboard.
+ */
+export type Theme = "auto" | "light" | "dark";
+/**
  * Messages the host sends to the web view over its WebSocket.
  */
 export type ServerMessage =
   | {
+      /**
+       * Everything renderers need besides tiles.
+       */
       settings: UiSettings;
       type: "settings";
     }
   | {
+      /**
+       * The update.
+       */
       tile: TileUpdate;
       type: "tile";
     };
@@ -790,7 +516,10 @@ export interface CatalogEntry {
   /**
    * The size it suggests for its tile.
    */
-  default_size: "small" | "medium" | "large" | "wide" | "tall";
+  default_size: Size;
+  /**
+   * Made-up but realistic data, shown in previews. Needs no account.
+   */
   demo: View;
   /**
    * One line about what it shows.
@@ -804,11 +533,14 @@ export interface CatalogEntry {
   /**
    * Built in or plugin.
    */
-  kind: "builtin" | "plugin";
+  kind: EntryKind;
   /**
    * Display name.
    */
   name: string;
+  /**
+   * What it needs to work: programs, environment variables, hosts.
+   */
   requirements?: Requirements;
   /**
    * Where it comes from: `builtin`, `bundled` (a plugin inside the
@@ -825,317 +557,17 @@ export interface CatalogEntry {
   version: string;
 }
 /**
- * Made-up but realistic data, shown in previews. Needs no account.
+ * What a tile shows: an overall status, a one-line summary and a widget tree.
  */
 export interface View {
   /**
    * The widget the tile shows; use `row` and `column` to combine several.
    */
-  root:
-    | {
-        /**
-         * Read markdown in `text`: `**bold**`, and code between backticks.
-         */
-        markdown?: boolean;
-        /**
-         * The text to show.
-         */
-        text: string;
-        type: "text";
-      }
-    | {
-        /**
-         * A change to show beside the value, e.g. "+2.8%".
-         */
-        delta?: string | null;
-        /**
-         * Shown above or before the value.
-         */
-        label: string;
-        /**
-         * Colors the value: ok, warn or error.
-         */
-        status?: Status | null;
-        type: "stat";
-        /**
-         * Shown after the value, smaller, e.g. "ms" or "/s".
-         */
-        unit?: string | null;
-        /**
-         * Already formatted, e.g. "3451" or "1.2k".
-         */
-        value: string;
-      }
-    | {
-        /**
-         * A line under the meter, e.g. "1721 of 1858 GiB used".
-         */
-        caption?: string | null;
-        /**
-         * Shown with the meter.
-         */
-        label: string;
-        /**
-         * A tick on the track at this percent, e.g. where usage should be by now.
-         */
-        marker?: number | null;
-        /**
-         * How full, 0-100.
-         */
-        percent: number;
-        /**
-         * Percents at which the fill turns warn and error colored.
-         */
-        thresholds?: Thresholds | null;
-        type: "gauge";
-      }
-    | {
-        /**
-         * The color of a single series.
-         */
-        color?: "accent" | "heat" | "cool" | "sunset";
-        /**
-         * Scale to the data's own range with a little padding (for prices that
-         * sit far from 0). Ignored when `y_min` or `y_max` is set, and when
-         * `mirrored`.
-         */
-        fit?: boolean;
-        /**
-         * How values are written: plain, bytes or count.
-         */
-        format?: "plain" | "bytes" | "count";
-        /**
-         * Points the host keeps per series when `id` is set. Default 300.
-         */
-        history?: number | null;
-        /**
-         * When set, the host keeps history for this widget: each update's
-         * `points` are new samples, appended to what the host already holds
-         * for (tile, `id`, series name). Renderers always get the full history.
-         */
-        id?: string | null;
-        /**
-         * The chart's title.
-         */
-        label: string;
-        /**
-         * Draw the first series above the axis and the second below it,
-         * e.g. network download and upload. Negative values count as 0 here
-         * (`dashboard check` flags them).
-         */
-        mirrored?: boolean;
-        /**
-         * One or more lines, each with its points.
-         */
-        series: SeriesData[];
-        /**
-         * A line, a filled area or one bar per sample.
-         */
-        style?: "line" | "area" | "bars";
-        type: "series";
-        /**
-         * Shown after values, e.g. "%" or "/s".
-         */
-        unit?: string | null;
-        /**
-         * The top of the chart. Default: the largest value (at least 1 when no
-         * value is negative and `y_min` is unset).
-         */
-        y_max?: number | null;
-        /**
-         * The bottom of the chart. Default: 0, or the smallest value when that
-         * is negative. Set it to chart values that never reach 0.
-         */
-        y_min?: number | null;
-      }
-    | {
-        /**
-         * The meters' color: `accent`, or a scale colored by each meter's value.
-         */
-        color?: "accent" | "heat" | "cool" | "sunset";
-        /**
-         * A title above the grid.
-         */
-        label?: string | null;
-        /**
-         * The meters, in order.
-         */
-        meters: Meter[];
-        type: "meter_grid";
-      }
-    | {
-        /**
-         * The bars, top to bottom.
-         */
-        bars: Bar[];
-        /**
-         * How values are written: plain, bytes or count.
-         */
-        format?: "plain" | "bytes" | "count";
-        /**
-         * A title above the bars.
-         */
-        label?: string | null;
-        /**
-         * Value of a full bar. Default: the largest value.
-         */
-        max?: number | null;
-        type: "bars";
-        /**
-         * Shown after each value.
-         */
-        unit?: string | null;
-      }
-    | {
-        /**
-         * `accent` (the default) gives each slice its own color, the theme's
-         * accent first. The other scales spread the slices along the scale
-         * in order. A slice's `status` overrides its color.
-         */
-        color?: "accent" | "heat" | "cool" | "sunset";
-        /**
-         * A ring with a hole in the middle. Default true; false draws a full disc.
-         */
-        donut?: boolean;
-        /**
-         * How values are written in the legend: plain, bytes or count.
-         */
-        format?: "plain" | "bytes" | "count";
-        /**
-         * A title above the chart.
-         */
-        label?: string | null;
-        /**
-         * The slices, in order. Values are zero or more.
-         */
-        slices: Slice[];
-        type: "pie";
-        /**
-         * Shown after each value in the legend.
-         */
-        unit?: string | null;
-      }
-    | {
-        /**
-         * Shown below the face, e.g. a date.
-         */
-        caption?: string | null;
-        /**
-         * 0-23.
-         */
-        hour: number;
-        /**
-         * Shown above the face, e.g. "Tokyo".
-         */
-        label?: string | null;
-        /**
-         * 0-59.
-         */
-        minute: number;
-        /**
-         * 0-59. No second hand when absent.
-         */
-        second?: number | null;
-        /**
-         * Colors the face's outline.
-         */
-        status?: Status | null;
-        type: "clock_face";
-      }
-    | {
-        /**
-         * Shown below the text.
-         */
-        caption?: string | null;
-        /**
-         * Shown above the text.
-         */
-        label?: string | null;
-        /**
-         * Colors the text.
-         */
-        status?: Status | null;
-        /**
-         * Already formatted, e.g. "14:05". The TUI draws it in a block font
-         * when it has a glyph for every character, else as plain text; see
-         * docs/contract.md, "Clock face and display".
-         */
-        text: string;
-        type: "display";
-        /**
-         * Shown after the text, smaller, e.g. "PM".
-         */
-        unit?: string | null;
-      }
-    | {
-        /**
-         * Shown when there are no items.
-         */
-        empty_text?: string | null;
-        /**
-         * The items, top to bottom.
-         */
-        items: ListItem[];
-        type: "list";
-      }
-    | {
-        /**
-         * The columns, left to right.
-         */
-        columns: Column[];
-        /**
-         * The rows, top to bottom.
-         */
-        rows: Row[];
-        type: "table";
-      }
-    | {
-        /**
-         * A title above the lines.
-         */
-        label?: string | null;
-        /**
-         * The lines, oldest first.
-         */
-        lines: LogLine[];
-        type: "log";
-      }
-    | {
-        /**
-         * The checks, one row each.
-         */
-        checks: UptimeCheck[];
-        type: "uptime";
-      }
-    | {
-        /**
-         * A line under the picture, e.g. the file name.
-         */
-        caption?: string | null;
-        /**
-         * Image file: PNG, JPEG, GIF (first frame), WebP or BMP.
-         */
-        path: string;
-        type: "image";
-      }
-    | {
-        /**
-         * The widgets, left to right.
-         */
-        children: Widget[];
-        type: "row";
-      }
-    | {
-        /**
-         * The widgets, top to bottom.
-         */
-        children: Widget[];
-        type: "column";
-      };
+  root: Widget;
   /**
-   * Health of a tile, row or item: colors it ok, warn or error.
+   * The tile's overall health, shown as its status color.
    */
-  status: "ok" | "warn" | "error" | "unknown";
+  status: Status;
   /**
    * One line, used when the tile is too small.
    */
@@ -1336,9 +768,9 @@ export interface UptimeCheck {
    */
   name: string;
   /**
-   * Health of a tile, row or item: colors it ok, warn or error.
+   * Result of the latest check.
    */
-  status: "ok" | "warn" | "error" | "unknown";
+  status: Status;
   /**
    * Share of recent checks that passed, 0-100.
    */
@@ -1349,7 +781,7 @@ export interface UptimeCheck {
   url?: string | null;
 }
 /**
- * What it needs to work: programs, environment variables, hosts.
+ * What a module needs to work. Shown before adding or installing it.
  */
 export interface Requirements {
   /**
@@ -1385,21 +817,27 @@ export interface TilePlacement {
   /**
    * Resolved size: screen config, else module config, else the module's hint.
    */
-  size: "small" | "medium" | "large" | "wide" | "tall";
+  size: Size;
   /**
    * The tile's module ID.
    */
   tile_id: string;
 }
 /**
- * Everything renderers need besides tiles.
+ * Renderer-wide settings derived from the config.
  */
 export interface UiSettings {
+  /**
+   * The color theme in use, both variants; `theme` picks one.
+   */
   color_theme?: ColorTheme;
   /**
    * Color themes to choose from: built-ins, then the config's own.
    */
   color_themes?: string[];
+  /**
+   * Where the config came from, for the settings screen.
+   */
   config: ConfigInfo;
   /**
    * Running modules, for the help screen.
@@ -1416,7 +854,7 @@ export interface UiSettings {
   /**
    * Light, dark or auto: picks the variant of `color_theme`.
    */
-  theme: "auto" | "light" | "dark";
+  theme: Theme;
   /**
    * The most times a second the terminal view draws the screen again when
    * tiles change. The web view does not use it.
@@ -1424,141 +862,26 @@ export interface UiSettings {
   tui_fps?: number;
 }
 /**
- * The color theme in use, both variants; `theme` picks one.
+ * A color theme with both variants, as sent to renderers.
  */
 export interface ColorTheme {
+  /**
+   * Colors for a dark background.
+   */
   dark: Tokens;
-  light: Tokens1;
+  /**
+   * Colors for a light background.
+   */
+  light: Tokens;
   /**
    * The theme's name, e.g. "default".
    */
   name: string;
 }
 /**
- * Colors for a dark background.
+ * Every color a renderer uses, as `#rrggbb`.
  */
 export interface Tokens {
-  /**
-   * Highlights: the default fill for meters, bars and charts.
-   */
-  accent: string;
-  /**
-   * Background of the item picked with the keyboard.
-   */
-  "accent-soft": string;
-  /**
-   * Page background.
-   */
-  bg: string;
-  /**
-   * Tile and table borders.
-   */
-  border: string;
-  /**
-   * High stop of the `cool` scale.
-   */
-  "cool-high": string;
-  /**
-   * Low stop of the `cool` scale.
-   */
-  "cool-low": string;
-  /**
-   * Middle stop of the `cool` scale.
-   */
-  "cool-mid": string;
-  /**
-   * Failing status.
-   */
-  error: string;
-  /**
-   * High stop of the `heat` scale.
-   */
-  "heat-high": string;
-  /**
-   * Stops of the `heat` color scale: low, middle, high.
-   */
-  "heat-low": string;
-  /**
-   * Middle stop of the `heat` scale.
-   */
-  "heat-mid": string;
-  /**
-   * Neutral information.
-   */
-  info: string;
-  /**
-   * Labels, captions and other quiet text.
-   */
-  muted: string;
-  /**
-   * Healthy status.
-   */
-  ok: string;
-  /**
-   * Text on an `accent` background.
-   */
-  "on-accent": string;
-  /**
-   * Categorical colors for series, bars and slices, in order.
-   */
-  "series-1": string;
-  /**
-   * Categorical color 2.
-   */
-  "series-2": string;
-  /**
-   * Categorical color 3.
-   */
-  "series-3": string;
-  /**
-   * Categorical color 4.
-   */
-  "series-4": string;
-  /**
-   * Categorical color 5.
-   */
-  "series-5": string;
-  /**
-   * Categorical color 6.
-   */
-  "series-6": string;
-  /**
-   * High stop of the `sunset` scale.
-   */
-  "sunset-high": string;
-  /**
-   * Low stop of the `sunset` scale.
-   */
-  "sunset-low": string;
-  /**
-   * Middle stop of the `sunset` scale.
-   */
-  "sunset-mid": string;
-  /**
-   * Tiles and panels.
-   */
-  surface: string;
-  /**
-   * Hovered rows and buttons; inline code.
-   */
-  "surface-2": string;
-  /**
-   * Body text.
-   */
-  text: string;
-  /**
-   * The empty part of gauges, meters and bars.
-   */
-  track: string;
-  /**
-   * Needs-attention status.
-   */
-  warn: string;
-}
-/**
- * Colors for a light background.
- */
-export interface Tokens1 {
   /**
    * Highlights: the default fill for meters, bars and charts.
    */
@@ -1761,7 +1084,7 @@ export interface ModuleSummary {
   /**
    * The size the module suggests, used when a screen doesn't set one.
    */
-  default_size: "small" | "medium" | "large" | "wide" | "tall";
+  default_size: Size;
   /**
    * The module's display name.
    */
@@ -1797,7 +1120,7 @@ export interface RotateSettings {
   screens: string[];
 }
 /**
- * The update.
+ * What the host sends to renderers (TUI, web) for each tile.
  */
 export interface TileUpdate {
   /**
@@ -1817,322 +1140,8 @@ export interface TileUpdate {
    * Unix ms.
    */
   updated_at: number;
-  view: View1;
-}
-/**
- * What the tile shows.
- */
-export interface View1 {
   /**
-   * The widget the tile shows; use `row` and `column` to combine several.
+   * What the tile shows.
    */
-  root:
-    | {
-        /**
-         * Read markdown in `text`: `**bold**`, and code between backticks.
-         */
-        markdown?: boolean;
-        /**
-         * The text to show.
-         */
-        text: string;
-        type: "text";
-      }
-    | {
-        /**
-         * A change to show beside the value, e.g. "+2.8%".
-         */
-        delta?: string | null;
-        /**
-         * Shown above or before the value.
-         */
-        label: string;
-        /**
-         * Colors the value: ok, warn or error.
-         */
-        status?: Status | null;
-        type: "stat";
-        /**
-         * Shown after the value, smaller, e.g. "ms" or "/s".
-         */
-        unit?: string | null;
-        /**
-         * Already formatted, e.g. "3451" or "1.2k".
-         */
-        value: string;
-      }
-    | {
-        /**
-         * A line under the meter, e.g. "1721 of 1858 GiB used".
-         */
-        caption?: string | null;
-        /**
-         * Shown with the meter.
-         */
-        label: string;
-        /**
-         * A tick on the track at this percent, e.g. where usage should be by now.
-         */
-        marker?: number | null;
-        /**
-         * How full, 0-100.
-         */
-        percent: number;
-        /**
-         * Percents at which the fill turns warn and error colored.
-         */
-        thresholds?: Thresholds | null;
-        type: "gauge";
-      }
-    | {
-        /**
-         * The color of a single series.
-         */
-        color?: "accent" | "heat" | "cool" | "sunset";
-        /**
-         * Scale to the data's own range with a little padding (for prices that
-         * sit far from 0). Ignored when `y_min` or `y_max` is set, and when
-         * `mirrored`.
-         */
-        fit?: boolean;
-        /**
-         * How values are written: plain, bytes or count.
-         */
-        format?: "plain" | "bytes" | "count";
-        /**
-         * Points the host keeps per series when `id` is set. Default 300.
-         */
-        history?: number | null;
-        /**
-         * When set, the host keeps history for this widget: each update's
-         * `points` are new samples, appended to what the host already holds
-         * for (tile, `id`, series name). Renderers always get the full history.
-         */
-        id?: string | null;
-        /**
-         * The chart's title.
-         */
-        label: string;
-        /**
-         * Draw the first series above the axis and the second below it,
-         * e.g. network download and upload. Negative values count as 0 here
-         * (`dashboard check` flags them).
-         */
-        mirrored?: boolean;
-        /**
-         * One or more lines, each with its points.
-         */
-        series: SeriesData[];
-        /**
-         * A line, a filled area or one bar per sample.
-         */
-        style?: "line" | "area" | "bars";
-        type: "series";
-        /**
-         * Shown after values, e.g. "%" or "/s".
-         */
-        unit?: string | null;
-        /**
-         * The top of the chart. Default: the largest value (at least 1 when no
-         * value is negative and `y_min` is unset).
-         */
-        y_max?: number | null;
-        /**
-         * The bottom of the chart. Default: 0, or the smallest value when that
-         * is negative. Set it to chart values that never reach 0.
-         */
-        y_min?: number | null;
-      }
-    | {
-        /**
-         * The meters' color: `accent`, or a scale colored by each meter's value.
-         */
-        color?: "accent" | "heat" | "cool" | "sunset";
-        /**
-         * A title above the grid.
-         */
-        label?: string | null;
-        /**
-         * The meters, in order.
-         */
-        meters: Meter[];
-        type: "meter_grid";
-      }
-    | {
-        /**
-         * The bars, top to bottom.
-         */
-        bars: Bar[];
-        /**
-         * How values are written: plain, bytes or count.
-         */
-        format?: "plain" | "bytes" | "count";
-        /**
-         * A title above the bars.
-         */
-        label?: string | null;
-        /**
-         * Value of a full bar. Default: the largest value.
-         */
-        max?: number | null;
-        type: "bars";
-        /**
-         * Shown after each value.
-         */
-        unit?: string | null;
-      }
-    | {
-        /**
-         * `accent` (the default) gives each slice its own color, the theme's
-         * accent first. The other scales spread the slices along the scale
-         * in order. A slice's `status` overrides its color.
-         */
-        color?: "accent" | "heat" | "cool" | "sunset";
-        /**
-         * A ring with a hole in the middle. Default true; false draws a full disc.
-         */
-        donut?: boolean;
-        /**
-         * How values are written in the legend: plain, bytes or count.
-         */
-        format?: "plain" | "bytes" | "count";
-        /**
-         * A title above the chart.
-         */
-        label?: string | null;
-        /**
-         * The slices, in order. Values are zero or more.
-         */
-        slices: Slice[];
-        type: "pie";
-        /**
-         * Shown after each value in the legend.
-         */
-        unit?: string | null;
-      }
-    | {
-        /**
-         * Shown below the face, e.g. a date.
-         */
-        caption?: string | null;
-        /**
-         * 0-23.
-         */
-        hour: number;
-        /**
-         * Shown above the face, e.g. "Tokyo".
-         */
-        label?: string | null;
-        /**
-         * 0-59.
-         */
-        minute: number;
-        /**
-         * 0-59. No second hand when absent.
-         */
-        second?: number | null;
-        /**
-         * Colors the face's outline.
-         */
-        status?: Status | null;
-        type: "clock_face";
-      }
-    | {
-        /**
-         * Shown below the text.
-         */
-        caption?: string | null;
-        /**
-         * Shown above the text.
-         */
-        label?: string | null;
-        /**
-         * Colors the text.
-         */
-        status?: Status | null;
-        /**
-         * Already formatted, e.g. "14:05". The TUI draws it in a block font
-         * when it has a glyph for every character, else as plain text; see
-         * docs/contract.md, "Clock face and display".
-         */
-        text: string;
-        type: "display";
-        /**
-         * Shown after the text, smaller, e.g. "PM".
-         */
-        unit?: string | null;
-      }
-    | {
-        /**
-         * Shown when there are no items.
-         */
-        empty_text?: string | null;
-        /**
-         * The items, top to bottom.
-         */
-        items: ListItem[];
-        type: "list";
-      }
-    | {
-        /**
-         * The columns, left to right.
-         */
-        columns: Column[];
-        /**
-         * The rows, top to bottom.
-         */
-        rows: Row[];
-        type: "table";
-      }
-    | {
-        /**
-         * A title above the lines.
-         */
-        label?: string | null;
-        /**
-         * The lines, oldest first.
-         */
-        lines: LogLine[];
-        type: "log";
-      }
-    | {
-        /**
-         * The checks, one row each.
-         */
-        checks: UptimeCheck[];
-        type: "uptime";
-      }
-    | {
-        /**
-         * A line under the picture, e.g. the file name.
-         */
-        caption?: string | null;
-        /**
-         * Image file: PNG, JPEG, GIF (first frame), WebP or BMP.
-         */
-        path: string;
-        type: "image";
-      }
-    | {
-        /**
-         * The widgets, left to right.
-         */
-        children: Widget[];
-        type: "row";
-      }
-    | {
-        /**
-         * The widgets, top to bottom.
-         */
-        children: Widget[];
-        type: "column";
-      };
-  /**
-   * Health of a tile, row or item: colors it ok, warn or error.
-   */
-  status: "ok" | "warn" | "error" | "unknown";
-  /**
-   * One line, used when the tile is too small.
-   */
-  summary: string;
+  view: View;
 }

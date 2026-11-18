@@ -16,6 +16,26 @@ struct WebProtocol {
 }
 
 fn main() {
-    let schema = schemars::schema_for!(WebProtocol);
+    let mut schema = serde_json::to_value(schemars::schema_for!(WebProtocol)).unwrap();
+    wrap_refs(&mut schema);
     println!("{}", serde_json::to_string_pretty(&schema).unwrap());
+}
+
+/// json2ts reads a `$ref` with a `description` beside it as a new inline
+/// type, so a documented field of type `Size` would lose the name `Size`.
+/// Moving the `$ref` into `allOf` keeps both the name and the field's doc.
+fn wrap_refs(value: &mut serde_json::Value) {
+    use serde_json::{Value, json};
+    match value {
+        Value::Object(map) => {
+            if map.len() > 1
+                && let Some(target) = map.remove("$ref")
+            {
+                map.insert("allOf".into(), json!([{ "$ref": target }]));
+            }
+            map.values_mut().for_each(wrap_refs);
+        }
+        Value::Array(items) => items.iter_mut().for_each(wrap_refs),
+        _ => {}
+    }
 }
