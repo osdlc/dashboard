@@ -11,6 +11,7 @@ use sysinfo::Networks;
 
 use super::{Rate, demo_graph, demo_series, demo_values, graph, manifest};
 
+/// Download and upload rates of the physical network interfaces.
 pub struct Network {
     networks: Networks,
     rate: Rate,
@@ -107,6 +108,7 @@ impl Module for Network {
     }
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let down = demo_values(120, 1_400_000.0, 1_200_000.0, 0.5);
     let up = demo_values(120, 180_000.0, 150_000.0, 3.0);

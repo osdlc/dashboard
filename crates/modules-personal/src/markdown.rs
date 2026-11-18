@@ -58,6 +58,7 @@ impl Default for Config {
     }
 }
 
+/// Open Markdown tasks from notes, in the Obsidian Tasks format.
 #[derive(Default)]
 pub struct MarkdownTasks {
     config: Config,
@@ -291,6 +292,7 @@ fn dataview(body: &str) -> (String, Vec<(String, String)>) {
     (text, fields)
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let today = today();
     let d = |days: i64| {

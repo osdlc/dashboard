@@ -73,6 +73,7 @@ impl Default for Config {
     }
 }
 
+/// Today's agenda from an iCalendar feed or file.
 #[derive(Default)]
 pub struct Calendar {
     config: Config,
@@ -336,6 +337,7 @@ fn agenda_view(
     }
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     // A hand-written feed with times around now, so the demo always reads
     // the same: one meeting under way, the next in 12 minutes.

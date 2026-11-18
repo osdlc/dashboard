@@ -16,25 +16,33 @@ pub struct CatalogEntry {
     /// The module ID to put in a config: under `modules:` for a built-in, or
     /// `package:` for a plugin package.
     pub id: String,
+    /// Display name.
     pub name: String,
+    /// The entry's version.
     pub version: String,
+    /// One line about what it shows.
     pub description: String,
+    /// Words to search and filter by, e.g. `github`.
     #[serde(default)]
     pub tags: Vec<String>,
+    /// Built in or plugin.
     pub kind: EntryKind,
     /// Where it comes from: `builtin`, `bundled` (a plugin inside the
     /// dashboard binary), or the folder of an installed package.
     pub source: String,
+    /// The size it suggests for its tile.
     pub default_size: Size,
     /// JSON Schema for the module's `config:` block.
     #[serde(default)]
     pub config_schema: Option<serde_json::Value>,
+    /// What it needs to work: programs, environment variables, hosts.
     #[serde(default)]
     pub requirements: Requirements,
     /// Made-up but realistic data, shown in previews. Needs no account.
     pub demo: View,
 }
 
+/// Whether an entry is compiled in or a separate program.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum EntryKind {
@@ -134,9 +142,13 @@ pub fn search<'a>(
 pub struct Package {
     /// Lowercase letters, digits and dashes. Also the package's folder name.
     pub id: String,
+    /// The package's version, e.g. "1.2.0".
     pub version: String,
+    /// Display name.
     pub name: String,
+    /// One line about what it shows.
     pub description: String,
+    /// Words to search and filter by, e.g. `github`.
     #[serde(default)]
     pub tags: Vec<String>,
     /// Program and arguments, run in the package's folder. A program given

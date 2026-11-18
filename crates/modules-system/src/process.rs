@@ -49,6 +49,7 @@ impl Default for Config {
 /// started since the last listing is counted from the next one.
 const LIST_EVERY: Duration = Duration::from_secs(10);
 
+/// One process and everything it started, as three numbers: CPU, memory and the number of processes.
 #[derive(Default)]
 pub struct Process {
     config: Config,
@@ -215,6 +216,7 @@ fn view(sum: Total, name: Option<&str>) -> View {
     }
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let demo = view(
         Total {

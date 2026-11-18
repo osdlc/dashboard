@@ -39,6 +39,7 @@ struct Quota {
     percent_remaining: Option<f64>,
 }
 
+/// GitHub Copilot's monthly quotas.
 #[derive(Default)]
 pub struct Copilot;
 
@@ -158,6 +159,7 @@ fn quota_name(id: &str) -> String {
     }
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     // A sample reply in the endpoint's shape, resetting 12 days from now.
     let now = now_secs();

@@ -83,6 +83,7 @@ impl Default for Config {
     }
 }
 
+/// Shows what a URL returns: a view, values picked from JSON, or text.
 #[derive(Default)]
 pub struct Http {
     config: Config,
@@ -210,6 +211,7 @@ fn demo_fields() -> Vec<Field> {
     ]
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let fields = demo_fields();
     let shape = Shape {
@@ -303,6 +305,7 @@ mod tests {
         assert!(requests[1].contains("\"v1\""), "{}", requests[1]);
     }
 
+    #[allow(unsafe_code)]
     #[tokio::test]
     async fn sends_the_token_and_picks_fields() {
         // SAFETY: only this test reads this variable.

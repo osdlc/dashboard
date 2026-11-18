@@ -12,7 +12,9 @@ use crate::{Action, CONTRACT_VERSION, Cell, Manifest, Refresh, View, Widget};
 /// One thing found, with where it is.
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub struct Finding {
+    /// True for a problem (the plugin sent something wrong), false for a note.
     pub problem: bool,
+    /// One line of plain text naming where it is.
     pub text: String,
 }
 

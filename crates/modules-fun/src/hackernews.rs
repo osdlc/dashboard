@@ -91,6 +91,7 @@ impl Default for Config {
     }
 }
 
+/// Hacker News: the top stories (or new, best, Ask HN, Show HN, jobs) from the public HN Firebase API, as a list.
 #[derive(Default)]
 pub struct HackerNews {
     config: Config,
@@ -284,6 +285,7 @@ fn demo_items(now: i64) -> Vec<Value> {
     ]
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let now = dashboard_host::now_ms() / 1000;
     CatalogEntry {

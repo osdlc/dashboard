@@ -115,6 +115,7 @@ enum Overlay {
     Settings,
 }
 
+/// Show the dashboard in the terminal until the user quits.
 pub async fn run(
     host: Host,
     mut settings_rx: watch::Receiver<UiSettings>,

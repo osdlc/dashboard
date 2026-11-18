@@ -60,6 +60,7 @@ impl Default for Config {
     }
 }
 
+/// Bitcoin fee rates, mempool size and the latest blocks, from mempool.space.
 #[derive(Default)]
 pub struct Mempool {
     config: Config,
@@ -278,6 +279,7 @@ fn view(data: &Data, c: &Config, now: i64) -> View {
 /// "Now" for the sample: 2026-10-27T12:00:00Z.
 const SAMPLE_NOW: i64 = 1_793_102_400;
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let data: Data = serde_json::from_str(include_str!("../testdata/mempool/sample.json"))
         .expect("demo data parses");

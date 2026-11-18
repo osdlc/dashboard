@@ -95,12 +95,14 @@ const ISSUE_SECTIONS: &[Section] = &[
     },
 ];
 
+/// GitHub pull requests and issues, read with the `gh` CLI (uses its login).
 pub struct GitHub {
     kind: Kind,
     config: Config,
 }
 
 impl GitHub {
+    /// Module for your pull requests.
     pub fn prs() -> Self {
         Self {
             kind: Kind::Prs,
@@ -108,6 +110,7 @@ impl GitHub {
         }
     }
 
+    /// Module for your issues.
     pub fn issues() -> Self {
         Self {
             kind: Kind::Issues,
@@ -271,6 +274,7 @@ fn github_entry(id: &str, name: &str, tag: &str, description: &str, demo: View) 
     }
 }
 
+/// Catalog entry for GitHub pull requests, with demo data.
 pub fn catalog_prs() -> CatalogEntry {
     let demo = view(vec![
         (
@@ -318,6 +322,7 @@ pub fn catalog_prs() -> CatalogEntry {
     )
 }
 
+/// Catalog entry for GitHub issues, with demo data.
 pub fn catalog_issues() -> CatalogEntry {
     let mut assigned = vec![
         demo_item(

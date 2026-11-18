@@ -20,6 +20,7 @@ use crate::Module;
 
 const TIMEOUT: Duration = Duration::from_secs(30);
 
+/// A module run as a child process that speaks the contract over stdin and stdout.
 pub struct Plugin {
     tile_id: String,
     argv: Vec<String>,
@@ -40,6 +41,7 @@ struct Proc {
 }
 
 impl Plugin {
+    /// A plugin for `tile_id` that runs `argv`. Nothing starts until first use.
     pub fn new(tile_id: &str, argv: Vec<String>) -> Self {
         Self {
             tile_id: tile_id.into(),
@@ -225,6 +227,7 @@ mod tests {
         std::fs::remove_dir_all(&dir).ok();
         tokio::time::sleep(Duration::from_millis(200)).await;
         // SAFETY: signal 0 only checks that the process exists.
+        #[allow(unsafe_code)]
         let alive = unsafe { libc::kill(pid, 0) } == 0;
         assert!(!alive, "sleep {pid} still running");
     }

@@ -67,6 +67,7 @@ impl Config {
     }
 }
 
+/// The latest or top dev.to articles for a tag, an author or the whole site.
 #[derive(Default)]
 pub struct DevTo {
     config: Config,
@@ -203,6 +204,7 @@ fn view(articles: &[Article], c: &Config, now: i64) -> View {
 /// "Now" for the sample: 2026-10-27T12:00:00Z.
 const SAMPLE_NOW: i64 = 1_793_102_400;
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let articles: Vec<Article> =
         serde_json::from_str(include_str!("../testdata/devto/articles.json"))

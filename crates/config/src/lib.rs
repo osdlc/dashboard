@@ -24,15 +24,18 @@ pub mod trust;
 
 pub use add::{NewModule, add_module};
 
+/// The tool's name, used for its config and data folders.
 pub const TOOL: &str = "dashboard";
 const VENDOR: &str = "dev.sksizer";
 
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(default, deny_unknown_fields)]
+/// A dashboard config file.
 pub struct Config {
     /// What this dashboard is for, in a few words. Shown by `dashboard
     /// dashboards list` and in the web view's dashboard switcher.
     pub description: Option<String>,
+    /// Light, dark, or `auto` to follow the system. Default: `auto`.
     pub theme: Theme,
     /// The colors: a built-in theme (`default`, `contrast`, `paper`, `ember`)
     /// or one from `color_themes:`. Default: `default`.
@@ -44,6 +47,7 @@ pub struct Config {
     pub modules: BTreeMap<String, ModuleConfig>,
     /// If empty, one screen shows every enabled module, auto-placed.
     pub screens: Vec<Screen>,
+    /// Cycle through screens on a timer. Unset: no rotation.
     pub rotate: Option<Rotate>,
     /// Settings for the terminal view.
     pub tui: Tui,
@@ -51,7 +55,9 @@ pub struct Config {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(default, deny_unknown_fields)]
+/// Settings for one module.
 pub struct ModuleConfig {
+    /// Whether the module runs. Default: true.
     pub enabled: bool,
     /// Run this module as a stdio plugin: program and arguments.
     pub plugin: Option<Vec<String>>,
@@ -104,24 +110,32 @@ pub struct CustomTheme {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
+/// A page of tiles, shown one at a time.
 pub struct Screen {
+    /// The screen's name, used by `rotate.screens`.
     pub name: String,
+    /// The tiles on this screen, in order.
     pub tiles: Vec<Tile>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
+/// One module's place on a screen.
 pub struct Tile {
+    /// The tile ID of the module to show.
     pub module: String,
     #[serde(default)]
+    /// How much room the tile takes. Unset: the module's own default.
     pub size: Option<Size>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
+/// Switch screens on a timer.
 pub struct Rotate {
     #[serde(with = "humantime_serde")]
     #[schemars(with = "String")]
+    /// How long each screen shows, such as `30s`.
     pub interval: Duration,
     /// Screens to rotate through, by name. Default: all.
     #[serde(default)]
@@ -157,7 +171,9 @@ fn default_resume_after() -> Duration {
 /// Where the config was read from, for messages and the settings screen.
 #[derive(Debug, Clone)]
 pub struct Loaded {
+    /// The parsed config.
     pub config: Config,
+    /// The file it was read from, or would be written to.
     pub path: PathBuf,
     /// False when no file exists and `DEFAULT_CONFIG` is in use.
     pub exists: bool,
@@ -221,6 +237,7 @@ pub fn load(path: Option<&Path>) -> Result<Loaded> {
     })
 }
 
+/// Parse config YAML. Empty text gives the default config.
 pub fn parse(text: &str) -> Result<Config> {
     if text.trim().is_empty() {
         return Ok(Config::default());
@@ -230,6 +247,7 @@ pub fn parse(text: &str) -> Result<Config> {
 }
 
 impl Config {
+    /// Settings for module `id`, or the defaults when it has none.
     pub fn module(&self, id: &str) -> ModuleConfig {
         self.modules.get(id).cloned().unwrap_or_default()
     }
@@ -424,6 +442,7 @@ fn pairs(m: &BTreeMap<String, String>) -> impl Iterator<Item = (&str, &str)> {
 pub struct Invalid {
     /// Where the mistake is.
     pub part: Part,
+    /// What is wrong, for the user.
     pub message: String,
 }
 

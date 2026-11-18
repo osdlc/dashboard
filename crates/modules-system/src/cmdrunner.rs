@@ -55,6 +55,7 @@ impl Default for Config {
     }
 }
 
+/// Shows the output of a command, run again on each refresh.
 #[derive(Default)]
 pub struct CmdRunner {
     config: Config,
@@ -212,6 +213,7 @@ fn strip_ansi(s: &str) -> String {
 /// The demo: `df -h` output, as cmdrunner shows it.
 const DEMO: &str = include_str!("../testdata/cmdrunner/df.txt");
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let run = Run {
         code: Some(0),
@@ -319,6 +321,7 @@ mod tests {
         // Give the kill a moment, then the sleep must be gone.
         tokio::time::sleep(Duration::from_millis(200)).await;
         // SAFETY: signal 0 only checks that the process exists.
+        #[allow(unsafe_code)]
         let alive = unsafe { libc::kill(pid, 0) } == 0;
         assert!(!alive, "sleep {pid} still running");
     }

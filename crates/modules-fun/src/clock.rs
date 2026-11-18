@@ -108,6 +108,7 @@ struct Zone {
     tz: TimeZone,
 }
 
+/// The local time in one or more time zones.
 #[derive(Default)]
 pub struct Clock {
     zones: Vec<Zone>,
@@ -416,6 +417,7 @@ fn view(style: Style, zones: &[Zone], now: Timestamp, hour12: bool, seconds: boo
     }
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let zones: Vec<Zone> = ["UTC", "America/New_York", "Asia/Tokyo"]
         .iter()

@@ -47,6 +47,7 @@ impl Default for Config {
     }
 }
 
+/// Tails a log file.
 #[derive(Default)]
 pub struct Log {
     config: Config,
@@ -112,6 +113,7 @@ impl Module for Log {
     }
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let lines = [
         "2026-10-27 09:14:02 INFO  server listening on :8080",

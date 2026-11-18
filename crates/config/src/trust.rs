@@ -32,14 +32,17 @@ pub fn default_path() -> Result<PathBuf> {
 /// The list of trusted project files.
 #[derive(Debug, Clone)]
 pub struct Trust {
+    /// The file the list is kept in.
     pub path: PathBuf,
 }
 
 impl Trust {
+    /// The list kept in `path`.
     pub fn new(path: impl Into<PathBuf>) -> Self {
         Self { path: path.into() }
     }
 
+    /// The list in the user's data home.
     pub fn open_default() -> Result<Self> {
         Ok(Self::new(default_path()?))
     }

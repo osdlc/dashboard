@@ -81,6 +81,7 @@ struct Annotation {
     description: String,
 }
 
+/// Pending Taskwarrior tasks, read with `task export`, most urgent first.
 #[derive(Default)]
 pub struct Taskwarrior {
     config: Config,
@@ -207,6 +208,7 @@ fn view(json: &str, now: Timestamp, tz: &TimeZone, limit: usize) -> Result<View>
     Ok(tasks_view(&tasks, today, limit))
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let now = Timestamp::now();
     let tz = TimeZone::system();

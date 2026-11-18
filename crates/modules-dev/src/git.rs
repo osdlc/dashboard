@@ -64,6 +64,7 @@ struct Found {
     repo: Result<Repo, String>,
 }
 
+/// Local git repositories: branch, commits ahead of and behind the upstream, and uncommitted changes.
 #[derive(Default)]
 pub struct Git {
     config: Config,
@@ -331,6 +332,7 @@ fn demo() -> View {
     ])
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     CatalogEntry {
         description: "Local git repositories: branch, commits ahead of and behind the upstream, and uncommitted changes. Runs git status in each one.".into(),

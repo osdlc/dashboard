@@ -52,6 +52,7 @@ impl Default for Config {
     }
 }
 
+/// Pi-hole queries, blocks, clients and the most blocked domains.
 #[derive(Default)]
 pub struct Pihole {
     config: Config,
@@ -349,6 +350,7 @@ const SUMMARY: &str = include_str!("../testdata/pihole/summary.json");
 const BLOCKING: &str = include_str!("../testdata/pihole/blocking.json");
 const TOP: &str = include_str!("../testdata/pihole/top_blocked.json");
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let summary: Summary = serde_json::from_str(SUMMARY).expect("demo summary parses");
     let blocking: Blocking = serde_json::from_str(BLOCKING).expect("demo blocking parses");

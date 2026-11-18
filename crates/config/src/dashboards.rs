@@ -23,7 +23,9 @@ pub fn default_dir() -> Result<PathBuf> {
 /// A saved dashboard found on disk.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Saved {
+    /// Its name, the file name without `.yaml`.
     pub name: String,
+    /// Its config file.
     pub path: PathBuf,
     /// Its `description:`, if it has one and the file reads.
     pub description: Option<String>,
@@ -32,10 +34,12 @@ pub struct Saved {
 /// The folder of saved dashboards.
 #[derive(Debug, Clone)]
 pub struct Registry {
+    /// The folder the dashboard files are in.
     pub dir: PathBuf,
 }
 
 impl Registry {
+    /// The registry in `dir`.
     pub fn new(dir: impl Into<PathBuf>) -> Self {
         Self { dir: dir.into() }
     }

@@ -27,6 +27,7 @@ struct Config {
     home: Option<String>,
 }
 
+/// Token use and cost of the pi coding agent, from its session logs.
 #[derive(Default)]
 pub struct Pi {
     home: PathBuf,
@@ -155,6 +156,7 @@ fn view(t: &Tally, now: i64) -> View {
     }
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let now = now_secs();
     let records = super::tally::demo_records(

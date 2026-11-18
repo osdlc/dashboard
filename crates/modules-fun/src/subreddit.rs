@@ -87,6 +87,7 @@ impl Default for Config {
     }
 }
 
+/// Subreddit: the hot (or new, top, rising) posts of a subreddit, from Reddit's public JSON listing, as a list.
 #[derive(Default)]
 pub struct Subreddit {
     config: Config,
@@ -346,6 +347,7 @@ fn view(
 /// "Now" for the sample: 2026-10-27T12:00:00Z.
 const SAMPLE_NOW: i64 = 1_793_102_400;
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let listing: Listing = serde_json::from_str(include_str!("../testdata/subreddit/hot.json"))
         .expect("demo data parses");

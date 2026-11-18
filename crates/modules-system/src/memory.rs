@@ -11,6 +11,7 @@ use super::{
     used_of,
 };
 
+/// Memory and swap: usage graph and gauges.
 #[derive(Default)]
 pub struct Memory {
     sys: System,
@@ -52,6 +53,7 @@ impl Module for Memory {
     }
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     const GIB: u64 = 1024 * 1024 * 1024;
     let used = demo_values(60, 62.0, 6.0, 2.0);

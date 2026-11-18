@@ -188,6 +188,7 @@ struct Place {
     longitude: f64,
 }
 
+/// Current weather and a short forecast from Open-Meteo.
 #[derive(Default)]
 pub struct Weather {
     config: Config,
@@ -470,6 +471,7 @@ fn view(label: &str, f: &Forecast) -> View {
     }
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let forecast: Forecast =
         serde_json::from_str(include_str!("../testdata/weather/forecast.json"))

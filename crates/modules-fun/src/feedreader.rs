@@ -98,6 +98,7 @@ impl Failure {
     }
 }
 
+/// Feed reader: the newest items of some RSS and Atom feeds, as one list.
 #[derive(Default)]
 pub struct FeedReader {
     config: Config,
@@ -763,6 +764,7 @@ fn view(feeds: &[(String, Result<Feed, Failure>)], max_items: usize) -> Result<V
     })
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let feed = parse_feed(include_str!("../testdata/feedreader/demo.xml"));
     let demo = view(&[("https://blog.example.com/feed.xml".into(), feed)], 10)

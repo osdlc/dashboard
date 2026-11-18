@@ -25,6 +25,7 @@ impl Default for Config {
     }
 }
 
+/// Top processes by CPU.
 #[derive(Default)]
 pub struct Processes {
     config: Config,
@@ -108,6 +109,7 @@ fn row(name: &str, pid: &str, cpu: f64, memory: u64) -> Row {
     }
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     const MIB: u64 = 1024 * 1024;
     let rows = [

@@ -30,6 +30,7 @@ const PHASES_URL: &str = "https://www.timeanddate.com/moon/phases/";
 #[serde(default, deny_unknown_fields)]
 struct Config {}
 
+/// The moon's phase, computed here: no network, no data files.
 #[derive(Default)]
 pub struct Lunar;
 
@@ -163,6 +164,7 @@ fn view(secs: i64, tz: &TimeZone) -> View {
 /// The demo's time: 2026-10-27 12:00 UTC.
 const DEMO_SECS: i64 = 1_793_102_400;
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     CatalogEntry {
         description: "The moon's phase, how much of it is lit, and the next full and new \

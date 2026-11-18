@@ -79,6 +79,7 @@ struct Task {
     tags: Vec<String>,
 }
 
+/// Open tasks from a local todo file: a markdown checklist or a todo.txt file.
 #[derive(Default)]
 pub struct Todo {
     config: Config,
@@ -323,6 +324,7 @@ fn sample_today() -> Date {
     jiff::civil::date(2026, 10, 27)
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let demo = view(
         &parse_todotxt(SAMPLE_TXT),

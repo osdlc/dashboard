@@ -42,6 +42,7 @@ struct Config {
     source: Option<String>,
 }
 
+/// OpenAI Codex limits and token use.
 #[derive(Default)]
 pub struct Codex {
     home: PathBuf,
@@ -460,6 +461,7 @@ fn view(s: &Snapshot, now: i64) -> View {
     }
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let now = now_secs();
     let tokens = [412_000, 1_180_000, 96_000, 0, 2_350_000, 870_000, 1_420_000];

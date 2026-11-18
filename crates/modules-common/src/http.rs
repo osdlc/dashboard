@@ -7,6 +7,7 @@ use anyhow::{Result, bail};
 /// So modules can name these types without depending on reqwest themselves.
 pub use reqwest::{Client, Response};
 
+/// HTTP client with a 20-second timeout and a `dashboard/<version>` user agent.
 pub fn client() -> Result<reqwest::Client> {
     Ok(reqwest::Client::builder()
         .timeout(Duration::from_secs(20))

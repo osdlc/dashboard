@@ -7,6 +7,7 @@ use dashboard_contract::{View, Widget};
 const DEFAULT_HISTORY: usize = 300;
 
 #[derive(Default)]
+/// Recent points of each tracked series, kept so a chart survives a reload.
 pub struct History {
     /// Keyed by (tile ID, widget ID, series name).
     buffers: HashMap<(String, String, String), VecDeque<(i64, f64)>>,

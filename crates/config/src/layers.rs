@@ -40,6 +40,7 @@ pub struct Sources {
 }
 
 impl Sources {
+    /// The trust list to check project files against.
     pub fn trust(&self) -> Result<Trust> {
         match &self.trust {
             Some(path) => Ok(Trust::new(path)),
@@ -49,13 +50,18 @@ impl Sources {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// Which kind of file a config layer comes from.
 pub enum LayerKind {
+    /// The machine file, read first.
     Machine,
+    /// A saved dashboard, read over the machine file.
     Dashboard,
+    /// The project file, read last; used only when trusted.
     Project,
 }
 
 impl LayerKind {
+    /// A short name for messages, such as `machine`.
     pub fn label(self) -> &'static str {
         match self {
             LayerKind::Machine => "machine",
@@ -68,13 +74,16 @@ impl LayerKind {
 /// A file that was read.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Layer {
+    /// Which kind of file this is.
     pub kind: LayerKind,
+    /// The file read.
     pub path: PathBuf,
 }
 
 /// The merged config and where it came from.
 #[derive(Debug, Clone)]
 pub struct Layered {
+    /// The merged config.
     pub config: Config,
     /// The machine file's path, whether or not it exists.
     pub machine: PathBuf,
@@ -106,7 +115,9 @@ pub struct Layered {
 /// Which file set each part of the merged config last.
 #[derive(Debug, Clone, Default)]
 pub struct Origins {
+    /// Module settings, by tile ID.
     pub modules: BTreeMap<String, PathBuf>,
+    /// Screens, by name.
     pub screens: BTreeMap<String, PathBuf>,
     /// Top-level keys, such as `rotate`.
     pub keys: BTreeMap<String, PathBuf>,
@@ -141,6 +152,7 @@ impl Layered {
         self.layer(LayerKind::Dashboard).unwrap_or(&self.machine)
     }
 
+    /// The file read for this kind of layer, if one was.
     pub fn layer(&self, kind: LayerKind) -> Option<&Path> {
         self.layers
             .iter()

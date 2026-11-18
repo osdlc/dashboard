@@ -28,6 +28,7 @@ use super::{
 /// One GPU's numbers from one reading.
 #[derive(Debug, Clone, PartialEq)]
 pub struct GpuStat {
+    /// GPU model name.
     pub name: String,
     /// Busy percent, 0–100.
     pub util: f64,
@@ -37,6 +38,7 @@ pub struct GpuStat {
     pub detail: String,
 }
 
+/// GPU: load over time, plus a utilization and a memory gauge per GPU.
 #[derive(Default)]
 pub struct Gpu {
     sys: System,
@@ -323,6 +325,7 @@ fn view(gpus: &[GpuStat], t: i64, history: Option<Vec<Vec<f64>>>) -> View {
     }
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     const GIB: u64 = 1024 * 1024 * 1024;
     let gpus = [GpuStat {

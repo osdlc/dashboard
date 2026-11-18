@@ -55,6 +55,7 @@ impl Default for Config {
     }
 }
 
+/// Shows the pictures in a folder one after another, as an `image` widget.
 #[derive(Default)]
 pub struct Screensaver {
     config: Config,
@@ -240,6 +241,7 @@ const SAMPLES: &[(&str, &[u8])] = &[
 fn samples() -> Result<PathBuf> {
     #[cfg(unix)]
     // SAFETY: getuid has no preconditions and cannot fail.
+    #[allow(unsafe_code)]
     let user = unsafe { libc::getuid() }.to_string();
     #[cfg(not(unix))]
     let user = std::env::var("USERNAME").unwrap_or_default();
@@ -254,6 +256,7 @@ fn samples() -> Result<PathBuf> {
     Ok(dir)
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     // The demo is the sunset sample. If the temp folder can't be written, the
     // renderer says it can't show the picture.
