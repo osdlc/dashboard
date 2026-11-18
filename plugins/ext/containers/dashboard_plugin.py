@@ -492,6 +492,47 @@ class PieWidget(_PieWidgetRequired, total=False):
     unit: Optional[str]
 
 
+class _ClockFaceWidgetRequired(TypedDict):
+    # 0-23.
+    hour: int
+    # 0-59.
+    minute: int
+    type: Literal["clock_face"]
+
+
+# An analog clock face with hour and minute hands, and a second hand
+# when `second` is given. The renderer draws it; it never reads a clock.
+class ClockFaceWidget(_ClockFaceWidgetRequired, total=False):
+    # Shown below the face, e.g. a date.
+    caption: Optional[str]
+    # Shown above the face, e.g. "Tokyo".
+    label: Optional[str]
+    # 0-59. No second hand when absent.
+    second: Optional[int]
+    # Colors the face's outline.
+    status: Optional["Status"]
+
+
+class _DisplayWidgetRequired(TypedDict):
+    # Already formatted, e.g. "14:05". The TUI draws it in a block font
+    # when it has a glyph for every character, else as plain text; see
+    # docs/contract.md, "Clock face and display".
+    text: str
+    type: Literal["display"]
+
+
+# One value as large as the space allows: a big number or a clock.
+class DisplayWidget(_DisplayWidgetRequired, total=False):
+    # Shown below the text.
+    caption: Optional[str]
+    # Shown above the text.
+    label: Optional[str]
+    # Colors the text.
+    status: Optional["Status"]
+    # Shown after the text, smaller, e.g. "PM".
+    unit: Optional[str]
+
+
 class _ListWidgetRequired(TypedDict):
     items: List["ListItem"]
     type: Literal["list"]
@@ -503,7 +544,7 @@ class ListWidget(_ListWidgetRequired, total=False):
     empty_text: Optional[str]
 
 
-# Rows and columns. A cell holds text, a number, or a stat, gauge or pie.
+# Rows and columns. A cell holds text, a number, or a stat, gauge, pie, display or clock face.
 class TableWidget(TypedDict):
     columns: List["Column"]
     rows: List["Row"]
@@ -524,6 +565,20 @@ class LogWidget(_LogWidgetRequired, total=False):
 class UptimeWidget(TypedDict):
     checks: List["UptimeCheck"]
     type: Literal["uptime"]
+
+
+class _ImageWidgetRequired(TypedDict):
+    # Image file: PNG, JPEG, GIF (first frame), WebP or BMP.
+    path: str
+    type: Literal["image"]
+
+
+# A picture from a file on the machine the dashboard runs on. The terminal
+# draws it with the best graphics it supports (Kitty, iTerm2 or Sixel),
+# or with colored half blocks. It is scaled to fit and keeps its shape.
+class ImageWidget(_ImageWidgetRequired, total=False):
+    # A line under the picture, e.g. the file name.
+    caption: Optional[str]
 
 
 # Widgets side by side, sharing the width.
@@ -571,6 +626,6 @@ SeriesStyle = Union[Literal["line"], Literal["area"], Literal["bars"]]
 
 ValueFormat = Union[Literal["plain"], Literal["bytes"], Literal["count"]]
 
-Widget = Union["TextWidget", "StatWidget", "GaugeWidget", "SeriesWidget", "MeterGridWidget", "BarsWidget", "PieWidget", "ListWidget", "TableWidget", "LogWidget", "UptimeWidget", "RowWidget", "ColumnWidget"]
+Widget = Union["TextWidget", "StatWidget", "GaugeWidget", "SeriesWidget", "MeterGridWidget", "BarsWidget", "PieWidget", "ClockFaceWidget", "DisplayWidget", "ListWidget", "TableWidget", "LogWidget", "UptimeWidget", "ImageWidget", "RowWidget", "ColumnWidget"]
 
 # ---- END GENERATED ----
