@@ -804,7 +804,9 @@ pub struct ConfigInfo {
 /// the switch to it tried; a failed switch shows as the config error.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct CreateOutcome {
+    /// The name the request asked for.
     pub name: String,
+    /// Why the create failed. `None`: the file was written.
     #[serde(default)]
     pub error: Option<String>,
     /// Counts the requests the server has handled, as in `AddOutcome`.
@@ -949,7 +951,9 @@ pub enum ClientMessage {
     /// Save a new dashboard and switch to it: a copy of the one in use, or
     /// one empty screen. The name is made into a slug.
     CreateDashboard {
+        /// The new dashboard's name, before it is made into a slug.
         name: String,
+        /// Copy the dashboard in use. `false`: one empty screen.
         #[serde(default)]
         copy: bool,
     },

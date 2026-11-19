@@ -456,7 +456,13 @@ export type ClientMessage =
       type: "switch_dashboard";
     }
   | {
+      /**
+       * Copy the dashboard in use. `false`: one empty screen.
+       */
       copy?: boolean;
+      /**
+       * The new dashboard's name, before it is made into a slug.
+       */
       name: string;
       type: "create_dashboard";
     };
@@ -1074,7 +1080,13 @@ export interface AddOutcome {
  * the switch to it tried; a failed switch shows as the config error.
  */
 export interface CreateOutcome {
+  /**
+   * Why the create failed. `None`: the file was written.
+   */
   error?: string | null;
+  /**
+   * The name the request asked for.
+   */
   name: string;
   /**
    * Counts the requests the server has handled, as in `AddOutcome`.
