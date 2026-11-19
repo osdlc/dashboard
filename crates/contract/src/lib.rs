@@ -676,6 +676,9 @@ pub struct ConfigInfo {
     /// How the last `add_module` went, so the editor that sent it can tell.
     #[serde(default)]
     pub added: Option<AddOutcome>,
+    /// How the last `create_dashboard` went.
+    #[serde(default)]
+    pub created: Option<CreateOutcome>,
     /// The saved dashboard in use, by name. `None`: `config.yaml` alone.
     #[serde(default)]
     pub dashboard: Option<String>,
@@ -691,6 +694,18 @@ pub struct ConfigInfo {
     /// based on an older version is refused.
     #[serde(default)]
     pub etag: Option<String>,
+}
+
+/// The result of a `create_dashboard`. With no error the file was written and
+/// the switch to it tried; a failed switch shows as the config error.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+pub struct CreateOutcome {
+    pub name: String,
+    #[serde(default)]
+    pub error: Option<String>,
+    /// Counts the requests the server has handled, as in `AddOutcome`.
+    #[serde(default)]
+    pub seq: u64,
 }
 
 /// The result of an `add_module`. With no error the config was written; the
@@ -803,6 +818,13 @@ pub enum ClientMessage {
     SwitchDashboard {
         #[serde(default)]
         name: Option<String>,
+    },
+    /// Save a new dashboard and switch to it: a copy of the one in use, or
+    /// one empty screen. The name is made into a slug.
+    CreateDashboard {
+        name: String,
+        #[serde(default)]
+        copy: bool,
     },
 }
 
