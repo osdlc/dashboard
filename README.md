@@ -1,6 +1,7 @@
 # dashboard
 
-Modular developer dashboard with a terminal UI and a web UI. See [docs/](docs/) for the design.
+Modular developer dashboard with a terminal UI and a web UI. See [docs/](docs/) for the design and
+[docs/roadmap.md](docs/roadmap.md) for where it is going and what is experimental.
 
 Requires Rust and pnpm. `cargo build` also builds the Vue app in `web/` (only when its files change) and embeds it in the binary. Set `DASHBOARD_SKIP_UI_BUILD=1` to skip that.
 
