@@ -48,7 +48,8 @@ impl Scratch {
         }
         let mut child = cmd
             .args(args)
-            .env("XDG_DATA_HOME", self.root.join("data"))
+            // Not XDG_DATA_HOME: Windows ignores it and uses its Known Folders.
+            .env("DASHBOARD_DURABLE_DIR", self.root.join("data"))
             .envs(env.iter().copied())
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())

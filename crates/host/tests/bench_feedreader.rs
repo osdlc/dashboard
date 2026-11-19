@@ -34,9 +34,9 @@ fn data(name: &str) -> String {
 /// no title is named by its path).
 fn expected(name: &str) -> View {
     let text = std::fs::read_to_string(dir().join(format!("{name}.view.json"))).unwrap();
+    // `data("")` ends in the OS's separator, as `data(name)` puts before name.
     let dir = serde_json::to_string(&data("")).unwrap();
-    let dir = dir[1..dir.len() - 1].trim_end_matches('/');
-    serde_json::from_str(&text.replace("$DIR", dir)).unwrap()
+    serde_json::from_str(&text.replace("$DIR/", &dir[1..dir.len() - 1])).unwrap()
 }
 
 /// Whether the command runs and succeeds: checks the interpreter is there and

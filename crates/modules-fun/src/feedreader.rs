@@ -801,8 +801,9 @@ mod tests {
     fn expected(name: &str) -> View {
         let path = dir().join(format!("{name}.view.json"));
         let text = std::fs::read_to_string(path).unwrap();
-        let dir = serde_json::to_string(&dir()).unwrap();
-        let text = text.replace("$DIR", &dir[1..dir.len() - 1]);
+        // `data("")` ends in the OS's separator, as `data(name)` puts before name.
+        let dir = serde_json::to_string(&data("")).unwrap();
+        let text = text.replace("$DIR/", &dir[1..dir.len() - 1]);
         serde_json::from_str(&text).unwrap()
     }
 

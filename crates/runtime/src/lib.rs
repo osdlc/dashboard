@@ -927,7 +927,7 @@ mod tests {
 
         // A module in a saved dashboard.
         std::fs::write(&machine, "rotate: { interval: 10s }\n").unwrap();
-        let work = dir.join("dashboards/work.yaml");
+        let work = dir.join("dashboards").join("work.yaml");
         std::fs::write(&work, "modules:\n  x: { plugin: [] }\n").unwrap();
         let err = error(Some("work"));
         assert!(
@@ -1156,7 +1156,7 @@ mod tests {
         let machine = dir.join("config.yaml");
         // Demo views only: nothing is started, no network.
         std::fs::write(&machine, "modules:\n  cswap: { demo: true }\n").unwrap();
-        let work = dir.join("dashboards/work.yaml");
+        let work = dir.join("dashboards").join("work.yaml");
         std::fs::write(
             &work,
             "description: Day job\nmodules:\n  ci: { plugin: [nope], demo: true }\n",
