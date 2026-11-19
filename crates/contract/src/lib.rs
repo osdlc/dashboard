@@ -2,6 +2,10 @@
 //! See `docs/contract.md`. These types are the source of truth for the
 //! generated JSON Schema and TypeScript types.
 
+// The docs here become the descriptions in the JSON Schema and the plugin
+// SDKs, so every public item needs one.
+#![warn(missing_docs)]
+
 use std::collections::BTreeMap;
 
 use schemars::JsonSchema;

@@ -21,7 +21,6 @@ repository = "https://github.com/osdlc/dashboard"
 # do, with a SAFETY comment.
 [workspace.lints.rust]
 unsafe_code = "deny"
-missing_docs = "warn"
 
 # Smallest binary: `cargo build --profile small`. Slower to build.
 [profile.small]
