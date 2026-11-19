@@ -13,6 +13,10 @@ released on their own; they record the stages the project was built in.
   a world clock with each zone's UTC offset, hours from the first zone, and working hours, day or
   night; `analog` draws a dial per zone and `digital` shows each time as big text. Native only: the
   `clock-ts` and `clock-py` benchmark copies keep the `row` style.
+- **New dashboard and Save as.** **+ New** and **Save as…** next to the title (web view and
+  desktop app) save a new dashboard file and open it: **Blank** starts with one empty screen in
+  the screen editor, **Copy of current** copies the file in use, comments included. A name in use
+  is refused.
 - **`series` takes negative values and a fitted scale.** The chart no longer clamps to 0: the
   bottom is `y_min`, else 0 or the lowest value, and a faint zero line shows when the scale spans
   zero (`area` fills to it, `bars` grow from it). `fit: true` scales to the data's own range, for

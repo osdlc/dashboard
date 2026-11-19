@@ -12,14 +12,14 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::Duration;
 
-use anyhow::Result;
-use dashboard_config::dashboards::Registry;
+use anyhow::{Context, Result, bail};
+use dashboard_config::dashboards::{BLANK, Registry, name_for};
 use dashboard_config::layers::{self, LayerKind, Layered, Sources};
 use dashboard_config::packages::{Packages, market_entries, market_index_path};
-use dashboard_config::{Config, Missing, ModuleConfig, NewModule, Part};
+use dashboard_config::{Config, DEFAULT_CONFIG, Missing, ModuleConfig, NewModule, Part};
 use dashboard_contract::{
-    AddOutcome, CatalogEntry, ClientMessage, ConfigInfo, DashboardSummary, EntryKind,
-    ModuleSummary, Size, UiSettings,
+    AddOutcome, CatalogEntry, ClientMessage, ConfigInfo, CreateOutcome, DashboardSummary,
+    EntryKind, ModuleSummary, Size, UiSettings,
 };
 pub use dashboard_host::Host;
 use dashboard_host::{Demo, Module, Plugin, SpawnOptions};
@@ -82,6 +82,7 @@ pub struct Runtime {
     config: Config,
     error: Option<String>,
     added: Option<AddOutcome>,
+    created: Option<CreateOutcome>,
     /// A note from the last save, kept across reloads (the save itself
     /// triggers one) until the next save or switch.
     notice: Option<String>,
@@ -104,6 +105,7 @@ impl Runtime {
             loaded,
             error: None,
             added: None,
+            created: None,
             notice: None,
             layer_paths: Arc::default(),
             settings,
@@ -303,7 +305,47 @@ impl Runtime {
                 }
             }
             ClientMessage::SwitchDashboard { name } => self.switch(name).await,
+            ClientMessage::CreateDashboard { name, copy } => {
+                let result = self.create_dashboard(&name, copy);
+                let seq = self.created.as_ref().map_or(0, |c| c.seq) + 1;
+                self.created = Some(CreateOutcome {
+                    name,
+                    error: result.as_ref().err().map(|e| format!("{e:#}")),
+                    seq,
+                });
+                match result {
+                    Ok(saved) => self.switch(Some(saved)).await,
+                    Err(_) => self.publish().await,
+                }
+            }
         }
+    }
+
+    /// Save a new dashboard file and return its name. A copy takes the file
+    /// settings are saved to, comments included, or the demo when that is
+    /// what's on screen. A name already in use is refused.
+    fn create_dashboard(&self, name: &str, copy: bool) -> Result<String> {
+        let name = name.trim();
+        if name.is_empty() {
+            bail!("the dashboard needs a name");
+        }
+        let name = name_for(name);
+        let registry = registry(&self.sources)?;
+        if registry.path(&name)?.exists() {
+            bail!("there is already a dashboard called {name:?}");
+        }
+        let text = if !copy {
+            BLANK.to_string()
+        } else if self.path().exists() {
+            let path = self.path();
+            std::fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?
+        } else if !self.loaded.exists {
+            DEFAULT_CONFIG.to_string()
+        } else {
+            BLANK.to_string()
+        };
+        registry.save(&name, &text, false)?;
+        Ok(name)
     }
 
     /// Write a catalog entry's `modules:` entry, and its tile when the config
@@ -502,6 +544,7 @@ impl Runtime {
                     (!lines.is_empty()).then(|| lines.join("\n"))
                 },
                 added: self.added.clone(),
+                created: self.created.clone(),
                 dashboard: self.loaded.dashboard.clone(),
                 dashboards: registry(&self.sources)
                     .map(|r| r.list().0)
@@ -1052,6 +1095,60 @@ mod tests {
     }
 
     /// Machine file, a saved dashboard and a project file, in a temp folder.
+    #[tokio::test]
+    async fn creates_blank_and_copied_dashboards_and_switches_to_them() {
+        let dir =
+            std::env::temp_dir().join(format!("dashboard-runtime-new-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let machine = dir.join("config.yaml");
+        let text = "# mine\nmodules:\n  cswap: { demo: true }\nscreens:\n  - name: a\n    tiles: [{ module: cswap }]\n";
+        std::fs::write(&machine, text).unwrap();
+        let sources = Sources {
+            machine: Some(machine),
+            registry: Some(dir.join("dashboards")),
+            ..Default::default()
+        };
+        let (mut runtime, rx) = Runtime::start(sources).await.unwrap();
+
+        let create = |name: &str, copy| ClientMessage::CreateDashboard {
+            name: name.into(),
+            copy,
+        };
+        runtime.handle(create("My Work", false)).await;
+        let settings = rx.borrow().clone();
+        assert_eq!(settings.config.dashboard.as_deref(), Some("my-work"));
+        assert_eq!(settings.config.created.as_ref().unwrap().error, None);
+        assert_eq!(settings.screens.len(), 1);
+        assert!(settings.screens[0].tiles.is_empty());
+
+        // A name in use is refused, and nothing changes.
+        runtime.handle(create("my-work", true)).await;
+        let settings = rx.borrow().clone();
+        let created = settings.config.created.clone().unwrap();
+        assert_eq!(created.seq, 2);
+        assert!(created.error.unwrap().contains("already"));
+        assert!(settings.screens[0].tiles.is_empty());
+        runtime.handle(create("   ", false)).await;
+        assert!(rx.borrow().config.created.clone().unwrap().error.is_some());
+
+        // A copy keeps the file as it was, comments too.
+        runtime
+            .handle(ClientMessage::SwitchDashboard { name: None })
+            .await;
+        runtime.handle(create("second", true)).await;
+        let settings = rx.borrow().clone();
+        assert_eq!(settings.config.dashboard.as_deref(), Some("second"));
+        assert_eq!(settings.screens[0].name, "a");
+        assert_eq!(
+            std::fs::read_to_string(dir.join("dashboards/second.yaml")).unwrap(),
+            text
+        );
+
+        runtime.host.stop_all().await;
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
     #[tokio::test]
     async fn switches_dashboards_and_writes_to_the_right_file() {
         let dir = std::env::temp_dir().join(format!("dashboard-runtime-{}", std::process::id()));

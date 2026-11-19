@@ -5,6 +5,7 @@ import { addSeq, isOutcomeOf, type PendingAdd } from './adds'
 import type { ClientMessage, ScreenLayout } from './contract'
 import HelpPanel from './components/HelpPanel.vue'
 import ScreenEditor from './components/ScreenEditor.vue'
+import NewDashboardDialog from './components/NewDashboardDialog.vue'
 import SettingsPanel from './components/SettingsPanel.vue'
 import TileCard from './components/TileCard.vue'
 import { useDensity } from './density'
@@ -91,7 +92,7 @@ function navKey(e: KeyboardEvent): boolean {
 /** Keys here must match keys.ts. */
 function onKey(e: KeyboardEvent) {
   if (e.metaKey || e.ctrlKey || e.altKey || e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return
-  if (editing.value) return // the editor handles its own keys
+  if (editing.value || newDashboard.value) return // they handle their own keys
   // Keyboard focus is off while help or settings are open.
   if (!ambient && overlay.value === 'none' && navKey(e)) {
     e.preventDefault()
@@ -156,6 +157,18 @@ watch(
   },
 )
 
+/** The "new dashboard" dialog: starts as a copy or as blank, and what the outcome counter was when opened. */
+const newDashboard = ref<{ copy: boolean; before: number } | null>(null)
+function openNewDashboard(copy: boolean) {
+  overlay.value = 'none'
+  newDashboard.value = { copy, before: settings.value?.config.created?.seq ?? 0 }
+}
+/** The dashboard exists and the server has switched to it. A blank one opens in the editor. */
+function dashboardCreated(blank: boolean) {
+  newDashboard.value = null
+  if (blank) openEditor()
+}
+
 function saveScreens(edited: ScreenLayout[]) {
   send({ type: 'save_screens', screens: edited, etag: editBase })
   editing.value = false
@@ -181,6 +194,12 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
         {{ d.name }}
       </option>
     </select>
+    <template v-if="settings">
+      <button type="button" class="help-btn" title="Start a new dashboard" @click="openNewDashboard(false)">+ New</button>
+      <button type="button" class="help-btn" title="Save a copy of this dashboard under a new name" @click="openNewDashboard(true)">
+        Save as…
+      </button>
+    </template>
     <nav class="tabs" aria-label="Screens">
       <button
         v-for="(s, i) in screens"
@@ -262,6 +281,15 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
     v-if="overlay === 'settings' && settings"
     :settings="settings"
     @close="overlay = 'none'"
+    @send="send"
+  />
+  <NewDashboardDialog
+    v-if="newDashboard && settings"
+    :settings="settings"
+    :copy="newDashboard.copy"
+    :before="newDashboard.before"
+    @close="newDashboard = null"
+    @created="dashboardCreated"
     @send="send"
   />
   <p v-if="settings?.config.error && overlay !== 'settings'" class="config-banner" role="alert">
