@@ -43,6 +43,14 @@ and modules this build doesn't have. Install a missing package with `dashboard p
 built-in modules' settings): opening a dashboard runs them, so read them first. Importing from a URL downloads with `curl`,
 and only `https://` URLs are accepted.
 
+To make one from the app, use **+ New** or **Save as…** next to the title (the web view and the
+desktop app). **Blank** starts with one empty screen and opens the screen editor; **Copy of
+current** copies the file settings are saved to, comments included, and then changes go to the
+copy. Either way the dashboard opens at once. A blank dashboard still has the modules from
+`config.yaml` running, as `modules:` merge (see [Precedence](#precedence)); only the screens
+start empty. A copy keeps relative paths as written, and they then start in `dashboards/`, so
+use `~/` or absolute paths in a file you copy.
+
 The web view has a switcher next to the title when there is at least one saved dashboard.
 Switching starts and stops only the modules that differ. The choice lasts while the server
 runs; start with `--dashboard` to pick one at startup.
