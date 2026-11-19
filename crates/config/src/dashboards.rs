@@ -10,6 +10,10 @@ use anyhow::{Context, Result, bail};
 
 use crate::TOOL;
 
+/// A new, empty dashboard. It needs a screen: with no `screens:` at all, the
+/// screens below it would stay.
+pub const BLANK: &str = "screens:\n  - name: main\n    tiles: []\n";
+
 /// `<config home>/dashboard/dashboards`. Moved by `XDG_CONFIG_HOME` or
 /// `DASHBOARD_CONFIG_DIR`.
 pub fn default_dir() -> Result<PathBuf> {
@@ -188,6 +192,13 @@ mod tests {
         assert!(check_name("").is_err());
         assert_eq!(name_for("My Work.yaml"), "my-work");
         assert_eq!(name_for("???"), "dashboard");
+    }
+
+    #[test]
+    fn blank_has_one_empty_screen() {
+        let config = crate::parse(BLANK).unwrap();
+        assert_eq!(config.screens.len(), 1);
+        assert!(config.screens[0].tiles.is_empty());
     }
 
     #[test]
