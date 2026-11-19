@@ -587,6 +587,11 @@ export type ClientMessage =
   | {
       name?: string | null;
       type: "switch_dashboard";
+    }
+  | {
+      copy?: boolean;
+      name: string;
+      type: "create_dashboard";
     };
 export type Theme = ("light" | "dark") | "auto";
 /**
@@ -964,6 +969,10 @@ export interface ConfigInfo {
    */
   added?: AddOutcome | null;
   /**
+   * How the last `create_dashboard` went.
+   */
+  created?: CreateOutcome | null;
+  /**
    * The saved dashboard in use, by name. `None`: `config.yaml` alone.
    */
   dashboard?: string | null;
@@ -1004,6 +1013,18 @@ export interface AddOutcome {
    * Counts the adds the server has handled, so a renderer can tell the
    * outcome of its add from an earlier one, which every later settings
    * message still carries.
+   */
+  seq?: number;
+}
+/**
+ * The result of a `create_dashboard`. With no error the file was written and
+ * the switch to it tried; a failed switch shows as the config error.
+ */
+export interface CreateOutcome {
+  error?: string | null;
+  name: string;
+  /**
+   * Counts the requests the server has handled, as in `AddOutcome`.
    */
   seq?: number;
 }
