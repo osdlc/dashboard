@@ -943,7 +943,7 @@ mod tests {
             "{err}"
         );
         std::fs::write(&machine, "").unwrap();
-        let project = dir.join("repo/.dashboard.yaml");
+        let project = dir.join("repo").join(".dashboard.yaml");
         std::fs::write(
             &project,
             "screens:\n  - name: repo\n    tiles: [{ module: memroy }]\n",
@@ -1050,7 +1050,7 @@ mod tests {
         let dir = std::env::temp_dir().join(format!("dashboard-nodemo-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(dir.join("repo")).unwrap();
-        let project = dir.join("repo/.dashboard.yaml");
+        let project = dir.join("repo").join(".dashboard.yaml");
         std::fs::write(
             &project,
             "modules:\n  cswap: { demo: true }\nscreens:\n  - name: proj\n    tiles: [{ module: cswap }]\n",
@@ -1271,7 +1271,7 @@ mod tests {
              - name: system\n    tiles: [{ module: cswap }]\n",
         )
         .unwrap();
-        let project = dir.join("repo/.dashboard.yaml");
+        let project = dir.join("repo").join(".dashboard.yaml");
         std::fs::write(
             &project,
             "screens:\n  - name: repo\n    tiles: []\n  - name: system\n    tiles: []\n",
@@ -1349,7 +1349,7 @@ mod tests {
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(dir.join("repo/src/deep")).unwrap();
         std::fs::write(dir.join("repo/TODO.md"), "- [ ] write the docs\n").unwrap();
-        let project = dir.join("repo/.dashboard.yaml");
+        let project = dir.join("repo").join(".dashboard.yaml");
         std::fs::write(
             &project,
             "modules:\n  notes:\n    builtin: textfile\n    config: { path: TODO.md }\n",
