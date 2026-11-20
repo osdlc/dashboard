@@ -99,7 +99,14 @@ async fn plugins_render_this_machine() {
     for (id, argv) in plugins() {
         let mut plugin = Plugin::new("test", argv);
         plugin.init(json!({})).await.expect("initialize");
-        let view = plugin.render().await.expect("view/render");
+        let rendered = plugin.render().await;
+        if cfg!(windows) {
+            // The plugins read Linux's and macOS's battery info only.
+            let err = format!("{:#}", rendered.unwrap_err());
+            assert!(err.contains("not available"), "{id}: {err}");
+            continue;
+        }
+        let view = rendered.expect("view/render");
         assert_eq!(problems(check_view(&view)), Vec::<String>::new(), "{id}");
     }
 }

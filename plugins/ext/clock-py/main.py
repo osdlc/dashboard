@@ -14,7 +14,7 @@ import re
 import time
 from datetime import datetime, timezone, tzinfo
 from typing import List, Optional, Tuple, TypedDict
-from zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo, available_timezones
 
 from dashboard_plugin import View, Widget, config_error, serve, with_defaults
 
@@ -61,6 +61,9 @@ def lookup(entry) -> Zone:
         try:
             tz = ZoneInfo(name)
         except Exception:
+            # Windows has no system database; Python reads one from tzdata.
+            if not available_timezones():
+                raise config_error("no time zone database: pip install tzdata") from None
             raise config_error(f"unknown time zone {json.dumps(name)}") from None
     return {"label": default_label(name) if label is None else label, "tz": tz}
 

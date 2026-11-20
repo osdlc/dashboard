@@ -245,7 +245,14 @@ pub fn parse_package(text: &str) -> Result<Package> {
         bail!("run: needs at least a program name");
     };
     let path = Path::new(program);
-    if path.is_absolute() || path.components().any(|c| c == Component::ParentDir) {
+    // Not just `is_absolute`: on Windows `/x` and `C:x` aren't absolute, yet
+    // both leave the package folder.
+    if path.components().any(|c| {
+        matches!(
+            c,
+            Component::Prefix(_) | Component::RootDir | Component::ParentDir
+        )
+    }) {
         bail!("run: {program:?} must be a program on PATH or a path inside the package");
     }
     if let Some(runtime) = &p.runtime
@@ -413,7 +420,7 @@ demo:
         // Paths in `run` resolve inside the folder; programs on PATH stay as they are.
         let tool = found.get("bin-tool").unwrap();
         assert!(
-            tool.argv()[0].ends_with("/bin-tool/bin/tool"),
+            Path::new(&tool.argv()[0]).ends_with("bin-tool/bin/tool"),
             "{:?}",
             tool.argv()
         );
