@@ -1,6 +1,6 @@
 //! `dashboard import`, `dashboards list`, `export` and `config` with layers,
-//! run as a user would, with the XDG homes and the working directory in a
-//! temp folder. No network.
+//! run as a user would, with the config and data homes and the working
+//! directory in a temp folder. No network.
 
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
@@ -22,17 +22,16 @@ impl Temp {
         path
     }
 
-    /// Run the dashboard in `cwd` with the XDG homes under the temp folder.
+    /// Run the dashboard in `cwd` with its config and data homes in the temp folder.
     fn run(&self, cwd: &Path, args: &[&str]) -> Output {
         Command::new(env!("CARGO_BIN_EXE_dashboard"))
             .args(args)
             .current_dir(cwd)
-            .env("XDG_CONFIG_HOME", self.0.join("xdg/config"))
-            .env("XDG_DATA_HOME", self.0.join("xdg/data"))
+            // Not XDG_*: Windows ignores those and uses its Known Folders.
+            .env("DASHBOARD_CONFIG_DIR", self.0.join("xdg/config"))
+            .env("DASHBOARD_DURABLE_DIR", self.0.join("xdg/data"))
             .env_remove("DASHBOARD_ROOT")
             .env_remove("DASHBOARD_MACHINE_CONFIG")
-            .env_remove("DASHBOARD_CONFIG_DIR")
-            .env_remove("DASHBOARD_DURABLE_DIR")
             // Not a test binary: don't let tiered-dirs pick a scratch root.
             .env_remove("CARGO")
             .output()
