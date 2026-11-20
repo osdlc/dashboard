@@ -927,7 +927,7 @@ mod tests {
 
         // A module in a saved dashboard.
         std::fs::write(&machine, "rotate: { interval: 10s }\n").unwrap();
-        let work = dir.join("dashboards/work.yaml");
+        let work = dir.join("dashboards").join("work.yaml");
         std::fs::write(&work, "modules:\n  x: { plugin: [] }\n").unwrap();
         let err = error(Some("work"));
         assert!(
@@ -943,7 +943,7 @@ mod tests {
             "{err}"
         );
         std::fs::write(&machine, "").unwrap();
-        let project = dir.join("repo/.dashboard.yaml");
+        let project = dir.join("repo").join(".dashboard.yaml");
         std::fs::write(
             &project,
             "screens:\n  - name: repo\n    tiles: [{ module: memroy }]\n",
@@ -1050,7 +1050,7 @@ mod tests {
         let dir = std::env::temp_dir().join(format!("dashboard-nodemo-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(dir.join("repo")).unwrap();
-        let project = dir.join("repo/.dashboard.yaml");
+        let project = dir.join("repo").join(".dashboard.yaml");
         std::fs::write(
             &project,
             "modules:\n  cswap: { demo: true }\nscreens:\n  - name: proj\n    tiles: [{ module: cswap }]\n",
@@ -1156,7 +1156,7 @@ mod tests {
         let machine = dir.join("config.yaml");
         // Demo views only: nothing is started, no network.
         std::fs::write(&machine, "modules:\n  cswap: { demo: true }\n").unwrap();
-        let work = dir.join("dashboards/work.yaml");
+        let work = dir.join("dashboards").join("work.yaml");
         std::fs::write(
             &work,
             "description: Day job\nmodules:\n  ci: { plugin: [nope], demo: true }\n",
@@ -1271,7 +1271,7 @@ mod tests {
              - name: system\n    tiles: [{ module: cswap }]\n",
         )
         .unwrap();
-        let project = dir.join("repo/.dashboard.yaml");
+        let project = dir.join("repo").join(".dashboard.yaml");
         std::fs::write(
             &project,
             "screens:\n  - name: repo\n    tiles: []\n  - name: system\n    tiles: []\n",
@@ -1349,7 +1349,7 @@ mod tests {
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(dir.join("repo/src/deep")).unwrap();
         std::fs::write(dir.join("repo/TODO.md"), "- [ ] write the docs\n").unwrap();
-        let project = dir.join("repo/.dashboard.yaml");
+        let project = dir.join("repo").join(".dashboard.yaml");
         std::fs::write(
             &project,
             "modules:\n  notes:\n    builtin: textfile\n    config: { path: TODO.md }\n",

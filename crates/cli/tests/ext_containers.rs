@@ -1,7 +1,8 @@
 //! The containers plugin package (`plugins/ext/containers`, Python): VMs and
 //! Docker engines read with the colima, limactl, podman and docker CLIs. Here
 //! those are fake scripts in the package's `testdata/`, so no real runtime is
-//! needed. Skipped without python3.
+//! needed. Skipped without python3, and on Windows, which can't run the
+//! scripts.
 
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -18,6 +19,11 @@ fn dir() -> PathBuf {
 
 fn have_python() -> bool {
     Command::new("python3").arg("--version").output().is_ok()
+}
+
+/// The fake CLIs are `sh` scripts, so Windows can't run them.
+fn can_run_fakes() -> bool {
+    cfg!(unix) && have_python()
 }
 
 fn fake(folder: &str, program: &str) -> String {
@@ -91,7 +97,7 @@ fn has_row(view: &View, needle: &str) -> bool {
 
 #[tokio::test]
 async fn everything_present_is_the_demo_view() {
-    if !have_python() {
+    if !can_run_fakes() {
         return;
     }
     let view = render(ok_config()).await;
@@ -119,7 +125,7 @@ async fn everything_present_is_the_demo_view() {
 
 #[tokio::test]
 async fn a_missing_or_disabled_cli_is_skipped() {
-    if !have_python() {
+    if !can_run_fakes() {
         return;
     }
     let mut config = ok_config();
@@ -157,7 +163,7 @@ async fn a_missing_or_disabled_cli_is_skipped() {
 
 #[tokio::test]
 async fn a_failing_cli_is_an_error_row_and_warns() {
-    if !have_python() {
+    if !can_run_fakes() {
         return;
     }
     let mut config = ok_config();
@@ -187,7 +193,7 @@ async fn a_failing_cli_is_an_error_row_and_warns() {
 
 #[tokio::test]
 async fn one_unreachable_engine_warns_and_the_rest_show() {
-    if !have_python() {
+    if !can_run_fakes() {
         return;
     }
     let mut config = ok_config();
@@ -203,7 +209,7 @@ async fn one_unreachable_engine_warns_and_the_rest_show() {
 #[cfg(unix)]
 #[tokio::test]
 async fn a_unix_socket_that_exists_is_asked_for_its_containers() {
-    if !have_python() {
+    if !can_run_fakes() {
         return;
     }
     // A context whose socket file exists is queried; the fake docker answers
@@ -245,7 +251,7 @@ async fn a_unix_socket_that_exists_is_asked_for_its_containers() {
 
 #[tokio::test]
 async fn show_exited_and_limit() {
-    if !have_python() {
+    if !can_run_fakes() {
         return;
     }
     let mut config = ok_config();
@@ -266,7 +272,7 @@ async fn show_exited_and_limit() {
 
 #[tokio::test]
 async fn show_stopped_vms_false_hides_them() {
-    if !have_python() {
+    if !can_run_fakes() {
         return;
     }
     let mut config = ok_config();

@@ -39,7 +39,12 @@ fn plugins() -> Vec<(&'static str, Vec<String>)> {
             vec!["node".into(), path("plugins/ext/clock-ts/main.ts")],
         ));
     }
-    if have("python3") {
+    // Python reads zones from the system, or on Windows from the tzdata package.
+    let zones = Command::new("python3")
+        .args(["-c", "import zoneinfo; zoneinfo.ZoneInfo('UTC')"])
+        .output()
+        .is_ok_and(|o| o.status.success());
+    if zones {
         out.push((
             "clock-py",
             vec!["python3".into(), path("plugins/ext/clock-py/main.py")],

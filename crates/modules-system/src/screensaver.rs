@@ -428,7 +428,8 @@ mod tests {
             .await
             .unwrap();
         let view = m.render().await.unwrap();
-        assert_eq!(view.summary, "trip/beach.JPG · 1 of 1");
+        let name = Path::new("trip").join("beach.JPG");
+        assert_eq!(view.summary, format!("{} · 1 of 1", name.display()));
         std::fs::remove_dir_all(&dir).unwrap();
     }
 
