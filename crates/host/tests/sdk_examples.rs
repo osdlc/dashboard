@@ -136,6 +136,9 @@ async fn big_files_rejects_a_missing_folder() {
 
 #[tokio::test]
 async fn load_keeps_history_in_the_host() {
+    if cfg!(windows) {
+        return; // No load average there: the examples answer with an error.
+    }
     for argv in each("load") {
         let (id, view) = run(argv.clone(), json!({}), 3).await;
         assert_eq!(id, "load", "{argv:?}");
