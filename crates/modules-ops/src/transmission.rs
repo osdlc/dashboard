@@ -70,6 +70,7 @@ impl Default for Config {
     }
 }
 
+/// Transmission: torrents from the BitTorrent client's RPC API, with progress, speeds and errors.
 #[derive(Default)]
 pub struct Transmission {
     config: Config,
@@ -353,6 +354,7 @@ fn view(mut torrents: Vec<Torrent>, limit: usize, base: &str) -> View {
 
 const SAMPLE: &str = include_str!("../testdata/transmission/torrent-get.json");
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let reply: Reply = serde_json::from_str(SAMPLE).expect("demo reply parses");
     let demo = view(

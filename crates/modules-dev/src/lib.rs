@@ -84,15 +84,21 @@ const MIN_INTERVAL_MS: u64 = 30_000;
 pub struct Issue {
     /// "ENG-12", "owner/repo#4".
     pub key: String,
+    /// Item title.
     pub title: String,
+    /// Link to the item in the browser.
     pub url: String,
+    /// State as the tracker names it, e.g. "open" or "In Progress".
     pub state: Option<String>,
+    /// When the item last changed, as the tracker sends it.
     pub updated: Option<String>,
+    /// Labels shown next to the title.
     pub tags: Vec<String>,
     /// Colors the item's marker, e.g. from priority.
     pub status: Option<Status>,
 }
 
+/// Manifest for a tracker module: medium size, polled at the tracker default.
 pub fn manifest(id: &str, name: &str) -> Manifest {
     Manifest {
         id: id.into(),

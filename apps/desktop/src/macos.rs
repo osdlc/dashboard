@@ -3,6 +3,9 @@
 //! every app; a screensaver window goes at the screensaver level, above the
 //! menu bar and the Dock.
 
+// AppKit and CoreGraphics calls for the window levels.
+#![allow(unsafe_code)]
+
 use objc2::msg_send;
 use objc2::runtime::AnyObject;
 use tauri::WebviewWindow;

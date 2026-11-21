@@ -58,6 +58,7 @@ impl Default for Config {
     }
 }
 
+/// Shows the pictures in a folder one after another, as an `image` widget.
 #[derive(Default)]
 pub struct Screensaver {
     config: Config,
@@ -262,8 +263,7 @@ const SAMPLES: &[(&str, &[u8])] = &[
 fn samples() -> Result<PathBuf> {
     static WRITES: AtomicUsize = AtomicUsize::new(0);
     #[cfg(unix)]
-    // SAFETY: getuid has no preconditions and cannot fail.
-    let user = unsafe { libc::getuid() };
+    let user = rustix::process::getuid().as_raw();
     #[cfg(not(unix))]
     let user = std::env::var("USERNAME").unwrap_or_default();
     let dir = std::env::temp_dir().join(format!("sitroom-screensaver-samples-{user}"));
@@ -311,6 +311,7 @@ fn private_dir(dir: &Path, user: u32) -> Result<()> {
     Ok(())
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     // The catalog is built often, so the samples are written once per run.
     // If the temp folder can't be written, the renderer says it can't show
@@ -464,8 +465,7 @@ mod tests {
     #[test]
     fn the_samples_folder_must_be_private() {
         use std::os::unix::fs::PermissionsExt;
-        // SAFETY: getuid has no preconditions and cannot fail.
-        let user = unsafe { libc::getuid() };
+        let user = rustix::process::getuid().as_raw();
         let dir =
             std::env::temp_dir().join(format!("sitroom-saver-private-{}", std::process::id()));
         let mode = |d: &Path| std::fs::metadata(d).unwrap().permissions().mode() & 0o777;

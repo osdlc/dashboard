@@ -77,6 +77,7 @@ impl Default for Config {
     }
 }
 
+/// Shows a file something else writes: a view, values picked from JSON, or text.
 #[derive(Default)]
 pub struct File {
     config: Config,
@@ -252,6 +253,7 @@ fn is_markdown(path: &Path) -> bool {
 /// The demo is the view in the `backup.json` sample.
 const DEMO: &str = include_str!("../testdata/feeds/backup.json");
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let shape = Shape {
         format: Format::Auto,

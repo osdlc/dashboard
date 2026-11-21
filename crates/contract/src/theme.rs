@@ -23,6 +23,7 @@ macro_rules! tokens {
             /// Token names, as written in config files and CSS variables.
             pub const NAMES: &'static [&'static str] = &[$($name),*];
 
+            /// The color of the token with this name, e.g. `accent`. `None`: no such token.
             pub fn get(&self, name: &str) -> Option<&str> {
                 match name {
                     $($name => Some(&self.$field),)*
@@ -62,59 +63,89 @@ tokens! {
     border => "border",
     /// The empty part of gauges, meters and bars.
     track => "track",
+    /// Highlights: the default fill for meters, bars and charts.
     accent => "accent",
     /// Background of the item picked with the keyboard.
     accent_soft => "accent-soft",
     /// Text on an `accent` background.
     on_accent => "on-accent",
+    /// Healthy status.
     ok => "ok",
+    /// Needs-attention status.
     warn => "warn",
+    /// Failing status.
     error => "error",
+    /// Neutral information.
     info => "info",
     /// Categorical colors for series, bars and slices, in order.
     series_1 => "series-1",
+    /// Categorical color 2.
     series_2 => "series-2",
+    /// Categorical color 3.
     series_3 => "series-3",
+    /// Categorical color 4.
     series_4 => "series-4",
+    /// Categorical color 5.
     series_5 => "series-5",
+    /// Categorical color 6.
     series_6 => "series-6",
     /// Stops of the `heat` color scale: low, middle, high.
     heat_low => "heat-low",
+    /// Middle stop of the `heat` scale.
     heat_mid => "heat-mid",
+    /// High stop of the `heat` scale.
     heat_high => "heat-high",
+    /// Low stop of the `cool` scale.
     cool_low => "cool-low",
+    /// Middle stop of the `cool` scale.
     cool_mid => "cool-mid",
+    /// High stop of the `cool` scale.
     cool_high => "cool-high",
+    /// Low stop of the `sunset` scale.
     sunset_low => "sunset-low",
+    /// Middle stop of the `sunset` scale.
     sunset_mid => "sunset-mid",
+    /// High stop of the `sunset` scale.
     sunset_high => "sunset-high",
 }
 
 /// A token a widget can color something with, e.g. one line of a chart.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub enum Tone {
+    /// The theme's accent color.
     #[serde(rename = "accent")]
     Accent,
+    /// Healthy.
     #[serde(rename = "ok")]
     Ok,
+    /// Needs attention.
     #[serde(rename = "warn")]
     Warn,
+    /// Broken or failing.
     #[serde(rename = "error")]
     Error,
+    /// Neutral information.
     #[serde(rename = "info")]
     Info,
+    /// Quiet, like captions.
     #[serde(rename = "muted")]
     Muted,
+    /// Categorical color 1.
     #[serde(rename = "series-1")]
     Series1,
+    /// Categorical color 2.
     #[serde(rename = "series-2")]
     Series2,
+    /// Categorical color 3.
     #[serde(rename = "series-3")]
     Series3,
+    /// Categorical color 4.
     #[serde(rename = "series-4")]
     Series4,
+    /// Categorical color 5.
     #[serde(rename = "series-5")]
     Series5,
+    /// Categorical color 6.
     #[serde(rename = "series-6")]
     Series6,
 }
@@ -155,8 +186,11 @@ impl Tone {
 /// A color theme with both variants, as sent to renderers.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct ColorTheme {
+    /// The theme's name, e.g. "default".
     pub name: String,
+    /// Colors for a light background.
     pub light: Tokens,
+    /// Colors for a dark background.
     pub dark: Tokens,
 }
 
@@ -167,6 +201,7 @@ impl Default for ColorTheme {
 }
 
 impl ColorTheme {
+    /// The dark variant when `dark`, else the light one.
     pub fn variant(&self, dark: bool) -> &Tokens {
         if dark { &self.dark } else { &self.light }
     }
@@ -204,6 +239,7 @@ impl ColorTheme {
     }
 }
 
+/// The built-in theme used when the config names none.
 pub const DEFAULT: &str = "default";
 
 /// Built-in theme names, the default first.

@@ -1,8 +1,11 @@
 [package]
 name = "sitroom-bench"
+description = "Sitroom's native-vs-plugin benchmark harness"
 edition.workspace = true
+rust-version.workspace = true
 version.workspace = true
 license.workspace = true
+repository.workspace = true
 publish = false
 
 # The native-vs-plugin benchmark: startup, render latency, memory and CPU of
@@ -16,3 +19,6 @@ tokio = { version = "1.54.1", features = ["full"] }
 
 [target.'cfg(unix)'.dependencies]
 libc = "0.2.191"
+
+[lints]
+workspace = true

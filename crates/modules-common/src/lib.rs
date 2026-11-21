@@ -18,11 +18,13 @@ pub mod time;
 
 /// One built-in module, as a bundle lists it.
 pub struct Builtin {
+    /// Builtin id, as used in `builtin:` in the config.
     pub id: &'static str,
     /// Listed before the other built-ins: the system and GitHub tiles.
     pub core: bool,
     /// A fresh instance.
     pub new: fn() -> Box<dyn Module>,
+    /// Catalog entry for the settings editor.
     pub catalog: fn() -> CatalogEntry,
 }
 
@@ -71,10 +73,12 @@ pub fn flattened_helpers() -> Vec<serde_json::Value> {
         .collect()
 }
 
+/// Converts string slices to owned strings.
 pub fn strings(items: &[&str]) -> Vec<String> {
     items.iter().map(|s| s.to_string()).collect()
 }
 
+/// Manifest for a module that polls every `interval_ms` (no faster than `min_interval_ms`).
 pub fn manifest(
     id: &str,
     name: &str,
