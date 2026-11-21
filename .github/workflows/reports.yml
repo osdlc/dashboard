@@ -6,12 +6,12 @@
 #
 # Settings are this repository's variables:
 #   REPORTS_RUST_DIR       .  (the workspace is at the root)
-#   REPORTS_RUST_ARGS      --workspace --exclude dashboard-desktop
-#                          --exclude dashboard-native  (on Linux the Tauri app
+#   REPORTS_RUST_ARGS      --workspace --exclude sitroom-desktop
+#                          --exclude sitroom-native  (on Linux the Tauri app
 #                          needs WebKitGTK and the GPUI app fontconfig; plain
 #                          `cargo test` leaves both out too)
 #   REPORTS_NODE_VERSION   24  (the plugin tests run the TypeScript plugins)
-#   REPORTS_ENV            DASHBOARD_SKIP_UI_BUILD=1  (embed the placeholder page)
+#   REPORTS_ENV            SITROOM_SKIP_UI_BUILD=1  (embed the placeholder page)
 #   REPORTS_TS_PACKAGES    web site
 #   REPORTS_TS_SETUP       none  (the tests import only src/ and node:, so
 #                          nothing is installed)

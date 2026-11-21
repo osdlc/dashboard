@@ -4,30 +4,30 @@ This tutorial takes you from nothing to a dashboard of your own. You will run th
 config file, add widgets, connect one that needs a login, write a widget of your own, and keep
 more than one dashboard. It takes about an hour.
 
-Every command and config below has been run against the dashboard in this repository. If one does
-not work for you, [open an issue](https://github.com/osdlc/dashboard/issues).
+Every command and config below has been run against sitroom in this repository. If one does
+not work for you, [open an issue](https://github.com/osdlc/sitroom/issues).
 
 You need:
 
-- [Rust](https://rustup.rs) and [pnpm](https://pnpm.io), to build the dashboard.
+- [Rust](https://rustup.rs) and [pnpm](https://pnpm.io), to build sitroom.
 - Node 24 (or Bun), for the widget you write in step 5. Python 3.9 or later works too.
 - The [GitHub CLI](https://cli.github.com) (`gh`), for step 4. You can skip that part.
 
 ## 1. Install and run the demo
 
 There are no packages yet, so you build from source. `cargo install` builds the web view too,
-and puts `dashboard` in `~/.cargo/bin`, which is on your `PATH` once Rust is installed.
+and puts `sitroom` in `~/.cargo/bin`, which is on your `PATH` once Rust is installed.
 
 ```sh
-git clone https://github.com/osdlc/dashboard
-cd dashboard
+git clone https://github.com/osdlc/sitroom
+cd sitroom
 cargo install --path crates/cli
 ```
 
 Start the terminal view:
 
 ```sh
-dashboard tui
+sitroom tui
 ```
 
 You have no config file yet, so it shows the built-in demo: eight screens of made-up data. Press
@@ -36,43 +36,43 @@ You have no config file yet, so it shows the built-in demo: eight screens of mad
 Now the web view:
 
 ```sh
-dashboard serve
+sitroom serve
 ```
 
 It opens `http://127.0.0.1:7878/?boot=…` in your browser. That link signs in one tab and expires
-after a minute. For another tab, run `dashboard open`. Press `Ctrl-C` to stop the server.
+after a minute. For another tab, run `sitroom open`. Press `Ctrl-C` to stop the server.
 
 To keep the server running in the background:
 
 ```sh
-dashboard serve -d    # start it and return
-dashboard status      # is it running, and where
-dashboard stop        # stop it
+sitroom serve -d    # start it and return
+sitroom status      # is it running, and where
+sitroom stop        # stop it
 ```
 
 The web view only listens on `127.0.0.1`, so other machines can't reach it.
 
 ## 2. Your first config file
 
-The config is one YAML file. Ask the dashboard where it looks:
+The config is one YAML file. Ask sitroom where it looks:
 
 ```sh
-dashboard config
+sitroom config
 ```
 
 ```text
-/home/you/.config/dashboard/config.yaml
+/home/you/.config/sitroom/config.yaml
 (no file; using the built-in demo, examples/demo.yaml)
 ```
 
-On macOS and Linux it is `~/.config/dashboard/config.yaml`. On Windows it is
-`%APPDATA%\dashboard\config.yaml`. `--config <path>` uses another file.
+On macOS and Linux it is `~/.config/sitroom/config.yaml`. On Windows it is
+`%APPDATA%\sitroom\config.yaml`. `--config <path>` uses another file.
 
 Create the file with one screen of built-in modules. Change the `repos:` path to a git repository
 of yours.
 
 ```yaml
-# ~/.config/dashboard/config.yaml
+# ~/.config/sitroom/config.yaml
 theme: auto            # auto | light | dark
 
 modules:
@@ -101,15 +101,15 @@ screens:
 Check the file:
 
 ```sh
-dashboard config
+sitroom config
 ```
 
 ```text
-machine    /home/you/.config/dashboard/config.yaml
+machine    /home/you/.config/sitroom/config.yaml
 ok
 ```
 
-Then run `dashboard tui` or `dashboard serve` again. You see your screen instead of the demo.
+Then run `sitroom tui` or `sitroom serve` again. You see your screen instead of the demo.
 
 <!-- Screenshot: the "main" screen from this step, in the web view. To be added. -->
 
@@ -131,14 +131,14 @@ and `medium` make the first row (8 + 4), and `small`, `small` and `large` make t
 
 ### Live edits and mistakes
 
-Leave the dashboard running and edit the file. Changes apply when you save. Only modules whose
+Leave sitroom running and edit the file. Changes apply when you save. Only modules whose
 settings changed restart.
 
-If the file has a mistake, the dashboard keeps the last good config and shows the error on the
-settings screen (press `s`). `dashboard config` shows it too:
+If the file has a mistake, sitroom keeps the last good config and shows the error on the
+settings screen (press `s`). `sitroom config` shows it too:
 
 ```text
-dashboard: in /home/you/.config/dashboard/config.yaml: screen "main": unknown module "memroy" (available: cpu, memory, gpu, ...)
+sitroom: in /home/you/.config/sitroom/config.yaml: screen "main": unknown module "memroy" (available: cpu, memory, gpu, ...)
 ```
 
 For completion and checks in your editor, save the config's JSON Schema next to the file and point
@@ -146,7 +146,7 @@ the first line at it. This works in editors that use yaml-language-server, such 
 the YAML extension.
 
 ```sh
-dashboard schema config > ~/.config/dashboard/config.schema.json
+sitroom schema config > ~/.config/sitroom/config.schema.json
 ```
 
 ```yaml
@@ -156,13 +156,13 @@ theme: auto
 
 ## 3. Find and add widgets
 
-`dashboard widgets` lists everything you can add: built-in modules, bundled plugins and plugin
+`sitroom widgets` lists everything you can add: built-in modules, bundled plugins and plugin
 packages you have installed. Give it words to search for, or a tag:
 
 ```sh
-dashboard widgets                 # everything
-dashboard widgets weather         # every word must match the ID, name, description or tags
-dashboard widgets --tag github
+sitroom widgets                 # everything
+sitroom widgets weather         # every word must match the ID, name, description or tags
+sitroom widgets --tag github
 ```
 
 ```text
@@ -170,7 +170,7 @@ weather  builtin  Weather  weather, personal, web
     Current weather and a short forecast from Open-Meteo (no key needed), for a place name or a latitude and longitude.
 ```
 
-`dashboard widgets` lists every widget, and `dashboard widgets <id> --json` shows one with its
+`sitroom widgets` lists every widget, and `sitroom widgets <id> --json` shows one with its
 settings. The web editor's Add dialog shows each one's demo and settings too.
 
 Add a second screen with the weather, Hacker News and a Jira tile. Put the new modules under your
@@ -204,7 +204,7 @@ Press `2` (or `]` in the web view) to see the new screen.
 
 You can also add widgets without editing the file:
 
-1. Run `dashboard serve` and press `e` to open the screen editor.
+1. Run `sitroom serve` and press `e` to open the screen editor.
 2. In **Add component**, search or pick a tag.
 3. Pick a widget. You see its demo, what it needs (programs, environment variables, hosts it
    calls) and a form for its settings. Tick **Demo data only** to add it with made-up data.
@@ -249,8 +249,8 @@ variable, or runs a command you choose and uses what it prints. Linear, for exam
 `$LINEAR_API_KEY`:
 
 ```sh
-export LINEAR_API_KEY=lin_api_...   # in your shell profile, then start the dashboard
-dashboard serve
+export LINEAR_API_KEY=lin_api_...   # in your shell profile, then start sitroom
+sitroom serve
 ```
 
 ```yaml
@@ -262,14 +262,14 @@ screens:
       - { module: linear, size: medium }
 ```
 
-Set the variable in the shell that starts the dashboard. Without it the tile says:
+Set the variable in the shell that starts sitroom. Without it the tile says:
 
 ```text
-no API token: set $LINEAR_API_KEY before starting the dashboard, or set token_env / token_command in the config
+no API token: set $LINEAR_API_KEY before starting sitroom, or set token_env / token_command in the config
 ```
 
 To read a different variable, set `token_env`. To get the token from a password manager, set
-`token_command`, a program and its arguments. The dashboard runs it and uses what it prints:
+`token_command`, a program and its arguments. Sitroom runs it and uses what it prints:
 
 ```yaml
 modules:
@@ -279,13 +279,13 @@ modules:
       # or: token_env: MY_LINEAR_KEY
 ```
 
-The web editor's Add dialog lists the variable each widget reads, and so does `dashboard widgets linear --json`
+The web editor's Add dialog lists the variable each widget reads, and so does `sitroom widgets linear --json`
 under `requirements`.
 
 ## 5. Your own widget
 
 A widget you write is a plugin: a program that reads requests on stdin and writes answers on
-stdout, one JSON message per line. The dashboard starts it, asks for a manifest once (its ID, name
+stdout, one JSON message per line. Sitroom starts it, asks for a manifest once (its ID, name
 and refresh period), then asks for a view on every refresh. You can use any language. For
 TypeScript and Python there is a small SDK that handles the protocol for you.
 
@@ -294,28 +294,28 @@ TypeScript and Python there is a small SDK that handles the protocol for you.
 Make the plugin in the config folder, so the config can find it by a short path:
 
 ```sh
-cd ~/.config/dashboard
-dashboard plugin new --lang ts folder
+cd ~/.config/sitroom
+sitroom plugin new --lang ts folder
 ```
 
 ```text
 created folder
   main.ts
-  dashboard-plugin.ts
+  sitroom-plugin.ts
   package.json
 
 try it:
-  dashboard plugin-check -- node folder/main.ts
+  sitroom plugin-check -- node folder/main.ts
 ```
 
-`main.ts` is your plugin. `dashboard-plugin.ts` is the SDK, copied in: one file, no packages. Try
+`main.ts` is your plugin. `sitroom-plugin.ts` is the SDK, copied in: one file, no packages. Try
 it as it is:
 
 ```sh
-dashboard plugin-check -- node folder/main.ts
+sitroom plugin-check -- node folder/main.ts
 ```
 
-`plugin-check` starts the plugin the way the dashboard does, checks what it sends and prints the
+`plugin-check` starts the plugin the way sitroom does, checks what it sends and prints the
 tile as the terminal view would draw it.
 
 ### Show something real
@@ -328,8 +328,8 @@ newest files. Replace `folder/main.ts` with:
 import { readdirSync, statSync, statfsSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { configError, liveSeries, serve, withDefaults } from "./dashboard-plugin.ts";
-import type { View } from "./dashboard-plugin.ts";
+import { configError, liveSeries, serve, withDefaults } from "./sitroom-plugin.ts";
+import type { View } from "./sitroom-plugin.ts";
 
 // Settings from the tile's `config:` block, with their defaults.
 let config = { path: "~/Downloads", newest: 3 };
@@ -468,12 +468,12 @@ its thresholds), a `series` (a chart) and a `list`. This is the view the plugin 
 }
 ```
 
-The chart sends only one point each time. Because the series has an `id`, the dashboard keeps
+The chart sends only one point each time. Because the series has an `id`, sitroom keeps
 its history and draws the whole line, so the plugin keeps no state. That is what `liveSeries`
 does. Points are `[unix milliseconds, value]`.
 
 The other widgets are `text` (with optional markdown), `bars`, `meter_grid`, `table`, `log` and
-`uptime`. [docs/plugins.md](https://github.com/osdlc/dashboard/blob/main/docs/plugins.md#widgets)
+`uptime`. [docs/plugins.md](https://github.com/osdlc/sitroom/blob/main/docs/plugins.md#widgets)
 has an example of each.
 
 [examples/blocks/](../examples/blocks/) has a JSON example of each widget type, and ways to
@@ -484,7 +484,7 @@ combine them: stats over a chart, a pie next to stats, widgets inside table cell
 `--plugin-config` passes a `config:` block, as JSON:
 
 ```sh
-dashboard plugin-check --plugin-config '{"path": "~/Downloads"}' -- node folder/main.ts
+sitroom plugin-check --plugin-config '{"path": "~/Downloads"}' -- node folder/main.ts
 ```
 
 ```text
@@ -521,11 +521,11 @@ the JSON alone won't show, such as percents outside 0 to 100 or chart times in s
 milliseconds. A bad setting shows the plugin's message:
 
 ```sh
-dashboard plugin-check --plugin-config '{"path": "~/nope"}' -- node folder/main.ts
+sitroom plugin-check --plugin-config '{"path": "~/nope"}' -- node folder/main.ts
 ```
 
 ```text
-dashboard: initialize failed: no such folder: /home/you/nope (code -32002)
+sitroom: initialize failed: no such folder: /home/you/nope (code -32002)
 ```
 
 ### Add it to your config
@@ -543,16 +543,16 @@ screens:
 
 A plugin started with `plugin:` runs in the config file's folder, so `folder/main.ts` is found
 next to `config.yaml`. Edit `main.ts` and the change shows at the next restart of the tile:
-change its `config:` or restart the dashboard.
+change its `config:` or restart sitroom.
 
-In Python, use `dashboard plugin new --lang py folder`. The SDK has the same parts:
+In Python, use `sitroom plugin new --lang py folder`. The SDK has the same parts:
 `serve(manifest=..., init=..., render=...)`, `with_defaults`, `config_error` and `live_series`.
-See [sdk/python](https://github.com/osdlc/dashboard/blob/main/sdk/python/README.md) and
-[sdk/typescript](https://github.com/osdlc/dashboard/blob/main/sdk/typescript/README.md).
+See [sdk/python](https://github.com/osdlc/sitroom/blob/main/sdk/python/README.md) and
+[sdk/typescript](https://github.com/osdlc/sitroom/blob/main/sdk/typescript/README.md).
 
-To share your widget, make it a package: its folder plus a `dashboard-plugin.yaml` with a
+To share your widget, make it a package: its folder plus a `sitroom-plugin.yaml` with a
 description, tags and a demo view. See
-[docs/plugins.md](https://github.com/osdlc/dashboard/blob/main/docs/plugins.md#package-it).
+[docs/plugins.md](https://github.com/osdlc/sitroom/blob/main/docs/plugins.md#package-it).
 
 ## 6. More than one dashboard
 
@@ -575,20 +575,20 @@ screens:
 Save it and open it:
 
 ```sh
-dashboard import focus.yaml          # saved as "focus"
-dashboard dashboards list
-dashboard --dashboard focus tui      # or: dashboard --dashboard focus serve
+sitroom import focus.yaml          # saved as "focus"
+sitroom dashboards list
+sitroom --dashboard focus tui      # or: sitroom --dashboard focus serve
 ```
 
-`import` checks the file, saves it in `~/.config/dashboard/dashboards/focus.yaml`, and lists what
+`import` checks the file, saves it in `~/.config/sitroom/dashboards/focus.yaml`, and lists what
 it needs that you don't have and the programs it runs. You can also write the file in that folder
 yourself. In the web view, a switcher next to the title picks a saved dashboard.
 
 To share one, export it and import the file on the other machine:
 
 ```sh
-dashboard export focus                      # print it
-dashboard export focus focus.yaml --force   # write it to a file
+sitroom export focus                      # print it
+sitroom export focus focus.yaml --force   # write it to a file
 ```
 
 `import` also takes an `https://` URL, and `--name` to save it under another name. `import` and
@@ -596,11 +596,11 @@ dashboard export focus focus.yaml --force   # write it to a file
 
 ### A dashboard for a repository
 
-A `.dashboard.yaml` file in a repository adds that repository's modules and screens when you run
-the dashboard inside it. Its screens come first.
+A `.sitroom.yaml` file in a repository adds that repository's modules and screens when you run
+sitroom inside it. Its screens come first.
 
 ```yaml
-# my-project/.dashboard.yaml
+# my-project/.sitroom.yaml
 modules:
   repo:
     builtin: git          # a second copy of a built-in, under its own ID
@@ -617,19 +617,19 @@ screens:
 
 `builtin:` runs a built-in module under a new ID, so you can show one module more than once with
 different settings. Relative paths start in the folder of the file that sets them, here the
-repository's top folder, so the dashboard shows the same thing from any folder inside it.
+repository's top folder, so sitroom shows the same thing from any folder inside it.
 
 A project file can run programs, and it comes with any repository you clone. So it is not used
 until you trust it:
 
 ```sh
-dashboard config      # project ... (not trusted, not used; see `dashboard trust`)
-cat .dashboard.yaml   # read it first
-dashboard trust       # prints the programs it runs, and trusts the file as it is now
+sitroom config      # project ... (not trusted, not used; see `sitroom trust`)
+cat .sitroom.yaml   # read it first
+sitroom trust       # prints the programs it runs, and trusts the file as it is now
 ```
 
-Any change to the file, yours or from a `git pull`, needs `dashboard trust` again.
-`dashboard trust --remove` stops using it, and `--no-project` skips it for one run.
+Any change to the file, yours or from a `git pull`, needs `sitroom trust` again.
+`sitroom trust --remove` stops using it, and `--no-project` skips it for one run.
 
 ## 7. Next steps
 
@@ -653,15 +653,15 @@ nothing to click.
 
 ### Install plugin packages
 
-Plugin packages are widgets other people wrote. `dashboard plugin install` adds one to
-`~/.local/share/dashboard/plugins/`. It checks the package, shows what it runs and needs, and asks
+Plugin packages are widgets other people wrote. `sitroom plugin install` adds one to
+`~/.local/share/sitroom/plugins/`. It checks the package, shows what it runs and needs, and asks
 first. There is no shared marketplace yet. The repository has packages in `plugins/ext`, which you
 can install from your clone:
 
 ```sh
-dashboard plugin install plugins/ext/clock-py
-dashboard plugin list
-dashboard plugin remove clock-py
+sitroom plugin install plugins/ext/clock-py
+sitroom plugin list
+sitroom plugin remove clock-py
 ```
 
 Then add it by its ID with `package:`:
@@ -678,19 +678,19 @@ screens:
 ```
 
 `scripts/build-marketplace.sh` builds a sample index from those packages. Then
-`dashboard plugin install clock-py --index marketplace/index.json` installs by ID, and the web
+`sitroom plugin install clock-py --index marketplace/index.json` installs by ID, and the web
 editor's catalog shows what the index offers.
 
 ### Read more
 
-- `dashboard widgets`: every widget; add `<id> --json` for its settings.
-- [docs/plugins.md](https://github.com/osdlc/dashboard/blob/main/docs/plugins.md): writing
+- `sitroom widgets`: every widget; add `<id> --json` for its settings.
+- [docs/plugins.md](https://github.com/osdlc/sitroom/blob/main/docs/plugins.md): writing
   plugins, packages and every widget type.
-- [docs/contract.md](https://github.com/osdlc/dashboard/blob/main/docs/contract.md): the plugin
+- [docs/contract.md](https://github.com/osdlc/sitroom/blob/main/docs/contract.md): the plugin
   contract in full.
-- [docs/dashboards.md](https://github.com/osdlc/dashboard/blob/main/docs/dashboards.md): how
+- [docs/dashboards.md](https://github.com/osdlc/sitroom/blob/main/docs/dashboards.md): how
   config files, saved dashboards and project files merge.
-- [docs/marketplace.md](https://github.com/osdlc/dashboard/blob/main/docs/marketplace.md):
+- [docs/marketplace.md](https://github.com/osdlc/sitroom/blob/main/docs/marketplace.md):
   installing packages and making an index.
-- [README](https://github.com/osdlc/dashboard/blob/main/README.md): every built-in module and its
+- [README](https://github.com/osdlc/sitroom/blob/main/README.md): every built-in module and its
   settings.

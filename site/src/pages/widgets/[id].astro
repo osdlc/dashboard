@@ -31,7 +31,7 @@ interface Props {
 const { w, prev, next } = Astro.props
 
 const base = import.meta.env.BASE_URL.replace(/\/?$/, '/')
-const repo = 'https://github.com/osdlc/dashboard'
+const repo = 'https://github.com/osdlc/sitroom'
 const liveSrc = `demo-app/index.html?${new URLSearchParams({ mode: 'demo', fill: '', catalog: `catalog/${w.id}.json`, id: w.id, size: w.default_size })}`
 const rows = settings(w)
 const config = configExample(w)
@@ -40,7 +40,7 @@ const needsNothing = !req.binaries.length && !req.env.length && !req.hosts.lengt
 const sourceUrl = w.kind === 'plugin' && w.source !== 'bundled' ? `${repo}/tree/main/${w.source}` : null
 ---
 
-<Base title={`${w.name} widget · dashboard`} description={w.description}>
+<Base title={`${w.name} widget · sitroom`} description={w.description}>
   <SiteHeader here="widgets" />
 
   <main class="wrap page">
@@ -102,15 +102,15 @@ const sourceUrl = w.kind === 'plugin' && w.source !== 'bundled' ? `${repo}/tree/
             w.kind === 'plugin' && w.source !== 'bundled' ? (
               <>
                 A plugin package: put its folder in <code>plugins/{w.id}/</code> next to your config, or in{' '}
-                <code>~/.local/share/dashboard/plugins/</code>.
+                <code>~/.local/share/sitroom/plugins/</code>.
               </>
             ) : w.source === 'bundled' ? (
-              <>Bundled into the dashboard binary; nothing to install.</>
+              <>Bundled into sitroom binary; nothing to install.</>
             ) : (
               <>Built in; nothing to install.</>
             )
           }{' '}
-          Or add it from the catalog in the web view's editor; <code>dashboard widgets {w.id}</code> lists it in a terminal.
+          Or add it from the catalog in the web view's editor; <code>sitroom widgets {w.id}</code> lists it in a terminal.
         </p>
       </section>
 

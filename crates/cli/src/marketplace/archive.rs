@@ -8,12 +8,12 @@ use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result, bail};
-use dashboard_config::packages::{Installed, load_package};
-use dashboard_contract::PACKAGE_FILE;
 use flate2::Compression;
 use flate2::read::GzDecoder;
 use flate2::write::GzEncoder;
 use path_guard::Guard;
+use sitroom_config::packages::{Installed, load_package};
+use sitroom_contract::PACKAGE_FILE;
 use tar::EntryType;
 
 /// The largest download or archive read: 64 MiB.
@@ -193,7 +193,7 @@ mod tests {
 
     fn scratch(name: &str) -> PathBuf {
         let dir =
-            std::env::temp_dir().join(format!("dashboard-archive-{name}-{}", std::process::id()));
+            std::env::temp_dir().join(format!("sitroom-archive-{name}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         dir

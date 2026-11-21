@@ -26,7 +26,7 @@ from typing import Any, Dict, List
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import apitoken  # noqa: E402
-from dashboard_plugin import View, config_error, serve, upstream_error, with_defaults  # noqa: E402
+from sitroom_plugin import View, config_error, serve, upstream_error, with_defaults  # noqa: E402
 from view import SAMPLE_NOW, TREE, view  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))

@@ -3,5 +3,5 @@
 //! that the checked-in file matches.
 
 fn main() {
-    print!("{}", dashboard_contract::theme::builtins_ts());
+    print!("{}", sitroom_contract::theme::builtins_ts());
 }

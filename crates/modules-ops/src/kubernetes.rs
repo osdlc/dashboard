@@ -21,14 +21,14 @@ use std::time::Duration;
 
 use anyhow::{Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::{
+use schemars::JsonSchema;
+use serde::Deserialize;
+use sitroom_contract::{
     Bar, CatalogEntry, Cell, Column, Manifest, Requirements, Row, Size, Status, ValueFormat, View,
     Widget,
 };
-use dashboard_host::{Module, now_ms};
-use dashboard_modules_common::{manifest, time::parse_time};
-use schemars::JsonSchema;
-use serde::Deserialize;
+use sitroom_host::{Module, now_ms};
+use sitroom_modules_common::{manifest, time::parse_time};
 use tokio::process::Command;
 
 const TIMEOUT: Duration = Duration::from_secs(15);
@@ -599,7 +599,7 @@ mod tests {
 
     #[test]
     fn demo_is_valid() {
-        let problems: Vec<String> = dashboard_contract::check::check_view(&catalog().demo)
+        let problems: Vec<String> = sitroom_contract::check::check_view(&catalog().demo)
             .into_iter()
             .filter(|f| f.problem)
             .map(|f| f.text)

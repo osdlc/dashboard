@@ -2,7 +2,7 @@ import { ref, watchEffect } from 'vue'
 
 /** Spacing between and inside tiles. Remembered per browser; this is a viewer preference, not config. */
 export type Density = 'comfortable' | 'compact'
-const KEY = 'dashboard.density'
+const KEY = 'sitroom.density'
 
 function load(): Density {
   try {

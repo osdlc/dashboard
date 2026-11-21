@@ -23,15 +23,15 @@ use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
 use std::collections::BTreeMap;
 
-use dashboard_contract::{CatalogEntry, Cell, Column, Manifest, Row, Size, Status, View, Widget};
-use dashboard_host::Module;
 use jiff::civil::Weekday;
 use jiff::tz::TimeZone;
 use jiff::{Timestamp, Zoned};
 use schemars::JsonSchema;
 use serde::Deserialize;
+use sitroom_contract::{CatalogEntry, Cell, Column, Manifest, Row, Size, Status, View, Widget};
+use sitroom_host::Module;
 
-use dashboard_modules_common::manifest;
+use sitroom_modules_common::manifest;
 
 const MONTHS: [&str; 12] = [
     "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
@@ -602,7 +602,7 @@ mod tests {
     #[test]
     fn catalog_demo_is_the_demo_sample() {
         // The catalog demo is the plugins' demo too (see their
-        // dashboard-plugin.yaml).
+        // sitroom-plugin.yaml).
         let expected: View = serde_json::from_value(read("demo.view.json")).unwrap();
         assert_eq!(catalog().demo, expected);
     }

@@ -12,7 +12,7 @@ import urllib.request
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 
-from dashboard_plugin import config_error, upstream_error
+from sitroom_plugin import config_error, upstream_error
 
 # How long one API call and one token command may take, in seconds. The host waits 30 s for
 # a render; the slowest render (two token commands and one call, or one token command and two
@@ -43,7 +43,7 @@ def read_token(env: str, command: Optional[List[str]], what: str = "API token") 
     value = os.environ.get(env, "").strip()
     if not value:
         raise config_error(
-            f"no {what}: set ${env} before starting the dashboard, or set the token command in the config"
+            f"no {what}: set ${env} before starting sitroom, or set the token command in the config"
         )
     return value
 

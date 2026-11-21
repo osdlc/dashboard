@@ -6,7 +6,7 @@ The Python version of a native-vs-plugin benchmark widget. It follows the same r
 native module (crates/modules-fun/src/clock.rs) and the TypeScript plugin
 (plugins/ext/clock-ts), and must show the same view for the same input.
 
-    dashboard plugin-check -- python3 plugins/ext/clock-py/main.py
+    sitroom plugin-check -- python3 plugins/ext/clock-py/main.py
 """
 
 import json
@@ -16,7 +16,7 @@ from datetime import datetime, timezone, tzinfo
 from typing import List, Optional, Tuple, TypedDict
 from zoneinfo import ZoneInfo, available_timezones
 
-from dashboard_plugin import View, Widget, config_error, serve, with_defaults
+from sitroom_plugin import View, Widget, config_error, serve, with_defaults
 
 MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]

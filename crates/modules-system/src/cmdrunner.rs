@@ -20,11 +20,11 @@ use std::time::Duration;
 
 use anyhow::{Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::{CatalogEntry, Manifest, Size, Status, View, Widget};
-use dashboard_host::Module;
-use dashboard_modules_common::manifest;
 use schemars::JsonSchema;
 use serde::Deserialize;
+use sitroom_contract::{CatalogEntry, Manifest, Size, Status, View, Widget};
+use sitroom_host::Module;
+use sitroom_modules_common::manifest;
 use tokio::process::Command;
 
 #[derive(Debug, Deserialize, JsonSchema)]
@@ -98,11 +98,11 @@ impl Module for CmdRunner {
             .kill_on_drop(true);
         // Its own process group (a job object on Windows), so a timeout stops
         // the whole pipeline, not only `sh`, and children it left behind.
-        dashboard_host::process::own_group(&mut cmd);
+        sitroom_host::process::own_group(&mut cmd);
         let child = cmd
             .spawn()
             .map_err(|e| anyhow::anyhow!("running the command: {e}"))?;
-        let _tree = dashboard_host::process::KillTree::new(&child);
+        let _tree = sitroom_host::process::KillTree::new(&child);
         let timeout = Duration::from_secs(self.config.timeout_secs);
         let run = match tokio::time::timeout(timeout, child.wait_with_output()).await {
             Ok(Ok(out)) => Run {
@@ -337,7 +337,7 @@ mod tests {
 
     #[test]
     fn demo_is_valid() {
-        let problems: Vec<String> = dashboard_contract::check::check_view(&catalog().demo)
+        let problems: Vec<String> = sitroom_contract::check::check_view(&catalog().demo)
             .into_iter()
             .filter(|f| f.problem)
             .map(|f| f.text)

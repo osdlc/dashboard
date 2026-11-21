@@ -1,10 +1,10 @@
-//! Which project files may be used. A `.dashboard.yaml` comes with whatever
+//! Which project files may be used. A `.sitroom.yaml` comes with whatever
 //! folder you are in, and it can start programs (plugins, `token_command`,
 //! built-ins that run commands). So, like `direnv allow`, a project file is
-//! only read after `dashboard trust`, and only while its content is the one
-//! that was trusted: any change to the file needs a new `dashboard trust`.
+//! only read after `sitroom trust`, and only while its content is the one
+//! that was trusted: any change to the file needs a new `sitroom trust`.
 //!
-//! The list is `<data home>/dashboard/trusted-projects`: one line per file,
+//! The list is `<data home>/sitroom/trusted-projects`: one line per file,
 //! `<sha256 of the content>  <absolute path>`.
 
 use std::path::{Path, PathBuf};
@@ -15,11 +15,11 @@ use sha2::{Digest, Sha256};
 
 use crate::{TOOL, VENDOR};
 
-/// The default list: `<data home>/dashboard/trusted-projects`.
+/// The default list: `<data home>/sitroom/trusted-projects`.
 pub fn default_path() -> Result<PathBuf> {
     let dirs = TieredDirs::from_env(
         VENDOR,
-        &env_vars!("DASHBOARD"),
+        &env_vars!("SITROOM"),
         ResolveOptions::new().with_convention(Convention::Xdg),
     )?;
     Ok(dirs
@@ -130,10 +130,10 @@ mod tests {
 
     #[test]
     fn trust_follows_the_content() {
-        let dir = std::env::temp_dir().join(format!("dashboard-trust-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sitroom-trust-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
-        let project = dir.join(".dashboard.yaml");
+        let project = dir.join(".sitroom.yaml");
         std::fs::write(&project, "screens: []\n").unwrap();
         let trust = Trust::new(dir.join("data/trusted-projects"));
         assert!(!trust.allows(&project));
@@ -142,7 +142,7 @@ mod tests {
         // Trusting again keeps one entry.
         trust.allow(&project).unwrap();
         assert_eq!(trust.entries().len(), 1);
-        // Any change needs a new `dashboard trust`.
+        // Any change needs a new `sitroom trust`.
         std::fs::write(&project, "screens: []\nmodules: {}\n").unwrap();
         assert!(!trust.allows(&project));
         trust.allow(&project).unwrap();

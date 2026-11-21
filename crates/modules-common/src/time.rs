@@ -5,7 +5,7 @@ pub fn ago(ts: &str) -> String {
     let Some(then) = parse_time(ts) else {
         return ts.to_string();
     };
-    let secs = (dashboard_host::now_ms() / 1000 - then).max(0);
+    let secs = (sitroom_host::now_ms() / 1000 - then).max(0);
     match secs {
         s if s < 60 => "just now".into(),
         s if s < 3600 => format!("{}m ago", s / 60),
@@ -46,7 +46,7 @@ pub fn parse_time(ts: &str) -> Option<i64> {
 /// RFC 3339 time `secs_ago` seconds before now, for demo data whose ages
 /// should read the same whenever it is shown.
 pub fn demo_time(secs_ago: i64) -> String {
-    rfc3339(dashboard_host::now_ms() / 1000 - secs_ago)
+    rfc3339(sitroom_host::now_ms() / 1000 - secs_ago)
 }
 
 /// RFC 3339 time (UTC) from seconds since the epoch.
@@ -90,7 +90,7 @@ mod tests {
 
     #[test]
     fn demo_times_parse_back() {
-        let now = dashboard_host::now_ms() / 1000;
+        let now = sitroom_host::now_ms() / 1000;
         for ago in [0, 59, 3_600, 86_400 * 40, 86_400 * 400] {
             // demo_time reads the clock again, so a second may have passed.
             let back = parse_time(&demo_time(ago)).unwrap();

@@ -1,11 +1,11 @@
 //! Drawing tiles and the widgets inside them.
 
-use dashboard_contract::rpc::LogLevel;
-use dashboard_contract::{Action, Cell as ViewCell, Status, TileUpdate, UptimeCheck, Widget};
 use ratatui::layout::{Constraint, Layout, Rect};
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Cell, Paragraph, Row, Table, Wrap};
+use sitroom_contract::rpc::LogLevel;
+use sitroom_contract::{Action, Cell as ViewCell, Status, TileUpdate, UptimeCheck, Widget};
 
 use crate::canvas::Canvas;
 use crate::charts;
@@ -470,7 +470,7 @@ fn draw_list(
     f: &mut Canvas,
     p: &Palette,
     area: Rect,
-    items: &[dashboard_contract::ListItem],
+    items: &[sitroom_contract::ListItem],
     empty_text: &Option<String>,
     hits: &mut Hits,
 ) {
@@ -482,7 +482,7 @@ fn draw_list(
         return;
     }
     let width = area.width as usize;
-    let rows_of = |i: &dashboard_contract::ListItem| 1 + i.subtitle.is_some() as u16;
+    let rows_of = |i: &sitroom_contract::ListItem| 1 + i.subtitle.is_some() as u16;
     let total = items.iter().fold(0u16, |t, i| t.saturating_add(rows_of(i)));
     let more_row = total > area.height && area.height >= 2;
     let budget = area.height - more_row as u16;
@@ -626,7 +626,7 @@ fn stack(n: usize, width: u16) -> bool {
 }
 
 /// Rows a tile would take to show all of its view at this width, borders
-/// included. Tiles get their rows from their size, not from this; `dashboard
+/// included. Tiles get their rows from their size, not from this; `sitroom
 /// plugin-check` uses it to size its preview.
 pub fn tile_wanted_height(tile: &TileUpdate, width: u16) -> u16 {
     want(&tile.view.root, width.saturating_sub(2)).rows + 2
@@ -749,8 +749,8 @@ const LEAST_FIRST_COLUMN: usize = 12;
 /// rightmost); the first column is always kept. Then the widest columns
 /// give up cells until the row fits, and cells left over are shared out.
 fn table_columns(
-    columns: &[dashboard_contract::Column],
-    rows: &[dashboard_contract::Row],
+    columns: &[sitroom_contract::Column],
+    rows: &[sitroom_contract::Row],
     width: u16,
 ) -> Vec<(usize, u16)> {
     let natural: Vec<usize> = columns
@@ -853,7 +853,7 @@ fn cell_text(cell: Option<&ViewCell>) -> String {
 
 /// A tile whose module hasn't produced a view yet.
 /// A list item's marker: its status, else its tone, else the terminal's color.
-fn item_color(p: &Palette, item: &dashboard_contract::ListItem) -> ratatui::style::Color {
+fn item_color(p: &Palette, item: &sitroom_contract::ListItem) -> ratatui::style::Color {
     match (item.status, item.tone) {
         (Some(s), _) => p.status(s),
         (None, Some(t)) => p.tone(t),
@@ -913,8 +913,8 @@ fn inline_markdown<'a>(p: &Palette, text: &'a str) -> Vec<Span<'a>> {
 
 #[cfg(test)]
 mod tests {
-    use dashboard_contract::Theme;
     use ratatui::buffer::Buffer;
+    use sitroom_contract::Theme;
 
     use super::*;
 
@@ -1027,7 +1027,7 @@ mod tests {
     fn list(n: usize) -> Widget {
         Widget::List {
             items: (1..=n)
-                .map(|i| dashboard_contract::ListItem {
+                .map(|i| sitroom_contract::ListItem {
                     title: format!("item {i}"),
                     subtitle: None,
                     status: None,
@@ -1197,13 +1197,13 @@ mod tests {
     #[test]
     fn a_table_shows_the_rows_that_fit() {
         let table = Widget::Table {
-            columns: vec![dashboard_contract::Column {
+            columns: vec![sitroom_contract::Column {
                 key: "k".into(),
                 label: "Name".into(),
                 priority: None,
             }],
             rows: (1..=6)
-                .map(|i| dashboard_contract::Row {
+                .map(|i| sitroom_contract::Row {
                     cells: [("k".to_string(), ViewCell::Text(format!("row {i}")))].into(),
                     status: None,
                     action: None,
@@ -1215,7 +1215,7 @@ mod tests {
 
     #[test]
     fn a_narrow_table_drops_low_priority_columns_and_keeps_the_first() {
-        let col = |key: &str, priority| dashboard_contract::Column {
+        let col = |key: &str, priority| sitroom_contract::Column {
             key: key.into(),
             label: key.into(),
             priority,
@@ -1228,7 +1228,7 @@ mod tests {
             col("restarts", None),
             col("age", None),
         ];
-        let row = |cells: [&str; 6]| dashboard_contract::Row {
+        let row = |cells: [&str; 6]| sitroom_contract::Row {
             cells: columns
                 .iter()
                 .zip(cells)
@@ -1274,7 +1274,7 @@ mod tests {
     fn a_tile_too_small_for_its_view_shows_the_summary() {
         let tile = TileUpdate {
             tile_id: "t".into(),
-            view: dashboard_contract::View {
+            view: sitroom_contract::View {
                 status: Status::Ok,
                 summary: "all good".into(),
                 root: Widget::Table {
@@ -1296,7 +1296,7 @@ mod tests {
     #[test]
     fn long_list_titles_end_with_an_ellipsis() {
         let widget = Widget::List {
-            items: vec![dashboard_contract::ListItem {
+            items: vec![sitroom_contract::ListItem {
                 title: "Fix the flaky integration test in the billing service".into(),
                 subtitle: Some("org/billing!412 · updated 3h ago by someone".into()),
                 status: None,

@@ -15,8 +15,8 @@ use std::time::Duration;
 
 use anyhow::Result;
 use async_trait::async_trait;
-use dashboard_contract::{CatalogEntry, Manifest, Size, Status, ValueFormat, View, Widget};
-use dashboard_host::{Module, now_ms};
+use sitroom_contract::{CatalogEntry, Manifest, Size, Status, ValueFormat, View, Widget};
+use sitroom_host::{Module, now_ms};
 use sysinfo::System;
 use tokio::process::Command;
 
@@ -291,7 +291,7 @@ fn view(gpus: &[GpuStat], t: i64, history: Option<Vec<Vec<f64>>>) -> View {
         style, mirrored, ..
     } = &mut chart
     {
-        *style = dashboard_contract::SeriesStyle::Line;
+        *style = sitroom_contract::SeriesStyle::Line;
         *mirrored = false;
     }
 

@@ -9,10 +9,10 @@
 //! docs/modules.md). Cursor and Copilot also call a web
 //! API, with the login their own app or CLI already keeps.
 
-use dashboard_contract::{Status, Thresholds, Widget};
-use dashboard_modules_common::Builtin;
+use sitroom_contract::{Status, Thresholds, Widget};
+use sitroom_modules_common::Builtin;
 #[allow(unused_imports)]
-pub(crate) use dashboard_modules_common::{entry, schema, strings};
+pub(crate) use sitroom_modules_common::{entry, schema, strings};
 
 #[cfg(feature = "antigravity")]
 pub mod antigravity;
@@ -163,20 +163,20 @@ pub fn until(secs: i64) -> String {
 }
 
 pub fn now_secs() -> i64 {
-    dashboard_host::now_ms() / 1000
+    sitroom_host::now_ms() / 1000
 }
 
 /// A one-row list that opens `url`: the way from a tile to the agent's own
 /// usage page or docs.
 pub fn link(title: &str, subtitle: &str, url: &str) -> Widget {
     Widget::List {
-        items: vec![dashboard_contract::ListItem {
+        items: vec![sitroom_contract::ListItem {
             tone: None,
             title: title.into(),
             subtitle: Some(subtitle.into()),
             status: None,
             tags: vec![],
-            action: Some(dashboard_contract::Action::OpenUrl { url: url.into() }),
+            action: Some(sitroom_contract::Action::OpenUrl { url: url.into() }),
         }],
         empty_text: None,
     }
@@ -184,13 +184,13 @@ pub fn link(title: &str, subtitle: &str, url: &str) -> Widget {
 
 /// Token counts as "4.2M".
 pub fn count(n: u64) -> String {
-    dashboard_contract::format_value(n as f64, dashboard_contract::ValueFormat::Count, None)
+    sitroom_contract::format_value(n as f64, sitroom_contract::ValueFormat::Count, None)
 }
 
 /// `2026-10-24` -> `Sat 24`.
 pub fn day_label(date: &str) -> String {
     const DAYS: [&str; 7] = ["Thu", "Fri", "Sat", "Sun", "Mon", "Tue", "Wed"];
-    match dashboard_modules_common::time::parse_time(&format!("{date}T00:00:00Z")) {
+    match sitroom_modules_common::time::parse_time(&format!("{date}T00:00:00Z")) {
         Some(t) => format!(
             "{} {}",
             DAYS[(t / 86_400).rem_euclid(7) as usize],

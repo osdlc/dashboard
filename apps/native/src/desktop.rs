@@ -35,9 +35,9 @@ pub fn open_window(shared: &Shared, ambient: bool, cx: &mut App) {
             titlebar: Some(TitlebarOptions {
                 title: Some(
                     if ambient {
-                        "Dashboard (ambient)"
+                        "Sitroom (ambient)"
                     } else {
-                        "Dashboard"
+                        "Sitroom"
                     }
                     .into(),
                 ),
@@ -174,7 +174,7 @@ pub mod tray {
             return;
         }
         let mut builder = TrayIconBuilder::new()
-            .with_tooltip("Dashboard")
+            .with_tooltip("Sitroom")
             .with_menu(Box::new(menu));
         if let Some(icon) = icon() {
             builder = builder.with_icon(icon);

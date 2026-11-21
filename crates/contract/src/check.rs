@@ -1,6 +1,6 @@
 //! Checks for things the JSON Schema can't express: values out of range,
 //! table cells with no column, links that aren't http(s). Used by
-//! `dashboard plugin-check` and the example plugin tests. Each finding is one
+//! `sitroom plugin-check` and the example plugin tests. Each finding is one
 //! line of plain text naming where it is.
 //!
 //! A finding is a problem (the plugin sent something wrong) or a note

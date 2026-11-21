@@ -4,8 +4,8 @@
 
 use std::rc::Rc;
 
-use dashboard_contract::{ColorScale, Status, Tokens, Tone};
 use gpui::{Hsla, Rgba};
+use sitroom_contract::{ColorScale, Status, Tokens, Tone};
 
 #[derive(Clone)]
 pub struct Palette(Rc<Tokens>);
@@ -22,7 +22,7 @@ impl Palette {
     fn rgb(&self, name: &str) -> (u8, u8, u8) {
         self.0
             .get(name)
-            .and_then(dashboard_contract::theme::rgb)
+            .and_then(sitroom_contract::theme::rgb)
             .unwrap_or((128, 128, 128))
     }
 

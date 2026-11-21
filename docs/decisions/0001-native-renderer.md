@@ -26,7 +26,7 @@ from the same config:
   redrew only the rows whose values changed. Numbers and fills animated with
   Slint's `animate`.
 - **SwiftUI** (`apps/swiftui`, about 3,200 lines of Swift, macOS 14+). Swift
-  can't link the Rust host, so it started `dashboard serve` as a child process
+  can't link the Rust host, so it started `sitroom serve` as a child process
   and read tiles over the web view's WebSocket. One `@Observable` model per
   tile, so an update to one tile redrew only that tile. Bar fills used Core
   Animation; numbers rolled with a SwiftUI push transition.

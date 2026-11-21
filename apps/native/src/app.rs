@@ -1,4 +1,4 @@
-//! The dashboard view: its state, keys and top-level layout. It behaves like
+//! Sitroom view: its state, keys and top-level layout. It behaves like
 //! the web view's `App.vue` and `AmbientApp.vue`, but reads the host directly.
 
 use std::cell::RefCell;
@@ -6,12 +6,12 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-use dashboard_contract::{CatalogEntry, ClientMessage, Theme, TileUpdate, UiSettings};
-use dashboard_runtime::Host;
 use gpui::{
     Context, FocusHandle, KeyDownEvent, MouseMoveEvent, ScrollHandle, SharedString, Task, Window,
     WindowAppearance, div, point, prelude::*, px,
 };
+use sitroom_contract::{CatalogEntry, ClientMessage, Theme, TileUpdate, UiSettings};
+use sitroom_runtime::Host;
 use tokio::sync::{broadcast, mpsc, watch};
 
 use crate::editor::Editor;
@@ -633,7 +633,7 @@ impl Dashboard {
             .items_center()
             .gap(px(if self.compact { 8.0 } else { 12.0 }))
             .mb(px(if self.compact { 6.0 } else { 16.0 }))
-            .child(ui.heading("Dashboard", 1.25))
+            .child(ui.heading("Sitroom", 1.25))
             .child(
                 div()
                     .flex()
@@ -754,7 +754,7 @@ impl Dashboard {
                     selected: update.and_then(|u| self.selected_item(u)),
                     ..self.draw(draw.p, m)
                 };
-                let small = placement.size == dashboard_contract::Size::Small;
+                let small = placement.size == sitroom_contract::Size::Small;
                 let face = tile
                     .tile(&id, update, b.width, Some(b.height), small)
                     .size_full();

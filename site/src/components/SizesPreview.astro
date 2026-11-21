@@ -157,7 +157,7 @@ const VIEWS = [
   const root = document.documentElement
   const dark = matchMedia('(prefers-color-scheme: dark)')
   const siteTheme = () => root.dataset.theme ?? (dark.matches ? 'dark' : 'light')
-  const COLORS_KEY = 'dashboard-site.colors'
+  const COLORS_KEY = 'sitroom-site.colors'
   const savedColors = () => {
     try {
       return localStorage.getItem(COLORS_KEY) ?? 'default'

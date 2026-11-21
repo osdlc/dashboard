@@ -2,10 +2,10 @@
 
 use anyhow::Result;
 use async_trait::async_trait;
-use dashboard_contract::{
+use sitroom_contract::{
     CatalogEntry, ColorScale, Manifest, Meter, Size, Status, ValueFormat, View, Widget,
 };
-use dashboard_host::{Module, now_ms};
+use sitroom_host::{Module, now_ms};
 use sysinfo::System;
 
 use super::{demo_graph, demo_series, demo_values, graph, manifest, sample, status_for};

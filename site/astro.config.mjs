@@ -1,8 +1,8 @@
 import { defineConfig } from 'astro/config'
 
-// Served from https://osdlc.github.io/dashboard/. Change BASE here (and only
+// Served from https://osdlc.github.io/sitroom/. Change BASE here (and only
 // here) if the site moves, e.g. to '/' on its own domain.
-const BASE = '/dashboard'
+const BASE = '/sitroom'
 
 export default defineConfig({
   site: 'https://osdlc.github.io',

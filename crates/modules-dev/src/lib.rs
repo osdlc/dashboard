@@ -7,16 +7,16 @@
 //! config file. Each module names an environment variable (`token_env`) or a
 //! command that prints the token (`token_command`, e.g. a password manager CLI).
 
-use dashboard_contract::{
+use sitroom_contract::{
     Action, CONTRACT_VERSION, LayoutHints, ListItem, Manifest, Refresh, Size, Status, View, Widget,
 };
-use dashboard_modules_common::Builtin;
+use sitroom_modules_common::Builtin;
 #[cfg(feature = "http")]
-pub use dashboard_modules_common::http::{check, client};
-pub use dashboard_modules_common::secret::Secret;
-pub use dashboard_modules_common::time::{ago, demo_time, parse_time};
+pub use sitroom_modules_common::http::{check, client};
+pub use sitroom_modules_common::secret::Secret;
+pub use sitroom_modules_common::time::{ago, demo_time, parse_time};
 #[allow(unused_imports)]
-pub(crate) use dashboard_modules_common::{entry, schema, strings};
+pub(crate) use sitroom_modules_common::{entry, schema, strings};
 
 #[cfg(feature = "forgejo")]
 pub mod forgejo;

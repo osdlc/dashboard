@@ -1,14 +1,14 @@
-//! `dashboard plugin-check -- <program> [args]`: run a stdio plugin the way
-//! the dashboard does, check what it sends back, and print its tile as text.
+//! `sitroom plugin-check -- <program> [args]`: run a stdio plugin the way
+//! sitroom does, check what it sends back, and print its tile as text.
 
 use std::io::ErrorKind;
 use std::time::{Duration, Instant};
 
 use anyhow::{Context, Result};
-use dashboard_cli_kit::Failure;
-use dashboard_contract::check::{Finding, check_manifest, check_view};
-use dashboard_contract::{Refresh, TileUpdate};
-use dashboard_host::{History, Module, Plugin};
+use sitroom_cli_kit::Failure;
+use sitroom_contract::check::{Finding, check_manifest, check_view};
+use sitroom_contract::{Refresh, TileUpdate};
+use sitroom_host::{History, Module, Plugin};
 
 pub struct Options {
     pub config: Option<String>,
@@ -143,14 +143,14 @@ pub async fn run(o: Options) -> Result<()> {
     let tile = TileUpdate {
         tile_id: manifest.id.clone(),
         view,
-        updated_at: dashboard_host::now_ms(),
+        updated_at: sitroom_host::now_ms(),
         stale: false,
         demo: false,
     };
     let height = o
         .height
-        .unwrap_or_else(|| dashboard_tui::tile_wanted_height(&tile, o.width).max(8));
-    println!("\n{}\n", dashboard_tui::tile_text(&tile, o.width, height));
+        .unwrap_or_else(|| sitroom_tui::tile_wanted_height(&tile, o.width).max(8));
+    println!("\n{}\n", sitroom_tui::tile_text(&tile, o.width, height));
 
     for f in findings.iter().filter(|f| !f.problem) {
         println!("note      {}", f.text);

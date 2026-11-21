@@ -1,7 +1,7 @@
 //! Saved dashboards: named configs kept as
-//! `<config home>/dashboard/dashboards/<name>.yaml`, e.g.
-//! `~/.config/dashboard/dashboards/work.yaml`. A dashboard file has the same
-//! keys as `config.yaml`. `dashboard --dashboard work` lays it over
+//! `<config home>/sitroom/dashboards/<name>.yaml`, e.g.
+//! `~/.config/sitroom/dashboards/work.yaml`. A dashboard file has the same
+//! keys as `config.yaml`. `sitroom --dashboard work` lays it over
 //! `config.yaml` (see `layers`).
 
 use std::path::{Path, PathBuf};
@@ -14,8 +14,8 @@ use crate::TOOL;
 /// screens below it would stay.
 pub const BLANK: &str = "screens:\n  - name: main\n    tiles: []\n";
 
-/// `<config home>/dashboard/dashboards`. Moved by `XDG_CONFIG_HOME` or
-/// `DASHBOARD_CONFIG_DIR`.
+/// `<config home>/sitroom/dashboards`. Moved by `XDG_CONFIG_HOME` or
+/// `SITROOM_CONFIG_DIR`.
 pub fn default_dir() -> Result<PathBuf> {
     Ok(crate::tiered_dirs()?
         .standalone(TOOL)?
@@ -105,7 +105,7 @@ impl Registry {
         let names: Vec<&str> = saved.iter().map(|s| s.name.as_str()).collect();
         if names.is_empty() {
             bail!(
-                "no dashboard {name:?}: {} has none yet (add one with `dashboard import`)",
+                "no dashboard {name:?}: {} has none yet (add one with `sitroom import`)",
                 self.dir.display()
             );
         }
@@ -178,7 +178,7 @@ mod tests {
 
     fn temp(name: &str) -> PathBuf {
         let dir =
-            std::env::temp_dir().join(format!("dashboard-registry-{name}-{}", std::process::id()));
+            std::env::temp_dir().join(format!("sitroom-registry-{name}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         dir
     }
@@ -237,8 +237,8 @@ mod tests {
     #[test]
     fn default_dir_follows_the_config_home() {
         // Test binaries get a scratch root from tiered-dirs; the folder is
-        // `dashboard/dashboards` under its config home.
+        // `sitroom/dashboards` under its config home.
         let dir = default_dir().unwrap();
-        assert!(dir.ends_with("dashboard/dashboards"), "{}", dir.display());
+        assert!(dir.ends_with("sitroom/dashboards"), "{}", dir.display());
     }
 }

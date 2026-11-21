@@ -1,7 +1,7 @@
 # Writing a plugin
 
 A plugin is any program that reads JSON-RPC requests on stdin and writes replies on stdout,
-one JSON message per line. Use any language. The dashboard starts it, asks it for a
+one JSON message per line. Use any language. Sitroom starts it, asks it for a
 manifest once, then asks it for a view on a timer and draws that view in the terminal and
 the browser.
 
@@ -9,7 +9,7 @@ the browser.
 a URL on each refresh, and the `file` built-in watches a file and shows it again when it
 changes (checking it every second where watching can't start, or with `watch: false`). Both
 read the same data: a view or a widget in the JSON below, values picked out of any JSON with
-`fields`, or text. A cron job, a CI step or another machine's dashboard can write it.
+`fields`, or text. A cron job, a CI step or another machine's sitroom can write it.
 
 ```yaml
 modules:
@@ -30,10 +30,10 @@ modules:
 `format` is `auto` (a view or widget when the data is one, else indented JSON, else text),
 `view`, `json` or `text`. A series widget with an `id` gets history kept by the host, so a
 URL that returns one point per fetch draws a growing chart. All settings:
-`dashboard widgets http --json` and `dashboard widgets file --json` (the `config_schema`).
+`sitroom widgets http --json` and `sitroom widgets file --json` (the `config_schema`).
 
 Examples, all tested against the real host (`crates/host/tests/example_plugins.rs`). Each
-is a [plugin package](#package-it): a folder with the program and a `dashboard-plugin.yaml`.
+is a [plugin package](#package-it): a folder with the program and a `sitroom-plugin.yaml`.
 
 | Package | Shows |
 |---|---|
@@ -43,8 +43,8 @@ is a [plugin package](#package-it): a folder with the program and a `dashboard-p
 | [`examples/plugins/latency`](../examples/plugins/latency) | A live chart using host-kept history, per-target stats, status from thresholds |
 | [`plugins/cswap`](../plugins/cswap) | A Rust plugin: a table with gauges in cells |
 
-Run them all on one screen: `cargo run -p dashboard -- --config examples/plugins.yaml serve`.
-See them in the catalog: `cargo run -p dashboard -- --config examples/plugins.yaml widgets example`.
+Run them all on one screen: `cargo run -p sitroom -- --config examples/plugins.yaml serve`.
+See them in the catalog: `cargo run -p sitroom -- --config examples/plugins.yaml widgets example`.
 
 `plugins/ext/` holds the native-vs-plugin benchmark widgets: clock, textfile, git, docker,
 hackernews, weather, feedreader and battery. Each one is a built-in module, written again as a
@@ -66,15 +66,15 @@ fills in the manifest, turns thrown errors into the right error codes and has ty
 every widget. Make a new plugin with it:
 
 ```sh
-dashboard plugin new --lang ts my-plugin      # main.ts + dashboard-plugin.ts (Node 24 or Bun)
-dashboard plugin new --lang py my-plugin      # main.py + dashboard_plugin.py (Python 3.9+)
-dashboard plugin-check -- node my-plugin/main.ts
+sitroom plugin new --lang ts my-plugin      # main.ts + sitroom-plugin.ts (Node 24 or Bun)
+sitroom plugin new --lang py my-plugin      # main.py + sitroom_plugin.py (Python 3.9+)
+sitroom plugin-check -- node my-plugin/main.ts
 ```
 
 The new folder already passes `plugin-check`. A TypeScript plugin looks like this:
 
 ```ts
-import { serve, withDefaults, configError } from "./dashboard-plugin.ts";
+import { serve, withDefaults, configError } from "./sitroom-plugin.ts";
 
 let config = { name: "world" };
 
@@ -91,7 +91,7 @@ serve({
 | Bad config (-32002) | `throw configError(msg)` | `raise config_error(msg)` |
 | Service down (-32001) | `throw upstreamError(msg)` | `raise upstream_error(msg)` |
 | Defaults, reject unknown keys | `withDefaults(config, defaults)` | `with_defaults(config, defaults)` |
-| A line in the dashboard's log | `log("info", msg)` | `log("info", msg)` |
+| A line in sitroom's log | `log("info", msg)` | `log("info", msg)` |
 | Chart with host-kept history | `liveSeries({ id, label }, { name: value })` | `live_series(id, label, {name: value})` |
 
 Any other exception becomes error -32603 with its message, and the stack goes to stderr.
@@ -103,11 +103,11 @@ against the real host in `crates/host/tests/sdk_examples.rs`.
 ## Check a plugin
 
 ```sh
-dashboard plugin-check -- python3 my_plugin.py
-dashboard plugin-check --plugin-config '{"repos": ["osdlc/dashboard"]}' --renders 5 -- node my_plugin.mjs
+sitroom plugin-check -- python3 my_plugin.py
+sitroom plugin-check --plugin-config '{"repos": ["osdlc/sitroom"]}' --renders 5 -- node my_plugin.mjs
 ```
 
-`plugin-check` starts the plugin the way the dashboard does and calls `initialize` and then
+`plugin-check` starts the plugin the way sitroom does and calls `initialize` and then
 `view/render` a few times. It reports mistakes the JSON alone won't catch and prints the tile
 as the terminal UI would draw it. Those mistakes include:
 - percents outside 0–100;
@@ -138,7 +138,7 @@ screens:
 A plugin started with `plugin:` runs in the config file's folder, so relative paths resolve
 from there. On Windows the program is looked up in `PATH` with `PATHEXT` (so `npx` finds
 `npx.cmd`), and `python3` is the first Python in `PATH`, or `py -3` instead of the Microsoft
-Store alias; see [windows.md](windows.md). Changes to the file apply while the dashboard runs;
+Store alias; see [windows.md](windows.md). Changes to the file apply while sitroom runs;
 the plugin restarts only if its own settings changed.
 
 Or, once it is a package, by its ID:
@@ -152,22 +152,22 @@ modules:
 
 A package runs in **its own folder**, not the config file's. Relative paths in its `config:`
 therefore resolve from the package folder (for an installed package, somewhere under
-`~/.local/share/dashboard/plugins/`). Use absolute paths in a package's config, or `~` paths
+`~/.local/share/sitroom/plugins/`). Use absolute paths in a package's config, or `~` paths
 if the plugin expands them (the git-repos example does).
-`dashboard config` reports a `package:` that isn't installed.
+`sitroom config` reports a `package:` that isn't installed.
 
 With `demo: true` in its entry (beside `package:`, not inside `config:`), the tile shows the
 package's `demo:` view instead of running it: no process starts, and the tile is tagged `demo`.
 A plugin started with `plugin:` has no `demo:` view, so its demo tile says so.
 
 A package tile restarts when its entry in the config changes. Upgrading the package in place
-(new files or a new `run:`) takes effect once its config entry changes or the dashboard
+(new files or a new `run:`) takes effect once its config entry changes or sitroom
 restarts.
 
 ## Package it
 
 A package is a folder named after the plugin's ID, holding the plugin's files and a
-`dashboard-plugin.yaml`:
+`sitroom-plugin.yaml`:
 
 ```yaml
 id: my-plugin                    # lowercase letters, digits and dashes; also the folder name
@@ -200,25 +200,25 @@ Rules the loader checks:
 - `runtime:` is a program name with an optional minimum, `name>=1.2`;
 - `demo:` is a valid view, with no problems `plugin-check` would report.
 
-Unknown keys are an error. `dashboard schema package` prints the JSON Schema.
+Unknown keys are an error. `sitroom schema package` prints the JSON Schema.
 
-The dashboard looks for packages in two places, first match wins:
+Sitroom looks for packages in two places, first match wins:
 - `plugins/<id>/` next to the config file (this is how `examples/plugins.yaml` finds the
   examples);
-- `<data home>/dashboard/plugins/<id>/`: `~/.local/share/dashboard/plugins/` by default,
+- `<data home>/sitroom/plugins/<id>/`: `~/.local/share/sitroom/plugins/` by default,
   moved by `XDG_DATA_HOME`.
 
-To install one, use `dashboard plugin install` (see [marketplace.md](marketplace.md)), or copy
+To install one, use `sitroom plugin install` (see [marketplace.md](marketplace.md)), or copy
 its folder there by hand. A folder that isn't a valid package is skipped with a message; it
 doesn't stop the others.
 
 ## Find widgets
 
 ```sh
-dashboard widgets                 # everything: built-ins, bundled plugins, packages, marketplace
-dashboard widgets pull requests   # every word must appear in the ID, name, description or tags
-dashboard widgets --tag dev
-dashboard widgets jira --json     # {"schemaVersion", "kind": "widgets", "entries": [...]}: full entries, with config schema and demo view
+sitroom widgets                 # everything: built-ins, bundled plugins, packages, marketplace
+sitroom widgets pull requests   # every word must appear in the ID, name, description or tags
+sitroom widgets --tag dev
+sitroom widgets jira --json     # {"schemaVersion", "kind": "widgets", "entries": [...]}: full entries, with config schema and demo view
 ```
 
 Search ignores case. `--tag` keeps entries with exactly that tag. Built-in modules are added
@@ -229,9 +229,9 @@ The web editor's "Add component" list shows the same catalog (`GET /api/catalog?
 writes these entries for you.
 
 Marketplace packages that are listed but not installed come from a cached index,
-`<data home>/dashboard/marketplace/index.json` (e.g. `~/.local/share/dashboard/marketplace/`):
-a copy of the last index `dashboard plugin install`, `list` or `update` read. They show as
-`market` in `dashboard widgets` and can't be added until installed. The index format is in
+`<data home>/sitroom/marketplace/index.json` (e.g. `~/.local/share/sitroom/marketplace/`):
+a copy of the last index `sitroom plugin install`, `list` or `update` read. They show as
+`market` in `sitroom widgets` and can't be added until installed. The index format is in
 [marketplace.md](marketplace.md#the-index).
 
 ## The protocol
@@ -240,14 +240,14 @@ Every message is one line of JSON. A request has `id`, `method` and `params`; an
 the same `id` and either `result` or `error`. A message without an `id` is a notification and
 gets no answer. `jsonrpc: "2.0"` goes on everything you send.
 
-**stdout carries only protocol messages.** Write anything else to stderr; the dashboard puts
+**stdout carries only protocol messages.** Write anything else to stderr; sitroom puts
 it in its log. Flush after each line (Python `print(..., flush=True)`; Node's
 `process.stdout.write` is fine).
 
 ### `initialize` (host → plugin, once)
 
 ```json
-{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"contract_version":"0.1","host":{"name":"dashboard","version":"0.1.0"},"config":{"repos":["a"]}}}
+{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"contract_version":"0.1","host":{"name":"sitroom","version":"0.1.0"},"config":{"repos":["a"]}}}
 ```
 
 `params.config` is the tile's `config:` block (or `null`). Reply with the manifest:
@@ -270,7 +270,7 @@ it in its log. Flush after each line (Python `print(..., flush=True)`; Node's
 | `contract_version` | `"0.1"`. The host refuses a different major version |
 | `refresh` | Only `poll` for now: `interval_ms` is the suggested period, `min_interval_ms` the floor for a config override |
 | `layout.size` | Suggested size: `small` (3×1), `medium` (4×2), `large` (6×3), `wide` (8×2), `tall` (4×4) |
-| `layout.priority` | Higher is placed earlier when the dashboard places tiles itself |
+| `layout.priority` | Higher is placed earlier when sitroom places tiles itself |
 | `commands` | Declared commands; not run by the host yet. Leave empty |
 | `config_schema` | Optional JSON Schema for your `config:` block |
 
@@ -302,12 +302,12 @@ Renders never overlap: the host waits for your reply, then waits the interval.
 {"jsonrpc":"2.0","method":"log","params":{"level":"warn","message":"rate limited, retrying"}}
 ```
 
-Levels: `error`, `warn`, `info`, `debug`. Goes to the dashboard's log, not the tile.
+Levels: `error`, `warn`, `info`, `debug`. Goes to sitroom's log, not the tile.
 
 ### `shutdown` and `exit`
 
 Answer `shutdown` with `null`, and exit on the `exit` notification. Most plugins don't need
-to: the dashboard kills the process when it stops the module.
+to: sitroom kills the process when it stops the module.
 
 ### Errors
 
@@ -373,9 +373,12 @@ A widget is a JSON object with a `type`. Optional fields can be left out.
   "detail":"HTTP 200","history":["ok","ok","error","ok"],"url":"https://api.example.com"}]}
 
 {"type":"image","path":"/home/me/Pictures/sunset.png","caption":"sunset.png"}
-// The terminal draws it with Kitty, iTerm2 or Sixel graphics, or half blocks. The path is
-// on the dashboard's machine; the web view loads it from the server, which sends only
-// pictures that a tile shows now.
+// The terminal draws it with Kitty, iTerm2 or Sixel graphics, or half blocks
+// (SITROOM_IMAGES=halfblocks skips asking the terminal). The path is on sitroom's
+// machine, and a relative one starts from the folder sitroom was started in. The web
+// view loads it from the server, which sends only pictures that a tile or a catalog demo
+// shows now: any PNG, JPEG, GIF, WebP or BMP file a plugin names, so name only files you
+// mean to show.
 
 {"type":"row","children":[ ... ]}      // side by side (stacks when narrow)
 {"type":"column","children":[ ... ]}   // top to bottom
@@ -393,16 +396,16 @@ Give a `series` widget an `id`, and the host keeps its history. Each render send
 ## Schemas and types
 
 ```sh
-dashboard schema manifest     # JSON Schema for the manifest
-dashboard schema view         # ... for a view (all widgets)
-dashboard schema initialize-params
-dashboard schema package      # ... for dashboard-plugin.yaml
-dashboard schema catalog-entry  # ... for one of the entries of `dashboard widgets --json`
+sitroom schema manifest     # JSON Schema for the manifest
+sitroom schema view         # ... for a view (all widgets)
+sitroom schema initialize-params
+sitroom schema package      # ... for sitroom-plugin.yaml
+sitroom schema catalog-entry  # ... for one of the entries of `sitroom widgets --json`
 ```
 
 The SDKs' types are generated from these by `node sdk/gen-types.mjs`; a test fails when they
 fall behind. For other languages, generate types from them (`typify` for Rust, for example).
-Rust plugins can use the `dashboard-contract` crate directly.
+Rust plugins can use the `sitroom-contract` crate directly.
 
 ## Not yet
 

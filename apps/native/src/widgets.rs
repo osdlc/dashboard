@@ -9,14 +9,14 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::f32::consts::TAU;
 
-use dashboard_contract::{
-    Action, Bar, Cell, ColorScale, Column, ListItem, LogLine, Meter, Row, SeriesData, SeriesStyle,
-    Slice, Status, TileUpdate, Tone, UptimeCheck, ValueFormat, Widget, format_value, rpc::LogLevel,
-};
 use gpui::{
     AnyElement, Background, ContentMask, Div, FontWeight, Hsla, PathBuilder, ScrollHandle,
     SharedString, StyledText, TextRun, Window, canvas, div, fill, font, linear_color_stop,
     linear_gradient, point, prelude::*, px, size,
+};
+use sitroom_contract::{
+    Action, Bar, Cell, ColorScale, Column, ListItem, LogLine, Meter, Row, SeriesData, SeriesStyle,
+    Slice, Status, TileUpdate, Tone, UptimeCheck, ValueFormat, Widget, format_value, rpc::LogLevel,
 };
 
 use crate::motion::{Motion, parse_number};
@@ -77,7 +77,7 @@ impl Out {
 pub fn run_action(action: &Action) {
     if let Action::OpenUrl { url } = action
         && is_web_url(url)
-        && let Err(err) = dashboard_host::browser::open(url)
+        && let Err(err) = sitroom_host::browser::open(url)
     {
         eprintln!("couldn't open the browser: {err}");
     }

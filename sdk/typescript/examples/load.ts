@@ -1,10 +1,10 @@
 // System load average as a live chart. Shows `liveSeries`: each render sends only the newest
-// values and the dashboard keeps the history, so the plugin stays stateless.
+// values and sitroom keeps the history, so the plugin stays stateless.
 //
-//   dashboard plugin-check --renders 5 -- node sdk/typescript/examples/load.ts
+//   sitroom plugin-check --renders 5 -- node sdk/typescript/examples/load.ts
 
 import { availableParallelism, loadavg, platform } from "node:os";
-import { liveSeries, serve, upstreamError } from "../dashboard-plugin.ts";
+import { liveSeries, serve, upstreamError } from "../sitroom-plugin.ts";
 
 serve({
   manifest: {

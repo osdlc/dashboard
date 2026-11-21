@@ -1736,19 +1736,19 @@ dependencies = [
 ]
 
 [[package]]
-name = "dashboard"
+name = "sitroom"
 version = "0.8.0"
 dependencies = [
  "anyhow",
  "clap",
- "dashboard-cli-kit",
- "dashboard-config",
- "dashboard-contract",
- "dashboard-host",
- "dashboard-modules",
- "dashboard-runtime",
- "dashboard-tui",
- "dashboard-web",
+ "sitroom-cli-kit",
+ "sitroom-config",
+ "sitroom-contract",
+ "sitroom-host",
+ "sitroom-modules",
+ "sitroom-runtime",
+ "sitroom-tui",
+ "sitroom-web",
  "etag-write",
  "flate2",
  "path-guard",
@@ -1763,19 +1763,19 @@ dependencies = [
 ]
 
 [[package]]
-name = "dashboard-bench"
+name = "sitroom-bench"
 version = "0.8.0"
 dependencies = [
  "anyhow",
- "dashboard-contract",
- "dashboard-modules",
+ "sitroom-contract",
+ "sitroom-modules",
  "libc",
  "serde_json",
  "tokio",
 ]
 
 [[package]]
-name = "dashboard-cli-kit"
+name = "sitroom-cli-kit"
 version = "0.8.0"
 dependencies = [
  "clap",
@@ -1785,12 +1785,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "dashboard-config"
+name = "sitroom-config"
 version = "0.8.0"
 dependencies = [
  "anyhow",
  "config-layers",
- "dashboard-contract",
+ "sitroom-contract",
  "etag-write",
  "humantime-serde",
  "schemars 1.2.3",
@@ -1803,7 +1803,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "dashboard-contract"
+name = "sitroom-contract"
 version = "0.8.0"
 dependencies = [
  "schemars 1.2.3",
@@ -1812,24 +1812,24 @@ dependencies = [
 ]
 
 [[package]]
-name = "dashboard-cswap"
+name = "sitroom-cswap"
 version = "0.8.0"
 dependencies = [
  "anyhow",
- "dashboard-contract",
+ "sitroom-contract",
  "serde",
  "serde_json",
 ]
 
 [[package]]
-name = "dashboard-desktop"
+name = "sitroom-desktop"
 version = "0.8.0"
 dependencies = [
  "anyhow",
- "dashboard-config",
- "dashboard-modules",
- "dashboard-runtime",
- "dashboard-web",
+ "sitroom-config",
+ "sitroom-modules",
+ "sitroom-runtime",
+ "sitroom-web",
  "objc2 0.6.5",
  "tauri",
  "tauri-build",
@@ -1840,12 +1840,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "dashboard-host"
+name = "sitroom-host"
 version = "0.8.0"
 dependencies = [
  "anyhow",
  "async-trait",
- "dashboard-contract",
+ "sitroom-contract",
  "libc",
  "serde",
  "serde_json",
@@ -1855,30 +1855,30 @@ dependencies = [
 ]
 
 [[package]]
-name = "dashboard-modules"
+name = "sitroom-modules"
 version = "0.8.0"
 dependencies = [
- "dashboard-contract",
- "dashboard-host",
- "dashboard-modules-agents",
- "dashboard-modules-common",
- "dashboard-modules-dev",
- "dashboard-modules-fun",
- "dashboard-modules-ops",
- "dashboard-modules-personal",
- "dashboard-modules-system",
+ "sitroom-contract",
+ "sitroom-host",
+ "sitroom-modules-agents",
+ "sitroom-modules-common",
+ "sitroom-modules-dev",
+ "sitroom-modules-fun",
+ "sitroom-modules-ops",
+ "sitroom-modules-personal",
+ "sitroom-modules-system",
  "serde_json",
 ]
 
 [[package]]
-name = "dashboard-modules-agents"
+name = "sitroom-modules-agents"
 version = "0.8.0"
 dependencies = [
  "anyhow",
  "async-trait",
- "dashboard-contract",
- "dashboard-host",
- "dashboard-modules-common",
+ "sitroom-contract",
+ "sitroom-host",
+ "sitroom-modules-common",
  "schemars 1.2.3",
  "serde",
  "serde_json",
@@ -1886,12 +1886,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "dashboard-modules-common"
+name = "sitroom-modules-common"
 version = "0.8.0"
 dependencies = [
  "anyhow",
- "dashboard-contract",
- "dashboard-host",
+ "sitroom-contract",
+ "sitroom-host",
  "reqwest",
  "schemars 1.2.3",
  "serde",
@@ -1900,14 +1900,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "dashboard-modules-dev"
+name = "sitroom-modules-dev"
 version = "0.8.0"
 dependencies = [
  "anyhow",
  "async-trait",
- "dashboard-contract",
- "dashboard-host",
- "dashboard-modules-common",
+ "sitroom-contract",
+ "sitroom-host",
+ "sitroom-modules-common",
  "schemars 1.2.3",
  "serde",
  "serde_json",
@@ -1915,14 +1915,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "dashboard-modules-fun"
+name = "sitroom-modules-fun"
 version = "0.8.0"
 dependencies = [
  "anyhow",
  "async-trait",
- "dashboard-contract",
- "dashboard-host",
- "dashboard-modules-common",
+ "sitroom-contract",
+ "sitroom-host",
+ "sitroom-modules-common",
  "jiff",
  "reqwest",
  "roxmltree 0.21.2",
@@ -1933,15 +1933,15 @@ dependencies = [
 ]
 
 [[package]]
-name = "dashboard-modules-ops"
+name = "sitroom-modules-ops"
 version = "0.8.0"
 dependencies = [
  "anyhow",
  "async-trait",
- "dashboard-config",
- "dashboard-contract",
- "dashboard-host",
- "dashboard-modules-common",
+ "sitroom-config",
+ "sitroom-contract",
+ "sitroom-host",
+ "sitroom-modules-common",
  "schemars 1.2.3",
  "serde",
  "serde_json",
@@ -1949,15 +1949,15 @@ dependencies = [
 ]
 
 [[package]]
-name = "dashboard-modules-personal"
+name = "sitroom-modules-personal"
 version = "0.8.0"
 dependencies = [
  "anyhow",
  "async-trait",
- "dashboard-config",
- "dashboard-contract",
- "dashboard-host",
- "dashboard-modules-common",
+ "sitroom-config",
+ "sitroom-contract",
+ "sitroom-host",
+ "sitroom-modules-common",
  "jiff",
  "schemars 1.2.3",
  "serde",
@@ -1967,14 +1967,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "dashboard-modules-system"
+name = "sitroom-modules-system"
 version = "0.8.0"
 dependencies = [
  "anyhow",
  "async-trait",
- "dashboard-contract",
- "dashboard-host",
- "dashboard-modules-common",
+ "sitroom-contract",
+ "sitroom-host",
+ "sitroom-modules-common",
  "libc",
  "notify",
  "schemars 1.2.3",
@@ -1986,15 +1986,15 @@ dependencies = [
 ]
 
 [[package]]
-name = "dashboard-native"
+name = "sitroom-native"
 version = "0.8.0"
 dependencies = [
  "anyhow",
- "dashboard-config",
- "dashboard-contract",
- "dashboard-host",
- "dashboard-modules",
- "dashboard-runtime",
+ "sitroom-config",
+ "sitroom-contract",
+ "sitroom-host",
+ "sitroom-modules",
+ "sitroom-runtime",
  "gpui-pre",
  "gpui-pre-platform",
  "image",
@@ -2007,28 +2007,28 @@ dependencies = [
 ]
 
 [[package]]
-name = "dashboard-runtime"
+name = "sitroom-runtime"
 version = "0.8.0"
 dependencies = [
  "anyhow",
- "dashboard-config",
- "dashboard-contract",
- "dashboard-cswap",
- "dashboard-host",
- "dashboard-modules",
+ "sitroom-config",
+ "sitroom-contract",
+ "sitroom-cswap",
+ "sitroom-host",
+ "sitroom-modules",
  "serde_json",
  "tokio",
 ]
 
 [[package]]
-name = "dashboard-tui"
+name = "sitroom-tui"
 version = "0.8.0"
 dependencies = [
  "anyhow",
- "dashboard-config",
- "dashboard-contract",
- "dashboard-host",
- "dashboard-modules",
+ "sitroom-config",
+ "sitroom-contract",
+ "sitroom-host",
+ "sitroom-modules",
  "image",
  "ratatui",
  "ratatui-image",
@@ -2040,15 +2040,15 @@ dependencies = [
 ]
 
 [[package]]
-name = "dashboard-web"
+name = "sitroom-web"
 version = "0.8.0"
 dependencies = [
  "anyhow",
  "async-trait",
  "axum",
- "dashboard-cli-kit",
- "dashboard-contract",
- "dashboard-host",
+ "sitroom-cli-kit",
+ "sitroom-contract",
+ "sitroom-host",
  "futures-util",
  "rust-embed",
  "serde",

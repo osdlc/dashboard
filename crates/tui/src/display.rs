@@ -2,11 +2,11 @@
 //! biggest that fits. Text with a character the font lacks, or in too small
 //! an area, is plain.
 
-use dashboard_contract::Status;
 use ratatui::layout::Rect;
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::Paragraph;
+use sitroom_contract::Status;
 
 use crate::canvas::Canvas;
 use crate::fit;
@@ -186,8 +186,8 @@ pub fn draw_display(f: &mut Canvas, p: &Palette, area: Rect, s: &DisplaySpec) {
 
 #[cfg(test)]
 mod tests {
-    use dashboard_contract::Theme;
     use ratatui::buffer::Buffer;
+    use sitroom_contract::Theme;
 
     use super::*;
 

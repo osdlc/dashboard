@@ -4,14 +4,14 @@
 // the native module (crates/modules-system/src/textfile.rs) and the Python plugin
 // (plugins/ext/textfile-py), and must show the same view for the same file.
 //
-//   dashboard plugin-check --plugin-config '{"path": "README.md"}' -- node plugins/ext/textfile-ts/main.ts
+//   sitroom plugin-check --plugin-config '{"path": "README.md"}' -- node plugins/ext/textfile-ts/main.ts
 
 import { readFileSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { basename, extname, join } from "node:path";
 
-import { configError, serve, upstreamError, withDefaults } from "./dashboard-plugin.ts";
-import type { View } from "./dashboard-plugin.ts";
+import { configError, serve, upstreamError, withDefaults } from "./sitroom-plugin.ts";
+import type { View } from "./sitroom-plugin.ts";
 
 /** Larger files are refused: this is for notes, not logs. */
 const MAX_BYTES = 1024 * 1024;

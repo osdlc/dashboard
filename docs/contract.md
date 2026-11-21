@@ -10,10 +10,10 @@ host-kept series history, `open_url` actions, the [catalog](#catalog) and plugin
 Designed here but not built yet: push mode
 (the host rejects push plugins), running declared commands with approval, and the
 `run_command` action. The Rust types in `crates/contract` are the source of truth;
-`dashboard schema view` prints the current JSON Schema.
+`sitroom schema view` prints the current JSON Schema.
 
 **Every widget, by example:** [examples/blocks/](../examples/blocks/) has a view for each widget
-type and ways to combine them, checked against this contract by `cargo test -p dashboard-contract`.
+type and ways to combine them, checked against this contract by `cargo test -p sitroom-contract`.
 
 ## Overview
 
@@ -121,7 +121,7 @@ pub enum Widget {
     Table  { columns: Vec<Column>, rows: Vec<Row> },
     Log    { label: Option<String>, lines: Vec<LogLine> },               // newest last
     Uptime { checks: Vec<UptimeCheck> },                                 // status strip per check
-    Image  { path: String, caption: Option<String> },                    // a picture file on the dashboard's machine
+    Image  { path: String, caption: Option<String> },                    // a picture file on sitroom's machine
     Row    { children: Vec<Widget> },
     Column { children: Vec<Widget> },
 }
@@ -207,7 +207,7 @@ lower. The top is `y_max`, else the highest value (at least 1 when nothing is ne
 no `y_min` or `y_max`, scales to the data's own range with 5% padding: use it for values far from
 0, such as a price. When the scale spans zero a faint zero line is drawn; `area` fills to that
 line and `bars` grow from it, down for negative values. A `mirrored` chart draws magnitudes, so
-negative values count as 0 there (`dashboard check` notes it). Values keep their sign in the
+negative values count as 0 there (`sitroom check` notes it). Values keep their sign in the
 legend; with `unit: "%"`, a non-whole value under 10 shows one decimal ("-1.2%"). A chart of
 several lines names each one in the legend, in its line's color.
 
@@ -236,7 +236,7 @@ its value (with `format` and `unit`) and its percent.
 - `color: accent` (the default) gives the slices the theme's `series-1` to `series-6` colors in
   order. `heat`, `cool` and `sunset` spread the slices along that scale in order. A slice's
   `status`, else its `tone`, overrides its color.
-- Values must be finite and 0 or more (`dashboard plugin-check` reports others). A pie with no
+- Values must be finite and 0 or more (`sitroom plugin-check` reports others). A pie with no
   slices, or only zeros, shows "no data".
 - The web view draws an SVG with the legend beside it, or below it in a narrow tile. The TUI draws
   a braille disc with the legend beside it when there is room, and otherwise one bar split into
@@ -248,7 +248,7 @@ its value (with `format` and `unit`) and its percent.
 A `clock_face` is an analog dial for a time the module already worked out (the renderer never
 reads a clock). `hour` is 0-23 and `minute` 0-59; `second` is optional and adds a second hand.
 The hour hand moves with the minutes, and the minute hand with the seconds. `label` goes above the dial and `caption` below it, and
-`status` colors the rim. `dashboard plugin-check` reports values out of range.
+`status` colors the rim. `sitroom plugin-check` reports values out of range.
 
 ```json
 {"type": "clock_face", "hour": 14, "minute": 5, "second": 9, "label": "Tokyo", "caption": "Tue 27 Oct"}
@@ -318,7 +318,7 @@ renderer and screen (see "Not in v0.1"). So put what matters most first: the cut
 bottom, the right of a row, and the end of a list. A typical tile leads with one or two stats or a
 gauge, then a graph or list, then detail. Give table columns a `priority` so a narrow tile keeps
 the useful ones (the kubernetes tile keeps pod, status and ready). Keep the `summary` short: it
-is what a tile too small for the view shows. `dashboard plugin-check --width W --height H`
+is what a tile too small for the view shows. `sitroom plugin-check --width W --height H`
 shows the view fitted to a tile of that size.
 
 ## Stdio plugin protocol
@@ -394,7 +394,7 @@ On connect, the web view first gets renderer settings, then a tile message per t
     "modules": [{ "tile_id": "sysperf", "name": "System", "refresh_ms": 1000, "refresh_overridden": false, "commands": [] }],
     "rotate": null,
     "tui_fps": 4,
-    "config": { "path": "/Users/me/.config/dashboard/config.yaml", "exists": true, "error": null } } }
+    "config": { "path": "/Users/me/.config/sitroom/config.yaml", "exists": true, "error": null } } }
 ```
 
 The web view gets these over a WebSocket. Settings are sent again whenever the config is reloaded.
@@ -420,7 +420,7 @@ The plugin is a small adapter around `cswap list --json`. (Emails below are plac
 **host → plugin**
 
 ```json
-{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"contract_version":"0.1","host":{"name":"dashboard","version":"0.1.0"},"config":{}}}
+{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"contract_version":"0.1","host":{"name":"sitroom","version":"0.1.0"},"config":{}}}
 ```
 
 **plugin → host**
@@ -486,9 +486,9 @@ Mapping from `cswap list --json`: `usage.fiveHour.pct` → 5-hour gauge, `usage.
 
 Everything that can be added to a dashboard has a catalog entry: built-in modules (from the
 binary), bundled plugins (cswap), installed plugin packages (from their
-`dashboard-plugin.yaml`, see [plugins.md](plugins.md#package-it)), and marketplace packages from
-the cached index that aren't installed yet (`source: "marketplace"`). `dashboard widgets` lists
-and searches them; `dashboard schema catalog-entry` prints the JSON Schema.
+`sitroom-plugin.yaml`, see [plugins.md](plugins.md#package-it)), and marketplace packages from
+the cached index that aren't installed yet (`source: "marketplace"`). `sitroom widgets` lists
+and searches them; `sitroom schema catalog-entry` prints the JSON Schema.
 
 ```rust
 pub struct CatalogEntry {

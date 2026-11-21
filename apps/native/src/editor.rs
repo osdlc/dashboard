@@ -4,13 +4,13 @@
 
 use std::collections::{HashMap, HashSet};
 
-use dashboard_contract::{
-    CatalogEntry, CatalogResponse, ClientMessage, EntryKind, ScreenLayout, Size, TilePlacement,
-    TileUpdate, UiSettings,
-};
 use gpui::{
     Context, Div, FontWeight, KeyDownEvent, MouseButton, MouseDownEvent, Pixels, Point, Render,
     SharedString, Stateful, Window, div, prelude::*, px,
+};
+use sitroom_contract::{
+    CatalogEntry, CatalogResponse, ClientMessage, EntryKind, ScreenLayout, Size, TilePlacement,
+    TileUpdate, UiSettings,
 };
 
 use crate::app::{Dashboard, PendingAdd};
@@ -1272,7 +1272,7 @@ impl Dashboard {
             format!("Writes modules.{id_text}{on} to the config file; comments stay.")
         } else {
             format!(
-                "Not installed. Install it first: dashboard plugin install {}",
+                "Not installed. Install it first: sitroom plugin install {}",
                 entry.id
             )
         };

@@ -5,7 +5,7 @@
 
 use std::collections::HashMap;
 
-use dashboard_contract::{Action, Cell, Widget};
+use sitroom_contract::{Action, Cell, Widget};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Dir {
@@ -242,7 +242,7 @@ pub fn neighbor(boxes: &[Bounds], from: usize, dir: Dir) -> Option<usize> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dashboard_contract::ListItem;
+    use sitroom_contract::ListItem;
 
     fn at(x: f32, y: f32) -> Bounds {
         Bounds {

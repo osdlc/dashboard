@@ -1,35 +1,35 @@
 # Desktop app, wallpaper and screensaver
 
-`dashboard-desktop` (in `apps/desktop`) is the dashboard as a desktop app. It is a separate
-binary from the `dashboard` CLI, so the CLI stays small. It is built with Tauri 2 and uses the
+`sitroom-desktop` (in `apps/desktop`) is sitroom as a desktop app. It is a separate
+binary from the `sitroom` CLI, so the CLI stays small. It is built with Tauri 2 and uses the
 system webview: WKWebView on macOS, WebView2 on Windows.
 
-It runs the same modules as `dashboard serve` (crate `dashboard-runtime`) and the same web server
-(`dashboard-web`), on 127.0.0.1 and any free port, and loads that page in its windows. The page
+It runs the same modules as `sitroom serve` (crate `sitroom-runtime`) and the same web server
+(`sitroom-web`), on 127.0.0.1 and any free port, and loads that page in its windows. The page
 talks to the server over the usual WebSocket, not through Tauri, so the app needs no IPC
 permissions.
 
 ## Run
 
 ```sh
-cargo run -p dashboard-desktop -- --config examples/demo.yaml                # a window, and a tray / menu-bar icon
-cargo run -p dashboard-desktop -- --config examples/demo.yaml --ambient      # the window in ambient mode
-cargo run -p dashboard-desktop -- --config examples/demo.yaml --wallpaper    # on the desktop, behind the icons
-cargo run -p dashboard-desktop -- --config examples/demo.yaml --screensaver  # full screen until a key or mouse move
+cargo run -p sitroom-desktop -- --config examples/demo.yaml                # a window, and a tray / menu-bar icon
+cargo run -p sitroom-desktop -- --config examples/demo.yaml --ambient      # the window in ambient mode
+cargo run -p sitroom-desktop -- --config examples/demo.yaml --wallpaper    # on the desktop, behind the icons
+cargo run -p sitroom-desktop -- --config examples/demo.yaml --screensaver  # full screen until a key or mouse move
 ```
 
 Other flags: `--port N` (default: any free port) and `--no-tray`. Without `--config` it uses the
-same config file as `dashboard`. `--wallpaper --no-tray` is refused: wallpaper windows ignore
+same config file as `sitroom`. `--wallpaper --no-tray` is refused: wallpaper windows ignore
 clicks, so the tray's *Quit* is the only way to end the app.
 
 Plain `cargo build` and `cargo test` leave the app out (it is slow to build, and on Linux it needs
-WebKitGTK). `cargo build --workspace` or `-p dashboard-desktop` include it.
+WebKitGTK). `cargo build --workspace` or `-p sitroom-desktop` include it.
 
 Build the macOS app bundle (not signed or notarized):
 
 ```sh
 cd apps/desktop && cargo tauri build --bundles app -- --profile small
-# target/small/bundle/macos/Dashboard.app
+# target/small/bundle/macos/Sitroom.app
 ```
 
 ## Modes
@@ -55,7 +55,7 @@ The wallpaper and screensaver windows are made from the displays connected when 
 A display added later gets no window, and one removed leaves its window behind; turn wallpaper
 off and on again from the tray to match the displays.
 
-Links open in the system browser, not in the app: the windows only load the dashboard's own
+Links open in the system browser, not in the app: the windows only load sitroom's own
 page, and a link that asks for a new window (`target="_blank"` or `window.open`)
 goes to the browser too. Only `http` and `https` links are opened.
 
@@ -86,7 +86,7 @@ first). Moving the mouse does nothing, so you can reach a tile. Cmd-Q also quits
 
 ## Windows screensaver (.scr)
 
-Copy `dashboard-desktop.exe` to `Dashboard.scr`. Windows runs a screensaver with:
+Copy `sitroom-desktop.exe` to `Sitroom.scr`. Windows runs a screensaver with:
 
 | Argument | What the app does |
 |---|---|
@@ -104,12 +104,12 @@ machine.
 
 `apps/desktop/saver` is a small screensaver bundle written in Objective-C. Its view is a
 WKWebView that loads the ambient page. `apps/desktop/saver/build.sh` builds
-`target/saver/Dashboard.saver` (92 KB, not signed).
+`target/saver/Sitroom.saver` (92 KB, not signed).
 
-It does not start the dashboard itself; it shows a server that is already running. It finds the
-URL and the session token in the record that `dashboard serve --detach` writes,
-`~/.local/share/run/dashboard/serve.json`, or in the `url` and `token` screensaver defaults
-(`defaults -currentHost write dev.dashboard.saver url 'http://127.0.0.1:7878/'`, and the same for
+It does not start sitroom itself; it shows a server that is already running. It finds the
+URL and the session token in the record that `sitroom serve --detach` writes,
+`~/.local/share/run/sitroom/serve.json`, or in the `url` and `token` screensaver defaults
+(`defaults -currentHost write dev.sitroom.saver url 'http://127.0.0.1:7878/'`, and the same for
 `token`). The token is put in the page's sessionStorage before the page runs, on the server's
 origin only, so it never goes in the URL (see "Signing in to the web view" in
 [cli.md](cli.md)). The app's own windows sign in the same way.
@@ -123,16 +123,16 @@ may open `http://127.0.0.1` and read the serve record.
 What was checked:
 
 - Loaded outside the screensaver host (a test program that loads the bundle into a window), the
-  view reached a local `dashboard serve` and loaded the page.
+  view reached a local `sitroom serve` and loaded the page.
 - Not checked: running it inside the real screensaver host. That needs installing it into
   `~/Library/Screen Savers`, which the build doesn't do. To try it: run
-  `dashboard serve --detach`, build the saver, double-click `Dashboard.saver`, and pick it in
+  `sitroom serve --detach`, build the saver, double-click `Sitroom.saver`, and pick it in
   System Settings. If the page doesn't load, the saver says why on screen and in Console
-  (search for `DashboardSaver`).
+  (search for `SitroomSaver`).
 
 Known limits: the token changes each time the server starts, so the saver needs the serve record
 (or the default updated). The saver looks for the record only at the fixed path above, which is
-the default location; if `DASHBOARD_*` or `XDG_*` variables move the CLI's run folder, set the
+the default location; if `SITROOM_*` or `XDG_*` variables move the CLI's run folder, set the
 `url` and `token` defaults instead. A fixed token, or a token file, would make this simpler.
 
 ## Size and memory
@@ -142,10 +142,10 @@ every built-in module.
 
 | | Size |
 |---|---|
-| `Dashboard.app` (macOS, arm64) | 9.0 MB; 4.3 MB zipped |
-| `dashboard-desktop` binary, release profile (no LTO, not stripped) | 28.5 MB |
-| `dashboard-desktop.exe` (Windows x64, cargo-xwin) | 10.3 MB, no extra DLLs (WebView2 comes with Windows) |
-| `dashboard` CLI, for comparison | 5.7 MB (macOS), 6.2 MB (Windows) |
+| `Sitroom.app` (macOS, arm64) | 9.0 MB; 4.3 MB zipped |
+| `sitroom-desktop` binary, release profile (no LTO, not stripped) | 28.5 MB |
+| `sitroom-desktop.exe` (Windows x64, cargo-xwin) | 10.3 MB, no extra DLLs (WebView2 comes with Windows) |
+| `sitroom` CLI, for comparison | 5.7 MB (macOS), 6.2 MB (Windows) |
 
 Memory at idle (RSS after 40 s, `examples/demo.yaml` with rotation on, one display):
 

@@ -3,9 +3,9 @@
 //! public-API widgets (subreddit, dev.to, mempool, crypto prices, sports
 //! scores). Each module sits behind a cargo feature named after its id.
 
-use dashboard_modules_common::Builtin;
+use sitroom_modules_common::Builtin;
 #[allow(unused_imports)]
-pub(crate) use dashboard_modules_common::{entry, schema, strings};
+pub(crate) use sitroom_modules_common::{entry, schema, strings};
 
 #[cfg(feature = "clock")]
 pub mod clock;
@@ -118,7 +118,7 @@ pub(crate) fn plural(n: i64, word: &str) -> String {
 #[allow(dead_code)]
 pub(crate) fn read_sample<T: serde::de::DeserializeOwned>(path: &str) -> anyhow::Result<T> {
     use anyhow::Context;
-    let path = dashboard_modules_common::expand_home(path);
+    let path = sitroom_modules_common::expand_home(path);
     let text =
         std::fs::read_to_string(&path).with_context(|| format!("reading {}", path.display()))?;
     serde_json::from_str(&text).with_context(|| format!("parsing {}", path.display()))

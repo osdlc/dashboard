@@ -2,7 +2,7 @@
 
 use std::time::{Duration, Instant};
 
-use dashboard_contract::{RotateSettings, ScreenLayout};
+use sitroom_contract::{RotateSettings, ScreenLayout};
 
 pub struct Rotation {
     /// Indexes into the screen list, in rotation order.

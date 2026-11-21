@@ -7,7 +7,7 @@ web/dist/
 __pycache__/
 *.pyc
 /bench/wasm/target/
-# Scratch homes for XDG_* overrides when trying the dashboard in a worktree.
+# Scratch homes for XDG_* overrides when trying sitroom in a worktree.
 .tmp/
 # Built by scripts/build-marketplace.sh.
 /marketplace/index.json

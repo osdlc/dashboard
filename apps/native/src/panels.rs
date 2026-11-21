@@ -1,11 +1,11 @@
 //! Shared controls, and the help and settings panels (`HelpPanel.vue`,
 //! `SettingsPanel.vue`).
 
-use dashboard_contract::{ClientMessage, Theme, UiSettings};
 use gpui::{
     Context, Div, ElementId, FontWeight, KeyDownEvent, MouseButton, Pixels, SharedString, Size,
     Stateful, div, prelude::*, px,
 };
+use sitroom_contract::{ClientMessage, Theme, UiSettings};
 
 use crate::app::{Dashboard, Overlay};
 use crate::input::TextField;
@@ -182,7 +182,7 @@ impl Dashboard {
 
     /// Reads how a request from this window went. Closes the dialog once the
     /// dashboard exists; returns true if it was a blank one.
-    pub fn dashboard_created(&mut self, settings: &UiSettings) -> bool {
+    pub fn sitroom_created(&mut self, settings: &UiSettings) -> bool {
         let Some(new) = &mut self.new_dashboard else {
             return false;
         };
@@ -305,7 +305,7 @@ impl Dashboard {
                     .on_mouse_down(MouseButton::Left, |_, _, cx| cx.stop_propagation())
                     .child(ui.heading(
                         if new.copy {
-                            "Save dashboard as"
+                            "Save sitroom as"
                         } else {
                             "New dashboard"
                         },
@@ -513,7 +513,7 @@ impl Dashboard {
             body.push(
                 ui.muted(
                     0.85,
-                    "Merged in this order; later files win. Settings are saved to the dashboard file, else config.yaml.",
+                    "Merged in this order; later files win. Settings are saved to sitroom file, else config.yaml.",
                 )
                 .into_any_element(),
             );

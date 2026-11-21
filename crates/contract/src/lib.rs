@@ -184,7 +184,7 @@ pub enum Widget {
         color: ColorScale,
         /// Draw the first series above the axis and the second below it,
         /// e.g. network download and upload. Negative values count as 0 here
-        /// (`dashboard check` flags them).
+        /// (`sitroom check` flags them).
         #[serde(default)]
         mirrored: bool,
         /// How values are written: plain, bytes or count.
@@ -297,7 +297,7 @@ pub enum Widget {
     },
     /// Availability checks, one row each with a strip of recent results.
     Uptime { checks: Vec<UptimeCheck> },
-    /// A picture from a file on the machine the dashboard runs on. The terminal
+    /// A picture from a file on the machine sitroom runs on. The terminal
     /// draws it with the best graphics it supports (Kitty, iTerm2 or Sixel),
     /// or with colored half blocks. It is scaled to fit and keeps its shape.
     Image {
@@ -700,7 +700,7 @@ pub struct ConfigInfo {
     #[serde(default)]
     pub dashboards: Vec<DashboardSummary>,
     /// The files merged into the config, lowest precedence first, e.g.
-    /// "machine: ~/.config/dashboard/config.yaml".
+    /// "machine: ~/.config/sitroom/config.yaml".
     #[serde(default)]
     pub layers: Vec<String>,
     /// The version of the file at `path`, which changes are written to (a sha256 etag),

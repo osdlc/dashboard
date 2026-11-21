@@ -5,7 +5,7 @@
 mod textfile;
 
 #[allow(unused_imports)]
-pub(crate) use dashboard_modules_common::{entry, schema, strings};
+pub(crate) use sitroom_modules_common::{entry, schema, strings};
 
 fn main() {
     bench_wasm_plugins::serve(textfile::TextFile::default());

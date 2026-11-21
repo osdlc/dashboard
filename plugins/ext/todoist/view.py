@@ -6,7 +6,7 @@ import math
 import urllib.parse
 from typing import Any, Dict, List, Optional
 
-from dashboard_plugin import ListItem, Status, View
+from sitroom_plugin import ListItem, Status, View
 
 # The fixed date for --sample and the tests, so "due today" always reads the same.
 SAMPLE_TODAY = "2026-10-27"

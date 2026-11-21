@@ -9,10 +9,10 @@ use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 
-use dashboard_contract::{Status, Widget};
-use dashboard_host::Module;
-use dashboard_modules_ops::{pihole::Pihole, transmission::Transmission};
 use serde_json::json;
+use sitroom_contract::{Status, Widget};
+use sitroom_host::Module;
+use sitroom_modules_ops::{pihole::Pihole, transmission::Transmission};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpListener;
 
@@ -252,7 +252,7 @@ async fn pihole_without_a_password_on_the_server_logs_in_once() {
 async fn pihole_without_a_password_says_how_to_set_one() {
     let (base, _) = serve_pihole(Some("hunter2")).await;
     let mut m = Pihole::default();
-    m.init(json!({ "url": base, "token_env": "DASHBOARD_TEST_NO_SUCH_PASSWORD" }))
+    m.init(json!({ "url": base, "token_env": "SITROOM_TEST_NO_SUCH_PASSWORD" }))
         .await
         .unwrap();
     let err = m.render().await.unwrap_err().to_string();

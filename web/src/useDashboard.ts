@@ -6,12 +6,12 @@ import { applyColorTheme, applyMode, DEFAULT_THEME } from './colors'
 export type ConnectionState = 'signing in' | 'connecting' | 'open' | 'closed' | 'signed out'
 
 /** Where this tab keeps its session token, so a reload stays signed in. */
-const TOKEN_KEY = 'dashboard-session'
+const TOKEN_KEY = 'sitroom-session'
 
 /**
  * Settings and live tile updates from the host over the WebSocket. Reconnects on close.
  *
- * The link `dashboard serve` opens carries a one-time boot token (`?boot=`). It is traded
+ * The link `sitroom serve` opens carries a one-time boot token (`?boot=`). It is traded
  * once for the session token, which is kept in this tab's sessionStorage and never put
  * in a URL.
  */
@@ -37,7 +37,7 @@ export function useDashboard() {
     state.value = 'connecting'
     const proto = location.protocol === 'https:' ? 'wss' : 'ws'
     // Browsers can't set headers on a WebSocket; the token goes as a subprotocol.
-    socket = new WebSocket(`${proto}://${location.host}/api/ws`, ['dashboard', `bearer.${token}`])
+    socket = new WebSocket(`${proto}://${location.host}/api/ws`, ['sitroom', `bearer.${token}`])
     socket.onopen = () => (state.value = 'open')
     socket.onmessage = (ev) => {
       const msg = JSON.parse(ev.data) as ServerMessage

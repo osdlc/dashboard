@@ -6,8 +6,8 @@ build output and not checked in. Try it:
 
 ```sh
 scripts/build-marketplace.sh
-dashboard plugin list --index marketplace/index.json
-dashboard plugin install clock-py --index marketplace/index.json
+sitroom plugin list --index marketplace/index.json
+sitroom plugin install clock-py --index marketplace/index.json
 ```
 
 See [docs/marketplace.md](../docs/marketplace.md).

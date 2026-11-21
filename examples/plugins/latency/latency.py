@@ -14,10 +14,10 @@ target is slow or unreachable. Standard library only; no ping privileges.
           - { name: router, host: 192.168.1.1, port: 80 }
 
 Shows the host-kept series history: the chart widget sets `id`, so each
-render sends only the newest point per target and the dashboard keeps the
+render sends only the newest point per target and sitroom keeps the
 last `history` points. The plugin itself stays stateless.
 
-    dashboard plugin-check --renders 5 --plugin-config '{"targets":[{"name":"github","host":"github.com"}]}' -- python3 examples/plugins/latency/latency.py
+    sitroom plugin-check --renders 5 --plugin-config '{"targets":[{"name":"github","host":"github.com"}]}' -- python3 examples/plugins/latency/latency.py
 """
 
 import json

@@ -16,7 +16,7 @@ opens the site's front page instead of the check. Use a full key for working lin
 `python3 main.py --sample` shows sample.json instead of calling the API (the tests and the
 catalog demo use it).
 
-    dashboard plugin-check -- python3 plugins/ext/healthchecks/main.py --sample
+    sitroom plugin-check -- python3 plugins/ext/healthchecks/main.py --sample
 """
 
 import json
@@ -30,7 +30,7 @@ import urllib.request
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from dashboard_plugin import ListItem, View, config_error, serve, upstream_error, with_defaults
+from sitroom_plugin import ListItem, View, config_error, serve, upstream_error, with_defaults
 
 SAMPLE = "--sample" in sys.argv[1:]
 # "Now" for the sample: 2026-10-27T12:00:00Z.
@@ -68,7 +68,7 @@ def token() -> str:
     value = os.environ.get(config["token_env"], "").strip()
     if not value:
         raise upstream_error(
-            f"no API key: set ${config['token_env']} before starting the dashboard, or set token_env / token_command"
+            f"no API key: set ${config['token_env']} before starting sitroom, or set token_env / token_command"
         )
     return value
 
@@ -77,7 +77,7 @@ def fetch_checks() -> List[Any]:
     url = config["base_url"] + "/api/v3/checks/"
     if config["tag"]:
         url += "?" + urllib.parse.urlencode({"tag": config["tag"]})
-    req = urllib.request.Request(url, headers={"X-Api-Key": token(), "User-Agent": "dashboard-plugin healthchecks"})
+    req = urllib.request.Request(url, headers={"X-Api-Key": token(), "User-Agent": "sitroom-plugin healthchecks"})
     try:
         with urllib.request.urlopen(req, timeout=20) as resp:
             data = json.load(resp)

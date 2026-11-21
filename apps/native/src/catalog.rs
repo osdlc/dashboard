@@ -2,8 +2,8 @@
 
 use std::collections::{HashMap, HashSet};
 
-use dashboard_contract::CatalogEntry;
 use serde_json::{Map, Value, json};
+use sitroom_contract::CatalogEntry;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum FieldKind {

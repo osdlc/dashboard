@@ -1,5 +1,5 @@
-//! dashboard-native: the dashboard drawn with GPUI, in a window, as the desktop
-//! wallpaper, or as a screensaver. It runs the same modules as `dashboard serve`
+//! sitroom-native: sitroom drawn with GPUI, in a window, as the desktop
+//! wallpaper, or as a screensaver. It runs the same modules as `sitroom serve`
 //! and reads the host directly, as the TUI does, with no web server or webview.
 
 // Release builds on Windows get no console window.
@@ -8,9 +8,9 @@
 use std::sync::Arc;
 
 use anyhow::Result;
-use dashboard_config::layers::Sources;
 use gpui::App;
 use launch::{Launch, Mode};
+use sitroom_config::layers::Sources;
 
 mod app;
 mod catalog;
@@ -32,10 +32,10 @@ use app::Shared;
 
 fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().skip(1).collect();
-    // Bundled plugins run as `<exe> plugin <id>` (see dashboard-runtime).
+    // Bundled plugins run as `<exe> plugin <id>` (see sitroom-runtime).
     if let [cmd, id] = args.as_slice()
         && cmd == "plugin"
-        && let Some(result) = dashboard_runtime::run_bundled(id)
+        && let Some(result) = sitroom_runtime::run_bundled(id)
     {
         return result;
     }
@@ -53,10 +53,10 @@ fn main() -> Result<()> {
     if launch.mode == Mode::Configure {
         let path = match &launch.config {
             Some(path) => path.clone(),
-            None => dashboard_config::default_path()?,
+            None => sitroom_config::default_path()?,
         };
         println!(
-            "The dashboard screensaver shows the screens from\n{}",
+            "Sitroom screensaver shows the screens from\n{}",
             path.display()
         );
         return Ok(());
@@ -69,12 +69,12 @@ fn main() -> Result<()> {
         machine: launch.config.clone(),
         ..Default::default()
     };
-    let (host, settings, actions, layers) = runtime.block_on(dashboard_runtime::start(sources))?;
+    let (host, settings, actions, layers) = runtime.block_on(sitroom_runtime::start(sources))?;
     let shared = Shared {
         host,
         settings,
         actions,
-        catalog: Arc::new(dashboard_runtime::catalog_source(layers)),
+        catalog: Arc::new(sitroom_runtime::catalog_source(layers)),
         runtime: runtime.handle().clone(),
     };
     run(launch, shared);

@@ -2,7 +2,7 @@
 //! `web/src/style.css`, `grid-auto-flow: dense`) worked out by hand, so every
 //! tile's box is known before drawing. Fitting and arrow keys both use it.
 
-use dashboard_contract::Size;
+use sitroom_contract::Size;
 
 use crate::nav::Bounds;
 
