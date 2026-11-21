@@ -159,8 +159,10 @@ fn router(state: AppState) -> Router {
         .with_state(state)
 }
 
+/// The built UI: `web/dist` in the repository, `ui/` in the published crate
+/// (build.rs picks it).
 #[derive(RustEmbed)]
-#[folder = "../../web/dist"]
+#[folder = "$SITROOM_UI_DIR"]
 struct Ui;
 
 /// Serves the embedded Vue build. Unknown paths without an extension get

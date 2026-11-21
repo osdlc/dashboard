@@ -1,7 +1,11 @@
-//! Builds the Vue app in `web/` so it can be embedded in the binary.
+//! Builds the Vue app in `web/` so it can be embedded in the binary, and tells
+//! `src/lib.rs` where the files are (`SITROOM_UI_DIR`).
 //!
-//! Reruns only when UI sources change. Set `SITROOM_SKIP_UI_BUILD=1` to skip
-//! (a placeholder page is embedded instead); the same happens if pnpm is missing.
+//! In the repository the UI is `web/dist`, rebuilt when its sources change. Set
+//! `SITROOM_SKIP_UI_BUILD=1` to skip that (a placeholder page is embedded
+//! instead); the same happens if pnpm is missing. The crate published to
+//! crates.io has no `web/` beside it: it carries the built UI in `ui/`
+//! (docs/releasing.md), and with neither a placeholder is embedded.
 
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -20,14 +24,34 @@ const WATCHED: &[&str] = &[
 ];
 
 fn main() {
-    let web = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap()).join("../../web");
-    let dist = web.join("dist");
+    let manifest = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
+    let web = manifest.join("../../web");
+    let packaged = manifest.join("ui");
+    println!("cargo:rerun-if-changed={}", packaged.display());
+    println!("cargo:rerun-if-env-changed=SITROOM_SKIP_UI_BUILD");
 
+    let dir = if web.join("package.json").exists() {
+        build(&web);
+        web.join("dist")
+    } else if packaged.join("index.html").exists() {
+        packaged
+    } else {
+        let dir = PathBuf::from(env::var("OUT_DIR").unwrap()).join("ui");
+        placeholder(
+            &dir,
+            "UI not built: this copy of sitroom-web has no web/ folder or ui/.",
+        );
+        dir
+    };
+    println!("cargo:rustc-env=SITROOM_UI_DIR={}", dir.display());
+}
+
+/// Builds `web/` into `web/dist`, or embeds a placeholder there.
+fn build(web: &Path) {
+    let dist = web.join("dist");
     for path in WATCHED {
         println!("cargo:rerun-if-changed={}", web.join(path).display());
     }
-    println!("cargo:rerun-if-env-changed=SITROOM_SKIP_UI_BUILD");
-
     if env::var_os("SITROOM_SKIP_UI_BUILD").is_some() {
         placeholder(&dist, "UI build skipped (SITROOM_SKIP_UI_BUILD is set).");
         return;
@@ -38,8 +62,8 @@ fn main() {
         return;
     }
 
-    run(&web, &["install", "--prefer-offline"]);
-    run(&web, &["build"]);
+    run(web, &["install", "--prefer-offline"]);
+    run(web, &["build"]);
 }
 
 fn run(dir: &Path, args: &[&str]) {

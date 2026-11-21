@@ -6,6 +6,9 @@ rust-version.workspace = true
 version.workspace = true
 license.workspace = true
 repository.workspace = true
+# ui/ is the built web UI, copied in before publishing (docs/releasing.md). It
+# is git-ignored, so it has to be listed.
+include = ["/src", "/build.rs", "/ui", "/Cargo.toml"]
 
 [dependencies]
 anyhow = "1.0.104"
@@ -14,7 +17,7 @@ sitroom-cli-kit = { version = "0.8.0", path = "../cli-kit" }
 sitroom-contract = { version = "0.8.0", path = "../contract" }
 sitroom-host = { version = "0.8.0", path = "../host" }
 futures-util = "0.3.34"
-rust-embed = { version = "8.13.0", features = ["mime-guess"] }
+rust-embed = { version = "8.13.0", features = ["mime-guess", "interpolate-folder-path"] }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.154"
 tokio = { version = "1.54.1", features = ["full"] }

@@ -209,7 +209,10 @@ pub struct Loaded {
 
 /// Used when there is no config file: the demo, so a first run shows what
 /// sitroom can do. Saving a setting from the UI writes this out first.
-pub const DEFAULT_CONFIG: &str = include_str!("../../../examples/demo.yaml");
+///
+/// `demo.yaml` is a copy of `examples/demo.yaml`, kept in this crate so the
+/// published crate has it (`crates/cli/tests/copies.rs` checks they match).
+pub const DEFAULT_CONFIG: &str = include_str!("../demo.yaml");
 
 /// Default config path: `<config home>/sitroom/config.yaml`, XDG layout on
 /// every OS (`~/.config/sitroom/config.yaml` on macOS too). Moved by

@@ -15,11 +15,13 @@ pub enum Lang {
     Py,
 }
 
+// The SDK files are copies of the ones in sdk/, kept in this crate so the
+// published crate has them (tests/copies.rs checks they match).
 const TS_MAIN: &str = include_str!("../templates/plugin.ts");
-const TS_SDK: &str = include_str!("../../../sdk/typescript/sitroom-plugin.ts");
+const TS_SDK: &str = include_str!("../sdk/sitroom-plugin.ts");
 const TS_PACKAGE: &str = "{\n  \"private\": true,\n  \"type\": \"module\"\n}\n";
 const PY_MAIN: &str = include_str!("../templates/plugin.py");
-const PY_SDK: &str = include_str!("../../../sdk/python/sitroom_plugin.py");
+const PY_SDK: &str = include_str!("../sdk/sitroom_plugin.py");
 
 impl Lang {
     /// (file name, contents) for each file, the main file first.
