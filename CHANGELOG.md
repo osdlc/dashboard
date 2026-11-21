@@ -6,8 +6,16 @@ released on their own; they record the stages the project was built in.
 
 ## 0.9.0
 
+- **Renamed to sitroom** (was `dashboard`): the command, the crates, the repository
+  (osdlc/sitroom), the `SITROOM_*` environment variables (were `DASHBOARD_*`), `.sitroom.yaml`
+  (was `.dashboard.yaml`), `sitroom-plugin.yaml` (was `dashboard-plugin.yaml`) and the SDK files.
+  The config and data folders move to `sitroom/` on first run; rename project files, plugin
+  packages and environment variables yourself.
 - **On crates.io.** `cargo install sitroom` installs `sitroom` and `sit`. The six crates are
   published together at the same version (docs/releasing.md).
+- **Prebuilt binaries and Homebrew.** The GitHub Release has `sitroom` and `sit` for macOS and
+  Linux (arm64 and x86-64) as `.tar.gz` archives with `SHA256SUMS`; `brew install
+  osdlc/tap/sitroom` installs them. The macOS binaries are not signed or notarized.
 - **Six crates instead of nineteen.** `sitroom-core` is the config, the host and the CLI
   conventions (was `sitroom-config`, `sitroom-host`, `sitroom-cli-kit`). `sitroom-modules` holds
   every bundle, the runtime and the cswap plugin (was `sitroom-modules-*`, `sitroom-runtime`,

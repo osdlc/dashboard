@@ -9,15 +9,25 @@ not work for you, [open an issue](https://github.com/osdlc/sitroom/issues).
 
 You need:
 
-- [Rust](https://rustup.rs) and [pnpm](https://pnpm.io), to build sitroom.
+- Homebrew, or [Rust](https://rustup.rs), to install sitroom. Building from a clone also needs [pnpm](https://pnpm.io).
 - Node 24 (or Bun), for the widget you write in step 5. Python 3.9 or later works too.
 - The [GitHub CLI](https://cli.github.com) (`gh`), for step 4. You can skip that part.
 
 ## 1. Install and run the demo
 
-There are no packages yet, so you build from source. `cargo install` builds the web view too,
-and puts `sitroom` in `~/.cargo/bin`, which is on your `PATH` once Rust is installed. It also
-installs `sit`, a short name for the same thing: `sit tui` is `sitroom tui`.
+With Homebrew, on macOS or Linux:
+
+```sh
+brew tap osdlc/tap && brew trust osdlc/tap
+brew install osdlc/tap/sitroom
+```
+
+Or with Rust: `cargo install sitroom` builds it from crates.io and puts it in `~/.cargo/bin`,
+which is on your `PATH` once Rust is installed. Prebuilt archives for macOS and Linux are on the
+[GitHub Release](https://github.com/osdlc/sitroom/releases/latest) too. Each way installs `sit`
+as well, a short name for the same thing: `sit tui` is `sitroom tui`.
+
+To build from a clone instead (this needs pnpm too, for the web view):
 
 ```sh
 git clone https://github.com/osdlc/sitroom
@@ -473,11 +483,11 @@ The chart sends only one point each time. Because the series has an `id`, sitroo
 its history and draws the whole line, so the plugin keeps no state. That is what `liveSeries`
 does. Points are `[unix milliseconds, value]`.
 
-The other widgets are `text` (with optional markdown), `bars`, `meter_grid`, `table`, `log` and
-`uptime`. [docs/plugins.md](https://github.com/osdlc/sitroom/blob/main/docs/plugins.md#widgets)
+The other widgets are `text` (with optional markdown), `bars`, `meter_grid`, `table`, `log`,
+`uptime`, `pie`, `clock_face`, `display` and `image`. [docs/plugins.md](https://github.com/osdlc/sitroom/blob/main/docs/plugins.md#widgets)
 has an example of each.
 
-[examples/blocks/](../examples/blocks/) has a JSON example of each widget type, and ways to
+[examples/blocks/](https://github.com/osdlc/sitroom/tree/main/examples/blocks) has a JSON example of each widget type, and ways to
 combine them: stats over a chart, a pie next to stats, widgets inside table cells.
 
 ### Check it
@@ -657,7 +667,8 @@ nothing to click.
 Plugin packages are widgets other people wrote. `sitroom plugin install` adds one to
 `~/.local/share/sitroom/plugins/`. It checks the package, shows what it runs and needs, and asks
 first. There is no shared marketplace yet. The repository has packages in `plugins/ext`, which you
-can install from your clone:
+can install from a clone of it (`git clone https://github.com/osdlc/sitroom`). `plugin install`
+also takes a `.tar.gz` file or a URL.
 
 ```sh
 sitroom plugin install plugins/ext/clock-py

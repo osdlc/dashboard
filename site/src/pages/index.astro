@@ -16,11 +16,10 @@ const blob = (path: string) => `${repo}/blob/main/${path}`
 
 const theme = 'vitesse-dark'
 
-const quickstart = `git clone ${repo}
-cd sitroom
-cargo build --release   # needs Rust and pnpm
-./target/release/sitroom tui     # terminal
-./target/release/sitroom serve   # browser`
+const quickstart = `brew tap osdlc/tap && brew trust osdlc/tap
+brew install osdlc/tap/sitroom   # or: cargo install sitroom
+sitroom tui     # terminal (sit tui for short)
+sitroom serve   # browser`
 
 const pluginConfig = `modules:
   load:
@@ -31,7 +30,7 @@ screens:
     tiles:
       - { module: load, size: medium }`
 
-const transcript = `→ {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"contract_version":"0.1","host":{"name":"sitroom","version":"0.1.0"},"config":{}}}
+const transcript = `→ {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"contract_version":"0.1","host":{"name":"sitroom","version":"0.9.0"},"config":{}}}
 ← {"jsonrpc":"2.0","id":1,"result":{"manifest":{"id":"load","name":"Load average","contract_version":"0.1","refresh":{"mode":"poll","interval_ms":2000},"layout":{"size":"medium"}}}}
 → {"jsonrpc":"2.0","id":2,"method":"view/render"}
 ← {"jsonrpc":"2.0","id":2,"result":{"status":"ok","summary":"load 3.12 2.80 2.41","root":{"type":"column","children":[…]}}}`
@@ -99,7 +98,7 @@ const modules = [
             <span class="strip" aria-hidden="true">
               {Array.from({ length: 28 }, (_, i) => <i class={i === 9 ? 's' : i === 21 ? 'd' : ''} />)}
             </span>
-            <span>open source · v0.1 · early</span>
+            <span>open source · v0.9 · early</span>
           </p>
           <h1 class="rise d1">A developer dashboard for your terminal and your browser.</h1>
           <p class="lede rise d2">
@@ -108,13 +107,14 @@ const modules = [
           </p>
           <div class="quick rise d3">
             <div class="quick-head">
-              <span>Build from source</span>
+              <span>Install</span>
               <button type="button" class="copy" data-copy={quickstart.replace(/ +#.*$/gm, '')}>Copy</button>
             </div>
             <Code code={quickstart} lang="sh" theme={theme} class="code" />
           </div>
           <p class="hint rise d4">
-            No config yet? It starts with a built-in demo of eight screens. Press <kbd>1</kbd>–<kbd>8</kbd> to switch,
+            Or download a prebuilt binary for macOS or Linux from the{' '}
+            <a href={`${repo}/releases/latest`}>GitHub Release</a>, or build from source. No config yet? It starts with a built-in demo of eight screens. Press <kbd>1</kbd>–<kbd>8</kbd> to switch,
             <kbd>?</kbd> for help. Then follow the <a href={`${base}tutorial/`}>tutorial</a> to build your own.
           </p>
         </div>
@@ -250,7 +250,7 @@ const modules = [
 
         <h3 class="sub">Widgets</h3>
         <p class="sub-copy">
-          Every module, built-in or plugin, describes its tile with these. Both renderers draw all of them.
+          Every module, built-in or plugin, describes its tile with these, the most common ones. Both renderers draw every type; the <a href={`${base}blocks/`}>building blocks</a> page has them all.
         </p>
         <Widgets />
       </div>
@@ -406,8 +406,8 @@ const modules = [
         <p class="label"><span class="n">06</span> status</p>
         <h2>Early, and built for one person on one machine.</h2>
         <p class="lede">
-          sitroom is at v0.1, the v1 foundation. It is used daily, but the config format and the plugin contract may
-          still change. There are no releases or packages yet: you build it from source.
+          sitroom is at v0.9. It is used daily, but the config format and the plugin contract may still change.
+          Install it with Homebrew, <code>cargo install sitroom</code> or a prebuilt binary from the GitHub Release.
         </p>
         <div class="status">
           <div>
@@ -418,6 +418,7 @@ const modules = [
               <li>Several screens, rotation, a settings screen and a help screen</li>
               <li>Screen editor in the web view, saved to the config file</li>
               <li>Live config reload, JSON Schema for the config</li>
+              <li>Homebrew, crates.io and prebuilt binaries for macOS and Linux</li>
             </ul>
           </div>
           <div>
@@ -426,7 +427,6 @@ const modules = [
               <li>Running a module's declared commands from a tile, with a confirmation step</li>
               <li>Push-mode plugins that send updates on their own</li>
               <li>WASM plugins</li>
-              <li>Prebuilt binaries or package manager installs</li>
             </ul>
           </div>
           <div>

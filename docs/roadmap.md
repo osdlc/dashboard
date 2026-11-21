@@ -46,7 +46,7 @@ are not a level yet: see [experiments](#experiments).
 | Marketplace index format | [marketplace.md](marketplace.md) | Experimental |
 | Config file format, and the token `*_env` / `*_command` settings | README, [dashboards.md](dashboards.md) | Experimental |
 | CLI commands, exit codes, `--json` output, the JSON Schemas from `sitroom schema` | [cli.md](cli.md) | Experimental |
-| `SITROOM_*` environment variables | README, [cli.md](cli.md) | Experimental |
+| `SITROOM_*` environment variables | README, [dashboards.md](dashboards.md), [marketplace.md](marketplace.md), [plugins.md](plugins.md), [desktop.md](desktop.md) | Experimental |
 | Color theme tokens | `crates/contract/src/theme.rs` | Experimental |
 | Each built-in module and its `config:` | catalog entries (`sitroom widgets`) | Experimental |
 | Web view URL options (`?mode=ambient`) and signing in | README, [cli.md](cli.md#signing-in-to-the-web-view) | Experimental |

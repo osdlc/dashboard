@@ -6,9 +6,13 @@ rust-version.workspace = true
 version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+keywords = ["dashboard", "websocket", "web-ui", "sitroom"]
+categories = ["web-programming", "visualization"]
 # ui/ is the built web UI, copied in before publishing (docs/releasing.md). It
 # is git-ignored, so it has to be listed.
-include = ["/src", "/build.rs", "/ui", "/Cargo.toml"]
+include = ["/src", "/build.rs", "/ui", "/Cargo.toml", "/README.md"]
 
 [dependencies]
 anyhow = "1.0.104"

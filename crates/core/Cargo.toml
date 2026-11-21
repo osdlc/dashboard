@@ -6,6 +6,10 @@ rust-version.workspace = true
 version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+keywords = ["dashboard", "config", "sitroom"]
+categories = ["development-tools"]
 
 [dependencies]
 anyhow = "1.0.104"

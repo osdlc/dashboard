@@ -6,6 +6,10 @@ rust-version.workspace = true
 version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+keywords = ["dashboard", "widgets", "plugin", "json-rpc", "sitroom"]
+categories = ["data-structures", "visualization"]
 
 [dependencies]
 schemars = "1.2.3"

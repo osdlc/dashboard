@@ -15,6 +15,7 @@ version = "0.9.0"
 rust-version = "1.95"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/osdlc/sitroom"
+homepage = "https://osdlc.github.io/sitroom/"
 
 # osdlc's Rust package standard (S-package-shape-rs). Unsafe code is denied
 # rather than forbidden: the few places that call the OS allow it where they

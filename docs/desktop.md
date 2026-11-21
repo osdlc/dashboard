@@ -22,8 +22,11 @@ Other flags: `--port N` (default: any free port) and `--no-tray`. Without `--con
 same config file as `sitroom`. `--wallpaper --no-tray` is refused: wallpaper windows ignore
 clicks, so the tray's *Quit* is the only way to end the app.
 
-Plain `cargo build` and `cargo test` leave the app out (it is slow to build, and on Linux it needs
-WebKitGTK). `cargo build --workspace` or `-p sitroom-desktop` include it.
+The native GPUI app (experimental) takes the same flags: `cargo run -p sitroom-native -- --ambient`.
+
+Plain `cargo build` and `cargo test` leave both apps out (they are slow to build, and on Linux the
+Tauri app needs WebKitGTK). `cargo build --workspace` or `-p sitroom-desktop` / `-p sitroom-native`
+include them. Neither app is in the release archives or Homebrew yet; those have `sitroom` and `sit`.
 
 Build the macOS app bundle (not signed or notarized):
 
@@ -106,11 +109,12 @@ machine.
 WKWebView that loads the ambient page. `apps/desktop/saver/build.sh` builds
 `target/saver/Sitroom.saver` (92 KB, not signed).
 
-It does not start sitroom itself; it shows a server that is already running. It finds the
-URL and the session token in the record that `sitroom serve --detach` writes,
-`~/.local/share/run/sitroom/serve.json`, or in the `url` and `token` screensaver defaults
+It does not start sitroom itself; it shows a server that is already running. It takes the
+URL and the session token from, in order: `$SITROOM_SAVER_URL` and `$SITROOM_SAVER_TOKEN` (for
+testing outside the screensaver host), the `url` and `token` screensaver defaults
 (`defaults -currentHost write dev.sitroom.saver url 'http://127.0.0.1:7878/'`, and the same for
-`token`). The token is put in the page's sessionStorage before the page runs, on the server's
+`token`), then the record that `sitroom serve --detach` writes,
+`~/.local/share/run/sitroom/serve.json`. The token is put in the page's sessionStorage before the page runs, on the server's
 origin only, so it never goes in the URL (see "Signing in to the web view" in
 [cli.md](cli.md)). The app's own windows sign in the same way.
 

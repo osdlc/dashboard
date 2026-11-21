@@ -240,8 +240,8 @@ pub fn run_dirs() -> Result<(PathBuf, PathBuf)> {
 
 /// Moves the config and data folders an earlier build kept under the old
 /// name, `dashboard`, to `sitroom`'s, each once: only when the new one doesn't
-/// exist yet. Returns what it did, to tell the user. Remove before the first
-/// release.
+/// exist yet. Returns what it did, to tell the user. 0.9.0, the first release,
+/// shipped with it for builds from before the rename; remove it in 1.0.
 pub fn move_old_folders() -> Vec<String> {
     let Ok(dirs) = tiered_dirs() else {
         return Vec::new();

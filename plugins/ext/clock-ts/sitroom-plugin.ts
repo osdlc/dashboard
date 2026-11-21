@@ -479,7 +479,7 @@ export interface SeriesWidget {
   /**
    * Draw the first series above the axis and the second below it,
    * e.g. network download and upload. Negative values count as 0 here
-   * (`sitroom check` flags them).
+   * (`sitroom plugin-check` flags them).
    */
   mirrored?: boolean;
   /** One or more lines, each with its points. */

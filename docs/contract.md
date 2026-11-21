@@ -207,7 +207,7 @@ lower. The top is `y_max`, else the highest value (at least 1 when nothing is ne
 no `y_min` or `y_max`, scales to the data's own range with 5% padding: use it for values far from
 0, such as a price. When the scale spans zero a faint zero line is drawn; `area` fills to that
 line and `bars` grow from it, down for negative values. A `mirrored` chart draws magnitudes, so
-negative values count as 0 there (`sitroom check` notes it). Values keep their sign in the
+negative values count as 0 there (`sitroom plugin-check` notes it). Values keep their sign in the
 legend; with `unit: "%"`, a non-whole value under 10 shows one decimal ("-1.2%"). A chart of
 several lines names each one in the legend, in its line's color.
 
