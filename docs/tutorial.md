@@ -9,13 +9,20 @@ not work for you, [open an issue](https://github.com/osdlc/sitroom/issues).
 
 You need:
 
-- Homebrew, or [Rust](https://rustup.rs), to install sitroom. Building from a clone also needs [pnpm](https://pnpm.io).
+- macOS or Linux, with `curl`; or Homebrew, or [Rust](https://rustup.rs), to install sitroom. Building from a clone also needs [pnpm](https://pnpm.io).
 - Node 24 (or Bun), for the widget you write in step 5. Python 3.9 or later works too.
 - The [GitHub CLI](https://cli.github.com) (`gh`), for step 4. You can skip that part.
 
 ## 1. Install and run the demo
 
-With Homebrew, on macOS or Linux:
+The quickest way, on macOS or Linux, is the install script. It downloads the build for your
+machine from the GitHub Release, checks it, and puts `sitroom` in `~/.local/bin`:
+
+```sh
+curl -fsSL https://osdlc.github.io/sitroom/install.sh | sh
+```
+
+Or with Homebrew:
 
 ```sh
 brew tap osdlc/tap && brew trust osdlc/tap
@@ -23,8 +30,7 @@ brew install osdlc/tap/sitroom
 ```
 
 Or with Rust: `cargo install sitroom` builds it from crates.io and puts it in `~/.cargo/bin`,
-which is on your `PATH` once Rust is installed. Prebuilt archives for macOS and Linux are on the
-[GitHub Release](https://github.com/osdlc/sitroom/releases/latest) too. Each way installs `sit`
+which is on your `PATH` once Rust is installed. Each way installs `sit`
 as well, a short name for the same thing: `sit tui` is `sitroom tui`.
 
 To build from a clone instead (this needs pnpm too, for the web view):

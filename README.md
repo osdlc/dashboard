@@ -7,10 +7,15 @@ Modular developer dashboard with a terminal UI and a web UI. The site,
 ## Install
 
 ```sh
-brew tap osdlc/tap && brew trust osdlc/tap   # once
-brew install osdlc/tap/sitroom               # Homebrew, macOS and Linux
+curl -fsSL https://osdlc.github.io/sitroom/install.sh | sh   # macOS and Linux: into ~/.local/bin
+brew tap osdlc/tap && brew trust osdlc/tap   # or Homebrew (tap once)
+brew install osdlc/tap/sitroom
 cargo install sitroom                        # or from crates.io (needs only Rust)
 ```
+
+The install script picks the build for your OS and CPU, checks it against the release's
+`SHA256SUMS` and installs it; `sh -s -- --version 0.9.0 --to /usr/local/bin` after `sh` picks
+the version and folder. Read it first if you like: <https://osdlc.github.io/sitroom/install.sh>.
 
 Each installs `sitroom` and `sit`, its short name (`sit tui` is `sitroom tui`). Prebuilt archives
 for macOS and Linux (arm64 and x86-64) are on the [GitHub Release](https://github.com/osdlc/sitroom/releases/latest),

@@ -6,6 +6,8 @@ released on their own; they record the stages the project was built in.
 
 ## Unreleased
 
+- **Install script.** `curl -fsSL https://osdlc.github.io/sitroom/install.sh | sh` installs `sitroom` and `sit`
+  from the latest release into `~/.local/bin`, after checking `SHA256SUMS` (`--version`, `--to`).
 - **No more moving the old folders.** 0.9.0 moved `~/.config/dashboard` and the data folder to
   `sitroom/` on first run. That is gone: sitroom keeps no code for names or formats it no
   longer uses. Move them yourself if you skipped 0.9.0.
