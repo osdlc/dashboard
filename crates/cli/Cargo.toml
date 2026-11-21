@@ -13,6 +13,13 @@ categories = ["command-line-utilities", "visualization", "development-tools"]
 # Two programs: `sitroom` and `sit`, its short name (src/bin/sit.rs).
 default-run = "sitroom"
 
+# `cargo binstall sitroom` downloads the release archive for the machine
+# (.github/workflows/release.yml) instead of compiling.
+[package.metadata.binstall]
+pkg-url = "{ repo }/releases/download/v{ version }/sitroom-{ version }-{ target }.tar.gz"
+bin-dir = "sitroom-{ version }-{ target }/{ bin }{ binary-ext }"
+pkg-fmt = "tgz"
+
 # Which built-in modules the binary includes: a bundle, or one module. Same
 # names as on sitroom-modules. See docs/modules.md.
 [features]

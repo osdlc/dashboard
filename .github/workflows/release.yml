@@ -2,7 +2,10 @@
 #
 # - crates.io: every crate (`publish`), so `cargo install sitroom` works.
 # - GitHub Release: `sitroom` and `sit` built for macOS and Linux, arm64 and
-#   x86-64, one .tar.gz per platform, with SHA256SUMS (`binaries`, `github`).
+#   x86-64, one .tar.gz per platform (Linux both glibc and static musl), and
+#   .deb, .rpm and Alpine .apk packages of the musl builds, with SHA256SUMS
+#   (`binaries`, `packages`, `github`). `cargo binstall sitroom` downloads
+#   the archives too ([package.metadata.binstall] in crates/cli/Cargo.toml).
 # - install.sh (site/public/install.sh, also served by the site) goes on the
 #   release too: `curl -fsSL https://osdlc.github.io/sitroom/install.sh | sh`
 #   picks the archive for the machine and checks it against SHA256SUMS.
@@ -131,6 +134,15 @@ jobs:
             runner: ubuntu-22.04
           - target: aarch64-unknown-linux-gnu
             runner: ubuntu-22.04-arm
+          # Static, so they run on any Linux, Alpine and old glibc included.
+          # zig is the C toolchain (aws-lc-sys is C), as in osdlc/skillwright.
+          # The .deb, .rpm and .apk packages are built from these.
+          - target: x86_64-unknown-linux-musl
+            runner: ubuntu-latest
+            builder: zigbuild
+          - target: aarch64-unknown-linux-musl
+            runner: ubuntu-24.04-arm
+            builder: zigbuild
     name: binaries (${{ matrix.target }})
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
@@ -152,11 +164,24 @@ jobs:
         with:
           node-version: '24'
 
+      - name: Install zig
+        if: matrix.builder == 'zigbuild'
+        uses: mlugg/setup-zig@d1434d08867e3ee9daa34448df10607b98908d29 # v2.2.1
+        with:
+          version: 0.14.1
+
+      - name: Install cargo-zigbuild
+        if: matrix.builder == 'zigbuild'
+        uses: taiki-e/install-action@1168f6810a3cb30a3514bf5756a3b7f0422c6df8 # v2.87.28
+        with:
+          tool: cargo-zigbuild@0.23.4
+
       # build.rs builds web/ with pnpm and embeds it.
       - name: Build
         env:
           TARGET: ${{ matrix.target }}
-        run: cargo build --locked --profile dist -p sitroom --bins --target "$TARGET"
+          BUILD: ${{ matrix.builder == 'zigbuild' && 'zigbuild' || 'build' }}
+        run: cargo "$BUILD" --locked --profile dist -p sitroom --bins --target "$TARGET"
 
       - name: Pack
         env:
@@ -177,10 +202,59 @@ jobs:
           path: ${{ env.ARCHIVE }}
           if-no-files-found: error
 
+  # .deb, .rpm and Alpine .apk for each CPU, from the static musl builds
+  # (scripts/linux-packages.sh).
+  packages:
+    needs: binaries
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # nfpm's own release, checked against its pinned checksum (install-action
+      # has no nfpm). To move the pin, take the sum from that release's
+      # checksums.txt.
+      - name: Install nfpm
+        env:
+          NFPM_VERSION: 2.49.0
+          NFPM_SHA256: 2afaa5ffb5e3493402e31e7c67a5a1fb42133e3f66fc315ca0051934125561c7
+        run: |
+          set -euo pipefail
+          f="nfpm_${NFPM_VERSION}_Linux_x86_64.tar.gz"
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/$f" "https://github.com/goreleaser/nfpm/releases/download/v${NFPM_VERSION}/$f"
+          echo "$NFPM_SHA256  $RUNNER_TEMP/$f" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/$f" -C "$RUNNER_TEMP" nfpm
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: binaries-*-linux-musl
+          merge-multiple: true
+          path: musl
+
+      - name: Build the packages
+        run: |
+          set -euo pipefail
+          for archive in musl/*.tar.gz; do
+            tar -xzf "$archive" -C musl
+            scripts/linux-packages.sh "${archive%.tar.gz}" packages
+          done
+          # The .deb's contents, as a check.
+          dpkg-deb -I packages/*_amd64.deb
+          dpkg-deb -c packages/*_amd64.deb
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: packages
+          path: packages/
+          if-no-files-found: error
+
   # The GitHub Release of the tag: the archives, SHA256SUMS and the
   # changelog's section for the version.
   github:
-    needs: [publish, binaries]
+    needs: [publish, binaries, packages]
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -197,17 +271,23 @@ jobs:
           merge-multiple: true
           path: dist
 
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: packages
+          path: dist
+
       - name: Create the release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           version="${GITHUB_REF_NAME#v}"
-          (cd dist && sha256sum *.tar.gz > SHA256SUMS)
+          (cd dist && sha256sum *.tar.gz *.deb *.rpm *.apk > SHA256SUMS)
           # The changelog's section for this version, without its heading.
           awk -v h="## $version" '$0 == h {on = 1; next} on && /^## / {exit} on' CHANGELOG.md > notes.md
           gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" \
-            --title "sitroom $version" --notes-file notes.md dist/*.tar.gz dist/SHA256SUMS site/public/install.sh
+            --title "sitroom $version" --notes-file notes.md \
+            dist/*.tar.gz dist/*.deb dist/*.rpm dist/*.apk dist/SHA256SUMS site/public/install.sh
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

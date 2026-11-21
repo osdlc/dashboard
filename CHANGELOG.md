@@ -6,6 +6,10 @@ released on their own; they record the stages the project was built in.
 
 ## Unreleased
 
+- **Linux packages and static builds.** The release adds static `-linux-musl` archives, which run
+  on any Linux (Alpine and old glibc included), and `.deb`, `.rpm` and Alpine `.apk` packages
+  made from them. The install script picks the static build when the system has no glibc 2.35
+  or later. `cargo binstall sitroom` downloads the release archive instead of compiling.
 - **Install script.** `curl -fsSL https://osdlc.github.io/sitroom/install.sh | sh` installs `sitroom` and `sit`
   from the latest release into `~/.local/bin`, after checking `SHA256SUMS` (`--version`, `--to`).
 - **No more moving the old folders.** 0.9.0 moved `~/.config/dashboard` and the data folder to

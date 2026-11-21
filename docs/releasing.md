@@ -45,13 +45,18 @@ git tag v0.9.0 && git push origin v0.9.0
    builds every crate) and `scripts/crates.sh publish`. A version already on crates.io (published
    by hand) is skipped; some crates published and some not stops the run.
 2. `binaries`, at the same time: builds `sitroom` and `sit` (profile `dist`) for
-   `aarch64-apple-darwin`, `x86_64-apple-darwin`, `x86_64-unknown-linux-gnu` and
-   `aarch64-unknown-linux-gnu`, one `sitroom-<version>-<target>.tar.gz` each.
-3. `github`, once both are done: the GitHub Release of the tag, with the archives, `SHA256SUMS`,
+   `aarch64-apple-darwin`, `x86_64-apple-darwin`, `x86_64-unknown-linux-gnu`,
+   `aarch64-unknown-linux-gnu` and, static with cargo-zigbuild, `x86_64-unknown-linux-musl` and
+   `aarch64-unknown-linux-musl`, one `sitroom-<version>-<target>.tar.gz` each.
+   `cargo binstall sitroom` finds these through `[package.metadata.binstall]` in
+   `crates/cli/Cargo.toml`.
+3. `packages`: a `.deb`, `.rpm` and Alpine `.apk` for each CPU from the musl archives, with
+   nfpm (`scripts/linux-packages.sh`, which runs the same on a machine with nfpm).
+4. `github`, once those are done: the GitHub Release of the tag, with the archives, the packages, `SHA256SUMS`,
    `install.sh` and the changelog's section as the notes. The site serves the same
    `site/public/install.sh` at <https://osdlc.github.io/sitroom/install.sh>; it installs the latest
    release unless given `--version`, so it needs no change for a new one.
-4. `homebrew`: writes `Formula/sitroom.rb` in osdlc/homebrew-tap for those archives and pushes
+5. `homebrew`: writes `Formula/sitroom.rb` in osdlc/homebrew-tap for those archives and pushes
    it as the osdlc-release GitHub App, the way osdlc/skillwright updates its formula.
 
 `cargo publish` goes in dependency order and waits for each crate to appear in the index before
