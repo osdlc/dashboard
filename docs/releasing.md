@@ -14,7 +14,9 @@ live outside it:
 - **The demo config** is a copy in `crates/config/demo.yaml`.
 - **The web UI** is built from `web/` in the repository. The published `sitroom-web` carries the
   built files in `crates/web/ui/` instead (git-ignored; `include` in its `Cargo.toml` lists it).
-  Its `build.rs` uses `web/` when it is there, else `ui/`, else a placeholder page.
+  Its `build.rs` uses `web/` when it is there, else `ui/`, else a placeholder page. Cargo counts
+  the ignored `ui/` as uncommitted, hence `--allow-dirty` below; start from a clean checkout so
+  it is the only such change.
 
 `crates/cli/tests/copies.rs` fails when a copy differs from its original. The `web` job in
 `rust-ci.yml` runs `cargo package --workspace`, which builds every crate from its packed copy, so a
@@ -28,8 +30,8 @@ and a `CHANGELOG.md` section for it):
 ```sh
 (cd web && pnpm install --frozen-lockfile && pnpm build)
 rm -rf crates/web/ui && cp -r web/dist crates/web/ui
-cargo publish --workspace --dry-run   # packs and builds every crate; uploads nothing
-cargo publish --workspace
+cargo publish --workspace --allow-dirty --dry-run   # packs and builds every crate; uploads nothing
+cargo publish --workspace --allow-dirty
 git tag v0.8.0 && git push origin v0.8.0
 ```
 

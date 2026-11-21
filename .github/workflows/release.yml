@@ -75,8 +75,19 @@ jobs:
           (cd web && pnpm install --frozen-lockfile && pnpm build)
           rm -rf crates/web/ui && cp -r web/dist crates/web/ui
 
+      # --allow-dirty is for the git-ignored crates/web/ui only: nothing else
+      # may have changed (the UI build must not touch tracked files).
+      - name: Only the UI is new
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git status --short
+            echo "::error::the checkout changed while building the UI"
+            exit 1
+          fi
+
+      # crates/web/ui is git-ignored, so cargo counts it as uncommitted.
       - name: Dry run
-        run: cargo publish --workspace --locked --dry-run
+        run: cargo publish --workspace --locked --allow-dirty --dry-run
 
       - uses: rust-lang/crates-io-auth-action@3268eb413133e2960fa4ae0e963ca76380c54cd9 # v1.0.6
         if: github.event_name == 'push'
@@ -86,4 +97,4 @@ jobs:
         if: github.event_name == 'push'
         env:
           CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
-        run: cargo publish --workspace --locked --no-verify
+        run: cargo publish --workspace --locked --allow-dirty --no-verify
