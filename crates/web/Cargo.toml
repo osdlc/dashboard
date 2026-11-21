@@ -13,8 +13,8 @@ include = ["/src", "/build.rs", "/ui", "/Cargo.toml"]
 [dependencies]
 anyhow = "1.0.104"
 axum = { version = "0.8.9", features = ["ws"] }
-sitroom-core = { version = "0.8.0", path = "../core" }
-sitroom-contract = { version = "0.8.0", path = "../contract" }
+sitroom-core = { version = "0.9.0", path = "../core" }
+sitroom-contract = { version = "0.9.0", path = "../contract" }
 futures-util = "0.3.34"
 rust-embed = { version = "8.13.0", features = ["mime-guess", "interpolate-folder-path"] }
 serde = { version = "1.0.229", features = ["derive"] }

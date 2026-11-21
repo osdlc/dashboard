@@ -9,10 +9,10 @@ publish = false
 
 [dependencies]
 anyhow = "1.0.104"
-sitroom-core = { version = "0.8.0", path = "../../crates/core" }
-sitroom-contract = { version = "0.8.0", path = "../../crates/contract" }
+sitroom-core = { version = "0.9.0", path = "../../crates/core" }
+sitroom-contract = { version = "0.9.0", path = "../../crates/contract" }
 # The runtime, and with its default features every built-in module.
-sitroom-modules = { version = "0.8.0", path = "../../crates/modules" }
+sitroom-modules = { version = "0.9.0", path = "../../crates/modules" }
 gpui = { package = "gpui-pre", version = "=0.3.11" }
 # runtime_shaders: compiling the shaders at build time needs Apple's Metal Toolchain.
 gpui_platform = { package = "gpui-pre-platform", version = "=0.3.11", features = ["font-kit", "runtime_shaders", "wayland", "x11"] }

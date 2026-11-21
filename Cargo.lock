@@ -7686,7 +7686,7 @@ checksum = "33f4fe9184a62d842c9ef383018f3306d8ba224fd9d836f56d7288308847c256"
 
 [[package]]
 name = "sitroom"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -7710,7 +7710,7 @@ dependencies = [
 
 [[package]]
 name = "sitroom-bench"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "anyhow",
  "libc",
@@ -7722,7 +7722,7 @@ dependencies = [
 
 [[package]]
 name = "sitroom-contract"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "schemars 1.2.3",
  "serde",
@@ -7731,7 +7731,7 @@ dependencies = [
 
 [[package]]
 name = "sitroom-core"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -7757,7 +7757,7 @@ dependencies = [
 
 [[package]]
 name = "sitroom-desktop"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "anyhow",
  "objc2 0.6.5",
@@ -7774,7 +7774,7 @@ dependencies = [
 
 [[package]]
 name = "sitroom-modules"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -7796,7 +7796,7 @@ dependencies = [
 
 [[package]]
 name = "sitroom-native"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "anyhow",
  "gpui-pre",
@@ -7815,7 +7815,7 @@ dependencies = [
 
 [[package]]
 name = "sitroom-tui"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "anyhow",
  "image",
@@ -7833,7 +7833,7 @@ dependencies = [
 
 [[package]]
 name = "sitroom-web"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "anyhow",
  "async-trait",
