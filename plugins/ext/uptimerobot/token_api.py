@@ -81,7 +81,7 @@ def plural(n: int, word: str) -> str:
 
 
 def count(n: float) -> str:
-    """Large counts short, like the dashboard's Count format: 950, 12.3k, 4.2M."""
+    """Large counts short, like sitroom's Count format: 950, 12.3k, 4.2M."""
     v = abs(n)
     steps = ["", "k", "M", "B"]
     i = 0
