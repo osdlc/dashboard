@@ -3,10 +3,12 @@
 #
 # Auth is trusted publishing: crates.io trades the job's OIDC token for a
 # short-lived publish token, so no token is stored here. crates.io allows
-# that only for a crate that exists, so the first release (0.8.0) is
-# published by hand. Then, on crates.io, add a trusted publisher to each
-# crate: repository osdlc/sitroom, workflow release.yml, environment
-# crates-io.
+# that only for a crate that exists, so the first release uses an API token
+# instead: the CARGO_REGISTRY_TOKEN secret of the `crates-io` environment.
+# When that secret is set it is used; when it isn't, OIDC is. After the first
+# release, add a trusted publisher to each crate on crates.io (repository
+# osdlc/sitroom, workflow release.yml, environment crates-io) and delete the
+# secret. docs/releasing.md has the steps.
 #
 # Prerequisite, created by the owner: the `crates-io` environment (Settings,
 # Environments), with a required reviewer and a deployment rule for `v*`
@@ -46,6 +48,9 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    env:
+      # Set only for the first release (see the header).
+      FIRST_RELEASE_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -93,12 +98,13 @@ jobs:
       - name: Dry run
         run: cargo publish --workspace --locked --allow-dirty --dry-run $UNPUBLISHED
 
+      # Trusted publishing, unless the first-release token is set.
       - uses: rust-lang/crates-io-auth-action@3268eb413133e2960fa4ae0e963ca76380c54cd9 # v1.0.6
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && env.FIRST_RELEASE_TOKEN == ''
         id: auth
 
       - name: Publish
         if: github.event_name == 'push'
         env:
-          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
+          CARGO_REGISTRY_TOKEN: ${{ env.FIRST_RELEASE_TOKEN || steps.auth.outputs.token }}
         run: cargo publish --workspace --locked --allow-dirty --no-verify $UNPUBLISHED
