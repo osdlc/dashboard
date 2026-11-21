@@ -6,6 +6,8 @@ rust-version.workspace = true
 version.workspace = true
 license.workspace = true
 repository.workspace = true
+# Two programs: `sitroom` and `sit`, its short name (src/bin/sit.rs).
+default-run = "sitroom"
 
 # Which built-in modules the binary includes: a bundle, or one module. Same
 # names as on sitroom-modules. See docs/modules.md.

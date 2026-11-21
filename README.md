@@ -15,6 +15,9 @@ cargo run -p sitroom -- open     # sign another browser tab in to the running se
 cargo run -p sitroom-desktop     # desktop app: a window, --wallpaper or --screensaver (docs/desktop.md)
 ```
 
+Installed (`cargo install --path crates/cli`), it's `sitroom tui`, `sitroom serve` and so on, or
+`sit` for short: `sit` runs `sitroom` with the same arguments.
+
 Add `mode=ambient` to the web page's URL (`?mode=ambient`) for ambient mode: no controls, large type, screens rotating.
 
 ### Keys

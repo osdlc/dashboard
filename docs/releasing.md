@@ -25,27 +25,40 @@ new file read from outside a crate's folder fails there first.
 
 ## A release
 
-From a clean checkout of `main`, at the version to release (`version` in the root `Cargo.toml`,
-and a `CHANGELOG.md` section for it):
+Bump `version` in the root `Cargo.toml` and in every `sitroom-*` path dependency (they name it
+too), turn the changelog's Unreleased section into the version's, and merge that. Then push the
+tag:
+
+```sh
+git tag v0.9.0 && git push origin v0.9.0
+```
+
+`.github/workflows/release.yml` checks the tag matches the version, builds the UI into
+`crates/web/ui`, runs `cargo publish --workspace --dry-run` (packs and builds every crate), waits
+for approval of the `crates-io` environment, then publishes. `cargo publish --workspace` goes in
+dependency order and waits for each crate to appear in the index before the next. A version
+can't be replaced once published, only yanked. Run the workflow by hand (Actions, release, Run
+workflow) for a dry run only.
+
+## Setting it up (once)
+
+1. **The environment.** Settings, Environments, New environment `crates-io`. Add yourself as a
+   required reviewer, and under deployment branches and tags allow only tags matching `v*`.
+2. **A token for the first release.** crates.io allows trusted publishing only for a crate that
+   exists, so the first release needs an API token. On crates.io, Account Settings, API Tokens:
+   scopes `publish-new` and `publish-update`, crates `sitroom*`, a short expiry. Save it as the
+   secret `CARGO_REGISTRY_TOKEN` of the `crates-io` environment (not a repository secret).
+3. **Release** as above.
+4. **Trusted publishing.** For each of the six crates on crates.io, Settings, Trusted
+   Publishing, add GitHub: owner `osdlc`, repository `sitroom`, workflow `release.yml`,
+   environment `crates-io`. Then delete the `CARGO_REGISTRY_TOKEN` secret and revoke the token.
+   Later releases get a short-lived token from crates.io instead.
+
+To publish from a machine instead (it needs a few GB free for the build), from a clean checkout:
 
 ```sh
 (cd web && pnpm install --frozen-lockfile && pnpm build)
 rm -rf crates/web/ui && cp -r web/dist crates/web/ui
-cargo publish --workspace --allow-dirty --dry-run   # packs and builds every crate; uploads nothing
+cargo publish --workspace --allow-dirty --dry-run
 cargo publish --workspace --allow-dirty
-git tag v0.8.0 && git push origin v0.8.0
 ```
-
-`cargo publish --workspace` publishes the crates in dependency order and waits for each to appear
-in the index before the next. A version can't be replaced once published, only yanked.
-
-The first release has to be published by hand like this, with a crates.io API token
-(`cargo login`), because crates.io sets up trusted publishing only for crates that exist. Then,
-for each crate, add a trusted publisher on crates.io (repository osdlc/sitroom, workflow
-`release.yml`, environment `crates-io`), and create the `crates-io` environment in the repository
-settings with a required reviewer.
-
-After that a release is: bump the version, add its changelog section, merge, then push the tag
-(`git tag v0.9.0 && git push origin v0.9.0`). `.github/workflows/release.yml` builds the UI, runs
-the dry run, waits for approval of the `crates-io` environment and publishes with a short-lived
-token from crates.io. Run it by hand (Actions, release, Run workflow) for a dry run only.

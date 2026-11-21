@@ -43,13 +43,13 @@ and modules this build doesn't have. Install a missing package with `sitroom plu
 built-in modules' settings): opening a dashboard runs them, so read them first. Importing from a URL downloads with `curl`,
 and only `https://` URLs are accepted.
 
-To make one from the app, use **+ New** or **Save as…** next to the title (the web view and the
-desktop app). **Blank** starts with one empty screen and opens the screen editor; **Copy of
-current** copies the file settings are saved to, comments included, and then changes go to the
-copy. Either way the dashboard opens at once. A blank dashboard still has the modules from
-`config.yaml` running, as `modules:` merge (see [Precedence](#precedence)); only the screens
-start empty. A copy keeps relative paths as written, and they then start in `dashboards/`, so
-use `~/` or absolute paths in a file you copy.
+To make one from the app, use **+ New** or **Save as…** next to the title (the web view, the
+desktop app and the GPUI app). **Blank** starts with one empty screen and opens the screen
+editor; **Copy of current** copies the file settings are saved to, comments included, and then
+changes go to the copy. Either way the dashboard opens at once. A blank dashboard still has the
+modules from `config.yaml` running, as `modules:` merge (see [Precedence](#precedence)); only
+the screens start empty. A copy keeps relative paths as written, and they then start in
+`dashboards/`, so use `~/` or absolute paths in a file you copy.
 
 The web view has a switcher next to the title when there is at least one saved dashboard.
 Switching starts and stops only the modules that differ. The choice lasts while the server
@@ -119,7 +119,7 @@ How each key merges:
 | `modules:` | Per module ID. A module's settings come whole from the last file that names it. Modules from earlier files stay. |
 | `screens:` | A saved dashboard's screens **replace** the machine file's. A project file's screens are **added in front** (so the repository's screen shows first); a project screen with the same name as an earlier one replaces it. |
 | `color_themes:` | Per theme name, like `modules:`. |
-| `theme:`, `color_theme:`, `rotate:`, `description:` | The last file that sets it wins. |
+| `theme:`, `color_theme:`, `rotate:`, `tui:`, `native:`, `description:` | The last file that sets it wins. |
 
 Each file must be valid on its own. An error names the file it is in.
 

@@ -11,6 +11,8 @@ released on their own; they record the stages the project was built in.
   every bundle, the runtime and the cswap plugin (was `sitroom-modules-*`, `sitroom-runtime`,
   `sitroom-cswap`), each bundle a folder in `crates/modules/src/`. The `bundle-*` and `module-*`
   features are unchanged; cswap is now `module-cswap`, in the agents bundle.
+- **`sit`, the short command.** `cargo install` now puts `sit` beside `sitroom`; it runs
+  `sitroom` with the same arguments, so `sit serve` is `sitroom serve`.
 - **Clock face and display widgets:** `clock_face` is an analog dial (hour, minute and optional
   second hand) and `display` is one value as large as the tile allows, with a block font in the
   TUI. Any module can use them; the clock uses both in its new styles.
@@ -22,6 +24,10 @@ released on their own; they record the stages the project was built in.
   desktop app) save a new dashboard file and open it: **Blank** starts with one empty screen in
   the screen editor, **Copy of current** copies the file in use, comments included. A name in use
   is refused.
+- **Native app (experimental).** `sitroom-native` (`apps/native`) draws the dashboard with
+  GPUI, with no web server or webview, as a window, `--ambient`, wallpaper or screensaver. New
+  `native:` settings: `fps` (default 30) caps how often it draws, and `animations: false` shows
+  new values without motion. See `docs/desktop.md` and `docs/decisions/0001-native-renderer.md`.
 - **`series` takes negative values and a fitted scale.** The chart no longer clamps to 0: the
   bottom is `y_min`, else 0 or the lowest value, and a faint zero line shows when the scale spans
   zero (`area` fills to it, `bars` grow from it). `fit: true` scales to the data's own range, for

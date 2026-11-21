@@ -895,6 +895,8 @@ mod tests {
             }],
             rotate: None,
             tui_fps: sitroom_contract::DEFAULT_TUI_FPS,
+            native_fps: sitroom_contract::DEFAULT_NATIVE_FPS,
+            native_animations: true,
             config: Default::default(),
         };
         let view = View {
@@ -1509,6 +1511,8 @@ mod tests_support {
                 modules: vec![],
                 rotate: None,
                 tui_fps: sitroom_contract::DEFAULT_TUI_FPS,
+                native_fps: sitroom_contract::DEFAULT_NATIVE_FPS,
+                native_animations: true,
                 config: Default::default(),
             },
             palette: Palette::for_theme(Theme::Dark, false),
@@ -1708,6 +1712,8 @@ mod tests_support {
             }],
             rotate: None,
             tui_fps: sitroom_contract::DEFAULT_TUI_FPS,
+            native_fps: sitroom_contract::DEFAULT_NATIVE_FPS,
+            native_animations: true,
             config: Default::default(),
         };
         let view = View {
