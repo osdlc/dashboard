@@ -149,11 +149,14 @@ jobs:
       # Every crate as crates.io would get it, built from its packed copy:
       # a file one embeds from outside its folder fails here. The UI goes in
       # sitroom-web's ui/, as for a release; it is git-ignored, so cargo
-      # counts it as uncommitted (--allow-dirty).
+      # counts it as uncommitted (--allow-dirty). `cargo package` also packs
+      # crates with publish = false, so those are left out by name (an
+      # --exclude for a crate not in the workspace only warns).
       - name: Package the crates
         run: |
           cp -r web/dist crates/web/ui
-          cargo package --workspace --locked --allow-dirty
+          cargo package --workspace --locked --allow-dirty \
+            --exclude sitroom-desktop --exclude sitroom-native --exclude sitroom-bench
 
       # `gen-types.mjs --check` fails on a stale SDK file itself and writes
       # nothing, so only web/src (and Cargo.lock, which these cargo runs could
