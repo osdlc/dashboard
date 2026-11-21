@@ -18,7 +18,8 @@
 # in Cargo.toml there is no MSRV or minimal-versions job.
 #
 # Plain `cargo test` covers the workspace's default members, which leave out
-# the Tauri desktop app (it needs WebKitGTK on Linux; see docs/desktop.md).
+# the Tauri desktop app (it needs WebKitGTK on Linux; see docs/desktop.md) and
+# the GPUI app (the `native` job).
 #
 # Every action is pinned to a commit SHA; the comment names its release.
 name: rust
@@ -69,6 +70,31 @@ jobs:
       # The web job builds the Vue app; the other jobs embed a placeholder page.
       env: |
         SITROOM_SKIP_UI_BUILD=1
+
+  # The GPUI app (apps/native), on macOS only for now: on Linux it needs
+  # fontconfig, X11 and Wayland headers, which no job installs yet.
+  native:
+    runs-on: macos-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: osdlc/osdlc/.github/actions/rust-toolchain@8a0f1f09e91423444b6d317a4abac05edc74c5ae # as `core`
+        with:
+          workspace: .
+          components: clippy
+
+      - uses: osdlc/osdlc/.github/actions/rust-build-cache@8a0f1f09e91423444b6d317a4abac05edc74c5ae # as `core`
+        with:
+          workspace: .
+
+      - name: Clippy
+        run: cargo clippy -p sitroom-native --all-targets --locked -- -D warnings
+
+      - name: Test
+        run: cargo test -p sitroom-native --locked
 
   # Runs scripts/check-features.sh --bundles (see its header). The per-module
   # builds (the script without --bundles) are left to a local run.
@@ -166,7 +192,7 @@ jobs:
   # run superseded by a newer push is cancelled, and should not report a
   # failure; a job that fails or times out still fails it.
   rust:
-    needs: [core, features, web]
+    needs: [core, native, features, web]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     timeout-minutes: 2

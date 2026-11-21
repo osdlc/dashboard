@@ -476,6 +476,8 @@ mod tests {
             modules: vec![],
             rotate: None,
             tui_fps: sitroom_contract::DEFAULT_TUI_FPS,
+            native_fps: sitroom_contract::DEFAULT_NATIVE_FPS,
+            native_animations: true,
             config: ConfigInfo::default(),
         });
         let (actions, _) = mpsc::unbounded_channel();

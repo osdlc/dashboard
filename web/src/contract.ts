@@ -855,6 +855,15 @@ export interface UiSettings {
    */
   modules: ModuleSummary[];
   /**
+   * False: the native app shows new values without motion.
+   */
+  native_animations?: boolean;
+  /**
+   * The most frames a second the native app draws. The web view does not
+   * use it.
+   */
+  native_fps?: number;
+  /**
    * Automatic screen rotation, if configured.
    */
   rotate?: RotateSettings | null;
