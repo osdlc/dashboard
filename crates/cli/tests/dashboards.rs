@@ -54,6 +54,7 @@ fn text(out: &Output) -> String {
 }
 
 #[test]
+#[cfg(feature = "module-cswap")] // its screens use the cswap tile
 fn import_list_export_and_layers() {
     let t = Temp::new();
     let config = t.write(
