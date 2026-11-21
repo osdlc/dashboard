@@ -14,10 +14,10 @@ tauri-build = { version = "2.7.4", features = [] }
 
 [dependencies]
 anyhow = "1.0.104"
-sitroom-core = { version = "0.8.0", path = "../../crates/core" }
+sitroom-core = { version = "0.9.0", path = "../../crates/core" }
 # The runtime, and with its default features every built-in module.
-sitroom-modules = { version = "0.8.0", path = "../../crates/modules" }
-sitroom-web = { version = "0.8.0", path = "../../crates/web" }
+sitroom-modules = { version = "0.9.0", path = "../../crates/modules" }
+sitroom-web = { version = "0.9.0", path = "../../crates/web" }
 tauri = { version = "2.12.5", features = ["tray-icon"] }
 tokio = { version = "1.54.1", features = ["sync"] }
 tracing = "0.1.44"

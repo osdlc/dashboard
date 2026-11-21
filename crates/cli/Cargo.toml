@@ -150,11 +150,11 @@ module-sdlc = ["sitroom-modules/module-sdlc"]
 [dependencies]
 anyhow = "1.0.104"
 clap = { version = "4.6.7", features = ["derive"] }
-sitroom-core = { version = "0.8.0", path = "../core" }
-sitroom-contract = { version = "0.8.0", path = "../contract" }
-sitroom-modules = { version = "0.8.0", path = "../modules", default-features = false }
-sitroom-tui = { version = "0.8.0", path = "../tui" }
-sitroom-web = { version = "0.8.0", path = "../web" }
+sitroom-core = { version = "0.9.0", path = "../core" }
+sitroom-contract = { version = "0.9.0", path = "../contract" }
+sitroom-modules = { version = "0.9.0", path = "../modules", default-features = false }
+sitroom-tui = { version = "0.9.0", path = "../tui" }
+sitroom-web = { version = "0.9.0", path = "../web" }
 etag-write = "0.2.4"
 flate2 = "1.1.10"
 path-guard = "0.3.2"

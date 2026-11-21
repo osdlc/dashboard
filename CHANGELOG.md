@@ -4,8 +4,10 @@ Sitroom is pre-1.0: the config format, the module contract and the CLI can still
 between minor versions. 0.4.0 is the first public release. The earlier versions were not
 released on their own; they record the stages the project was built in.
 
-## Unreleased
+## 0.9.0
 
+- **On crates.io.** `cargo install sitroom` installs `sitroom` and `sit`. The six crates are
+  published together at the same version (docs/releasing.md).
 - **Six crates instead of nineteen.** `sitroom-core` is the config, the host and the CLI
   conventions (was `sitroom-config`, `sitroom-host`, `sitroom-cli-kit`). `sitroom-modules` holds
   every bundle, the runtime and the cswap plugin (was `sitroom-modules-*`, `sitroom-runtime`,
