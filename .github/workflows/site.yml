@@ -37,6 +37,18 @@ jobs:
           cache: pnpm
           cache-dependency-path: site/pnpm-lock.yaml
 
+      # The install script the site serves: it parses in a strict POSIX
+      # shell (dash), and installs the latest release and runs it. GH_TOKEN
+      # isn't passed; the one API call it makes is unauthenticated.
+      - name: install.sh works
+        run: |
+          set -eu
+          shellcheck public/install.sh
+          dash -n public/install.sh
+          dash public/install.sh --to "$RUNNER_TEMP/bin"
+          "$RUNNER_TEMP/bin/sitroom" --version
+          "$RUNNER_TEMP/bin/sit" --version
+
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
       - run: pnpm run build

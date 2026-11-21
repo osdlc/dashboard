@@ -3,6 +3,9 @@
 # - crates.io: every crate (`publish`), so `cargo install sitroom` works.
 # - GitHub Release: `sitroom` and `sit` built for macOS and Linux, arm64 and
 #   x86-64, one .tar.gz per platform, with SHA256SUMS (`binaries`, `github`).
+# - install.sh (site/public/install.sh, also served by the site) goes on the
+#   release too: `curl -fsSL https://osdlc.github.io/sitroom/install.sh | sh`
+#   picks the archive for the machine and checks it against SHA256SUMS.
 # - Homebrew: Formula/sitroom.rb in osdlc/homebrew-tap, pointing at those
 #   archives (`homebrew`), so `brew install osdlc/tap/sitroom` works.
 #
@@ -204,7 +207,7 @@ jobs:
           # The changelog's section for this version, without its heading.
           awk -v h="## $version" '$0 == h {on = 1; next} on && /^## / {exit} on' CHANGELOG.md > notes.md
           gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" \
-            --title "sitroom $version" --notes-file notes.md dist/*.tar.gz dist/SHA256SUMS
+            --title "sitroom $version" --notes-file notes.md dist/*.tar.gz dist/SHA256SUMS site/public/install.sh
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

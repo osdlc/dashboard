@@ -11,8 +11,9 @@ in another language, use the `plugin` skill.
 ## Install
 
 ```sh
-brew tap osdlc/tap && brew trust osdlc/tap   # once
-brew install osdlc/tap/sitroom               # Homebrew, macOS and Linux
+curl -fsSL https://osdlc.github.io/sitroom/install.sh | sh   # macOS and Linux: into ~/.local/bin
+brew tap osdlc/tap && brew trust osdlc/tap   # or Homebrew (tap once)
+brew install osdlc/tap/sitroom
 cargo install sitroom                        # or from crates.io (needs only Rust)
 ```
 

@@ -16,8 +16,7 @@ const blob = (path: string) => `${repo}/blob/main/${path}`
 
 const theme = 'vitesse-dark'
 
-const quickstart = `brew tap osdlc/tap && brew trust osdlc/tap
-brew install osdlc/tap/sitroom   # or: cargo install sitroom
+const quickstart = `curl -fsSL https://osdlc.github.io/sitroom/install.sh | sh
 sitroom tui     # terminal (sit tui for short)
 sitroom serve   # browser`
 
@@ -113,7 +112,8 @@ const modules = [
             <Code code={quickstart} lang="sh" theme={theme} class="code" />
           </div>
           <p class="hint rise d4">
-            Or download a prebuilt binary for macOS or Linux from the{' '}
+            Or <code>brew install osdlc/tap/sitroom</code> (after <code>brew tap osdlc/tap</code>),{' '}
+            <code>cargo install sitroom</code>, a binary from the{' '}
             <a href={`${repo}/releases/latest`}>GitHub Release</a>, or build from source. No config yet? It starts with a built-in demo of eight screens. Press <kbd>1</kbd>–<kbd>8</kbd> to switch,
             <kbd>?</kbd> for help. Then follow the <a href={`${base}tutorial/`}>tutorial</a> to build your own.
           </p>
@@ -407,7 +407,8 @@ const modules = [
         <h2>Early, and built for one person on one machine.</h2>
         <p class="lede">
           sitroom is at v0.9. It is used daily, but the config format and the plugin contract may still change.
-          Install it with Homebrew, <code>cargo install sitroom</code> or a prebuilt binary from the GitHub Release.
+          Install it with the install script, Homebrew, <code>cargo install sitroom</code> or a prebuilt binary from the
+          GitHub Release.
         </p>
         <div class="status">
           <div>
@@ -418,7 +419,7 @@ const modules = [
               <li>Several screens, rotation, a settings screen and a help screen</li>
               <li>Screen editor in the web view, saved to the config file</li>
               <li>Live config reload, JSON Schema for the config</li>
-              <li>Homebrew, crates.io and prebuilt binaries for macOS and Linux</li>
+              <li>An install script, Homebrew, crates.io and prebuilt binaries for macOS and Linux</li>
             </ul>
           </div>
           <div>

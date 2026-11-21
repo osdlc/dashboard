@@ -47,8 +47,10 @@ git tag v0.9.0 && git push origin v0.9.0
 2. `binaries`, at the same time: builds `sitroom` and `sit` (profile `dist`) for
    `aarch64-apple-darwin`, `x86_64-apple-darwin`, `x86_64-unknown-linux-gnu` and
    `aarch64-unknown-linux-gnu`, one `sitroom-<version>-<target>.tar.gz` each.
-3. `github`, once both are done: the GitHub Release of the tag, with the archives, `SHA256SUMS`
-   and the changelog's section as the notes.
+3. `github`, once both are done: the GitHub Release of the tag, with the archives, `SHA256SUMS`,
+   `install.sh` and the changelog's section as the notes. The site serves the same
+   `site/public/install.sh` at <https://osdlc.github.io/sitroom/install.sh>; it installs the latest
+   release unless given `--version`, so it needs no change for a new one.
 4. `homebrew`: writes `Formula/sitroom.rb` in osdlc/homebrew-tap for those archives and pushes
    it as the osdlc-release GitHub App, the way osdlc/skillwright updates its formula.
 
