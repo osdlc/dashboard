@@ -1,10 +1,10 @@
-//! `dashboard plugin install | list | update | remove | pack`: install plugin
+//! `sitroom plugin install | list | update | remove | pack`: install plugin
 //! packages from a marketplace index, a `.tar.gz`, a URL or a folder. See
 //! docs/marketplace.md.
 //!
 //! Install checks the sha256, shows what the plugin runs and needs, asks,
 //! then unpacks into a staging folder and moves it into
-//! `<data home>/dashboard/plugins/<id>/`. `installed.json` there records
+//! `<data home>/sitroom/plugins/<id>/`. `installed.json` there records
 //! where each one came from.
 
 use std::cmp::Ordering;
@@ -12,8 +12,8 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result, bail};
-use dashboard_config::packages::{Packages, data_dir, load_package, parse_package, valid_id};
-use dashboard_contract::{Index, IndexEntry, PACKAGE_FILE, Package};
+use sitroom_config::packages::{Packages, data_dir, load_package, parse_package, valid_id};
+use sitroom_contract::{Index, IndexEntry, PACKAGE_FILE, Package};
 
 mod archive;
 mod source;
@@ -21,7 +21,7 @@ mod source;
 use source::{Location, Origin, Record, load_index};
 
 /// Set instead of `--index`.
-const INDEX_ENV: &str = "DASHBOARD_PLUGIN_INDEX";
+const INDEX_ENV: &str = "SITROOM_PLUGIN_INDEX";
 
 pub struct Options {
     /// The index: a path or URL to an `index.json`.
@@ -31,7 +31,7 @@ pub struct Options {
 }
 
 impl Options {
-    /// `--index`, or else $DASHBOARD_PLUGIN_INDEX.
+    /// `--index`, or else $SITROOM_PLUGIN_INDEX.
     fn index(&self) -> Result<Option<Location>> {
         match self.flag_index()? {
             Some(at) => Ok(Some(at)),
@@ -54,7 +54,7 @@ struct Places {
     /// Installed packages, one folder each.
     plugins: PathBuf,
     /// Unpacked archives wait here until confirmed. Next to `plugins`, so
-    /// the final move is a rename, and outside it, so a running dashboard
+    /// the final move is a rename, and outside it, so a running sitroom
     /// never loads a half-unpacked package.
     staging: PathBuf,
 }
@@ -179,7 +179,7 @@ fn unpack_and_move(f: &Fetched, places: &Places, tmp: &Path, yes: bool) -> Resul
     archive::unpack(&f.bytes, &tmp.join("unpacked"))?;
     let root = archive::package_root(&tmp.join("unpacked"))?;
     let text = std::fs::read_to_string(root.join(PACKAGE_FILE))?;
-    let package = parse_package(&text).context("in the archive's dashboard-plugin.yaml")?;
+    let package = parse_package(&text).context("in the archive's sitroom-plugin.yaml")?;
     if let Some((at, entry)) = &f.index
         && (entry.id != package.id || entry.version != package.version)
     {
@@ -382,7 +382,7 @@ fn first_line(text: &str) -> String {
 
 /// Install newer versions of the packages named, or of every package
 /// installed from an index. Each uses the index it was installed from, or
-/// `--index`. $DASHBOARD_PLUGIN_INDEX is only used for a package named here
+/// `--index`. $SITROOM_PLUGIN_INDEX is only used for a package named here
 /// that was not installed from an index.
 pub async fn update(ids: &[String], o: &Options) -> Result<()> {
     let places = Places::new()?;
@@ -394,14 +394,14 @@ pub async fn update(ids: &[String], o: &Options) -> Result<()> {
         record.plugins.keys().cloned().collect()
     };
     if ids.is_empty() {
-        println!("nothing was installed with `dashboard plugin install`");
+        println!("nothing was installed with `sitroom plugin install`");
         return Ok(());
     }
     let mut indexes: Vec<(String, Index)> = vec![];
     let mut failed = vec![];
     for id in &ids {
         let Some(origin) = record.plugins.get(id) else {
-            println!("{id}: not installed with `dashboard plugin install`; skipped");
+            println!("{id}: not installed with `sitroom plugin install`; skipped");
             continue;
         };
         let at = match (o.flag_index(), &origin.index) {

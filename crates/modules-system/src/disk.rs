@@ -5,10 +5,10 @@ use std::path::Path;
 
 use anyhow::Result;
 use async_trait::async_trait;
-use dashboard_contract::{
+use sitroom_contract::{
     CatalogEntry, Manifest, SeriesData, Size, Status, ValueFormat, View, Widget, format_value,
 };
-use dashboard_host::{Module, now_ms};
+use sitroom_host::{Module, now_ms};
 use sysinfo::Disks;
 
 use super::{

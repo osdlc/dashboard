@@ -1,6 +1,6 @@
 [package]
-name = "dashboard-cswap"
-description = "Dashboard stdio plugin that shows Claude accounts from cswap"
+name = "sitroom-cswap"
+description = "Sitroom stdio plugin that shows Claude accounts from cswap"
 edition.workspace = true
 rust-version.workspace = true
 version.workspace = true
@@ -9,7 +9,7 @@ repository.workspace = true
 
 [dependencies]
 anyhow = "1.0.104"
-dashboard-contract = { version = "0.8.0", path = "../../crates/contract" }
+sitroom-contract = { version = "0.8.0", path = "../../crates/contract" }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.154"
 

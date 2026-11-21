@@ -1,13 +1,13 @@
 [package]
-name = "dashboard-modules-fun"
-description = "Dashboard modules for fun: the demo, clocks, Hacker News, feeds and public-API widgets"
+name = "sitroom-modules-fun"
+description = "Sitroom modules for fun: the demo, clocks, Hacker News, feeds and public-API widgets"
 edition.workspace = true
 rust-version.workspace = true
 version.workspace = true
 license.workspace = true
 repository.workspace = true
 
-# One feature per module, named after its id. dashboard-modules turns them on
+# One feature per module, named after its id. sitroom-modules turns them on
 # through its `bundle-fun` and `module-<id>` features.
 [features]
 default = [
@@ -24,27 +24,27 @@ default = [
 demo = []
 clock = ["dep:jiff"]
 # reqwest, to call the HN API; tokio, to fetch the stories at the same time.
-hackernews = ["dashboard-modules-common/http", "dep:tokio"]
+hackernews = ["sitroom-modules-common/http", "dep:tokio"]
 feedreader = [
-    "dashboard-modules-common/http",
+    "sitroom-modules-common/http",
     "dep:reqwest",
     "dep:roxmltree",
     "dep:tokio",
 ]
 # Reddit's JSON listing, and its Atom feed when Reddit refuses the JSON.
-subreddit = ["dashboard-modules-common/http", "dep:roxmltree"]
+subreddit = ["sitroom-modules-common/http", "dep:roxmltree"]
 # Public JSON APIs, no key: reqwest only.
-devto = ["dashboard-modules-common/http"]
-mempool = ["dashboard-modules-common/http"]
-crypto = ["dashboard-modules-common/http"]
-scores = ["dashboard-modules-common/http"]
+devto = ["sitroom-modules-common/http"]
+mempool = ["sitroom-modules-common/http"]
+crypto = ["sitroom-modules-common/http"]
+scores = ["sitroom-modules-common/http"]
 
 [dependencies]
 anyhow = "1.0.104"
 async-trait = "0.1.92"
-dashboard-contract = { version = "0.8.0", path = "../contract" }
-dashboard-host = { version = "0.8.0", path = "../host" }
-dashboard-modules-common = { version = "0.8.0", path = "../modules-common" }
+sitroom-contract = { version = "0.8.0", path = "../contract" }
+sitroom-host = { version = "0.8.0", path = "../host" }
+sitroom-modules-common = { version = "0.8.0", path = "../modules-common" }
 jiff = { version = "0.2.38", optional = true }
 reqwest = { version = "0.13.5", default-features = false, optional = true }
 roxmltree = { version = "0.21.1", optional = true }

@@ -8,10 +8,10 @@
 use std::path::PathBuf;
 use std::process::Command;
 
-use dashboard_contract::View;
-use dashboard_contract::check::{check_manifest, check_view};
-use dashboard_host::{Module, Plugin};
 use serde_json::json;
+use sitroom_contract::View;
+use sitroom_contract::check::{check_manifest, check_view};
+use sitroom_host::{Module, Plugin};
 
 fn repo(path: &str) -> PathBuf {
     [env!("CARGO_MANIFEST_DIR"), "../..", path].iter().collect()
@@ -44,7 +44,7 @@ fn plugins() -> Vec<(&'static str, Vec<String>)> {
     out
 }
 
-fn problems(found: Vec<dashboard_contract::check::Finding>) -> Vec<String> {
+fn problems(found: Vec<sitroom_contract::check::Finding>) -> Vec<String> {
     found
         .into_iter()
         .filter(|f| f.problem)
@@ -59,7 +59,7 @@ struct TempDir(PathBuf);
 impl TempDir {
     fn new(name: &str) -> Self {
         let dir = std::env::temp_dir().join(format!(
-            "dashboard-bench-textfile-{name}-{}",
+            "sitroom-bench-textfile-{name}-{}",
             std::process::id()
         ));
         std::fs::create_dir_all(&dir).unwrap();
@@ -145,12 +145,12 @@ fn sdk_copies_match_the_sdk() {
     // installed. Keep them in step with sdk/.
     for (copy, sdk) in [
         (
-            "plugins/ext/textfile-ts/dashboard-plugin.ts",
-            "sdk/typescript/dashboard-plugin.ts",
+            "plugins/ext/textfile-ts/sitroom-plugin.ts",
+            "sdk/typescript/sitroom-plugin.ts",
         ),
         (
-            "plugins/ext/textfile-py/dashboard_plugin.py",
-            "sdk/python/dashboard_plugin.py",
+            "plugins/ext/textfile-py/sitroom_plugin.py",
+            "sdk/python/sitroom_plugin.py",
         ),
     ] {
         let a = std::fs::read_to_string(repo(copy)).unwrap();

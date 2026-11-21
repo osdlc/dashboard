@@ -1,6 +1,6 @@
 [package]
-name = "dashboard-contract"
-description = "Types shared by the dashboard host, its modules, stdio plugins and renderers"
+name = "sitroom-contract"
+description = "Types shared by sitroom host, its modules, stdio plugins and renderers"
 edition.workspace = true
 rust-version.workspace = true
 version.workspace = true

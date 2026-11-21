@@ -14,15 +14,15 @@
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::{
-    Action, CatalogEntry, ListItem, Manifest, Requirements, Size, Status, View, Widget,
-};
-use dashboard_host::Module;
-use dashboard_modules_common::http::{check, client};
-use dashboard_modules_common::manifest;
 use schemars::JsonSchema;
 use serde::Deserialize;
 use serde_json::Value;
+use sitroom_contract::{
+    Action, CatalogEntry, ListItem, Manifest, Requirements, Size, Status, View, Widget,
+};
+use sitroom_host::Module;
+use sitroom_modules_common::http::{check, client};
+use sitroom_modules_common::manifest;
 
 use crate::{ago, plural};
 
@@ -121,13 +121,13 @@ impl Module for HackerNews {
             Some(path) => read_sample(path)?,
             None => fetch(self.config.feed, self.config.limit).await?,
         };
-        let now = dashboard_host::now_ms() / 1000;
+        let now = sitroom_host::now_ms() / 1000;
         Ok(view(&items, self.config.feed, self.config.limit, now))
     }
 }
 
 fn read_sample(path: &str) -> Result<Vec<Value>> {
-    let path = dashboard_modules_common::expand_home(path);
+    let path = sitroom_modules_common::expand_home(path);
     let text =
         std::fs::read_to_string(&path).with_context(|| format!("reading {}", path.display()))?;
     match serde_json::from_str(&text) {
@@ -287,7 +287,7 @@ fn demo_items(now: i64) -> Vec<Value> {
 
 /// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
-    let now = dashboard_host::now_ms() / 1000;
+    let now = sitroom_host::now_ms() / 1000;
     CatalogEntry {
         description: "Top stories from Hacker News (or new, best, Ask HN, Show HN, jobs), with \
                       points, comments and age. Click a story to open it. Public API, no key."

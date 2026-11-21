@@ -1,5 +1,5 @@
 // A widget type's fields, from the view's JSON Schema (src/data/view-schema.json,
-// `dashboard schema view`), for the building block pages. Also the widget types
+// `sitroom schema view`), for the building block pages. Also the widget types
 // a view uses. Kept apart from blocks.ts, which loads the data, so tests can run
 // it without the site (`pnpm test`).
 

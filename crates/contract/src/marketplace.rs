@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use crate::catalog::{CatalogEntry, EntryKind, MARKETPLACE, Package, Requirements};
 use crate::{Size, View};
 
-/// The index format this dashboard reads and writes.
+/// The index format this version of sitroom reads and writes.
 pub const INDEX_FORMAT: u32 = 1;
 
 /// `index.json`: the packages a marketplace offers.
@@ -41,7 +41,7 @@ impl Index {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 pub struct IndexEntry {
-    /// The package's ID, as in its `dashboard-plugin.yaml`.
+    /// The package's ID, as in its `sitroom-plugin.yaml`.
     pub id: String,
     /// The package's version.
     pub version: String,
@@ -64,7 +64,7 @@ pub struct IndexEntry {
     #[serde(default)]
     pub requirements: Requirements,
     /// The rest is what the web editor's catalog shows before the package is
-    /// installed, copied from its `dashboard-plugin.yaml`.
+    /// installed, copied from its `sitroom-plugin.yaml`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
     /// The size it suggests for its tile.

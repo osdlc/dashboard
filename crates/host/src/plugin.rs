@@ -9,10 +9,10 @@ use std::time::Duration;
 
 use anyhow::{Context, Result, anyhow, bail};
 use async_trait::async_trait;
-use dashboard_contract::rpc::{
+use sitroom_contract::rpc::{
     HostInfo, InitializeParams, InitializeResult, LogLevel, LogParams, Message, Request, method,
 };
-use dashboard_contract::{CONTRACT_VERSION, Manifest, Refresh, View};
+use sitroom_contract::{CONTRACT_VERSION, Manifest, Refresh, View};
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader, Lines};
 use tokio::process::{Child, ChildStdin, ChildStdout, Command};
 
@@ -99,7 +99,7 @@ impl Plugin {
         let params = InitializeParams {
             contract_version: CONTRACT_VERSION.into(),
             host: HostInfo {
-                name: "dashboard".into(),
+                name: "sitroom".into(),
                 version: env!("CARGO_PKG_VERSION").into(),
             },
             config: self.config.clone(),

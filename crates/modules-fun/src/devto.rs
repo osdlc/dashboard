@@ -10,15 +10,15 @@
 
 use anyhow::{Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::{
-    Action, CatalogEntry, ListItem, Manifest, Requirements, Size, Status, View, Widget,
-};
-use dashboard_host::Module;
-use dashboard_modules_common::http::{check, client};
-use dashboard_modules_common::{manifest, time::parse_time};
 use schemars::JsonSchema;
 use serde::Deserialize;
 use serde_json::Value;
+use sitroom_contract::{
+    Action, CatalogEntry, ListItem, Manifest, Requirements, Size, Status, View, Widget,
+};
+use sitroom_host::Module;
+use sitroom_modules_common::http::{check, client};
+use sitroom_modules_common::{manifest, time::parse_time};
 
 use crate::{ago, plural};
 
@@ -112,7 +112,7 @@ impl Module for DevTo {
             Some(path) => crate::read_sample(path)?,
             None => fetch(&self.config).await?,
         };
-        let now = dashboard_host::now_ms() / 1000;
+        let now = sitroom_host::now_ms() / 1000;
         Ok(view(&articles, &self.config, now))
     }
 }

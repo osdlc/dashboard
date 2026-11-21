@@ -2,7 +2,7 @@
 
 from typing import Any, Dict, List, Optional
 
-from dashboard_plugin import UptimeCheck, View, upstream_error
+from sitroom_plugin import UptimeCheck, View, upstream_error
 from token_api import is_int, plural
 
 # The time the sample ages are measured from (2026-10-27T02:00:00Z), so `--sample` shows

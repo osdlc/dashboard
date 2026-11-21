@@ -1,6 +1,6 @@
 [package]
-name = "dashboard-cli-kit"
-description = "Command-line conventions from the osdlc CLI standard: exit codes, the error line, --json documents and the web view's boot token. Kept free of dashboard types so it can move into a shared cli-kit crate."
+name = "sitroom-cli-kit"
+description = "Command-line conventions from the osdlc CLI standard: exit codes, the error line, --json documents and the web view's boot token. Kept free of sitroom types so it can move into a shared cli-kit crate."
 edition.workspace = true
 rust-version.workspace = true
 version.workspace = true

@@ -3,7 +3,7 @@
   "title": "Series: line",
   "group": "primitives",
   "default_size": "medium",
-  "description": "Values over time as lines. Points are `[unix milliseconds, value]`. Several series get the theme's series colors in order, or a `tone` each. Set `id` and the dashboard keeps the history, so a module can send one new point per update.",
+  "description": "Values over time as lines. Points are `[unix milliseconds, value]`. Several series get the theme's series colors in order, or a `tone` each. Set `id` and sitroom keeps the history, so a module can send one new point per update.",
   "view": {
     "status": "ok",
     "summary": "p50 42 ms · p99 118 ms",

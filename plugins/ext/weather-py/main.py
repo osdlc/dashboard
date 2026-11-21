@@ -5,7 +5,7 @@ a latitude and longitude.
 The Python copy of the built-in `weather` module (crates/modules-personal/src/weather.rs), for
 the native-vs-plugin benchmark. It builds the same view from the same Open-Meteo reply.
 
-    dashboard plugin-check -- python3 plugins/ext/weather-py/main.py
+    sitroom plugin-check -- python3 plugins/ext/weather-py/main.py
 
 A `plugin:` runs in the config file's folder, so this path is for a config in the repository
 root; examples/bench.yaml uses `../plugins/ext/weather-py/main.py`.
@@ -28,7 +28,7 @@ import urllib.request
 from typing import Any, Dict, List, Optional
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from dashboard_plugin import Row, StatWidget, View, config_error, serve, upstream_error, with_defaults  # noqa: E402
+from sitroom_plugin import Row, StatWidget, View, config_error, serve, upstream_error, with_defaults  # noqa: E402
 
 # How long one request may take, in seconds.
 TIMEOUT = 20
@@ -148,7 +148,7 @@ def check() -> None:
 def get(url: str, query: Dict[str, str]) -> Any:
     """GETs `url` and returns the JSON reply. Open-Meteo explains a bad request in a `reason`
     field."""
-    req = urllib.request.Request(f"{url}?{urllib.parse.urlencode(query)}", headers={"User-Agent": "dashboard"})
+    req = urllib.request.Request(f"{url}?{urllib.parse.urlencode(query)}", headers={"User-Agent": "sitroom"})
     try:
         with urllib.request.urlopen(req, timeout=TIMEOUT) as res:
             body = res.read()

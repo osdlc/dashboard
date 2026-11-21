@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
   <key>CFBundleExecutable</key>
-  <string>DashboardSaver</string>
+  <string>SitroomSaver</string>
   <key>CFBundleIdentifier</key>
-  <string>dev.dashboard.saver</string>
+  <string>dev.sitroom.saver</string>
   <key>CFBundleName</key>
-  <string>Dashboard</string>
+  <string>Sitroom</string>
   <key>CFBundlePackageType</key>
   <string>BNDL</string>
   <key>CFBundleShortVersionString</key>
@@ -15,6 +15,6 @@
   <key>CFBundleVersion</key>
   <string>1</string>
   <key>NSPrincipalClass</key>
-  <string>DashboardSaverView</string>
+  <string>SitroomSaverView</string>
 </dict>
 </plist>

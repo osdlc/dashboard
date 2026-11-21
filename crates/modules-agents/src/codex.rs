@@ -11,21 +11,21 @@ use std::time::Duration;
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::{
-    Bar, CatalogEntry, Manifest, Requirements, Size, Status, ValueFormat, View, Widget,
-};
-use dashboard_host::Module;
 use schemars::JsonSchema;
 use serde::Deserialize;
 use serde::de::DeserializeOwned;
 use serde_json::{Value, json};
+use sitroom_contract::{
+    Bar, CatalogEntry, Manifest, Requirements, Size, Status, ValueFormat, View, Widget,
+};
+use sitroom_host::Module;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::process::Command;
 
 use super::{Window, count, day_label, now_secs, worst};
-use dashboard_modules_common::expand_home;
-use dashboard_modules_common::manifest;
-use dashboard_modules_common::time::{ago, demo_time, parse_time};
+use sitroom_modules_common::expand_home;
+use sitroom_modules_common::manifest;
+use sitroom_modules_common::time::{ago, demo_time, parse_time};
 
 /// Session files looked at, newest first, before giving up.
 const MAX_FILES: usize = 30;
@@ -113,19 +113,19 @@ impl Module for Codex {
 
 async fn live() -> Result<Snapshot> {
     // On Windows npm installs `codex.cmd`, which needs the PATHEXT lookup.
-    let argv = dashboard_host::process::resolve_argv(&["codex".into(), "app-server".into()], None);
+    let argv = sitroom_host::process::resolve_argv(&["codex".into(), "app-server".into()], None);
     let mut cmd = Command::new(&argv[0]);
     cmd.args(&argv[1..])
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::null())
         .kill_on_drop(true);
-    dashboard_host::process::own_group(&mut cmd);
+    sitroom_host::process::own_group(&mut cmd);
     let mut child = cmd
         .spawn()
         .context("running codex (is the Codex CLI installed?)")?;
     // Killing a wrapper (`npx`, a `.cmd` shim) alone would leave its `node` running.
-    let _tree = dashboard_host::process::KillTree::new(&child);
+    let _tree = sitroom_host::process::KillTree::new(&child);
     let mut rpc = Rpc {
         stdin: child.stdin.take().context("codex stdin")?,
         stdout: BufReader::new(child.stdout.take().context("codex stdout")?).lines(),
@@ -134,7 +134,7 @@ async fn live() -> Result<Snapshot> {
     let work = async {
         rpc.call::<Value>(
             "initialize",
-            json!({ "clientInfo": { "name": "dashboard", "title": null, "version": env!("CARGO_PKG_VERSION") }, "capabilities": null }),
+            json!({ "clientInfo": { "name": "sitroom", "title": null, "version": env!("CARGO_PKG_VERSION") }, "capabilities": null }),
         )
         .await?;
         rpc.notify("initialized").await?;

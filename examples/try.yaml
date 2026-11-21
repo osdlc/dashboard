@@ -1,9 +1,9 @@
 # Try-out config: one or more screens for each feature merged so far. From the
 # repository root:
 #
-#   cargo run -p dashboard -- serve --config examples/try.yaml   # web view
-#   cargo run -p dashboard -- tui   --config examples/try.yaml   # terminal
-#   cargo run -p dashboard -- --config examples/try.yaml config  # check the file
+#   cargo run -p sitroom -- serve --config examples/try.yaml   # web view
+#   cargo run -p sitroom -- tui   --config examples/try.yaml   # terminal
+#   cargo run -p sitroom -- --config examples/try.yaml config  # check the file
 #
 # Switch screens with the number keys or [ and ].
 #
@@ -22,7 +22,7 @@
 # examples/plugins so this file finds them by ID. They are all `demo: true`, and
 # none has been run against the real service yet ("untested live"). To run one
 # for real, install the package (copy its folder to
-# ~/.local/share/dashboard/plugins/), drop `demo: true`, fill in `config:` and
+# ~/.local/share/sitroom/plugins/), drop `demo: true`, fill in `config:` and
 # set the token variable named next to it.
 #
 # The personal screens read the sample files in crates/modules-personal/testdata;
@@ -35,7 +35,7 @@
 #
 # Bundles: built-in modules come in bundles (system, dev, ops, fun, agents,
 # personal) that are Cargo features of the binary. All are on by default. A smaller build, e.g.
-#   cargo run -p dashboard --no-default-features --features bundle-system -- widgets
+#   cargo run -p sitroom --no-default-features --features bundle-system -- widgets
 # lists only what it has; a config naming a left-out module reports it as an
 # error on its tile. See docs/modules.md.
 #
@@ -44,7 +44,7 @@
 # Enter opens its link, Esc steps back out. `?` lists every key.
 #
 # Signing in: `serve` opens a one-time `?boot=` link. For another tab, or when
-# that link has expired, run `cargo run -p dashboard -- open`.
+# that link has expired, run `cargo run -p sitroom -- open`.
 #
 # Adding widgets: in the web view press `e` for the screen editor. "Add
 # component" searches the catalog (built-ins, installed packages and the
@@ -53,23 +53,23 @@
 #
 # Marketplace: build the sample index from plugins/ext, then list it:
 #   scripts/build-marketplace.sh
-#   cargo run -p dashboard -- plugin list --index marketplace/index.json
+#   cargo run -p sitroom -- plugin list --index marketplace/index.json
 # Packages it offers then show (not installed) in the editor's catalog.
 # `plugin install <id> --index marketplace/index.json` installs one into your
-# data folder (~/.local/share/dashboard/plugins); docs/marketplace.md has more.
+# data folder (~/.local/share/sitroom/plugins); docs/marketplace.md has more.
 #
 # Saved dashboards: examples/try-focus.yaml is a dashboard laid over this file
 # (its screens replace these). Save it and show it with:
-#   cargo run -p dashboard -- import examples/try-focus.yaml
-#   cargo run -p dashboard -- serve --config examples/try.yaml --dashboard try-focus
-# `import` saves it in ~/.config/dashboard/dashboards; set XDG_CONFIG_HOME to
+#   cargo run -p sitroom -- import examples/try-focus.yaml
+#   cargo run -p sitroom -- serve --config examples/try.yaml --dashboard try-focus
+# `import` saves it in ~/.config/sitroom/dashboards; set XDG_CONFIG_HOME to
 # keep it somewhere else. The web view has a switcher next to the title.
-# docs/dashboards.md explains the layers, including a project .dashboard.yaml.
+# docs/dashboards.md explains the layers, including a project .sitroom.yaml.
 #
 # Ambient mode and the desktop app: open the web page with `?mode=ambient` for
 # large type and rotating screens with nothing to click. The desktop app shows
 # the same page in a window, as the wallpaper or as a screensaver:
-#   cargo run -p dashboard-desktop -- --config examples/try.yaml
+#   cargo run -p sitroom-desktop -- --config examples/try.yaml
 # (docs/desktop.md lists --wallpaper, --screensaver and --ambient).
 
 theme: auto
@@ -321,7 +321,7 @@ modules:
     config: { roots: [../../..], depth: 1 }
   ci:
     package: gh-actions
-    config: { repos: [osdlc/dashboard, osdlc/osdlc], limit: 4 }
+    config: { repos: [osdlc/sitroom, osdlc/osdlc], limit: 4 }
   latency:
     package: latency
     refresh: 2s

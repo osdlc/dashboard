@@ -229,7 +229,7 @@ pub enum Widget {
         color: ColorScale,
         /// Draw the first series above the axis and the second below it,
         /// e.g. network download and upload. Negative values count as 0 here
-        /// (`dashboard check` flags them).
+        /// (`sitroom check` flags them).
         #[serde(default)]
         mirrored: bool,
         /// How values are written: plain, bytes or count.
@@ -356,7 +356,7 @@ pub enum Widget {
         /// The checks, one row each.
         checks: Vec<UptimeCheck>,
     },
-    /// A picture from a file on the machine the dashboard runs on. The terminal
+    /// A picture from a file on the machine sitroom runs on. The terminal
     /// draws it with the best graphics it supports (Kitty, iTerm2 or Sixel),
     /// or with colored half blocks. It is scaled to fit and keeps its shape.
     Image {
@@ -720,7 +720,7 @@ pub struct TileUpdate {
     pub demo: bool,
 }
 
-/// Light or dark, for the whole dashboard.
+/// Light or dark, for the whole sitroom.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum Theme {
@@ -790,7 +790,7 @@ pub struct ConfigInfo {
     #[serde(default)]
     pub dashboards: Vec<DashboardSummary>,
     /// The files merged into the config, lowest precedence first, e.g.
-    /// "machine: ~/.config/dashboard/config.yaml".
+    /// "machine: ~/.config/sitroom/config.yaml".
     #[serde(default)]
     pub layers: Vec<String>,
     /// The version of the file at `path`, which changes are written to (a sha256 etag),
@@ -833,7 +833,7 @@ pub struct AddOutcome {
 /// A saved dashboard, for the switcher.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct DashboardSummary {
-    /// The dashboard's name.
+    /// Sitroom's name.
     pub name: String,
     /// A line about what it shows.
     #[serde(default)]
@@ -953,7 +953,7 @@ pub enum ClientMessage {
     CreateDashboard {
         /// The new dashboard's name, before it is made into a slug.
         name: String,
-        /// Copy the dashboard in use. `false`: one empty screen.
+        /// Copy sitroom in use. `false`: one empty screen.
         #[serde(default)]
         copy: bool,
     },

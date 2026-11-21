@@ -6,8 +6,6 @@ use std::collections::BTreeMap;
 use std::time::{Duration, Instant};
 
 use anyhow::Result;
-use dashboard_contract::{Action, ClientMessage, ScreenLayout, TileUpdate, UiSettings};
-use dashboard_host::Host;
 use ratatui::Frame;
 use ratatui::buffer::Buffer;
 use ratatui::crossterm::event::{
@@ -20,6 +18,8 @@ use ratatui::layout::{Constraint, Layout};
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Paragraph, Scrollbar, ScrollbarOrientation, ScrollbarState};
+use sitroom_contract::{Action, ClientMessage, ScreenLayout, TileUpdate, UiSettings};
+use sitroom_host::Host;
 use tokio::sync::broadcast::error::TryRecvError;
 use tokio::sync::{mpsc, watch};
 
@@ -115,7 +115,7 @@ enum Overlay {
     Settings,
 }
 
-/// Show the dashboard in the terminal until the user quits.
+/// Show sitroom in the terminal until the user quits.
 pub async fn run(
     host: Host,
     mut settings_rx: watch::Receiver<UiSettings>,
@@ -422,9 +422,9 @@ impl App {
         match action {
             Action::OpenUrl { url } => {
                 // Nowhere to show an error in the TUI; the link just doesn't open.
-                let _ = dashboard_host::browser::open_web_link(url);
+                let _ = sitroom_host::browser::open_web_link(url);
             }
-            // Not run yet; `dashboard plugin-check` says so.
+            // Not run yet; `sitroom plugin-check` says so.
             Action::RunCommand { .. } => {}
         }
     }
@@ -847,7 +847,7 @@ fn open_editor(path: &str) -> Result<()> {
     }
     argv.push(path.into());
     // On Windows, so `code` finds `code.cmd`.
-    let argv = dashboard_host::process::resolve_argv(&argv, None);
+    let argv = sitroom_host::process::resolve_argv(&argv, None);
     let program = &argv[0];
     std::process::Command::new(program)
         .args(&argv[1..])
@@ -859,12 +859,12 @@ fn open_editor(path: &str) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dashboard_contract::{
-        ModuleSummary, ScreenLayout, Size, Status, Theme, TilePlacement, View, Widget,
-    };
     use ratatui::Terminal;
     use ratatui::backend::TestBackend;
     use ratatui::buffer::Buffer;
+    use sitroom_contract::{
+        ModuleSummary, ScreenLayout, Size, Status, Theme, TilePlacement, View, Widget,
+    };
 
     fn app() -> App {
         let tile = |id: &str, size| TilePlacement {
@@ -894,7 +894,7 @@ mod tests {
                 default_size: Size::Medium,
             }],
             rotate: None,
-            tui_fps: dashboard_contract::DEFAULT_TUI_FPS,
+            tui_fps: sitroom_contract::DEFAULT_TUI_FPS,
             config: Default::default(),
         };
         let view = View {
@@ -1054,7 +1054,7 @@ mod tests {
         let (tx, mut rx) = mpsc::unbounded_channel();
         let mut app = app();
         app.actions = Some(tx);
-        app.settings.color_themes = dashboard_contract::theme::BUILTIN
+        app.settings.color_themes = sitroom_contract::theme::BUILTIN
             .iter()
             .map(|s| s.to_string())
             .collect();
@@ -1086,7 +1086,7 @@ mod tests {
     #[test]
     fn colors_follow_the_color_theme() {
         let mut app = app();
-        let ember = dashboard_contract::theme::builtin("ember").unwrap();
+        let ember = sitroom_contract::theme::builtin("ember").unwrap();
         let mut settings = app.settings.clone();
         settings.color_theme = ember.clone();
         app.apply_settings(settings, Instant::now());
@@ -1173,7 +1173,7 @@ mod tests {
                 root: Widget::List {
                     items: titles
                         .iter()
-                        .map(|t| dashboard_contract::ListItem {
+                        .map(|t| sitroom_contract::ListItem {
                             tone: None,
                             title: t.to_string(),
                             subtitle: None,
@@ -1391,11 +1391,11 @@ mod tests {
     }
 }
 
-/// One tile drawn as plain text (no colors), for `dashboard plugin-check`.
-pub fn tile_text(tile: &dashboard_contract::TileUpdate, width: u16, height: u16) -> String {
+/// One tile drawn as plain text (no colors), for `sitroom plugin-check`.
+pub fn tile_text(tile: &sitroom_contract::TileUpdate, width: u16, height: u16) -> String {
     let area = ratatui::layout::Rect::new(0, 0, width, height);
     let mut buf = ratatui::buffer::Buffer::empty(area);
-    let palette = theme::Palette::for_theme(dashboard_contract::Theme::Dark, false);
+    let palette = theme::Palette::for_theme(sitroom_contract::Theme::Dark, false);
     widgets::draw_tile(
         &mut canvas::Canvas(&mut buf),
         &palette,
@@ -1414,13 +1414,13 @@ pub fn tile_text(tile: &dashboard_contract::TileUpdate, width: u16, height: u16)
 
 /// Rows a tile would take to show all of its view at this width, borders
 /// included. On a dashboard a tile's rows come from its size instead.
-pub fn tile_wanted_height(tile: &dashboard_contract::TileUpdate, width: u16) -> u16 {
+pub fn tile_wanted_height(tile: &sitroom_contract::TileUpdate, width: u16) -> u16 {
     widgets::tile_wanted_height(tile, width)
 }
 
 #[cfg(test)]
 mod preview {
-    //! `cargo test -p dashboard-tui preview -- --ignored --nocapture` prints a
+    //! `cargo test -p sitroom-tui preview -- --ignored --nocapture` prints a
     //! sample system tile, for eyeballing chart rendering without a terminal.
     use super::tests_support::*;
 
@@ -1430,16 +1430,16 @@ mod preview {
         println!("{}", render_sample(110, 34));
     }
 
-    /// `COLOR_THEME=paper MODE=light cargo test -p dashboard-tui preview_colors
+    /// `COLOR_THEME=paper MODE=light cargo test -p sitroom-tui preview_colors
     /// -- --ignored --nocapture > tile.html` writes the sample in color.
     #[test]
     #[ignore]
     fn preview_colors() {
         let name = std::env::var("COLOR_THEME").unwrap_or_else(|_| "default".into());
-        let colors = dashboard_contract::theme::builtin(&name).expect("a built-in color theme");
+        let colors = sitroom_contract::theme::builtin(&name).expect("a built-in color theme");
         let theme = match std::env::var("MODE").as_deref() {
-            Ok("light") => dashboard_contract::Theme::Light,
-            _ => dashboard_contract::Theme::Dark,
+            Ok("light") => sitroom_contract::Theme::Light,
+            _ => sitroom_contract::Theme::Dark,
         };
         println!("{}", sample_html(110, 34, theme, &colors));
     }
@@ -1448,12 +1448,12 @@ mod preview {
 #[cfg(test)]
 mod tests_support {
     use super::*;
-    use dashboard_contract::{
+    use ratatui::Terminal;
+    use ratatui::backend::TestBackend;
+    use sitroom_contract::{
         Bar, ColorScale, Meter, ModuleSummary, ScreenLayout, SeriesData, SeriesStyle, Size, Status,
         Theme, TilePlacement, ValueFormat, View, Widget,
     };
-    use ratatui::Terminal;
-    use ratatui::backend::TestBackend;
 
     fn series(
         id: &str,
@@ -1508,7 +1508,7 @@ mod tests_support {
                 screens: vec![],
                 modules: vec![],
                 rotate: None,
-                tui_fps: dashboard_contract::DEFAULT_TUI_FPS,
+                tui_fps: sitroom_contract::DEFAULT_TUI_FPS,
                 config: Default::default(),
             },
             palette: Palette::for_theme(Theme::Dark, false),
@@ -1550,7 +1550,7 @@ mod tests_support {
         w: u16,
         h: u16,
         theme: Theme,
-        colors: &dashboard_contract::ColorTheme,
+        colors: &sitroom_contract::ColorTheme,
     ) -> String {
         let buf = sample_buffer(w, h, theme, colors);
         let tokens = colors.variant(theme == Theme::Dark);
@@ -1586,7 +1586,7 @@ mod tests_support {
         w: u16,
         h: u16,
         theme: Theme,
-        colors: &dashboard_contract::ColorTheme,
+        colors: &sitroom_contract::ColorTheme,
     ) -> Buffer {
         let wave = |n: usize, k: f64, amp: f64, base: f64| -> Vec<f64> {
             (0..n)
@@ -1707,7 +1707,7 @@ mod tests_support {
                 default_size: Size::Medium,
             }],
             rotate: None,
-            tui_fps: dashboard_contract::DEFAULT_TUI_FPS,
+            tui_fps: sitroom_contract::DEFAULT_TUI_FPS,
             config: Default::default(),
         };
         let view = View {

@@ -6,7 +6,7 @@ The Python version of a native-vs-plugin benchmark widget. It follows the same r
 native module (crates/modules-system/src/battery.rs) and the TypeScript plugin
 (plugins/ext/battery-ts), and must show the same view for the same input.
 
-    dashboard plugin-check -- python3 plugins/ext/battery-py/main.py
+    sitroom plugin-check -- python3 plugins/ext/battery-py/main.py
 """
 
 import math
@@ -16,7 +16,7 @@ import subprocess
 import sys
 from typing import List, Optional, TypedDict
 
-from dashboard_plugin import View, Widget, serve, upstream_error, with_defaults
+from sitroom_plugin import View, Widget, serve, upstream_error, with_defaults
 
 SYSFS = "/sys/class/power_supply"
 

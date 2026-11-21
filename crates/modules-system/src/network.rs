@@ -3,10 +3,10 @@
 
 use anyhow::Result;
 use async_trait::async_trait;
-use dashboard_contract::{
+use sitroom_contract::{
     CatalogEntry, Manifest, SeriesData, Size, Status, ValueFormat, View, format_value,
 };
-use dashboard_host::{Module, now_ms};
+use sitroom_host::{Module, now_ms};
 use sysinfo::Networks;
 
 use super::{Rate, demo_graph, demo_series, demo_values, graph, manifest};

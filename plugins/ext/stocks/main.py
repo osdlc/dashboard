@@ -14,7 +14,7 @@ built-in module.
 
 `--sample` shows the saved replies in samples/ instead of calling Yahoo:
 
-    dashboard plugin-check -- python3 plugins/ext/stocks/main.py --sample
+    sitroom plugin-check -- python3 plugins/ext/stocks/main.py --sample
 """
 
 import json
@@ -29,13 +29,13 @@ from typing import Any, Dict, List, Tuple, Union
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from dashboard_plugin import PluginError, View, config_error, serve, upstream_error, with_defaults  # noqa: E402
+from sitroom_plugin import PluginError, View, config_error, serve, upstream_error, with_defaults  # noqa: E402
 from view import SAMPLE_NOW, SYMBOL_RE, QuoteError, parse, view  # noqa: E402
 
 API = "https://query1.finance.yahoo.com/v8/finance/chart/"
 # Yahoo answers 429 to an empty or tool-like User-Agent (curl, python-urllib), and, when
 # last tried, to a full desktop Chrome string too; "Mozilla/5.0 ..." in this form works.
-USER_AGENT = "Mozilla/5.0 (compatible; dashboard-stocks/0.1)"
+USER_AGENT = "Mozilla/5.0 (compatible; sitroom-stocks/0.1)"
 SAMPLE = "--sample" in sys.argv[1:]
 MAX_SYMBOLS = 25
 

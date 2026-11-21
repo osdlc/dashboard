@@ -8,10 +8,10 @@
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use dashboard_config::packages::load_package;
-use dashboard_contract::check::{Finding, check_manifest, check_view};
-use dashboard_host::{Module, Plugin};
 use serde_json::json;
+use sitroom_config::packages::load_package;
+use sitroom_contract::check::{Finding, check_manifest, check_view};
+use sitroom_host::{Module, Plugin};
 
 fn ext_dir() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("../../plugins/ext")
@@ -46,7 +46,7 @@ fn problems(found: Vec<Finding>) -> Vec<String> {
 #[test]
 fn every_package_loads_and_carries_the_shared_files() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
-    let sdk = std::fs::read_to_string(root.join("sdk/python/dashboard_plugin.py")).unwrap();
+    let sdk = std::fs::read_to_string(root.join("sdk/python/sitroom_plugin.py")).unwrap();
     let dirs = packages();
     let helpers = std::fs::read_to_string(dirs[0].join("token_api.py")).unwrap();
     let apitoken = std::fs::read_to_string(dirs[0].join("apitoken.py")).unwrap();
@@ -70,10 +70,10 @@ fn every_package_loads_and_carries_the_shared_files() {
         assert!(p.package.config_schema.is_some(), "{id}");
         // Each package carries copies of the SDK, apitoken.py (and its
         // test) and token_api.py; they must stay the same everywhere.
-        let copy = std::fs::read_to_string(dir.join("dashboard_plugin.py")).unwrap();
+        let copy = std::fs::read_to_string(dir.join("sitroom_plugin.py")).unwrap();
         assert!(
             copy == sdk,
-            "{id}: dashboard_plugin.py differs from sdk/python; copy it again"
+            "{id}: sitroom_plugin.py differs from sdk/python; copy it again"
         );
         let copy = std::fs::read_to_string(dir.join("token_api.py")).unwrap();
         assert!(
@@ -112,7 +112,7 @@ async fn sample_render_is_the_demo_view() {
         assert_eq!(problems(check_view(&view)), Vec::<String>::new(), "{id}");
         assert_eq!(
             view, p.package.demo,
-            "{id}: the demo in dashboard-plugin.yaml must match `python3 main.py --sample`"
+            "{id}: the demo in sitroom-plugin.yaml must match `python3 main.py --sample`"
         );
     }
 }
@@ -156,7 +156,7 @@ async fn without_a_token_it_names_the_variable() {
     if !have_python() {
         return;
     }
-    const VAR: &str = "DASHBOARD_TEST_NO_SUCH_TOKEN";
+    const VAR: &str = "SITROOM_TEST_NO_SUCH_TOKEN";
     for dir in packages() {
         let p = load_package(&dir).unwrap();
         let id = p.package.id.as_str();

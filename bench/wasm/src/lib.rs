@@ -7,9 +7,9 @@ use std::io::{BufRead, Write};
 use std::pin::pin;
 use std::task::{Context, Poll, Waker};
 
-use dashboard_contract::rpc::{InitializeParams, InitializeResult, Request, Response, RpcError};
-use dashboard_contract::rpc::{error_code, method};
-use dashboard_host::Module;
+use sitroom_contract::rpc::{InitializeParams, InitializeResult, Request, Response, RpcError};
+use sitroom_contract::rpc::{error_code, method};
+use sitroom_host::Module;
 use serde_json::Value;
 
 /// Answer requests on stdin until it closes.

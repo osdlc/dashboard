@@ -1,12 +1,12 @@
 # Windows
 
-The CLI (`dashboard.exe`) builds for Windows and compiles there with no warnings. It has only
+The CLI (`sitroom.exe`) builds for Windows and compiles there with no warnings. It has only
 been cross-compiled from macOS so far, never run on Windows. "Needs a Windows test" below lists
 what to check on a real machine.
 
 ## Build
 
-On Windows, the normal build works: `cargo build -p dashboard` (with pnpm on the PATH for the
+On Windows, the normal build works: `cargo build -p sitroom` (with pnpm on the PATH for the
 web app). From macOS or Linux, cross-compile with [cargo-xwin](https://github.com/rust-cross/cargo-xwin),
 which downloads the MSVC headers and libraries:
 
@@ -15,14 +15,14 @@ rustup target add x86_64-pc-windows-msvc
 cargo install cargo-xwin
 # macOS: clang and lld from Homebrew's llvm
 PATH="/opt/homebrew/opt/llvm/bin:$PATH" XWIN_ACCEPT_LICENSE=1 \
-  cargo xwin build --target x86_64-pc-windows-msvc --profile small -p dashboard
+  cargo xwin build --target x86_64-pc-windows-msvc --profile small -p sitroom
 # one bundle:
 PATH="/opt/homebrew/opt/llvm/bin:$PATH" XWIN_ACCEPT_LICENSE=1 \
-  cargo xwin build --target x86_64-pc-windows-msvc --profile small -p dashboard \
+  cargo xwin build --target x86_64-pc-windows-msvc --profile small -p sitroom \
   --no-default-features --features bundle-system
 ```
 
-The binary is `target/x86_64-pc-windows-msvc/small/dashboard.exe`. `cargo xwin clippy` and
+The binary is `target/x86_64-pc-windows-msvc/small/sitroom.exe`. `cargo xwin clippy` and
 `cargo xwin test --no-run` work the same way, for checking the Windows-only code.
 
 ## Size
@@ -51,10 +51,10 @@ thing):
 
 | What | Where |
 |---|---|
-| Config | `%APPDATA%\dashboard\config.yaml` (or `--config`, or `DASHBOARD_MACHINE_CONFIG`) |
-| Installed plugins | `%APPDATA%\dashboard\plugins` |
-| Background server record | `%APPDATA%\run\dashboard\serve.json` |
-| Background server log | `%APPDATA%\logs\dashboard\serve.log` |
+| Config | `%APPDATA%\sitroom\config.yaml` (or `--config`, or `SITROOM_MACHINE_CONFIG`) |
+| Installed plugins | `%APPDATA%\sitroom\plugins` |
+| Background server record | `%APPDATA%\run\sitroom\serve.json` |
+| Background server log | `%APPDATA%\logs\sitroom\serve.log` |
 
 In a module's `config:`, `~/` (and `~\`) means `%USERPROFILE%` when `HOME` is not set.
 
@@ -69,16 +69,16 @@ launcher is installed. `node` needs nothing special. The same lookup finds the e
 the TUI's "edit config" (`notepad` when `EDITOR` is not set). `EDITOR` may be a full path with
 spaces, such as `C:\Program Files\Notepad++\notepad++.exe`, but then without arguments.
 
-**Stopping plugins.** Each plugin runs in a job object. When the dashboard stops or restarts a
+**Stopping plugins.** Each plugin runs in a job object. When sitroom stops or restarts a
 plugin, everything the plugin started stops too (for example the `node` behind an `npx.cmd`
-shim). `cmdrunner` does the same, so a timeout stops the whole command. `dashboard stop`
+shim). `cmdrunner` does the same, so a timeout stops the whole command. `sitroom stop`
 uses `taskkill /T /F`, which ends the background server and its plugins.
 
 **Background server.** `serve --detach` starts the server with a hidden console of its own,
 so its plugins and commands don't each open a console window.
 
 **Uptime checks.** A `curl:` line can't go through `sh`, and `cmd /C` would change its quotes
-and `%` signs, so on Windows the dashboard splits the line into words itself and runs
+and `%` signs, so on Windows sitroom splits the line into words itself and runs
 `curl.exe` (part of Windows 10 and later) directly:
 
 - `'...'` keeps the text as it is; `"..."` groups words and still expands variables;
@@ -119,9 +119,9 @@ The `sysinfo` modules (cpu, memory, network, disk, processes) support Windows.
 
 None of this has been run on Windows. To check on a real machine (or a Windows CI runner):
 
-1. `dashboard.exe tui` and `dashboard.exe serve` start, draw and quit cleanly, in Windows
+1. `sitroom.exe tui` and `sitroom.exe serve` start, draw and quit cleanly, in Windows
    Terminal and in the old console host (`conhost`).
-2. `dashboard.exe serve --detach`, then `status` and `stop`: no console window appears, the
+2. `sitroom.exe serve --detach`, then `status` and `stop`: no console window appears, the
    record and log land in the folders above, and `stop` ends the server and its plugins
    (Task Manager shows no `python`, `node` or `cmd` left over).
 3. Plugins: `plugin: [python3, x.py]` with the python.org installer (uses `py -3`), with
@@ -138,6 +138,6 @@ None of this has been run on Windows. To check on a real machine (or a Windows C
 10. The bundled cswap plugin with cswap installed (`uv tool install`), and the TUI's
     "edit config" with and without `EDITOR` set (also set to a path under `Program Files`).
 11. The Windows-only unit test `process::tests::kill_tree_ends_grandchildren` in
-    `dashboard-host` (`cargo test -p dashboard-host`), which can't run on macOS.
+    `sitroom-host` (`cargo test -p sitroom-host`), which can't run on macOS.
 12. The test suite as a whole (`cargo test --workspace`): some tests start `sh`, `python3` or
     `node` and may need to skip on Windows.

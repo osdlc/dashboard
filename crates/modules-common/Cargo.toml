@@ -1,6 +1,6 @@
 [package]
-name = "dashboard-modules-common"
-description = "What the dashboard's built-in module bundles share: registration, catalog helpers, times and HTTP"
+name = "sitroom-modules-common"
+description = "What sitroom's built-in module bundles share: registration, catalog helpers, times and HTTP"
 edition.workspace = true
 rust-version.workspace = true
 version.workspace = true
@@ -13,8 +13,8 @@ http = ["dep:reqwest"]
 
 [dependencies]
 anyhow = "1.0.104"
-dashboard-contract = { version = "0.8.0", path = "../contract" }
-dashboard-host = { version = "0.8.0", path = "../host" }
+sitroom-contract = { version = "0.8.0", path = "../contract" }
+sitroom-host = { version = "0.8.0", path = "../host" }
 reqwest = { version = "0.13.5", features = ["json", "query"], optional = true }
 schemars = "1.2.3"
 serde = { version = "1.0.229", features = ["derive"] }

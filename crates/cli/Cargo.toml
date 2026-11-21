@@ -1,6 +1,6 @@
 [package]
-name = "dashboard"
-description = "The dashboard command: the TUI, the web view, config, packages and the plugin tools"
+name = "sitroom"
+description = "Sitroom command: the TUI, the web view, config, packages and the plugin tools"
 edition.workspace = true
 rust-version.workspace = true
 version.workspace = true
@@ -8,7 +8,7 @@ license.workspace = true
 repository.workspace = true
 
 # Which built-in modules the binary includes: a bundle, or one module. Same
-# names as on dashboard-modules. See docs/modules.md.
+# names as on sitroom-modules. See docs/modules.md.
 [features]
 default = [
     "bundle-system",
@@ -21,7 +21,7 @@ default = [
 # Each bundle turns on its module features here too, so cfg(feature = "module-x")
 # works in this crate's tests.
 bundle-system = [
-    "dashboard-modules/bundle-system",
+    "sitroom-modules/bundle-system",
     "module-cpu",
     "module-memory",
     "module-gpu",
@@ -40,7 +40,7 @@ bundle-system = [
     "module-screensaver",
 ]
 bundle-dev = [
-    "dashboard-modules/bundle-dev",
+    "sitroom-modules/bundle-dev",
     "module-github-prs",
     "module-github-issues",
     "module-jira",
@@ -49,7 +49,7 @@ bundle-dev = [
     "module-git",
 ]
 bundle-ops = [
-    "dashboard-modules/bundle-ops",
+    "sitroom-modules/bundle-ops",
     "module-docker",
     "module-kubernetes",
     "module-ipinfo",
@@ -57,7 +57,7 @@ bundle-ops = [
     "module-transmission",
 ]
 bundle-fun = [
-    "dashboard-modules/bundle-fun",
+    "sitroom-modules/bundle-fun",
     "module-demo",
     "module-clock",
     "module-hackernews",
@@ -69,7 +69,7 @@ bundle-fun = [
     "module-scores",
 ]
 bundle-agents = [
-    "dashboard-modules/bundle-agents",
+    "sitroom-modules/bundle-agents",
     "module-codex",
     "module-copilot",
     "module-cursor",
@@ -79,7 +79,7 @@ bundle-agents = [
     "module-pi",
 ]
 bundle-personal = [
-    "dashboard-modules/bundle-personal",
+    "sitroom-modules/bundle-personal",
     "module-weather",
     "module-todo",
     "module-lunar",
@@ -90,70 +90,70 @@ bundle-personal = [
     "module-taskwarrior",
     "module-sdlc",
 ]
-module-cpu = ["dashboard-modules/module-cpu"]
-module-memory = ["dashboard-modules/module-memory"]
-module-gpu = ["dashboard-modules/module-gpu"]
-module-network = ["dashboard-modules/module-network"]
-module-disk = ["dashboard-modules/module-disk"]
-module-processes = ["dashboard-modules/module-processes"]
-module-process = ["dashboard-modules/module-process"]
-module-log = ["dashboard-modules/module-log"]
-module-uptime = ["dashboard-modules/module-uptime"]
-module-textfile = ["dashboard-modules/module-textfile"]
-module-battery = ["dashboard-modules/module-battery"]
-module-cmdrunner = ["dashboard-modules/module-cmdrunner"]
-module-security = ["dashboard-modules/module-security"]
-module-http = ["dashboard-modules/module-http"]
-module-file = ["dashboard-modules/module-file"]
-module-screensaver = ["dashboard-modules/module-screensaver"]
-module-github-prs = ["dashboard-modules/module-github-prs"]
-module-github-issues = ["dashboard-modules/module-github-issues"]
-module-jira = ["dashboard-modules/module-jira"]
-module-linear = ["dashboard-modules/module-linear"]
-module-forgejo = ["dashboard-modules/module-forgejo"]
-module-git = ["dashboard-modules/module-git"]
-module-demo = ["dashboard-modules/module-demo"]
-module-clock = ["dashboard-modules/module-clock"]
-module-hackernews = ["dashboard-modules/module-hackernews"]
-module-feedreader = ["dashboard-modules/module-feedreader"]
-module-subreddit = ["dashboard-modules/module-subreddit"]
-module-devto = ["dashboard-modules/module-devto"]
-module-mempool = ["dashboard-modules/module-mempool"]
-module-crypto = ["dashboard-modules/module-crypto"]
-module-scores = ["dashboard-modules/module-scores"]
-module-codex = ["dashboard-modules/module-codex"]
-module-copilot = ["dashboard-modules/module-copilot"]
-module-cursor = ["dashboard-modules/module-cursor"]
-module-antigravity = ["dashboard-modules/module-antigravity"]
-module-gemini = ["dashboard-modules/module-gemini"]
-module-opencode = ["dashboard-modules/module-opencode"]
-module-pi = ["dashboard-modules/module-pi"]
-module-docker = ["dashboard-modules/module-docker"]
-module-kubernetes = ["dashboard-modules/module-kubernetes"]
-module-ipinfo = ["dashboard-modules/module-ipinfo"]
-module-pihole = ["dashboard-modules/module-pihole"]
-module-transmission = ["dashboard-modules/module-transmission"]
-module-weather = ["dashboard-modules/module-weather"]
-module-todo = ["dashboard-modules/module-todo"]
-module-lunar = ["dashboard-modules/module-lunar"]
-module-calendar = ["dashboard-modules/module-calendar"]
-module-org-agenda = ["dashboard-modules/module-org-agenda"]
-module-markdown-tasks = ["dashboard-modules/module-markdown-tasks"]
-module-todo-txt = ["dashboard-modules/module-todo-txt"]
-module-taskwarrior = ["dashboard-modules/module-taskwarrior"]
-module-sdlc = ["dashboard-modules/module-sdlc"]
+module-cpu = ["sitroom-modules/module-cpu"]
+module-memory = ["sitroom-modules/module-memory"]
+module-gpu = ["sitroom-modules/module-gpu"]
+module-network = ["sitroom-modules/module-network"]
+module-disk = ["sitroom-modules/module-disk"]
+module-processes = ["sitroom-modules/module-processes"]
+module-process = ["sitroom-modules/module-process"]
+module-log = ["sitroom-modules/module-log"]
+module-uptime = ["sitroom-modules/module-uptime"]
+module-textfile = ["sitroom-modules/module-textfile"]
+module-battery = ["sitroom-modules/module-battery"]
+module-cmdrunner = ["sitroom-modules/module-cmdrunner"]
+module-security = ["sitroom-modules/module-security"]
+module-http = ["sitroom-modules/module-http"]
+module-file = ["sitroom-modules/module-file"]
+module-screensaver = ["sitroom-modules/module-screensaver"]
+module-github-prs = ["sitroom-modules/module-github-prs"]
+module-github-issues = ["sitroom-modules/module-github-issues"]
+module-jira = ["sitroom-modules/module-jira"]
+module-linear = ["sitroom-modules/module-linear"]
+module-forgejo = ["sitroom-modules/module-forgejo"]
+module-git = ["sitroom-modules/module-git"]
+module-demo = ["sitroom-modules/module-demo"]
+module-clock = ["sitroom-modules/module-clock"]
+module-hackernews = ["sitroom-modules/module-hackernews"]
+module-feedreader = ["sitroom-modules/module-feedreader"]
+module-subreddit = ["sitroom-modules/module-subreddit"]
+module-devto = ["sitroom-modules/module-devto"]
+module-mempool = ["sitroom-modules/module-mempool"]
+module-crypto = ["sitroom-modules/module-crypto"]
+module-scores = ["sitroom-modules/module-scores"]
+module-codex = ["sitroom-modules/module-codex"]
+module-copilot = ["sitroom-modules/module-copilot"]
+module-cursor = ["sitroom-modules/module-cursor"]
+module-antigravity = ["sitroom-modules/module-antigravity"]
+module-gemini = ["sitroom-modules/module-gemini"]
+module-opencode = ["sitroom-modules/module-opencode"]
+module-pi = ["sitroom-modules/module-pi"]
+module-docker = ["sitroom-modules/module-docker"]
+module-kubernetes = ["sitroom-modules/module-kubernetes"]
+module-ipinfo = ["sitroom-modules/module-ipinfo"]
+module-pihole = ["sitroom-modules/module-pihole"]
+module-transmission = ["sitroom-modules/module-transmission"]
+module-weather = ["sitroom-modules/module-weather"]
+module-todo = ["sitroom-modules/module-todo"]
+module-lunar = ["sitroom-modules/module-lunar"]
+module-calendar = ["sitroom-modules/module-calendar"]
+module-org-agenda = ["sitroom-modules/module-org-agenda"]
+module-markdown-tasks = ["sitroom-modules/module-markdown-tasks"]
+module-todo-txt = ["sitroom-modules/module-todo-txt"]
+module-taskwarrior = ["sitroom-modules/module-taskwarrior"]
+module-sdlc = ["sitroom-modules/module-sdlc"]
 
 [dependencies]
 anyhow = "1.0.104"
 clap = { version = "4.6.7", features = ["derive"] }
-dashboard-cli-kit = { version = "0.8.0", path = "../cli-kit" }
-dashboard-config = { version = "0.8.0", path = "../config" }
-dashboard-contract = { version = "0.8.0", path = "../contract" }
-dashboard-host = { version = "0.8.0", path = "../host" }
-dashboard-modules = { version = "0.8.0", path = "../modules", default-features = false }
-dashboard-runtime = { version = "0.8.0", path = "../runtime" }
-dashboard-tui = { version = "0.8.0", path = "../tui" }
-dashboard-web = { version = "0.8.0", path = "../web" }
+sitroom-cli-kit = { version = "0.8.0", path = "../cli-kit" }
+sitroom-config = { version = "0.8.0", path = "../config" }
+sitroom-contract = { version = "0.8.0", path = "../contract" }
+sitroom-host = { version = "0.8.0", path = "../host" }
+sitroom-modules = { version = "0.8.0", path = "../modules", default-features = false }
+sitroom-runtime = { version = "0.8.0", path = "../runtime" }
+sitroom-tui = { version = "0.8.0", path = "../tui" }
+sitroom-web = { version = "0.8.0", path = "../web" }
 etag-write = "0.2.4"
 flate2 = "1.1.10"
 path-guard = "0.3.2"

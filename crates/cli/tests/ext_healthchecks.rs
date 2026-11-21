@@ -7,11 +7,11 @@
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use dashboard_config::packages::load_package;
-use dashboard_contract::check::check_view;
-use dashboard_contract::{Status, Widget};
-use dashboard_host::{Module, Plugin};
 use serde_json::json;
+use sitroom_config::packages::load_package;
+use sitroom_contract::check::check_view;
+use sitroom_contract::{Status, Widget};
+use sitroom_host::{Module, Plugin};
 
 fn dir() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("../../plugins/ext/healthchecks")
@@ -66,13 +66,13 @@ async fn sample_shows_the_demo_view() {
     // key returns it, so its link falls back to the site's front page.
     assert_eq!(
         items[4].action,
-        Some(dashboard_contract::Action::OpenUrl {
+        Some(sitroom_contract::Action::OpenUrl {
             url: "https://healthchecks.io/".into()
         })
     );
 
     let package = load_package(&dir()).expect("package loads");
-    assert_eq!(package.package.demo, view, "demo: in dashboard-plugin.yaml");
+    assert_eq!(package.package.demo, view, "demo: in sitroom-plugin.yaml");
 }
 
 #[tokio::test]
@@ -95,7 +95,7 @@ async fn limit_and_self_hosted_links() {
     assert_eq!(items.len(), 2);
     assert_eq!(
         items[0].action,
-        Some(dashboard_contract::Action::OpenUrl {
+        Some(sitroom_contract::Action::OpenUrl {
             url: "https://hc.example.com/checks/5d3b6e2a-1f4c-4a9e-9b1d-0c2e7f8a6b31/details/"
                 .into()
         })
@@ -121,18 +121,18 @@ async fn bad_settings_and_no_key() {
     // An unset variable: an error before any request is made.
     let mut plugin = Plugin::new("healthchecks", argv);
     plugin
-        .init(json!({ "token_env": "DASHBOARD_TEST_NO_SUCH_VAR" }))
+        .init(json!({ "token_env": "SITROOM_TEST_NO_SUCH_VAR" }))
         .await
         .expect("initialize");
     let err = format!("{:#}", plugin.render().await.unwrap_err());
-    assert!(err.contains("$DASHBOARD_TEST_NO_SUCH_VAR"), "{err}");
+    assert!(err.contains("$SITROOM_TEST_NO_SUCH_VAR"), "{err}");
 }
 
 /// The package carries a copy of the SDK; it must match the one in `sdk/`.
 #[test]
 fn sdk_copy_is_current() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
-    let copy = std::fs::read_to_string(dir().join("dashboard_plugin.py")).unwrap();
-    let sdk = std::fs::read_to_string(root.join("sdk/python/dashboard_plugin.py")).unwrap();
-    assert!(copy == sdk, "copy sdk/python/dashboard_plugin.py again");
+    let copy = std::fs::read_to_string(dir().join("sitroom_plugin.py")).unwrap();
+    let sdk = std::fs::read_to_string(root.join("sdk/python/sitroom_plugin.py")).unwrap();
+    assert!(copy == sdk, "copy sdk/python/sitroom_plugin.py again");
 }

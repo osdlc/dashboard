@@ -3,7 +3,7 @@
 import re
 from typing import Any, Dict, List, Optional, Tuple
 
-from dashboard_plugin import Column, Row, View
+from sitroom_plugin import Column, Row, View
 
 # The time the sample is measured from (the close of the sampled trading day), so `--sample`
 # shows the same view whenever it runs.

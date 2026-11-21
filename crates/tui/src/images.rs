@@ -1,6 +1,6 @@
 //! The image widget. The terminal's graphics support is detected once at
 //! start: Kitty, iTerm2 or Sixel when it answers for one, colored half blocks
-//! otherwise. `DASHBOARD_IMAGES=halfblocks` skips the query. Each picture is
+//! otherwise. `SITROOM_IMAGES=halfblocks` skips the query. Each picture is
 //! decoded once, shrunk to at most [`MAX_EDGE`] pixels a side, and encoded
 //! again only when its file changes or it is drawn at a new size.
 
@@ -53,7 +53,7 @@ pub fn detect() {
     if PICKER.get().is_some() {
         return;
     }
-    let picker = match std::env::var("DASHBOARD_IMAGES").as_deref() {
+    let picker = match std::env::var("SITROOM_IMAGES").as_deref() {
         Ok("halfblocks") => Picker::halfblocks(),
         _ => Picker::from_query_stdio().unwrap_or_else(|_| Picker::halfblocks()),
     };
@@ -184,7 +184,7 @@ mod tests {
     fn render(path: &str, w: u16, h: u16) -> Buffer {
         let area = Rect::new(0, 0, w, h);
         let mut buf = Buffer::empty(area);
-        let p = Palette::for_theme(dashboard_contract::Theme::Dark, false);
+        let p = Palette::for_theme(sitroom_contract::Theme::Dark, false);
         draw(&mut Canvas(&mut buf), &p, area, path, Some("sunset.png"));
         buf
     }

@@ -21,7 +21,7 @@ in the [roadmap](../../docs/roadmap.md#api-levels).
   [M-0002](M-0002-core-and-plugins.md) run), and what would make it published.
 - The same widget written at each level and in several languages, tested to render the same view
   (#17).
-- `dashboard plugin-check` reports which level a plugin uses.
+- `sitroom plugin-check` reports which level a plugin uses.
 - The lists of what is not built yet point here instead, so there is one list: "Not in v0.1"
   in [contract.md](../../docs/contract.md), and "Not yet" in [plugins.md](../../docs/plugins.md)
   and [marketplace.md](../../docs/marketplace.md).

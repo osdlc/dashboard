@@ -2,25 +2,25 @@
 //! personal), each behind cargo features; this crate gathers whatever the build
 //! includes. See docs/modules.md.
 
-use dashboard_contract::CatalogEntry;
-use dashboard_host::Module;
-pub use dashboard_modules_common::Builtin;
+use sitroom_contract::CatalogEntry;
+use sitroom_host::Module;
+pub use sitroom_modules_common::Builtin;
 
 /// Each included bundle's modules, in bundle order.
 fn bundles() -> Vec<&'static [Builtin]> {
     vec![
-        #[cfg(feature = "dashboard-modules-system")]
-        dashboard_modules_system::MODULES,
-        #[cfg(feature = "dashboard-modules-dev")]
-        dashboard_modules_dev::MODULES,
-        #[cfg(feature = "dashboard-modules-ops")]
-        dashboard_modules_ops::MODULES,
-        #[cfg(feature = "dashboard-modules-fun")]
-        dashboard_modules_fun::MODULES,
-        #[cfg(feature = "dashboard-modules-agents")]
-        dashboard_modules_agents::MODULES,
-        #[cfg(feature = "dashboard-modules-personal")]
-        dashboard_modules_personal::MODULES,
+        #[cfg(feature = "sitroom-modules-system")]
+        sitroom_modules_system::MODULES,
+        #[cfg(feature = "sitroom-modules-dev")]
+        sitroom_modules_dev::MODULES,
+        #[cfg(feature = "sitroom-modules-ops")]
+        sitroom_modules_ops::MODULES,
+        #[cfg(feature = "sitroom-modules-fun")]
+        sitroom_modules_fun::MODULES,
+        #[cfg(feature = "sitroom-modules-agents")]
+        sitroom_modules_agents::MODULES,
+        #[cfg(feature = "sitroom-modules-personal")]
+        sitroom_modules_personal::MODULES,
     ]
 }
 
@@ -44,14 +44,14 @@ pub fn builtin(id: &str) -> Option<Box<dyn Module>> {
 
 /// Make the relative paths in a built-in's `config:` start from `dir`, the
 /// folder of the config file that set it. Which settings are paths comes
-/// from the module's config schema (see `dashboard_modules_common::PATH_KEYWORD`).
+/// from the module's config schema (see `sitroom_modules_common::PATH_KEYWORD`).
 pub fn resolve_paths(id: &str, config: &mut serde_json::Value, dir: &std::path::Path) {
     if let Some(schema) = all()
         .into_iter()
         .find(|b| b.id == id)
         .and_then(|b| (b.catalog)().config_schema)
     {
-        dashboard_modules_common::resolve_paths(config, &schema, dir);
+        sitroom_modules_common::resolve_paths(config, &schema, dir);
     }
 }
 
@@ -63,7 +63,7 @@ pub fn catalog() -> Vec<CatalogEntry> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dashboard_contract::check::check_view;
+    use sitroom_contract::check::check_view;
 
     #[test]
     fn every_builtin_has_a_matching_catalog_entry() {
@@ -205,7 +205,7 @@ mod tests {
     /// it flattens in (such as `Secret`, for the token settings).
     #[test]
     fn schemas_are_not_described_by_a_helper() {
-        let helpers: Vec<serde_json::Value> = dashboard_modules_common::flattened_helpers()
+        let helpers: Vec<serde_json::Value> = sitroom_modules_common::flattened_helpers()
             .iter()
             .filter_map(|h| h.get("description").cloned())
             .collect();
@@ -236,7 +236,7 @@ mod tests {
             for (key, prop) in props {
                 let is_path = NAMES.contains(&key.as_str());
                 assert_eq!(
-                    prop.get(dashboard_modules_common::PATH_KEYWORD)
+                    prop.get(sitroom_modules_common::PATH_KEYWORD)
                         == Some(&serde_json::Value::Bool(true)),
                     is_path,
                     "{}.{key}",

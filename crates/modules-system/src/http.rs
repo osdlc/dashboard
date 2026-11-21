@@ -25,13 +25,13 @@ use std::time::Duration;
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::{CatalogEntry, Manifest, Size, View};
-use dashboard_host::Module;
-use dashboard_modules_common::http::{self, Client};
-use dashboard_modules_common::manifest;
-use dashboard_modules_common::secret::Secret;
 use schemars::JsonSchema;
 use serde::Deserialize;
+use sitroom_contract::{CatalogEntry, Manifest, Size, View};
+use sitroom_host::Module;
+use sitroom_modules_common::http::{self, Client};
+use sitroom_modules_common::manifest;
+use sitroom_modules_common::secret::Secret;
 
 use crate::feed::{self, Field, Format, MAX_BYTES, Shape};
 
@@ -222,7 +222,7 @@ pub fn catalog() -> CatalogEntry {
     };
     CatalogEntry {
         description: "Shows what a URL returns, fetched again on each refresh: a view or \
-                      widget in the dashboard's JSON, values picked out of any JSON, or \
+                      widget in sitroom's JSON, values picked out of any JSON, or \
                       text. Add it several times with `builtin: http`."
             .into(),
         tags: crate::strings(&["http", "json", "api", "custom"]),
@@ -239,7 +239,7 @@ pub fn catalog() -> CatalogEntry {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dashboard_contract::{Status, Widget};
+    use sitroom_contract::{Status, Widget};
     use tokio::io::{AsyncReadExt, AsyncWriteExt};
     use tokio::net::TcpListener;
 
@@ -384,7 +384,7 @@ mod tests {
 
     #[test]
     fn demo_is_valid() {
-        let problems: Vec<String> = dashboard_contract::check::check_view(&catalog().demo)
+        let problems: Vec<String> = sitroom_contract::check::check_view(&catalog().demo)
             .into_iter()
             .filter(|f| f.problem)
             .map(|f| f.text)

@@ -1,5 +1,5 @@
 # Builds the Astro site in site/ and publishes it to GitHub Pages
-# (https://osdlc.github.io/dashboard/). Pull requests build it to catch errors;
+# (https://osdlc.github.io/sitroom/). Pull requests build it to catch errors;
 # only main deploys. The site reads examples/demo.yaml and docs/tutorial.md at build time.
 name: site
 

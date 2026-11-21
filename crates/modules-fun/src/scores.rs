@@ -13,15 +13,15 @@
 
 use anyhow::{Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::{
-    Action, CatalogEntry, ListItem, Manifest, Requirements, Size, Status, View, Widget,
-};
-use dashboard_host::Module;
-use dashboard_modules_common::http::{check, client};
-use dashboard_modules_common::manifest;
 use schemars::JsonSchema;
 use serde::Deserialize;
 use serde_json::Value;
+use sitroom_contract::{
+    Action, CatalogEntry, ListItem, Manifest, Requirements, Size, Status, View, Widget,
+};
+use sitroom_host::Module;
+use sitroom_modules_common::http::{check, client};
+use sitroom_modules_common::manifest;
 
 const API: &str = "https://site.api.espn.com/apis/site/v2/sports";
 

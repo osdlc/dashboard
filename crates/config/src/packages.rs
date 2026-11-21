@@ -1,19 +1,19 @@
-//! Installed plugin packages: folders holding a `dashboard-plugin.yaml` (see
+//! Installed plugin packages: folders holding a `sitroom-plugin.yaml` (see
 //! docs/plugins.md). Looked for in two places, first match wins:
 //!
 //! - `plugins/<id>/` next to the config file, for packages kept with a config;
-//! - `<data home>/dashboard/plugins/<id>/`, e.g. `~/.local/share/dashboard/plugins/`.
+//! - `<data home>/sitroom/plugins/<id>/`, e.g. `~/.local/share/sitroom/plugins/`.
 //!
-//! Also the cached marketplace index, `<data home>/dashboard/marketplace/index.json`:
+//! Also the cached marketplace index, `<data home>/sitroom/marketplace/index.json`:
 //! packages that can be installed but aren't yet.
 
 use std::path::{Component, Path, PathBuf};
 
 use anyhow::{Context, Result, bail};
 use config_layers::tiered_dirs::{Convention, ResolveOptions, TieredDirs, env_vars};
-use dashboard_contract::check::check_view;
-use dashboard_contract::marketplace::INDEX_FORMAT;
-use dashboard_contract::{CatalogEntry, Index, PACKAGE_FILE, Package};
+use sitroom_contract::check::check_view;
+use sitroom_contract::marketplace::INDEX_FORMAT;
+use sitroom_contract::{CatalogEntry, Index, PACKAGE_FILE, Package};
 
 use crate::{TOOL, VENDOR};
 
@@ -117,13 +117,13 @@ impl Packages {
     }
 }
 
-/// `<data home>/dashboard/plugins`, e.g. `~/.local/share/dashboard/plugins`.
+/// `<data home>/sitroom/plugins`, e.g. `~/.local/share/sitroom/plugins`.
 /// Moved by `XDG_DATA_HOME`.
 pub fn data_dir() -> Result<PathBuf> {
     Ok(data_home()?.join("plugins"))
 }
 
-/// The cached marketplace index: `<data home>/dashboard/marketplace/index.json`.
+/// The cached marketplace index: `<data home>/sitroom/marketplace/index.json`.
 pub fn market_index_path() -> Result<PathBuf> {
     Ok(data_home()?.join("marketplace").join("index.json"))
 }
@@ -131,7 +131,7 @@ pub fn market_index_path() -> Result<PathBuf> {
 fn data_home() -> Result<PathBuf> {
     let dirs = TieredDirs::from_env(
         VENDOR,
-        &env_vars!("DASHBOARD"),
+        &env_vars!("SITROOM"),
         ResolveOptions::new().with_convention(Convention::Xdg),
     )?;
     Ok(dirs.standalone(TOOL)?.durable().into_path())
@@ -154,7 +154,7 @@ pub fn market_entries(
         serde_json::from_str(&text).with_context(|| format!("in {}", path.display()))?;
     if index.format != INDEX_FORMAT {
         bail!(
-            "{}: index format {}; this dashboard reads format {INDEX_FORMAT}",
+            "{}: index format {}; this version of sitroom reads format {INDEX_FORMAT}",
             path.display(),
             index.format
         );
@@ -211,7 +211,7 @@ pub fn load_package(dir: &Path) -> Result<Installed> {
     Ok(Installed { package, dir })
 }
 
-/// Parse a `dashboard-plugin.yaml` and check what serde can't.
+/// Parse a `sitroom-plugin.yaml` and check what serde can't.
 pub fn parse_package(text: &str) -> Result<Package> {
     let p: Package = serde_saphyr::from_str(text).map_err(|e| anyhow::anyhow!("{e}"))?;
     if !valid_id(&p.id) {
@@ -333,7 +333,7 @@ demo:
         let p = parse_package(HELLO).unwrap();
         assert_eq!(p.id, "hello");
         assert_eq!(p.run, ["python3", "hello.py"]);
-        assert_eq!(p.size, Some(dashboard_contract::Size::Small));
+        assert_eq!(p.size, Some(sitroom_contract::Size::Small));
         assert_eq!(p.config_schema.unwrap()["type"], "object");
     }
 
@@ -382,7 +382,7 @@ demo:
     #[test]
     fn loads_installed_packages() {
         let root =
-            std::env::temp_dir().join(format!("dashboard-packages-test-{}", std::process::id()));
+            std::env::temp_dir().join(format!("sitroom-packages-test-{}", std::process::id()));
         // A folder left by an earlier run with the same pid would change the results.
         let _ = std::fs::remove_dir_all(&root);
         let (first, second) = (root.join("a"), root.join("b"));
@@ -429,7 +429,7 @@ demo:
         assert_eq!(found.get("hello").unwrap().argv()[0], "python3");
 
         let entry = found.get("hello").unwrap().entry();
-        assert_eq!(entry.kind, dashboard_contract::EntryKind::Plugin);
+        assert_eq!(entry.kind, sitroom_contract::EntryKind::Plugin);
         assert_eq!(entry.requirements.binaries, ["python3>=3.9"]);
         std::fs::remove_dir_all(&root).unwrap();
     }
@@ -469,7 +469,7 @@ demo:
         let text =
             std::fs::read_to_string(root.join("crates/modules-fun/testdata/clock/demo.view.json"))
                 .unwrap();
-        let expected: dashboard_contract::View = serde_json::from_str(&text).unwrap();
+        let expected: sitroom_contract::View = serde_json::from_str(&text).unwrap();
         for id in ["clock-ts", "clock-py"] {
             let p = found.get(id).unwrap_or_else(|| panic!("{id} not found"));
             assert_eq!(p.package.demo, expected, "{id}");
@@ -486,7 +486,7 @@ demo:
             root.join("crates/modules-system/testdata/textfile/notes.md.view.json"),
         )
         .unwrap();
-        let expected: dashboard_contract::View = serde_json::from_str(&text).unwrap();
+        let expected: sitroom_contract::View = serde_json::from_str(&text).unwrap();
         for id in ["textfile-ts", "textfile-py"] {
             let p = found.get(id).unwrap_or_else(|| panic!("{id} not found"));
             assert_eq!(p.package.demo, expected, "{id}");
@@ -503,7 +503,7 @@ demo:
             root.join("crates/modules-system/testdata/battery/pmset-discharging.view.json"),
         )
         .unwrap();
-        let expected: dashboard_contract::View = serde_json::from_str(&text).unwrap();
+        let expected: sitroom_contract::View = serde_json::from_str(&text).unwrap();
         for id in ["battery-ts", "battery-py"] {
             let p = found.get(id).unwrap_or_else(|| panic!("{id} not found"));
             assert_eq!(p.package.demo, expected, "{id}");
@@ -520,7 +520,7 @@ demo:
             root.join("crates/modules-fun/testdata/feedreader/demo.view.json"),
         )
         .unwrap();
-        let expected: dashboard_contract::View = serde_json::from_str(&text).unwrap();
+        let expected: sitroom_contract::View = serde_json::from_str(&text).unwrap();
         for id in ["feedreader-ts", "feedreader-py"] {
             let p = found.get(id).unwrap_or_else(|| panic!("{id} not found"));
             assert_eq!(p.package.demo, expected, "{id}");
@@ -537,7 +537,7 @@ demo:
             root.join("crates/modules-fun/testdata/hackernews/demo.view.json"),
         )
         .unwrap();
-        let expected: dashboard_contract::View = serde_json::from_str(&text).unwrap();
+        let expected: sitroom_contract::View = serde_json::from_str(&text).unwrap();
         for id in ["hackernews-ts", "hackernews-py"] {
             let p = found.get(id).unwrap_or_else(|| panic!("{id} not found"));
             assert_eq!(p.package.demo, expected, "{id}");
@@ -566,8 +566,7 @@ demo:
 
     #[test]
     fn market_entries_skip_installed_packages() {
-        let dir =
-            std::env::temp_dir().join(format!("dashboard-market-test-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sitroom-market-test-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("index.json");
         assert!(

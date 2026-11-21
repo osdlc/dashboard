@@ -5,10 +5,10 @@
 // the native module (crates/modules-fun/src/clock.rs) and the Python plugin
 // (plugins/ext/clock-py), and must show the same view for the same input.
 //
-//   dashboard plugin-check -- node plugins/ext/clock-ts/main.ts
+//   sitroom plugin-check -- node plugins/ext/clock-ts/main.ts
 
-import { configError, serve, withDefaults } from "./dashboard-plugin.ts";
-import type { View, Widget } from "./dashboard-plugin.ts";
+import { configError, serve, withDefaults } from "./sitroom-plugin.ts";
+import type { View, Widget } from "./sitroom-plugin.ts";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];

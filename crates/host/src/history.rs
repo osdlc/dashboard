@@ -2,7 +2,7 @@
 
 use std::collections::{HashMap, VecDeque};
 
-use dashboard_contract::{View, Widget};
+use sitroom_contract::{View, Widget};
 
 const DEFAULT_HISTORY: usize = 300;
 
@@ -64,7 +64,7 @@ impl History {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dashboard_contract::{SeriesData, Status};
+    use sitroom_contract::{SeriesData, Status};
 
     fn view(points: Vec<(i64, f64)>) -> View {
         View {

@@ -13,17 +13,17 @@
 
 use anyhow::{Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::{
-    Action, CatalogEntry, Cell, Column, Manifest, Requirements, Row, Size, Status, ValueFormat,
-    View, Widget, format_value,
-};
-use dashboard_host::Module;
-use dashboard_modules_common::http::{Client, check, client};
-use dashboard_modules_common::manifest;
 use schemars::JsonSchema;
 use serde::Deserialize;
 use serde::de::DeserializeOwned;
 use serde_json::Value;
+use sitroom_contract::{
+    Action, CatalogEntry, Cell, Column, Manifest, Requirements, Row, Size, Status, ValueFormat,
+    View, Widget, format_value,
+};
+use sitroom_host::Module;
+use sitroom_modules_common::http::{Client, check, client};
+use sitroom_modules_common::manifest;
 
 use crate::{ago, thousands};
 
@@ -96,7 +96,7 @@ impl Module for Mempool {
             Some(path) => crate::read_sample(path)?,
             None => fetch(&c.url).await?,
         };
-        let now = dashboard_host::now_ms() / 1000;
+        let now = sitroom_host::now_ms() / 1000;
         Ok(view(&data, c, now))
     }
 }

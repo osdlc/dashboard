@@ -11,16 +11,16 @@ import plugin from '../data/load.py?raw'
 
 const base = import.meta.env.BASE_URL.replace(/\/?$/, '/')
 const shot = (name: string) => `${base}shots/${name}`
-const repo = 'https://github.com/osdlc/dashboard'
+const repo = 'https://github.com/osdlc/sitroom'
 const blob = (path: string) => `${repo}/blob/main/${path}`
 
 const theme = 'vitesse-dark'
 
 const quickstart = `git clone ${repo}
-cd dashboard
+cd sitroom
 cargo build --release   # needs Rust and pnpm
-./target/release/dashboard tui     # terminal
-./target/release/dashboard serve   # browser`
+./target/release/sitroom tui     # terminal
+./target/release/sitroom serve   # browser`
 
 const pluginConfig = `modules:
   load:
@@ -31,7 +31,7 @@ screens:
     tiles:
       - { module: load, size: medium }`
 
-const transcript = `→ {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"contract_version":"0.1","host":{"name":"dashboard","version":"0.1.0"},"config":{}}}
+const transcript = `→ {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"contract_version":"0.1","host":{"name":"sitroom","version":"0.1.0"},"config":{}}}
 ← {"jsonrpc":"2.0","id":1,"result":{"manifest":{"id":"load","name":"Load average","contract_version":"0.1","refresh":{"mode":"poll","interval_ms":2000},"layout":{"size":"medium"}}}}
 → {"jsonrpc":"2.0","id":2,"method":"view/render"}
 ← {"jsonrpc":"2.0","id":2,"result":{"status":"ok","summary":"load 3.12 2.80 2.41","root":{"type":"column","children":[…]}}}`
@@ -85,7 +85,7 @@ const modules = [
 ---
 
 <Base
-  title="dashboard: a developer dashboard for your terminal and browser"
+  title="sitroom: a developer dashboard for your terminal and browser"
   description="One Rust binary that shows system stats, pull requests, issues, logs, uptime checks and AI usage limits as a terminal UI or a local web page, configured with one YAML file."
 >
   <SiteHeader />
@@ -122,7 +122,7 @@ const modules = [
           <div class="window browser">
             <div class="window-bar">
               <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
-              <span class="title">127.0.0.1:7878 — dashboard serve</span>
+              <span class="title">127.0.0.1:7878 — sitroom serve</span>
               <span class="spacer"></span>
             </div>
             <img
@@ -151,7 +151,7 @@ const modules = [
           <div class="view">
             <Terminal />
             <div class="view-copy">
-              <h3><code>dashboard tui</code></h3>
+              <h3><code>sitroom tui</code></h3>
               <ul>
                 <li>Braille charts and block meters, built on ratatui.</li>
                 <li>Mouse: click, scroll, hover highlight. Double-click a tile for fullscreen.</li>
@@ -179,7 +179,7 @@ const modules = [
               />
             </figure>
             <div class="view-copy">
-              <h3><code>dashboard serve</code></h3>
+              <h3><code>sitroom serve</code></h3>
               <ul>
                 <li>A Vue app built into the binary, live over a WebSocket, with smooth transitions.</li>
                 <li>Compact density with <kbd>d</kbd>. Fullscreen any tile.</li>
@@ -265,7 +265,7 @@ const modules = [
           <div class="prose">
             <p>
               A plugin is a program that speaks JSON-RPC 2.0 on stdin and stdout, one JSON message per line. The
-              dashboard starts it, then:
+              sitroom starts it, then:
             </p>
             <ol class="steps">
               <li>
@@ -276,16 +276,16 @@ const modules = [
                 <code>view/render</code> is called on every refresh. The plugin returns a view: a status, a one-line
                 summary and a root widget.
               </li>
-              <li><code>shutdown</code>, then <code>exit</code>, when the dashboard stops.</li>
+              <li><code>shutdown</code>, then <code>exit</code>, when sitroom stops.</li>
             </ol>
             <p>
               The host keeps chart history: give a series an <code>id</code> and send only new points. Anything the
-              plugin writes to stderr goes to the dashboard's log. If the plugin exits or stops answering, the tile
+              plugin writes to stderr goes to sitroom's log. If the plugin exits or stops answering, the tile
               shows the error and the plugin is started again.
             </p>
             <p>
               Plugins can declare commands, but nothing in the protocol lets a plugin run one. JSON Schemas for the
-              manifest and view: <code>dashboard schema manifest</code>, <code>dashboard schema view</code>. Full
+              manifest and view: <code>sitroom schema manifest</code>, <code>sitroom schema view</code>. Full
               details in <a href={blob('docs/contract.md')}>docs/contract.md</a>. Step 5 of the
               <a href={`${base}tutorial/#5-your-own-widget`}>tutorial</a> writes one in TypeScript.
             </p>
@@ -328,11 +328,11 @@ const modules = [
           <h2>One YAML file. Edits apply while it runs.</h2>
           <ul class="facts">
             <li>
-              Lives at <code>~/.config/dashboard/config.yaml</code>, or pass <code>--config &lt;path&gt;</code>.
+              Lives at <code>~/.config/sitroom/config.yaml</code>, or pass <code>--config &lt;path&gt;</code>.
               Without one you get the demo.
             </li>
             <li>
-              Save the file and the dashboard picks it up. Only modules whose settings changed restart. If the file has
+              Save the file and sitroom picks it up. Only modules whose settings changed restart. If the file has
               an error, the last good config stays in effect and the error shows on the settings screen.
             </li>
             <li>
@@ -340,8 +340,8 @@ const modules = [
               comments, order and quoting stay as you wrote them.
             </li>
             <li>
-              <code>dashboard schema config</code> prints a JSON Schema, for completion and checks in editors that use
-              yaml-language-server. <code>dashboard config</code> checks the file.
+              <code>sitroom schema config</code> prints a JSON Schema, for completion and checks in editors that use
+              yaml-language-server. <code>sitroom config</code> checks the file.
             </li>
             <li>Screens can rotate on a timer, pausing for a minute after you press a key.</li>
           </ul>
@@ -406,7 +406,7 @@ const modules = [
         <p class="label"><span class="n">06</span> status</p>
         <h2>Early, and built for one person on one machine.</h2>
         <p class="lede">
-          dashboard is at v0.1, the v1 foundation. It is used daily, but the config format and the plugin contract may
+          sitroom is at v0.1, the v1 foundation. It is used daily, but the config format and the plugin contract may
           still change. There are no releases or packages yet: you build it from source.
         </p>
         <div class="status">

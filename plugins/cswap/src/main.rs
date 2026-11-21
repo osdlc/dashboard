@@ -1,4 +1,4 @@
 //! Runs the cswap plugin: shows Claude accounts from cswap over stdio.
 fn main() -> anyhow::Result<()> {
-    dashboard_cswap::run()
+    sitroom_cswap::run()
 }

@@ -9,16 +9,16 @@ use std::process::Stdio;
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::{CatalogEntry, Manifest, Requirements, Size, View, Widget};
-use dashboard_host::Module;
 use schemars::JsonSchema;
 use serde::Deserialize;
 use serde_json::Value;
+use sitroom_contract::{CatalogEntry, Manifest, Requirements, Size, View, Widget};
+use sitroom_host::Module;
 use tokio::process::Command;
 
 use super::now_secs;
 use super::tally::{DAYS, Record, Tally, recent_files};
-use dashboard_modules_common::{expand_home, manifest};
+use sitroom_modules_common::{expand_home, manifest};
 
 const DOCS: &str = "https://opencode.ai/docs";
 
@@ -239,7 +239,7 @@ pub fn catalog() -> CatalogEntry {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dashboard_modules_common::time::parse_time;
+    use sitroom_modules_common::time::parse_time;
 
     // Shaped like OpenCode's message files, with ids shortened.
     const REPLY: &str = r#"{"id":"msg_01","sessionID":"ses_01","role":"assistant","time":{"created":1793095200000,"completed":1793095212000},"modelID":"claude-sonnet-4-5","providerID":"anthropic","mode":"build","path":{"cwd":"/tmp/x","root":"/tmp/x"},"system":[],"cost":0.0421,"tokens":{"input":1200,"output":800,"reasoning":0,"cache":{"read":10000,"write":2000}}}"#;

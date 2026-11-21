@@ -5,7 +5,7 @@
 //! docs/modules.md.
 //!
 //! A built-in module runs in a child process of this program (`native-child`),
-//! so each one is measured on its own, the way the dashboard would run it: in
+//! so each one is measured on its own, the way sitroom would run it: in
 //! process, on a tokio runtime. Plugins are spawned the way the host spawns
 //! them and spoken to over stdin and stdout.
 //!
@@ -27,7 +27,7 @@ use anyhow::{Context, Result, bail};
 use serde_json::{Value, json};
 
 const USAGE: &str = "\
-usage: dashboard-bench [options]
+usage: sitroom-bench [options]
 
   --only <ids>      widgets to measure, comma-separated (default: all 8)
   --impls <names>   native,ts,py,wasm,wasm-aot (default: all; wasm only for clock and textfile)
@@ -370,8 +370,8 @@ impl Proc {
 
     fn initialize(&mut self, config: &Value) -> Result<Value> {
         let params = json!({
-            "contract_version": dashboard_contract::CONTRACT_VERSION,
-            "host": { "name": "dashboard-bench", "version": env!("CARGO_PKG_VERSION") },
+            "contract_version": sitroom_contract::CONTRACT_VERSION,
+            "host": { "name": "sitroom-bench", "version": env!("CARGO_PKG_VERSION") },
             "config": config,
         });
         let result = self.call("initialize", Some(params))?;
@@ -555,14 +555,14 @@ fn native_child(args: &[String]) -> Result<()> {
     let renders: usize = renders.parse()?;
     let idle = Duration::from_secs_f64(idle.parse()?);
     let live_for = Duration::from_secs_f64(live_secs.parse()?);
-    // Multi-threaded, like the dashboard's own runtime.
+    // Multi-threaded, like sitroom's own runtime.
     let rt = tokio::runtime::Runtime::new()?;
     let row = rt.block_on(async {
         // Let the runtime's threads settle before the baseline.
         tokio::time::sleep(Duration::from_millis(200)).await;
         let rss_before = rss_kb(std::process::id());
         let t = Instant::now();
-        let mut module = dashboard_modules::builtin(id).context("not in this build")?;
+        let mut module = sitroom_modules::builtin(id).context("not in this build")?;
         let manifest = module.init(config.clone()).await?;
         let init_ms = ms(t.elapsed());
         let cpu0 = self_cpu();
@@ -824,7 +824,7 @@ fn table(rows: &[Value]) -> String {
         None => "-".into(),
     };
     for r in rows {
-        // For a built-in module, the memory it adds to the dashboard's process.
+        // For a built-in module, the memory it adds to sitroom's process.
         let rss = if r["impl"] == "native" {
             &r["rss_delta_kb"]
         } else {

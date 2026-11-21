@@ -97,7 +97,7 @@ export type Widget =
       /**
        * Draw the first series above the axis and the second below it,
        * e.g. network download and upload. Negative values count as 0 here
-       * (`dashboard check` flags them).
+       * (`sitroom check` flags them).
        */
       mirrored?: boolean;
       /**
@@ -457,7 +457,7 @@ export type ClientMessage =
     }
   | {
       /**
-       * Copy the dashboard in use. `false`: one empty screen.
+       * Copy sitroom in use. `false`: one empty screen.
        */
       copy?: boolean;
       /**
@@ -467,7 +467,7 @@ export type ClientMessage =
       type: "create_dashboard";
     };
 /**
- * Light or dark, for the whole dashboard.
+ * Light or dark, for the whole sitroom.
  */
 export type Theme = "auto" | "light" | "dark";
 /**
@@ -555,7 +555,7 @@ export interface CatalogEntry {
   requirements?: Requirements;
   /**
    * Where it comes from: `builtin`, `bundled` (a plugin inside the
-   * dashboard binary), or the folder of an installed package.
+   * sitroom binary), or the folder of an installed package.
    */
   source: string;
   /**
@@ -1047,7 +1047,7 @@ export interface ConfigInfo {
   exists: boolean;
   /**
    * The files merged into the config, lowest precedence first, e.g.
-   * "machine: ~/.config/dashboard/config.yaml".
+   * "machine: ~/.config/sitroom/config.yaml".
    */
   layers?: string[];
   /**
@@ -1102,7 +1102,7 @@ export interface DashboardSummary {
    */
   description?: string | null;
   /**
-   * The dashboard's name.
+   * Sitroom's name.
    */
   name: string;
 }

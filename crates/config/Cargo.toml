@@ -1,6 +1,6 @@
 [package]
-name = "dashboard-config"
-description = "The dashboard's config file: reading, layers, and writing settings back in place"
+name = "sitroom-config"
+description = "Sitroom's config file: reading, layers, and writing settings back in place"
 edition.workspace = true
 rust-version.workspace = true
 version.workspace = true
@@ -10,7 +10,7 @@ repository.workspace = true
 [dependencies]
 anyhow = "1.0.104"
 config-layers = "0.7.1"
-dashboard-contract = { version = "0.8.0", path = "../contract" }
+sitroom-contract = { version = "0.8.0", path = "../contract" }
 etag-write = "0.2.4"
 humantime-serde = "1.1.1"
 schemars = "1.2.3"

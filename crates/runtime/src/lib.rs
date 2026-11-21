@@ -1,9 +1,9 @@
 //! Runs modules from the config and keeps them in step with it: when the
 //! config file changes, only modules whose settings changed are restarted, and
 //! renderers get new `UiSettings`. The config is the merge of its layers
-//! (see `dashboard_config::layers`); any of their files changing reloads it.
+//! (see `sitroom_config::layers`); any of their files changing reloads it.
 //!
-//! Shared by the `dashboard` CLI and the `dashboard-desktop` app. Bundled
+//! Shared by the `sitroom` CLI and the `sitroom-desktop` app. Bundled
 //! plugins run as `<current exe> plugin <id>`, so every binary that links this
 //! crate must handle that command (see `run_bundled`).
 
@@ -13,16 +13,16 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::{Context, Result, bail};
-use dashboard_config::dashboards::{BLANK, Registry, name_for};
-use dashboard_config::layers::{self, LayerKind, Layered, Sources};
-use dashboard_config::packages::{Packages, market_entries, market_index_path};
-use dashboard_config::{Config, DEFAULT_CONFIG, Missing, ModuleConfig, NewModule, Part};
-use dashboard_contract::{
+use sitroom_config::dashboards::{BLANK, Registry, name_for};
+use sitroom_config::layers::{self, LayerKind, Layered, Sources};
+use sitroom_config::packages::{Packages, market_entries, market_index_path};
+use sitroom_config::{Config, DEFAULT_CONFIG, Missing, ModuleConfig, NewModule, Part};
+use sitroom_contract::{
     AddOutcome, CatalogEntry, ClientMessage, ConfigInfo, CreateOutcome, DashboardSummary,
     EntryKind, ModuleSummary, Size, UiSettings,
 };
-pub use dashboard_host::Host;
-use dashboard_host::{Demo, Module, Plugin, SpawnOptions};
+pub use sitroom_host::Host;
+use sitroom_host::{Demo, Module, Plugin, SpawnOptions};
 use tokio::sync::{Mutex, mpsc, watch};
 
 /// The config files in use, kept current across reloads and switches. The
@@ -68,12 +68,12 @@ pub fn catalog_source(
 /// there is no bundled plugin of that name.
 pub fn run_bundled(id: &str) -> Option<Result<()>> {
     match id {
-        "cswap" => Some(dashboard_cswap::run()),
+        "cswap" => Some(sitroom_cswap::run()),
         _ => None,
     }
 }
 
-/// A running dashboard: its config and the modules it started.
+/// A running sitroom: its config and the modules it started.
 pub struct Runtime {
     /// The host running the modules.
     pub host: Host,
@@ -219,7 +219,7 @@ impl Runtime {
     pub async fn handle(&mut self, msg: ClientMessage) {
         match msg {
             ClientMessage::SetTheme { theme, etag } => {
-                let result = dashboard_config::write_theme(
+                let result = sitroom_config::write_theme(
                     self.path(),
                     self.missing(),
                     theme,
@@ -230,7 +230,7 @@ impl Runtime {
             ClientMessage::SetColorTheme { name, etag } => {
                 // Only a theme this config has, so a typo never reaches the file.
                 let result = self.config.color_theme_named(&name).and_then(|_| {
-                    dashboard_config::write_color_theme(
+                    sitroom_config::write_color_theme(
                         self.path(),
                         self.missing(),
                         &name,
@@ -249,10 +249,10 @@ impl Runtime {
                     .partition(|s| self.loaded.project_screens.contains(&s.name));
                 let shown = self.settings.borrow().screens.clone();
                 let project_changed = project.iter().any(|s| !shown.iter().any(|old| old == s));
-                let result = dashboard_config::screens_json(&own).and_then(|mut json| {
+                let result = sitroom_config::screens_json(&own).and_then(|mut json| {
                     // Screens of this file that a project screen hides stay in it.
                     self.loaded.restore_shadowed(&mut json);
-                    dashboard_config::write_screen_values(
+                    sitroom_config::write_screen_values(
                         self.path(),
                         self.missing(),
                         json,
@@ -358,7 +358,7 @@ impl Runtime {
             Some(name) if !self.config.screens.is_empty() => Some((name.as_str(), req.size)),
             _ => None,
         };
-        dashboard_config::add_module(self.path(), self.missing(), &module, tile)
+        sitroom_config::add_module(self.path(), self.missing(), &module, tile)
     }
 
     /// Reload right after writing the config, rather than waiting for the
@@ -428,7 +428,7 @@ impl Runtime {
                         errors.push(self.loaded.locate(
                             &Part::Module(id.clone()),
                             &format!(
-                                "modules.{id}.package: no installed package {name:?} (see `dashboard widgets`)"
+                                "modules.{id}.package: no installed package {name:?} (see `sitroom widgets`)"
                             ),
                         ));
                         continue;
@@ -444,10 +444,10 @@ impl Runtime {
                     },
                     None => {
                         let name = module_config.builtin.as_deref().unwrap_or(id);
-                        match dashboard_modules::builtin(name) {
+                        match sitroom_modules::builtin(name) {
                             Some(m) => {
                                 if let Some(dir) = dir {
-                                    dashboard_modules::resolve_paths(
+                                    sitroom_modules::resolve_paths(
                                         name,
                                         &mut module_config.config,
                                         dir,
@@ -622,7 +622,7 @@ fn new_module(config: &Config, entry: &CatalogEntry, req: &AddRequest) -> Result
         anyhow::bail!("{id:?} is already in the config; pick another ID");
     }
     // Another built-in's ID would hide that built-in.
-    let builtin_ids: Vec<&str> = dashboard_modules::ids()
+    let builtin_ids: Vec<&str> = sitroom_modules::ids()
         .into_iter()
         .chain(BUNDLED.iter().copied())
         .collect();
@@ -733,7 +733,7 @@ fn demo_module(
         return match packages.get(name) {
             Some(p) => Ok(Box::new(Demo::new(&p.entry()))),
             None => Err(format!(
-                "modules.{id}.package: no installed package {name:?} (see `dashboard widgets`)"
+                "modules.{id}.package: no installed package {name:?} (see `sitroom widgets`)"
             )),
         };
     }
@@ -748,7 +748,7 @@ fn demo_module(
     Ok(Box::new(Demo::new(&entry)))
 }
 
-/// Plugins that ship inside the dashboard binary, run as `dashboard plugin <id>`.
+/// Plugins that ship inside sitroom binary, run as `sitroom plugin <id>`.
 const BUNDLED: &[&str] = &["cswap"];
 
 /// How to run module `id` as a plugin: its configured command, or the bundled
@@ -765,7 +765,7 @@ fn plugin_argv(id: &str, config: &ModuleConfig) -> Option<Vec<String>> {
 /// Every module the config may name: built-ins, bundled plugins, and modules
 /// configured as a plugin, a package, or a second copy of a built-in (`builtin:`).
 pub fn known_modules(config: &Config) -> Vec<String> {
-    let mut ids: Vec<String> = dashboard_modules::ids()
+    let mut ids: Vec<String> = sitroom_modules::ids()
         .into_iter()
         .chain(BUNDLED.iter().copied())
         .map(|s| s.to_string())
@@ -790,7 +790,7 @@ pub fn missing_packages(config: &Config, packages: &Packages) -> Vec<(String, St
                 (
                     id.clone(),
                     format!(
-                        "modules.{id}.package: no installed package {name:?} (see `dashboard widgets`)"
+                        "modules.{id}.package: no installed package {name:?} (see `sitroom widgets`)"
                     ),
                 )
             })
@@ -819,8 +819,8 @@ pub fn catalog(config_paths: &[PathBuf]) -> (Vec<CatalogEntry>, Vec<String>) {
 
 /// Built-ins and bundled plugins: what ships inside the binary.
 fn builtin_catalog() -> Vec<CatalogEntry> {
-    let mut entries = dashboard_modules::catalog();
-    entries.push(dashboard_cswap::catalog());
+    let mut entries = sitroom_modules::catalog();
+    entries.push(sitroom_cswap::catalog());
     entries
 }
 
@@ -845,7 +845,7 @@ fn placeholder_settings() -> UiSettings {
         screens: vec![],
         modules: vec![],
         rotate: None,
-        tui_fps: dashboard_contract::DEFAULT_TUI_FPS,
+        tui_fps: sitroom_contract::DEFAULT_TUI_FPS,
         config: ConfigInfo::default(),
     }
 }
@@ -857,9 +857,9 @@ mod tests {
     #[test]
     fn runs_only_modules_the_config_names() {
         // Works in any build: names the first built-in this build has, if any.
-        let builtins = dashboard_modules::ids();
+        let builtins = sitroom_modules::ids();
         let first = builtins.first().map(|id| format!("  {id}: {{}}\n"));
-        let config = dashboard_config::parse(&format!(
+        let config = sitroom_config::parse(&format!(
             "modules:\n{}  not-in-build: {{}}\n  ci:\n    plugin: [python3, ci.py]\n\
              screens:\n  - name: a\n    tiles:\n      - module: cswap\n",
             first.unwrap_or_default()
@@ -879,7 +879,7 @@ mod tests {
 
     #[test]
     fn reports_packages_that_are_not_installed() {
-        let config = dashboard_config::parse(
+        let config = sitroom_config::parse(
             "modules:\n  a:\n    package: hello\n  b:\n    package: nope\n  c: {}\n",
         )
         .unwrap();
@@ -889,7 +889,7 @@ mod tests {
             missing_packages(&config, &packages),
             [(
                 "b".to_string(),
-                "modules.b.package: no installed package \"nope\" (see `dashboard widgets`)"
+                "modules.b.package: no installed package \"nope\" (see `sitroom widgets`)"
                     .to_string()
             )]
         );
@@ -899,7 +899,7 @@ mod tests {
     /// layer that is.
     #[test]
     fn config_errors_name_their_file() {
-        let dir = std::env::temp_dir().join(format!("dashboard-errfile-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sitroom-errfile-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(dir.join("dashboards")).unwrap();
         std::fs::create_dir_all(dir.join("repo")).unwrap();
@@ -945,13 +945,13 @@ mod tests {
             "{err}"
         );
         std::fs::write(&machine, "").unwrap();
-        let project = dir.join("repo").join(".dashboard.yaml");
+        let project = dir.join("repo").join(".sitroom.yaml");
         std::fs::write(
             &project,
             "screens:\n  - name: repo\n    tiles: [{ module: memroy }]\n",
         )
         .unwrap();
-        dashboard_config::trust::Trust::new(&trust)
+        sitroom_config::trust::Trust::new(&trust)
             .allow(&project)
             .unwrap();
         let err = error(None);
@@ -967,7 +967,7 @@ mod tests {
     #[cfg(unix)]
     #[tokio::test]
     async fn modules_init_at_the_same_time() {
-        let dir = std::env::temp_dir().join(format!("dashboard-init-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sitroom-init-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         let machine = dir.join("config.yaml");
@@ -1002,7 +1002,7 @@ mod tests {
     /// file stays as it was.
     #[tokio::test]
     async fn saves_color_theme() {
-        let dir = std::env::temp_dir().join(format!("dashboard-colors-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sitroom-colors-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         let machine = dir.join("config.yaml");
@@ -1049,17 +1049,17 @@ mod tests {
     /// with that setting alone, not the demo config.
     #[tokio::test]
     async fn first_save_beside_a_project_file_leaves_out_the_demo() {
-        let dir = std::env::temp_dir().join(format!("dashboard-nodemo-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sitroom-nodemo-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(dir.join("repo")).unwrap();
-        let project = dir.join("repo").join(".dashboard.yaml");
+        let project = dir.join("repo").join(".sitroom.yaml");
         std::fs::write(
             &project,
             "modules:\n  cswap: { demo: true }\nscreens:\n  - name: proj\n    tiles: [{ module: cswap }]\n",
         )
         .unwrap();
         let trust = dir.join("trusted-projects");
-        dashboard_config::trust::Trust::new(&trust)
+        sitroom_config::trust::Trust::new(&trust)
             .allow(&project)
             .unwrap();
         let machine = dir.join("config.yaml");
@@ -1074,7 +1074,7 @@ mod tests {
         .unwrap();
         runtime
             .handle(ClientMessage::SetTheme {
-                theme: dashboard_contract::Theme::Light,
+                theme: sitroom_contract::Theme::Light,
                 etag: None,
             })
             .await;
@@ -1097,8 +1097,7 @@ mod tests {
     /// Machine file, a saved dashboard and a project file, in a temp folder.
     #[tokio::test]
     async fn creates_blank_and_copied_dashboards_and_switches_to_them() {
-        let dir =
-            std::env::temp_dir().join(format!("dashboard-runtime-new-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sitroom-runtime-new-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         let machine = dir.join("config.yaml");
@@ -1151,7 +1150,7 @@ mod tests {
 
     #[tokio::test]
     async fn switches_dashboards_and_writes_to_the_right_file() {
-        let dir = std::env::temp_dir().join(format!("dashboard-runtime-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sitroom-runtime-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(dir.join("dashboards")).unwrap();
         std::fs::create_dir_all(dir.join("repo")).unwrap();
@@ -1165,13 +1164,13 @@ mod tests {
         )
         .unwrap();
         std::fs::write(
-            dir.join("repo/.dashboard.yaml"),
+            dir.join("repo/.sitroom.yaml"),
             "screens:\n  - name: repo\n    tiles: [{ module: cswap }]\n",
         )
         .unwrap();
         let trust = dir.join("trusted-projects");
-        dashboard_config::trust::Trust::new(&trust)
-            .allow(&dir.join("repo/.dashboard.yaml"))
+        sitroom_config::trust::Trust::new(&trust)
+            .allow(&dir.join("repo/.sitroom.yaml"))
             .unwrap();
         let sources = Sources {
             machine: Some(machine.clone()),
@@ -1221,7 +1220,7 @@ mod tests {
         let screens = rx.borrow().screens.clone();
         assert_eq!(screens[0].name, "repo");
         let mut edited = screens.clone();
-        edited.push(dashboard_contract::ScreenLayout {
+        edited.push(sitroom_contract::ScreenLayout {
             name: "mine".into(),
             tiles: vec![],
         });
@@ -1232,7 +1231,7 @@ mod tests {
                 etag,
             })
             .await;
-        let saved = dashboard_config::parse(&std::fs::read_to_string(&work).unwrap()).unwrap();
+        let saved = sitroom_config::parse(&std::fs::read_to_string(&work).unwrap()).unwrap();
         let names: Vec<&str> = saved.screens.iter().map(|s| s.name.as_str()).collect();
         assert!(!names.contains(&"repo"), "{names:?}");
         assert!(names.contains(&"mine"), "{names:?}");
@@ -1263,7 +1262,7 @@ mod tests {
     /// user's, and says that edits to the project's are not saved.
     #[tokio::test]
     async fn saving_keeps_screens_a_project_screen_hides() {
-        let dir = std::env::temp_dir().join(format!("dashboard-shadow-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sitroom-shadow-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(dir.join("repo")).unwrap();
         let machine = dir.join("config.yaml");
@@ -1273,14 +1272,14 @@ mod tests {
              - name: system\n    tiles: [{ module: cswap }]\n",
         )
         .unwrap();
-        let project = dir.join("repo").join(".dashboard.yaml");
+        let project = dir.join("repo").join(".sitroom.yaml");
         std::fs::write(
             &project,
             "screens:\n  - name: repo\n    tiles: []\n  - name: system\n    tiles: []\n",
         )
         .unwrap();
         let trust = dir.join("trusted-projects");
-        dashboard_config::trust::Trust::new(&trust)
+        sitroom_config::trust::Trust::new(&trust)
             .allow(&project)
             .unwrap();
         let (mut runtime, rx) = Runtime::start(Sources {
@@ -1304,7 +1303,7 @@ mod tests {
                 etag,
             })
             .await;
-        let saved = dashboard_config::parse(&std::fs::read_to_string(&machine).unwrap()).unwrap();
+        let saved = sitroom_config::parse(&std::fs::read_to_string(&machine).unwrap()).unwrap();
         let names: Vec<&str> = saved.screens.iter().map(|s| s.name.as_str()).collect();
         assert_eq!(names, ["main", "system"]);
         assert_eq!(saved.screens[1].tiles[0].module, "cswap");
@@ -1312,9 +1311,9 @@ mod tests {
 
         // A tile added to a project screen: not saved, and the user is told.
         let mut edited = screens;
-        edited[0].tiles.push(dashboard_contract::TilePlacement {
+        edited[0].tiles.push(sitroom_contract::TilePlacement {
             tile_id: "cswap".into(),
-            size: dashboard_contract::Size::Wide,
+            size: sitroom_contract::Size::Wide,
         });
         let etag = rx.borrow().config.etag.clone();
         runtime
@@ -1341,24 +1340,24 @@ mod tests {
     }
 
     /// A built-in's relative paths start in the folder of the file that set
-    /// them, not where the dashboard was started (a subfolder here).
+    /// them, not where sitroom was started (a subfolder here).
     #[tokio::test]
     async fn builtin_paths_start_in_the_config_files_folder() {
-        if dashboard_modules::builtin("textfile").is_none() {
+        if sitroom_modules::builtin("textfile").is_none() {
             return;
         }
-        let dir = std::env::temp_dir().join(format!("dashboard-paths-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sitroom-paths-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(dir.join("repo/src/deep")).unwrap();
         std::fs::write(dir.join("repo/TODO.md"), "- [ ] write the docs\n").unwrap();
-        let project = dir.join("repo").join(".dashboard.yaml");
+        let project = dir.join("repo").join(".sitroom.yaml");
         std::fs::write(
             &project,
             "modules:\n  notes:\n    builtin: textfile\n    config: { path: TODO.md }\n",
         )
         .unwrap();
         let trust = dir.join("trusted-projects");
-        dashboard_config::trust::Trust::new(&trust)
+        sitroom_config::trust::Trust::new(&trust)
             .allow(&project)
             .unwrap();
         let (runtime, _rx) = Runtime::start(Sources {
@@ -1391,7 +1390,7 @@ mod tests {
 
     #[tokio::test]
     async fn demo_uses_the_catalog_view() {
-        let config = dashboard_config::parse(
+        let config = sitroom_config::parse(
             r"
 modules:
   prs: { builtin: github-prs, demo: true }
@@ -1405,7 +1404,7 @@ modules:
         let catalog = builtin_catalog();
         // github-prs is only in builds with its feature; cswap is always bundled.
         let mut cases = vec![("cswap", "cswap")];
-        if dashboard_modules::ids().contains(&"github-prs") {
+        if sitroom_modules::ids().contains(&"github-prs") {
             cases.push(("prs", "github-prs"));
         }
         for (id, name) in cases {
@@ -1423,7 +1422,7 @@ modules:
 
     #[test]
     fn new_module_picks_builtin_package_or_bundled() {
-        let config = dashboard_config::parse(
+        let config = sitroom_config::parse(
             "modules:\n  taken: {}\nscreens:\n  - name: a\n    tiles:\n      - module: cswap\n",
         )
         .unwrap();
@@ -1458,7 +1457,7 @@ modules:
         assert!(add("cswap", "cswap", EntryKind::Plugin).is_err());
         assert!(add("c2", "cswap", EntryKind::Plugin).is_err());
         assert!(find_entry(&[PathBuf::from("x.yaml")], "nope", EntryKind::Builtin).is_err());
-        if let Some(first) = dashboard_modules::ids().first() {
+        if let Some(first) = sitroom_modules::ids().first() {
             let m = add("copy", first, EntryKind::Builtin).unwrap();
             assert_eq!(m.builtin.as_deref(), Some(*first));
             let m = add(first, first, EntryKind::Builtin).unwrap();
@@ -1468,8 +1467,7 @@ modules:
 
     #[tokio::test]
     async fn add_module_writes_the_config_and_starts_it() {
-        let dir =
-            std::env::temp_dir().join(format!("dashboard-runtime-add-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sitroom-runtime-add-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("config.yaml");
         std::fs::write(

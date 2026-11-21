@@ -10,7 +10,7 @@ export const AMBIENT_INTERVAL_MS = 30_000
 
 /**
  * `?mode=demo&catalog=<url>`: catalog entries' demo views, with no server.
- * `catalog` is a `dashboard widgets --json` file; `id` picks one entry,
+ * `catalog` is a `sitroom widgets --json` file; `id` picks one entry,
  * `theme` (`light` or `dark`) fixes the mode and `color_theme` (a built-in
  * name, e.g. `paper`) the colors, `size` draws the one tile at that size
  * instead of its default, and `fill` makes it fill the page. The site's

@@ -1,4 +1,4 @@
-//! `dashboard plugin new --lang ts|py NAME [DIR]`: write a working plugin to start from.
+//! `sitroom plugin new --lang ts|py NAME [DIR]`: write a working plugin to start from.
 //! The templates and the SDK files are built into the binary, so the new folder needs
 //! nothing else.
 
@@ -16,10 +16,10 @@ pub enum Lang {
 }
 
 const TS_MAIN: &str = include_str!("../templates/plugin.ts");
-const TS_SDK: &str = include_str!("../../../sdk/typescript/dashboard-plugin.ts");
+const TS_SDK: &str = include_str!("../../../sdk/typescript/sitroom-plugin.ts");
 const TS_PACKAGE: &str = "{\n  \"private\": true,\n  \"type\": \"module\"\n}\n";
 const PY_MAIN: &str = include_str!("../templates/plugin.py");
-const PY_SDK: &str = include_str!("../../../sdk/python/dashboard_plugin.py");
+const PY_SDK: &str = include_str!("../../../sdk/python/sitroom_plugin.py");
 
 impl Lang {
     /// (file name, contents) for each file, the main file first.
@@ -27,11 +27,11 @@ impl Lang {
         match self {
             Lang::Ts => vec![
                 ("main.ts", TS_MAIN),
-                ("dashboard-plugin.ts", TS_SDK),
+                ("sitroom-plugin.ts", TS_SDK),
                 // Tells Node the .ts files are ES modules, so it doesn't guess and warn.
                 ("package.json", TS_PACKAGE),
             ],
-            Lang::Py => vec![("main.py", PY_MAIN), ("dashboard_plugin.py", PY_SDK)],
+            Lang::Py => vec![("main.py", PY_MAIN), ("sitroom_plugin.py", PY_SDK)],
         }
     }
 
@@ -72,7 +72,7 @@ pub fn run(lang: Lang, name: &str, dir: Option<&Path>) -> Result<()> {
     }
     let runner = lang.runner();
     println!(
-        "\ntry it:\n  dashboard plugin-check -- {runner} {}",
+        "\ntry it:\n  sitroom plugin-check -- {runner} {}",
         main.display()
     );
     // Plugins run in the config file's folder, so the config gets the full path.
@@ -92,7 +92,7 @@ fn check_name(name: &str) -> Result<()> {
             .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-');
     if !ok {
         // A bad argument: exit 2, like a clap error.
-        return Err(dashboard_cli_kit::Failure::usage(format!(
+        return Err(sitroom_cli_kit::Failure::usage(format!(
             "{name:?}: use lowercase letters, digits and dashes, starting with a letter"
         ))
         .into());
@@ -131,21 +131,20 @@ mod tests {
     }
 
     /// Each template, written out and run through the real host, passes the
-    /// same checks as `dashboard plugin-check`. Skipped when the runner is missing.
+    /// same checks as `sitroom plugin-check`. Skipped when the runner is missing.
     #[tokio::test]
     async fn scaffolds_pass_the_checks() {
-        use dashboard_contract::check::{check_manifest, check_view};
-        use dashboard_host::{Module, Plugin};
+        use sitroom_contract::check::{check_manifest, check_view};
+        use sitroom_host::{Module, Plugin};
 
-        let problems = |found: Vec<dashboard_contract::check::Finding>| -> Vec<String> {
+        let problems = |found: Vec<sitroom_contract::check::Finding>| -> Vec<String> {
             found
                 .into_iter()
                 .filter(|f| f.problem)
                 .map(|f| f.text)
                 .collect()
         };
-        let root =
-            std::env::temp_dir().join(format!("dashboard-plugin-new-{}", std::process::id()));
+        let root = std::env::temp_dir().join(format!("sitroom-plugin-new-{}", std::process::id()));
         for lang in [Lang::Ts, Lang::Py] {
             if !have(lang.runner()) {
                 continue;
@@ -174,13 +173,12 @@ mod tests {
     /// change, run `node sdk/gen-types.mjs`. Skipped without Node.
     #[test]
     fn sdk_types_are_up_to_date() {
-        use dashboard_contract::{Manifest, View, rpc};
+        use sitroom_contract::{Manifest, View, rpc};
 
         if !have("node") {
             return;
         }
-        let dir =
-            std::env::temp_dir().join(format!("dashboard-sdk-schemas-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sitroom-sdk-schemas-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         for (name, schema) in [
             ("manifest", schemars::schema_for!(Manifest)),

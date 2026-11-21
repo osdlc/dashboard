@@ -17,14 +17,14 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::{
-    Action, CatalogEntry, ListItem, Manifest, Requirements, Size, Status, View, Widget,
-};
-use dashboard_host::Module;
 use jiff::civil::Date;
 use schemars::JsonSchema;
 use serde::Deserialize;
 use serde_json::Value;
+use sitroom_contract::{
+    Action, CatalogEntry, ListItem, Manifest, Requirements, Size, Status, View, Widget,
+};
+use sitroom_host::Module;
 
 use crate::{day_text, expand_home, link, manifest, parse_date, today};
 

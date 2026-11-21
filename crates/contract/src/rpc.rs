@@ -34,7 +34,7 @@ pub mod error_code {
 /// Who is running the plugin.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct HostInfo {
-    /// The host's name, e.g. "dashboard".
+    /// The host's name, e.g. "sitroom".
     pub name: String,
     /// The host's version, e.g. "0.1.0".
     pub version: String,

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The smallest plugin with the SDK: a greeting, a clock and a render counter.
 
-    dashboard plugin-check -- python3 sdk/python/examples/hello.py
+    sitroom plugin-check -- python3 sdk/python/examples/hello.py
 
     modules:
       hello:
@@ -15,7 +15,7 @@ import time
 
 # The SDK is one file in the folder above; a plugin of your own keeps a copy next to it.
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-from dashboard_plugin import serve, with_defaults  # noqa: E402
+from sitroom_plugin import serve, with_defaults  # noqa: E402
 
 config = {"name": "world"}
 renders = 0

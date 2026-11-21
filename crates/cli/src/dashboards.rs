@@ -1,28 +1,28 @@
-//! Saved dashboards: `dashboard dashboards list`, `dashboard import` and
-//! `dashboard export`. See docs/dashboards.md.
+//! Saved dashboards: `sitroom dashboards list`, `sitroom import` and
+//! `sitroom export`. See docs/dashboards.md.
 
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use anyhow::{Context, Result, bail};
-use dashboard_config::dashboards::name_for;
-use dashboard_config::layers::{Sources, find_project};
-use dashboard_config::packages::Packages;
-use dashboard_config::{Config, parse};
+use sitroom_config::dashboards::name_for;
+use sitroom_config::layers::{Sources, find_project};
+use sitroom_config::packages::Packages;
+use sitroom_config::{Config, parse};
 
-use dashboard_runtime::{known_modules, registry};
+use sitroom_runtime::{known_modules, registry};
 
 /// Print the saved dashboards, and the project file if one applies here.
 pub fn list(sources: &Sources) -> Result<()> {
     let registry = registry(sources)?;
     let (saved, errors) = registry.list();
     for err in &errors {
-        eprintln!("dashboard: warning: {err}");
+        eprintln!("sitroom: warning: {err}");
     }
     println!("{}", registry.dir.display());
     if saved.is_empty() {
-        println!("  (none yet: add one with `dashboard import FILE`)");
+        println!("  (none yet: add one with `sitroom import FILE`)");
     }
     let width = saved.iter().map(|s| s.name.len()).max().unwrap_or(0);
     for s in &saved {
@@ -42,7 +42,7 @@ pub fn list(sources: &Sources) -> Result<()> {
         let note = if sources.trust().is_ok_and(|t| t.allows(&project)) {
             ""
         } else {
-            " (not trusted, not used; see `dashboard trust`)"
+            " (not trusted, not used; see `sitroom trust`)"
         };
         println!("project file: {}{note}", project.display());
     }
@@ -81,7 +81,7 @@ pub fn import(sources: &Sources, from: &str, name: Option<&str>, force: bool) ->
         }
         if needs.iter().any(|n| n.contains("plugin package")) {
             println!(
-                "Install a package with `dashboard plugin install <id> --index <index>`, or from its folder or .tar.gz (see docs/marketplace.md)."
+                "Install a package with `sitroom plugin install <id> --index <index>`, or from its folder or .tar.gz (see docs/marketplace.md)."
             );
         }
     }
@@ -93,7 +93,7 @@ pub fn import(sources: &Sources, from: &str, name: Option<&str>, force: bool) ->
         }
     }
     println!("{RUNS_NOTE}");
-    println!("open it with: dashboard --dashboard {name} serve");
+    println!("open it with: sitroom --dashboard {name} serve");
     Ok(())
 }
 
@@ -200,7 +200,7 @@ pub fn export(sources: &Sources, name: &str, file: Option<&Path>, force: bool) -
 fn sources_machine(sources: &Sources) -> Result<PathBuf> {
     match &sources.machine {
         Some(p) => Ok(p.clone()),
-        None => dashboard_config::default_path(),
+        None => sitroom_config::default_path(),
     }
 }
 
@@ -242,7 +242,7 @@ pub fn needs(config: &Config, packages: &Packages, path: &Path) -> Vec<String> {
                 "module {id:?}, which this build doesn't have (see docs/modules.md)"
             ));
         } else if let Some(builtin) = &m.builtin
-            && dashboard_modules::builtin(builtin).is_none()
+            && sitroom_modules::builtin(builtin).is_none()
         {
             out.push(format!(
                 "built-in module {builtin:?} for {id:?}, which this build doesn't have"
