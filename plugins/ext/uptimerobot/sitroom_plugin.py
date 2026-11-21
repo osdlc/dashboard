@@ -59,7 +59,7 @@ def _send(message: dict) -> None:
 
 
 def log(level: LogLevel, message: str) -> None:
-    """Sends a line to the dashboard's log (not the tile)."""
+    """Sends a line to sitroom's log (not the tile)."""
     _send({"method": "log", "params": {"level": level, "message": message}})
 
 
@@ -100,7 +100,7 @@ def serve(
     init: Optional[Callable[[Dict[str, Any]], None]] = None,
     shutdown: Optional[Callable[[], None]] = None,
 ) -> None:
-    """Answers the dashboard's requests on stdin until it says `exit` or closes stdin.
+    """Answers sitroom's requests on stdin until it says `exit` or closes stdin.
 
     `manifest` is a dict or a function of the config that returns one; `contract_version`
     and `commands` are filled in. `init(config)` gets the tile's `config:` block (`{}` when
@@ -142,7 +142,7 @@ def serve(
         except PluginError as e:
             _send({"id": msg["id"], "error": {"code": e.code, "message": str(e)}})
         except Exception as e:
-            # A bug: the tile shows the error, the dashboard's log gets the traceback.
+            # A bug: the tile shows the error, sitroom's log gets the traceback.
             traceback.print_exc()
             _send({"id": msg["id"], "error": {"code": INTERNAL_ERROR, "message": f"{type(e).__name__}: {e}"}})
 
@@ -573,7 +573,7 @@ class _ImageWidgetRequired(TypedDict):
     type: Literal["image"]
 
 
-# A picture from a file on the machine the dashboard runs on. The terminal
+# A picture from a file on the machine sitroom runs on. The terminal
 # draws it with the best graphics it supports (Kitty, iTerm2 or Sixel),
 # or with colored half blocks. It is scaled to fit and keeps its shape.
 class ImageWidget(_ImageWidgetRequired, total=False):

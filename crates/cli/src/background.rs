@@ -349,7 +349,7 @@ mod tests {
     fn matches_ps_comm() {
         assert!(same_program("/usr/local/bin/sitroom\n", "sitroom"));
         assert!(same_program("sitroom", "sitroom"));
-        assert!(same_program("sitroom-relea", "sitroom-release"));
+        assert!(same_program("sitroom-release", "sitroom-release-x"));
         assert!(!same_program("sshd", "sitroom"));
         assert!(!same_program("dash", "sitroom"));
         assert!(!same_program("", "sitroom"));
