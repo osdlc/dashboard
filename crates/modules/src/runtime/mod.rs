@@ -819,6 +819,7 @@ pub fn catalog(config_paths: &[PathBuf]) -> (Vec<CatalogEntry>, Vec<String>) {
 
 /// Built-ins and bundled plugins: what ships inside the binary.
 fn builtin_catalog() -> Vec<CatalogEntry> {
+    #[cfg_attr(not(feature = "module-cswap"), allow(unused_mut))]
     let mut entries = crate::catalog();
     #[cfg(feature = "module-cswap")]
     entries.push(crate::agents::cswap::catalog());
