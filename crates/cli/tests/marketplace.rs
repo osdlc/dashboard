@@ -1,4 +1,4 @@
-//! `dashboard plugin pack | install | list | update | remove`, run as the
+//! `sitroom plugin pack | install | list | update | remove`, run as the
 //! binary against a local index made from the example packages. The data
 //! home is a scratch folder; nothing touches the network.
 
@@ -12,10 +12,8 @@ struct Scratch {
 
 impl Scratch {
     fn new(name: &str) -> Self {
-        let root = std::env::temp_dir().join(format!(
-            "dashboard-marketplace-{name}-{}",
-            std::process::id()
-        ));
+        let root =
+            std::env::temp_dir().join(format!("sitroom-marketplace-{name}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&root);
         std::fs::create_dir_all(&root).unwrap();
         Self { root }
@@ -30,26 +28,26 @@ impl Scratch {
     }
 
     fn plugins(&self) -> PathBuf {
-        self.root.join("data/dashboard/plugins")
+        self.root.join("data/sitroom/plugins")
     }
 
-    /// Run the dashboard with this folder as the data home, feeding `stdin`.
+    /// Run sitroom with this folder as the data home, feeding `stdin`.
     fn run(&self, args: &[&str], stdin: &str) -> Output {
         self.run_env(args, stdin, &[])
     }
 
     /// `run`, with these environment variables set.
     fn run_env(&self, args: &[&str], stdin: &str, env: &[(&str, &str)]) -> Output {
-        let mut cmd = Command::new(env!("CARGO_BIN_EXE_dashboard"));
+        let mut cmd = Command::new(env!("CARGO_BIN_EXE_sitroom"));
         for (key, _) in std::env::vars() {
-            if key.starts_with("DASHBOARD_") {
+            if key.starts_with("SITROOM_") {
                 cmd.env_remove(key);
             }
         }
         let mut child = cmd
             .args(args)
             // Not XDG_DATA_HOME: Windows ignores it and uses its Known Folders.
-            .env("DASHBOARD_DURABLE_DIR", self.root.join("data"))
+            .env("SITROOM_DURABLE_DIR", self.root.join("data"))
             .envs(env.iter().copied())
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
@@ -135,13 +133,13 @@ fn install_list_update_remove_from_a_local_index() {
     let err = s.fails(&["plugin", "install", "hello", "--index", &index]);
     assert!(err.contains("--yes"), "{err}");
 
-    // "y" installs it, where the dashboard looks for packages.
+    // "y" installs it, where sitroom looks for packages.
     let out = s.run(&["plugin", "install", "hello", "--index", &index], "y\n");
     assert!(out.status.success(), "{}", text(&out));
     let installed = s.plugins().join("hello");
-    assert!(installed.join("dashboard-plugin.yaml").is_file());
+    assert!(installed.join("sitroom-plugin.yaml").is_file());
     assert!(installed.join("hello.py").is_file());
-    let found = dashboard_config::packages::Packages::load_from(&[s.plugins()]);
+    let found = sitroom_config::packages::Packages::load_from(&[s.plugins()]);
     assert!(found.errors.is_empty(), "{:?}", found.errors);
     assert_eq!(found.get("hello").unwrap().package.version, "0.1.0");
     let record = std::fs::read_to_string(s.plugins().join("installed.json")).unwrap();
@@ -155,12 +153,12 @@ fn install_list_update_remove_from_a_local_index() {
     // A newer version in the index: list says so, and update installs it.
     let src = s.root.join("src/hello");
     std::fs::create_dir_all(&src).unwrap();
-    for name in ["dashboard-plugin.yaml", "hello.py"] {
+    for name in ["sitroom-plugin.yaml", "hello.py"] {
         std::fs::copy(example("hello").join(name), src.join(name)).unwrap();
     }
-    let yaml = std::fs::read_to_string(src.join("dashboard-plugin.yaml")).unwrap();
+    let yaml = std::fs::read_to_string(src.join("sitroom-plugin.yaml")).unwrap();
     std::fs::write(
-        src.join("dashboard-plugin.yaml"),
+        src.join("sitroom-plugin.yaml"),
         yaml.replace("version: 0.1.0", "version: 0.2.0"),
     )
     .unwrap();
@@ -170,7 +168,7 @@ fn install_list_update_remove_from_a_local_index() {
     // The index it came from is remembered, so update needs no --index.
     let out = s.ok(&["plugin", "update", "--yes"]);
     assert!(out.contains("replaces version 0.1.0"), "{out}");
-    let yaml = std::fs::read_to_string(installed.join("dashboard-plugin.yaml")).unwrap();
+    let yaml = std::fs::read_to_string(installed.join("sitroom-plugin.yaml")).unwrap();
     assert!(yaml.contains("version: 0.2.0"));
     assert!(s.ok(&["plugin", "update"]).contains("up to date"));
 
@@ -225,7 +223,7 @@ fn installs_from_a_file_or_a_folder() {
     let path = archive.display().to_string();
     let out = s.ok(&["plugin", "install", &path, "--sha256", &sha, "--yes"]);
     assert!(out.contains("checked against --sha256"), "{out}");
-    assert!(s.plugins().join("latency/dashboard-plugin.yaml").is_file());
+    assert!(s.plugins().join("latency/sitroom-plugin.yaml").is_file());
 
     let folder = example("hello").display().to_string();
     let out = s.ok(&["plugin", "install", &folder, "--yes"]);
@@ -240,12 +238,12 @@ fn installs_from_a_file_or_a_folder() {
 fn hello_at(s: &Scratch, version: &str) -> PathBuf {
     let src = s.root.join(format!("src-{version}/hello"));
     std::fs::create_dir_all(&src).unwrap();
-    for name in ["dashboard-plugin.yaml", "hello.py"] {
+    for name in ["sitroom-plugin.yaml", "hello.py"] {
         std::fs::copy(example("hello").join(name), src.join(name)).unwrap();
     }
-    let yaml = std::fs::read_to_string(src.join("dashboard-plugin.yaml")).unwrap();
+    let yaml = std::fs::read_to_string(src.join("sitroom-plugin.yaml")).unwrap();
     std::fs::write(
-        src.join("dashboard-plugin.yaml"),
+        src.join("sitroom-plugin.yaml"),
         yaml.replace("version: 0.1.0", &format!("version: {version}")),
     )
     .unwrap();
@@ -266,7 +264,7 @@ fn update_keeps_to_the_recorded_index() {
         &example("latency").display().to_string(),
         "--yes",
     ]);
-    let env = [("DASHBOARD_PLUGIN_INDEX", other_index.as_str())];
+    let env = [("SITROOM_PLUGIN_INDEX", other_index.as_str())];
 
     // The variable doesn't replace the index hello came from, and doesn't
     // reach latency, which came from a folder.
@@ -344,12 +342,12 @@ fn every_ext_package_packs() {
     let mut dirs: Vec<PathBuf> = std::fs::read_dir(&ext)
         .unwrap()
         .map(|e| e.unwrap().path())
-        .filter(|p| p.join("dashboard-plugin.yaml").is_file())
+        .filter(|p| p.join("sitroom-plugin.yaml").is_file())
         .collect();
     dirs.sort();
     let refs: Vec<&Path> = dirs.iter().map(PathBuf::as_path).collect();
     s.pack(&refs);
-    let index: dashboard_contract::Index =
+    let index: sitroom_contract::Index =
         serde_json::from_slice(&std::fs::read(s.market().join("index.json")).unwrap()).unwrap();
     assert_eq!(index.plugins.len(), dirs.len());
     let err = s.fails(&[

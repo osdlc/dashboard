@@ -5,7 +5,7 @@
 // native-vs-plugin benchmark. It shows the same view for the same repositories, so keep the
 // three (Rust, TypeScript, Python) in step. Node 24 runs it as is.
 //
-//   dashboard plugin-check --plugin-config '{"repos": ["."]}' -- node plugins/ext/git-ts/main.ts
+//   sitroom plugin-check --plugin-config '{"repos": ["."]}' -- node plugins/ext/git-ts/main.ts
 //
 //   modules:
 //     git-ts:
@@ -16,8 +16,8 @@ import { spawnSync } from "node:child_process";
 import { realpathSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { basename } from "node:path";
-import { configError, serve, upstreamError, withDefaults } from "./dashboard-plugin.ts";
-import type { Row, Status, View } from "./dashboard-plugin.ts";
+import { configError, serve, upstreamError, withDefaults } from "./sitroom-plugin.ts";
+import type { Row, Status, View } from "./sitroom-plugin.ts";
 
 let config = { repos: [] as string[] };
 

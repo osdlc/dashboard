@@ -1,6 +1,6 @@
 //! Builds the Vue app in `web/` so it can be embedded in the binary.
 //!
-//! Reruns only when UI sources change. Set `DASHBOARD_SKIP_UI_BUILD=1` to skip
+//! Reruns only when UI sources change. Set `SITROOM_SKIP_UI_BUILD=1` to skip
 //! (a placeholder page is embedded instead); the same happens if pnpm is missing.
 
 use std::path::{Path, PathBuf};
@@ -26,10 +26,10 @@ fn main() {
     for path in WATCHED {
         println!("cargo:rerun-if-changed={}", web.join(path).display());
     }
-    println!("cargo:rerun-if-env-changed=DASHBOARD_SKIP_UI_BUILD");
+    println!("cargo:rerun-if-env-changed=SITROOM_SKIP_UI_BUILD");
 
-    if env::var_os("DASHBOARD_SKIP_UI_BUILD").is_some() {
-        placeholder(&dist, "UI build skipped (DASHBOARD_SKIP_UI_BUILD is set).");
+    if env::var_os("SITROOM_SKIP_UI_BUILD").is_some() {
+        placeholder(&dist, "UI build skipped (SITROOM_SKIP_UI_BUILD is set).");
         return;
     }
     if Command::new("pnpm").arg("--version").output().is_err() {
@@ -67,7 +67,7 @@ fn placeholder(dist: &Path, message: &str) {
     fs::create_dir_all(dist).unwrap();
     fs::write(
         dist.join("index.html"),
-        format!("<!doctype html><title>Dashboard</title><p>{message}</p>"),
+        format!("<!doctype html><title>Sitroom</title><p>{message}</p>"),
     )
     .unwrap();
 }

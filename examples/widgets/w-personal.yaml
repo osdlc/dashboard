@@ -1,7 +1,7 @@
 # Personal widgets: a calendar from an .ics feed, and tasks from org-mode,
 # Markdown (Obsidian Tasks), todo.txt, Taskwarrior and an osdlc sdlc vault.
 #
-#   cargo run -p dashboard -- serve --config examples/widgets/w-personal.yaml
+#   cargo run -p sitroom -- serve --config examples/widgets/w-personal.yaml
 #
 # Relative paths start from this file's folder. The "day" screen reads the
 # sample files under crates/modules-personal/testdata, so it works with no
@@ -27,11 +27,11 @@ modules:
       paths: [../../crates/modules-personal/testdata/org]
       days: 14
       undated: true
-      link: "https://github.com/osdlc/dashboard/blob/main/crates/modules-personal/testdata/org/{path}#L{line}"
+      link: "https://github.com/osdlc/sitroom/blob/main/crates/modules-personal/testdata/org/{path}#L{line}"
   markdown-tasks:
     config:
       paths: [../../crates/modules-personal/testdata/markdown]
-      link: "https://github.com/osdlc/dashboard/blob/main/crates/modules-personal/testdata/markdown/{path}#L{line}"
+      link: "https://github.com/osdlc/sitroom/blob/main/crates/modules-personal/testdata/markdown/{path}#L{line}"
   todo-txt:
     config: { path: ../../crates/modules-personal/testdata/todo-txt/todo.txt }
   taskwarrior:
@@ -40,7 +40,7 @@ modules:
     config:
       path: ../../crates/modules-personal/testdata/sdlc
       planning: true
-      link: "https://github.com/osdlc/dashboard/blob/main/crates/modules-personal/testdata/sdlc/{path}"
+      link: "https://github.com/osdlc/sitroom/blob/main/crates/modules-personal/testdata/sdlc/{path}"
 
   # ---- the same modules as demo views ----
   calendar-demo:

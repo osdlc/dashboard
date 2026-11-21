@@ -7,15 +7,15 @@ use std::process::Stdio;
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::{CatalogEntry, Manifest, Requirements, Size, View, Widget};
-use dashboard_host::Module;
 use serde::Deserialize;
+use sitroom_contract::{CatalogEntry, Manifest, Requirements, Size, View, Widget};
+use sitroom_host::Module;
 use tokio::process::Command;
 
 use super::{Window, now_secs, worst};
-use dashboard_modules_common::http::{check, client};
-use dashboard_modules_common::manifest;
-use dashboard_modules_common::time::{demo_time, parse_time};
+use sitroom_modules_common::http::{check, client};
+use sitroom_modules_common::manifest;
+use sitroom_modules_common::time::{demo_time, parse_time};
 
 const URL: &str = "https://api.github.com/copilot_internal/user";
 
@@ -213,7 +213,7 @@ mod tests {
         let now = parse_time("2026-10-16T12:00:00Z").unwrap();
         let v = view(&user, now);
         assert_eq!(v.summary, "individual · 88% premium requests");
-        assert_eq!(v.status, dashboard_contract::Status::Warn);
+        assert_eq!(v.status, sitroom_contract::Status::Warn);
         let Widget::Column { children } = &v.root else {
             panic!()
         };

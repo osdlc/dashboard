@@ -10,7 +10,7 @@ pub use reqwest::{Client, Response};
 pub fn client() -> Result<reqwest::Client> {
     Ok(reqwest::Client::builder()
         .timeout(Duration::from_secs(20))
-        .user_agent(concat!("dashboard/", env!("CARGO_PKG_VERSION")))
+        .user_agent(concat!("sitroom/", env!("CARGO_PKG_VERSION")))
         .build()?)
 }
 
@@ -20,7 +20,7 @@ pub fn client() -> Result<reqwest::Client> {
 pub fn localhost_client() -> Result<reqwest::Client> {
     Ok(reqwest::Client::builder()
         .timeout(Duration::from_secs(10))
-        .user_agent(concat!("dashboard/", env!("CARGO_PKG_VERSION")))
+        .user_agent(concat!("sitroom/", env!("CARGO_PKG_VERSION")))
         .danger_accept_invalid_certs(true)
         .build()?)
 }

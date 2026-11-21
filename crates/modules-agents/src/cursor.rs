@@ -12,17 +12,17 @@ use std::process::Stdio;
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::{CatalogEntry, Manifest, Requirements, Size, Status, View, Widget};
-use dashboard_host::Module;
 use schemars::JsonSchema;
 use serde::Deserialize;
 use serde_json::Value;
+use sitroom_contract::{CatalogEntry, Manifest, Requirements, Size, Status, View, Widget};
+use sitroom_host::Module;
 use tokio::process::Command;
 
 use super::{Window, now_secs};
-use dashboard_modules_common::http::{check, client};
-use dashboard_modules_common::time::{demo_time, parse_time};
-use dashboard_modules_common::{expand_home, manifest};
+use sitroom_modules_common::http::{check, client};
+use sitroom_modules_common::time::{demo_time, parse_time};
+use sitroom_modules_common::{expand_home, manifest};
 
 const URL: &str = "https://cursor.com/api/usage-summary";
 const DASHBOARD: &str = "https://cursor.com/dashboard?tab=usage";

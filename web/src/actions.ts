@@ -20,7 +20,7 @@ export function runAction(action: Action) {
       if (webUrl(action.url)) window.open(action.url, '_blank', 'noopener')
       break
     case 'run_command':
-      // Not run yet; `dashboard plugin-check` says so.
+      // Not run yet; `sitroom plugin-check` says so.
       break
   }
 }

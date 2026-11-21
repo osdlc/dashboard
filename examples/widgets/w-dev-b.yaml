@@ -2,8 +2,8 @@
 # Python plugin package in plugins/ext/ (examples/widgets/plugins links
 # there, so `package: <id>` finds them). From the repository root:
 #
-#   cargo run -p dashboard -- serve --config examples/widgets/w-dev-b.yaml
-#   cargo run -p dashboard -- tui   --config examples/widgets/w-dev-b.yaml
+#   cargo run -p sitroom -- serve --config examples/widgets/w-dev-b.yaml
+#   cargo run -p sitroom -- tui   --config examples/widgets/w-dev-b.yaml
 #
 # All five call token APIs and are untested live, so nothing here calls them:
 # - the "dev & tasks" screen shows each package's demo view (`demo: true`: no

@@ -21,7 +21,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, TypeVar
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from dashboard_plugin import View, config_error, serve, with_defaults  # noqa: E402
+from sitroom_plugin import View, config_error, serve, with_defaults  # noqa: E402
 import view  # noqa: E402
 
 T = TypeVar("T")

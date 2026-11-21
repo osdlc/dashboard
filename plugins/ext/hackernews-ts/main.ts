@@ -5,14 +5,14 @@
 // the native module (crates/modules-fun/src/hackernews.rs) and the Python plugin
 // (plugins/ext/hackernews-py), and must show the same view for the same input.
 //
-//   dashboard plugin-check -- node plugins/ext/hackernews-ts/main.ts
+//   sitroom plugin-check -- node plugins/ext/hackernews-ts/main.ts
 
 import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-import { configError, serve, upstreamError, withDefaults } from "./dashboard-plugin.ts";
-import type { ListItem, View } from "./dashboard-plugin.ts";
+import { configError, serve, upstreamError, withDefaults } from "./sitroom-plugin.ts";
+import type { ListItem, View } from "./sitroom-plugin.ts";
 
 const API = "https://hacker-news.firebaseio.com/v0";
 /** Most stories shown. Each one is a request per refresh, so keep it small. */

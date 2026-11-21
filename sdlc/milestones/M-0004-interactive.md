@@ -26,7 +26,7 @@ Build API level 3, as experimental, and use it so a user can act on an item from
   list mixes built-ins and plugins, so both paths are used. Several of these plugins have not
   been run against the real service yet; [M-0002](M-0002-core-and-plugins.md) may move or drop
   them first.
-- Every action that changes something outside the dashboard asks first, shows what it will run or
+- Every action that changes something outside sitroom asks first, shows what it will run or
   send, and is written to the log.
 - Ambient mode shows no actions (nor the screensaver module).
 

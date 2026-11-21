@@ -1,7 +1,7 @@
 # Built-in modules
 
-Built-in modules are Rust modules compiled into the `dashboard` binary. They run in the
-dashboard's own process, with no plugin to start. (Modules in other languages are plugins; see
+Built-in modules are Rust modules compiled into the `sitroom` binary. They run in the
+sitroom's own process, with no plugin to start. (Modules in other languages are plugins; see
 [plugins.md](plugins.md).)
 
 Like every module, a built-in one only runs when the config names it, under `modules:` or as a
@@ -22,11 +22,11 @@ Built-in modules are grouped into bundles, one crate per bundle:
 
 Two more crates hold the shared parts:
 
-- `crates/modules-common` (`dashboard-modules-common`): the `Builtin` registration type,
+- `crates/modules-common` (`sitroom-modules-common`): the `Builtin` registration type,
   catalog entry helpers (`entry`, `schema`, `strings`), `manifest`, times (`time::ago`,
   `time::demo_time`), tokens from the environment or a command (`secret::Secret`) and,
   behind its `http` feature, an HTTP client (`http::client`, `http::check`).
-- `crates/modules` (`dashboard-modules`): the facade the rest of the workspace uses. It
+- `crates/modules` (`sitroom-modules`): the facade the rest of the workspace uses. It
   gathers the modules of every bundle in the build: `all()`, `ids()`, `builtin(id)` and
   `catalog()`.
 
@@ -34,16 +34,16 @@ Two more crates hold the shared parts:
 
 Each bundle is a cargo feature, `bundle-<name>`, and each module is a feature,
 `module-<id>`. A bundle feature turns on all of its modules. The default build has every
-bundle. The same features exist on `dashboard-modules` and on the `dashboard` binary.
+bundle. The same features exist on `sitroom-modules` and on the `sitroom` binary.
 
 ```sh
-cargo build -p dashboard                                              # every bundle
-cargo build -p dashboard --no-default-features --features bundle-system
-cargo build -p dashboard --no-default-features --features bundle-system,module-github-prs
-cargo build -p dashboard --no-default-features                        # no built-in modules
+cargo build -p sitroom                                              # every bundle
+cargo build -p sitroom --no-default-features --features bundle-system
+cargo build -p sitroom --no-default-features --features bundle-system,module-github-prs
+cargo build -p sitroom --no-default-features                        # no built-in modules
 ```
 
-`dashboard widgets` and the web palette list only the modules in the build. A screen tile that
+`sitroom widgets` and the web palette list only the modules in the build. A screen tile that
 names a module the build left out makes the config fail to load, with an error that names the
 module. A `modules:` entry for a left-out module is ignored: the module does not run.
 
@@ -52,11 +52,11 @@ rest in bundle order (system, dev, ops, fun, agents, personal).
 
 Heavy dependencies sit only in the bundles (and modules) that need them: `sysinfo` in the
 system modules that read it, and `reqwest` only in modules that call a web API (it comes from
-`dashboard-modules-common`'s `http` feature).
+`sitroom-modules-common`'s `http` feature).
 
 `scripts/check-features.sh` builds the binary with no modules, with each bundle alone and with
 each module alone, with warnings as errors. For no modules and for each bundle it also runs the
-tests of the `dashboard` and `dashboard-modules` crates. Run it after changing a bundle
+tests of the `sitroom` and `sitroom-modules` crates. Run it after changing a bundle
 (`scripts/check-features.sh --bundles` skips the per-module builds).
 
 Binary size, `--profile small` on macOS arm64:
@@ -100,16 +100,16 @@ Python plugin); `bench/` has the harness.
 
 Say the new module is `weather` and it goes in the `personal` bundle. If the bundle has no
 crate yet, copy `crates/modules-fun` (the smallest), rename it, and add it to
-`dashboard-modules` as an optional dependency with `default-features = false` and to the list
+`sitroom-modules` as an optional dependency with `default-features = false` and to the list
 in `bundles()` in `crates/modules/src/lib.rs`.
 
 1. **File.** Write `crates/modules-<bundle>/src/weather.rs`: a struct that implements
-   `dashboard_host::Module` (`init` reads the `config:` block and returns a manifest, `render`
+   `sitroom_host::Module` (`init` reads the `config:` block and returns a manifest, `render`
    returns a `View`). Copy the shape of a module close to yours: `uptime.rs` for a command or
    URL check, `jira.rs` for a token API, `cpu.rs` for a graph.
 2. **Feature.** In the bundle's `Cargo.toml`, add a feature named after the id and add it to
    `default`. Put the module's own dependencies behind it (`weather = ["dep:x"]`, or
-   `["dashboard-modules-common/http"]` for reqwest).
+   `["sitroom-modules-common/http"]` for reqwest).
 3. **Registration.** In the bundle's `lib.rs`, declare the file behind its feature
    (`#[cfg(feature = "weather")] pub mod weather;`) and add a `Builtin` to `MODULES`:
 
@@ -124,9 +124,9 @@ in `bundles()` in `crates/modules/src/lib.rs`.
    ```
 
 4. **Facade features.** In `crates/modules/Cargo.toml` add
-   `module-weather = ["dashboard-modules-personal/weather"]` and add `module-weather` to
+   `module-weather = ["sitroom-modules-personal/weather"]` and add `module-weather` to
    `bundle-personal`. In `crates/cli/Cargo.toml` add
-   `module-weather = ["dashboard-modules/module-weather"]`.
+   `module-weather = ["sitroom-modules/module-weather"]`.
 5. **Catalog entry and demo view.** Add `pub fn catalog() -> CatalogEntry` to the file. Start
    from `crate::entry(id, name, size, demo)` and fill in `description`, `tags`,
    `config_schema` (`crate::schema::<Config>()`) and `requirements` (binaries, environment

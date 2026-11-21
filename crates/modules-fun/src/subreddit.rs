@@ -17,17 +17,17 @@
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::{
-    Action, CatalogEntry, ListItem, Manifest, Requirements, Size, Status, ValueFormat, View,
-    Widget, format_value,
-};
-use dashboard_host::Module;
-use dashboard_modules_common::http::{Client, check, client};
-use dashboard_modules_common::manifest;
-use dashboard_modules_common::time::parse_time;
 use schemars::JsonSchema;
 use serde::Deserialize;
 use serde_json::Value;
+use sitroom_contract::{
+    Action, CatalogEntry, ListItem, Manifest, Requirements, Size, Status, ValueFormat, View,
+    Widget, format_value,
+};
+use sitroom_host::Module;
+use sitroom_modules_common::http::{Client, check, client};
+use sitroom_modules_common::manifest;
+use sitroom_modules_common::time::parse_time;
 
 use crate::{ago, plural};
 
@@ -125,7 +125,7 @@ impl Module for Subreddit {
         let c = &self.config;
         let listing: Listing = match &c.sample {
             Some(path) if path.ends_with(".rss") || path.ends_with(".xml") => {
-                let path = dashboard_modules_common::expand_home(path);
+                let path = sitroom_modules_common::expand_home(path);
                 let text = std::fs::read_to_string(&path)
                     .with_context(|| format!("reading {}", path.display()))?;
                 parse_feed(&text).with_context(|| format!("parsing {}", path.display()))?
@@ -133,7 +133,7 @@ impl Module for Subreddit {
             Some(path) => crate::read_sample(path)?,
             None => fetch(&c.subreddit, c.sort, c.limit).await?,
         };
-        let now = dashboard_host::now_ms() / 1000;
+        let now = sitroom_host::now_ms() / 1000;
         Ok(view(
             &listing,
             &c.subreddit,

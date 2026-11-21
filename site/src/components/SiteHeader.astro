@@ -6,14 +6,14 @@ interface Props {
 }
 const { here } = Astro.props
 const base = import.meta.env.BASE_URL.replace(/\/?$/, '/')
-const repo = 'https://github.com/osdlc/dashboard'
+const repo = 'https://github.com/osdlc/sitroom'
 ---
 
 <header class="top">
   <div class="wrap bar">
-    <a class="brand" href={base} aria-label="dashboard home">
+    <a class="brand" href={base} aria-label="sitroom home">
       <span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-      dashboard
+      sitroom
     </a>
     <nav aria-label="Sections">
       <a href={`${base}tutorial/`} aria-current={here === 'tutorial' ? 'page' : undefined}>Tutorial</a>
@@ -40,7 +40,7 @@ const repo = 'https://github.com/osdlc/dashboard'
 <script>
   // Theme: cycles OS default → light → dark, remembered in this browser.
   const root = document.documentElement
-  const KEY = 'dashboard-site.theme'
+  const KEY = 'sitroom-site.theme'
   const dark = () => matchMedia('(prefers-color-scheme: dark)').matches
   document.querySelector('[data-theme-toggle]')?.addEventListener('click', () => {
     const current = root.dataset.theme ?? (dark() ? 'dark' : 'light')

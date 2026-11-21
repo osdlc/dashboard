@@ -8,7 +8,7 @@ native module (crates/modules-fun/src/feedreader.rs) and the TypeScript plugin
 (plugins/ext/feedreader-ts), and must show the same view for the same input. It parses with
 the standard library's ElementTree.
 
-    dashboard plugin-check -- python3 plugins/ext/feedreader-py/main.py
+    sitroom plugin-check -- python3 plugins/ext/feedreader-py/main.py
 """
 
 import http.client
@@ -21,7 +21,7 @@ from xml.parsers import expat
 from concurrent.futures import ThreadPoolExecutor
 from typing import List, Optional, Tuple, TypedDict, Union
 
-from dashboard_plugin import ListItem, View, config_error, serve, upstream_error, with_defaults
+from sitroom_plugin import ListItem, View, config_error, serve, upstream_error, with_defaults
 
 RDF_NS = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 RSS1_NS = "http://purl.org/rss/1.0/"
@@ -54,7 +54,7 @@ def is_http(s: str) -> bool:
 def read(entry: str) -> Feed:
     """Fetches a URL or reads a file. The body is read as UTF-8 whatever the feed declares."""
     if is_http(entry):
-        req = urllib.request.Request(entry, headers={"User-Agent": "dashboard/0.1.0"})
+        req = urllib.request.Request(entry, headers={"User-Agent": "sitroom/0.1.0"})
         try:
             with urllib.request.urlopen(req, timeout=20) as resp:
                 data = resp.read()

@@ -7,9 +7,9 @@
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use dashboard_config::packages::load_package;
-use dashboard_host::{Module, Plugin};
 use serde_json::json;
+use sitroom_config::packages::load_package;
+use sitroom_host::{Module, Plugin};
 
 fn have(program: &str) -> bool {
     Command::new(program).arg("--version").output().is_ok()
@@ -82,7 +82,7 @@ impl Drop for TempDir {
 /// `work`: a clone one commit ahead and one behind, with a changed and an
 /// untracked file. `plain`: a clean repository with no upstream.
 fn fixture(name: &str) -> TempDir {
-    let root = std::env::temp_dir().join(format!("dashboard-{name}-{}", std::process::id()));
+    let root = std::env::temp_dir().join(format!("sitroom-{name}-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&root);
     std::fs::create_dir_all(&root).unwrap();
     let origin = root.join("origin");
@@ -117,7 +117,7 @@ async fn native_and_plugins_show_the_same_view() {
         .map(|r| root.join(r).to_string_lossy().into_owned())
         .collect();
     let config = json!({ "repos": repos });
-    let mut native = dashboard_modules::builtin("git").expect("git module");
+    let mut native = sitroom_modules::builtin("git").expect("git module");
     native.init(config.clone()).await.expect("init");
     let want = native.render().await.expect("render");
     assert_eq!(want.summary, "3 repos · 1 dirty · 1 unpushed · 1 behind");
@@ -131,7 +131,7 @@ async fn native_and_plugins_show_the_same_view() {
 
 #[test]
 fn packages_have_the_native_demo_view() {
-    let native = dashboard_modules::catalog()
+    let native = sitroom_modules::catalog()
         .into_iter()
         .find(|e| e.id == "git")
         .expect("git entry");
@@ -158,7 +158,7 @@ async fn unreadable_parent_is_not_a_folder() {
         return;
     }
     let root =
-        std::env::temp_dir().join(format!("dashboard-bench-git-locked-{}", std::process::id()));
+        std::env::temp_dir().join(format!("sitroom-bench-git-locked-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&root);
     let locked = root.join("locked");
     std::fs::create_dir_all(locked.join("repo")).unwrap();
@@ -174,7 +174,7 @@ async fn unreadable_parent_is_not_a_folder() {
     let _unlock = Unlock(locked.clone());
 
     let config = json!({ "repos": [locked.join("repo").to_string_lossy()] });
-    let mut native = dashboard_modules::builtin("git").expect("git module");
+    let mut native = sitroom_modules::builtin("git").expect("git module");
     native.init(config.clone()).await.expect("init");
     let want = native.render().await.expect("render");
     assert_eq!(want.summary, "1 repo · 0 dirty · 0 unpushed · 0 behind");

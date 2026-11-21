@@ -42,11 +42,11 @@ join() { local IFS=,; echo "$*"; }
 size() {
     local name=$1 features=$2
     if [[ -z $features ]]; then
-        cargo build --quiet --profile small -p dashboard --no-default-features
+        cargo build --quiet --profile small -p sitroom --no-default-features
     else
-        cargo build --quiet --profile small -p dashboard --no-default-features --features "$features"
+        cargo build --quiet --profile small -p sitroom --no-default-features --features "$features"
     fi
-    record "size.$name" "$(size_of "$target/small/dashboard")"
+    record "size.$name" "$(size_of "$target/small/sitroom")"
 }
 
 # Seconds for one cargo build.
@@ -96,9 +96,9 @@ for part in "${parts[@]}"; do
                 export RUSTC_WRAPPER=sccache name=clean-with-sccache
             fi
             rm -rf "$CARGO_TARGET_DIR"
-            timed "$name.small" --profile small -p dashboard
+            timed "$name.small" --profile small -p sitroom
             rm -rf "$CARGO_TARGET_DIR"
-            timed "$name.debug" -p dashboard
+            timed "$name.debug" -p sitroom
             rm -rf "$CARGO_TARGET_DIR"
         )
         ;;
@@ -111,17 +111,17 @@ for part in "${parts[@]}"; do
             crates/modules-dev/src/git.rs
         )
         for profile in dev release small; do
-            cargo build --quiet --profile "$profile" -p dashboard
+            cargo build --quiet --profile "$profile" -p sitroom
             for f in "${files[@]}"; do
                 touch "$f"
-                timed "incremental.$profile.$(basename "$f" .rs)" --profile "$profile" -p dashboard
+                timed "incremental.$profile.$(basename "$f" .rs)" --profile "$profile" -p sitroom
             done
         done
         for profile in dev release; do
-            cargo build --quiet --profile "$profile" -p dashboard --no-default-features --features bundle-fun
+            cargo build --quiet --profile "$profile" -p sitroom --no-default-features --features bundle-fun
             touch crates/modules-fun/src/clock.rs
             timed "incremental.$profile.clock.bundle-fun-only" \
-                --profile "$profile" -p dashboard --no-default-features --features bundle-fun
+                --profile "$profile" -p sitroom --no-default-features --features bundle-fun
         done
         ;;
     *)

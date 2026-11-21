@@ -2,7 +2,7 @@
 """The largest files under a folder: a row of stats and a table. Shows config with
 defaults, a config error, and a table with a gauge in each row.
 
-    dashboard plugin-check --plugin-config '{"dir": "."}' -- python3 sdk/python/examples/big_files.py
+    sitroom plugin-check --plugin-config '{"dir": "."}' -- python3 sdk/python/examples/big_files.py
 
     modules:
       big-files:
@@ -16,7 +16,7 @@ import sys
 from typing import List, Tuple
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-from dashboard_plugin import Row, View, config_error, log, serve, with_defaults  # noqa: E402
+from sitroom_plugin import Row, View, config_error, log, serve, with_defaults  # noqa: E402
 
 config = {"dir": ".", "top": 5, "max_files": 20000}
 

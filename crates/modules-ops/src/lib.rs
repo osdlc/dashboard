@@ -2,9 +2,9 @@
 //! infrastructure (Pi-hole, Transmission). Each module sits behind a cargo
 //! feature named after its id.
 
-use dashboard_modules_common::Builtin;
+use sitroom_modules_common::Builtin;
 #[allow(unused_imports)]
-pub(crate) use dashboard_modules_common::{entry, schema, strings};
+pub(crate) use sitroom_modules_common::{entry, schema, strings};
 
 #[cfg(feature = "docker")]
 pub mod docker;

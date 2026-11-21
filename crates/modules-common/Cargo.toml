@@ -1,5 +1,5 @@
 [package]
-name = "dashboard-modules-common"
+name = "sitroom-modules-common"
 edition.workspace = true
 version.workspace = true
 license.workspace = true
@@ -10,8 +10,8 @@ http = ["dep:reqwest"]
 
 [dependencies]
 anyhow = "1.0.104"
-dashboard-contract = { version = "0.8.0", path = "../contract" }
-dashboard-host = { version = "0.8.0", path = "../host" }
+sitroom-contract = { version = "0.8.0", path = "../contract" }
+sitroom-host = { version = "0.8.0", path = "../host" }
 reqwest = { version = "0.13.5", features = ["json", "query"], optional = true }
 schemars = "1.2.3"
 serde = { version = "1.0.229", features = ["derive"] }

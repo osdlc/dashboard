@@ -6,7 +6,7 @@ The Python version of a native-vs-plugin benchmark widget. It follows the same r
 native module (crates/modules-fun/src/hackernews.rs) and the TypeScript plugin
 (plugins/ext/hackernews-ts), and must show the same view for the same input.
 
-    dashboard plugin-check -- python3 plugins/ext/hackernews-py/main.py
+    sitroom plugin-check -- python3 plugins/ext/hackernews-py/main.py
 """
 
 import json
@@ -18,7 +18,7 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, List, Optional
 
-from dashboard_plugin import ListItem, View, config_error, serve, upstream_error, with_defaults
+from sitroom_plugin import ListItem, View, config_error, serve, upstream_error, with_defaults
 
 API = "https://hacker-news.firebaseio.com/v0"
 # Most stories shown. Each one is a request per refresh, so keep it small.
@@ -54,7 +54,7 @@ def read_sample(path: str) -> List[Any]:
 
 
 def get_json(url: str) -> Any:
-    req = urllib.request.Request(url, headers={"User-Agent": "dashboard-plugin hackernews-py"})
+    req = urllib.request.Request(url, headers={"User-Agent": "sitroom-plugin hackernews-py"})
     try:
         with urllib.request.urlopen(req, timeout=20) as resp:
             return json.load(resp)

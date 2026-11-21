@@ -5,9 +5,9 @@
 
 use std::path::PathBuf;
 
-use dashboard_contract::check::check_view;
-use dashboard_contract::{Size, View, Widget};
 use serde::Deserialize;
+use sitroom_contract::check::check_view;
+use sitroom_contract::{Size, View, Widget};
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]

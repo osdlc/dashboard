@@ -35,7 +35,7 @@ interface Props {
 const { b, prev, next } = Astro.props
 
 const base = import.meta.env.BASE_URL.replace(/\/?$/, '/')
-const repo = 'https://github.com/osdlc/dashboard'
+const repo = 'https://github.com/osdlc/sitroom'
 const type = typeOf(b)
 const primitive = b.group === 'primitives'
 const liveSrc = `demo-app/index.html?${new URLSearchParams({ mode: 'demo', fill: '', catalog: `blocks/${b.id}.json`, id: b.id, size: b.default_size })}`
@@ -47,7 +47,7 @@ const users = primitive ? widgetsUsing(type) : []
 const SHOWN = 30
 ---
 
-<Base title={`${b.name} · building blocks · dashboard`} description={b.description.replace(/`/g, '')}>
+<Base title={`${b.name} · building blocks · sitroom`} description={b.description.replace(/`/g, '')}>
   <SiteHeader here="blocks" />
 
   <main class="wrap page">
@@ -162,7 +162,7 @@ const SHOWN = 30
         </table>
       </div>
       <p class="hint">
-        From the contract's JSON Schema (<code>dashboard schema view</code>). Colors are never raw: <code>tone</code> names
+        From the contract's JSON Schema (<code>sitroom schema view</code>). Colors are never raw: <code>tone</code> names
         a color of the theme in use (accent, ok, warn, error, info, muted, series-1 to series-6).{' '}
         <a href={`${repo}/blob/main/docs/contract.md`}>docs/contract.md</a> has the whole contract.
       </p>

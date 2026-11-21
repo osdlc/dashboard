@@ -5,7 +5,7 @@
 The Python copy of the built-in `docker` module (crates/modules-ops/src/docker.rs), for the
 native-vs-plugin benchmark. It builds the same view from the same docker output.
 
-    dashboard plugin-check -- python3 plugins/ext/docker-py/main.py
+    sitroom plugin-check -- python3 plugins/ext/docker-py/main.py
 
     modules:
       docker-py:
@@ -20,7 +20,7 @@ import sys
 from typing import Any, Dict, List, Optional, Union
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from dashboard_plugin import Column, Row, View, serve, with_defaults  # noqa: E402
+from sitroom_plugin import Column, Row, View, serve, with_defaults  # noqa: E402
 
 # How long one docker command may take, in seconds. A render runs up to two
 # (ps, then stats), so 2 x 10 s stays under the plugin host's 30 s limit

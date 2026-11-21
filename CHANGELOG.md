@@ -1,6 +1,6 @@
 # Changelog
 
-The dashboard is pre-1.0: the config format, the module contract and the CLI can still change
+Sitroom is pre-1.0: the config format, the module contract and the CLI can still change
 between minor versions. 0.4.0 is the first public release. The earlier versions were not
 released on their own; they record the stages the project was built in.
 
@@ -43,7 +43,7 @@ released on their own; they record the stages the project was built in.
 - **Push modules can report errors;** the tile keeps its last good view, marked stale.
 - **A hands-on tutorial** (`docs/tutorial.md`), from the demo to a dashboard and a widget of your
   own.
-- **CLI:** `dashboard --version`; `--help` lists every exit code; config errors name the file the
+- **CLI:** `sitroom --version`; `--help` lists every exit code; config errors name the file the
   mistake is in; built-in module paths are relative to the config file that set them.
 - **Fixes:**
   - a tile that has never loaded shows its error, not "stale";
@@ -57,7 +57,7 @@ released on their own; they record the stages the project was built in.
   experimental macOS `.saver`.
 - **Ambient mode** in the web view (`?mode=ambient`): no header or editor, large type, every
   screen rotating, nothing to click.
-- **The config runtime moved into its own crate** (`dashboard-runtime`), shared by the CLI and the
+- **The config runtime moved into its own crate** (`sitroom-runtime`), shared by the CLI and the
   desktop app.
 - **Processes and signals:**
   - plugins and the codex app-server run in their own process group on Unix, and stopping one
@@ -78,14 +78,14 @@ released on their own; they record the stages the project was built in.
   packages and a cached marketplace index) with tag filters. Picking an entry shows its demo view
   and the settings it needs.
 - **Keyboard focus** on tiles and their items in the TUI and the web view; Enter opens links.
-- **Marketplace, local first:** `dashboard plugin install`, `list`, `update`, `remove` and `pack`.
+- **Marketplace, local first:** `sitroom plugin install`, `list`, `update`, `remove` and `pack`.
 - **Saved dashboards and config layers:** `--dashboard`, `dashboards list`, `import`, `export`,
-  and a project `.dashboard.yaml`. A project file must be trusted with `dashboard trust` before it
+  and a project `.sitroom.yaml`. A project file must be trusted with `sitroom trust` before it
   is used. `trust` and `import` list the programs a config would run.
 - **Web dashboard switcher,** and config layers shown in settings.
 - **CLI conventions:**
   - fixed exit codes (2 usage, 22 missing tool, 23–25 service errors);
-  - a single `dashboard: message` error line with a hint;
+  - a single `sitroom: message` error line with a hint;
   - `--json` documents for every command.
 - **Safer config writes:**
   - writes from the web view and the TUI are compare-and-swap, so a change based on an older file
@@ -128,12 +128,12 @@ A large set of widgets, most of them built in and grouped in feature-gated bundl
 First public release.
 
 - **Catalog entries:** every built-in module has metadata (description, tags, settings) and a demo
-  view. `dashboard widgets` lists them.
-- **Plugin packages** (`dashboard-plugin.yaml`): `package:` in the config runs one, and
-  `dashboard config` reports missing or broken packages.
+  view. `sitroom widgets` lists them.
+- **Plugin packages** (`sitroom-plugin.yaml`): `package:` in the config runs one, and
+  `sitroom config` reports missing or broken packages.
 - **Only the modules the config names run;** built-ins are no longer on by default.
 - **TypeScript and Python plugin SDKs,** with contract types generated from the Rust types.
-  `dashboard plugin new --lang ts|py` scaffolds a plugin.
+  `sitroom plugin new --lang ts|py` scaffolds a plugin.
 - **Feature-gated bundles:** built-in modules are split into bundle crates, so a binary can
   include only what it needs.
 - **`demo: true`** on a module shows its catalog demo view instead of running it.
@@ -144,7 +144,7 @@ First public release.
 ## 0.3.0
 
 - **Stdio plugins** (JSON-RPC 2.0, newline-delimited); cswap is bundled as
-  `dashboard plugin cswap`.
+  `sitroom plugin cswap`.
 - **GitHub PR and issue modules** (via `gh`); Jira, Linear and Forgejo modules. Tokens come from
   env vars or a `token_command`.
 - **A demo module** with `examples/demo.yaml`, shown by default when there is no config file.
@@ -162,7 +162,7 @@ First public release.
 - **Agent usage:** codex (live limits from the codex app-server) and copilot.
 - **Builds and tooling:**
   - a size-optimized build profile (`cargo build --profile small`);
-  - `dashboard plugin-check` runs a plugin like the host does and checks what it sends;
+  - `sitroom plugin-check` runs a plugin like the host does and checks what it sends;
   - example plugins in several languages.
 
 ## 0.2.0

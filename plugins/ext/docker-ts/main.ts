@@ -4,7 +4,7 @@
 // The TypeScript copy of the built-in `docker` module (crates/modules-ops/src/docker.rs), for
 // the native-vs-plugin benchmark. It builds the same view from the same docker output.
 //
-//   dashboard plugin-check -- node plugins/ext/docker-ts/main.ts
+//   sitroom plugin-check -- node plugins/ext/docker-ts/main.ts
 //
 //   modules:
 //     docker-ts:
@@ -12,8 +12,8 @@
 //       config: { stats: true, limit: 20 }
 
 import { execFile } from "node:child_process";
-import { serve, withDefaults } from "./dashboard-plugin.ts";
-import type { Column, Row, View } from "./dashboard-plugin.ts";
+import { serve, withDefaults } from "./sitroom-plugin.ts";
+import type { Column, Row, View } from "./sitroom-plugin.ts";
 
 /**
  * How long one docker command may take, in ms. A render runs up to two (ps,

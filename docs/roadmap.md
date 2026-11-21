@@ -1,18 +1,18 @@
 # Roadmap
 
-Where the dashboard is going, in milestones, and what a user or plugin author can count on at each
+Where sitroom is going, in milestones, and what a user or plugin author can count on at each
 step. Pre-1.0, so the milestones and their order can change. Each milestone is a file in
 [sdlc/milestones/](../sdlc/milestones/). GitHub milestones of the same names, to attach issues
 and pull requests to, are not created yet.
 
 ## Stability tiers
 
-Every part of the dashboard that someone outside this repository could depend on has one of three
+Every part of sitroom that someone outside this repository could depend on has one of three
 tiers.
 
 | Tier | What it promises |
 |---|---|
-| **Published** | Changes only in backward-compatible ways within a major version: the contract version for the `View` JSON and the stdio protocol, the dashboard's own version for everything else. Something is removed only in a new major version, and is deprecated for at least one minor release before that: the CHANGELOG says so, and `dashboard config` and `plugin-check` warn where it is used. |
+| **Published** | Changes only in backward-compatible ways within a major version: the contract version for the `View` JSON and the stdio protocol, sitroom's own version for everything else. Something is removed only in a new major version, and is deprecated for at least one minor release before that: the CHANGELOG says so, and `sitroom config` and `plugin-check` warn where it is used. |
 | **Experimental** | Can change or be removed in any release, with a CHANGELOG entry and no deprecation period. Use it, and expect to update. |
 | **Internal** | No promise. Only this repository uses it. |
 
@@ -42,13 +42,13 @@ are not a level yet: see [experiments](#experiments).
 | `View` JSON and the widget types | `crates/contract`, [contract.md](contract.md) | Experimental |
 | Stdio protocol (level 2), with its error codes | [contract.md](contract.md), [plugins.md](plugins.md) | Experimental |
 | TypeScript and Python SDKs | `sdk/` | Experimental |
-| Plugin package format (`dashboard-plugin.yaml`) and where packages are installed | [plugins.md](plugins.md) | Experimental |
+| Plugin package format (`sitroom-plugin.yaml`) and where packages are installed | [plugins.md](plugins.md) | Experimental |
 | Marketplace index format | [marketplace.md](marketplace.md) | Experimental |
 | Config file format, and the token `*_env` / `*_command` settings | README, [dashboards.md](dashboards.md) | Experimental |
-| CLI commands, exit codes, `--json` output, the JSON Schemas from `dashboard schema` | [cli.md](cli.md) | Experimental |
-| `DASHBOARD_*` environment variables | README, [cli.md](cli.md) | Experimental |
+| CLI commands, exit codes, `--json` output, the JSON Schemas from `sitroom schema` | [cli.md](cli.md) | Experimental |
+| `SITROOM_*` environment variables | README, [cli.md](cli.md) | Experimental |
 | Color theme tokens | `crates/contract/src/theme.rs` | Experimental |
-| Each built-in module and its `config:` | catalog entries (`dashboard widgets`) | Experimental |
+| Each built-in module and its `config:` | catalog entries (`sitroom widgets`) | Experimental |
 | Web view URL options (`?mode=ambient`) and signing in | README, [cli.md](cli.md#signing-in-to-the-web-view) | Experimental |
 | Desktop app and its flags | [desktop.md](desktop.md) | Experimental |
 | Built-in `Module` trait, renderer feed (WebSocket messages), the Rust crates | source | Internal |

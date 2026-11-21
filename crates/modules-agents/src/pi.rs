@@ -6,16 +6,16 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::{CatalogEntry, Manifest, Requirements, Size, View, Widget};
-use dashboard_host::Module;
 use schemars::JsonSchema;
 use serde::Deserialize;
 use serde_json::Value;
+use sitroom_contract::{CatalogEntry, Manifest, Requirements, Size, View, Widget};
+use sitroom_host::Module;
 
 use super::now_secs;
 use super::tally::{Record, Tally, recent_files};
-use dashboard_modules_common::time::parse_time;
-use dashboard_modules_common::{expand_home, manifest};
+use sitroom_modules_common::time::parse_time;
+use sitroom_modules_common::{expand_home, manifest};
 
 const DOCS: &str = "https://github.com/badlogic/pi-mono";
 
@@ -206,7 +206,7 @@ not json
         let now = parse_time("2026-10-27T12:00:00Z").unwrap();
         let v = view(&Tally::new(&records, now), now);
         assert_eq!(v.summary, "8.0k today · 8.0k this week · $0.03");
-        assert_eq!(v.status, dashboard_contract::Status::Ok);
+        assert_eq!(v.status, sitroom_contract::Status::Ok);
     }
 
     #[test]

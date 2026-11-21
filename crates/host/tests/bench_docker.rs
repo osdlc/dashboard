@@ -9,10 +9,10 @@
 use std::path::PathBuf;
 use std::process::Command;
 
-use dashboard_contract::check::check_view;
-use dashboard_contract::{Cell, Status, View, Widget};
-use dashboard_host::{Module, Plugin};
 use serde_json::json;
+use sitroom_contract::check::check_view;
+use sitroom_contract::{Cell, Status, View, Widget};
+use sitroom_host::{Module, Plugin};
 
 fn repo(path: &str) -> String {
     let path: PathBuf = [env!("CARGO_MANIFEST_DIR"), "../..", path].iter().collect();
@@ -130,12 +130,12 @@ async fn rejects_unknown_settings() {
 fn sdk_copies_are_current() {
     for (copy, sdk) in [
         (
-            "plugins/ext/docker-ts/dashboard-plugin.ts",
-            "sdk/typescript/dashboard-plugin.ts",
+            "plugins/ext/docker-ts/sitroom-plugin.ts",
+            "sdk/typescript/sitroom-plugin.ts",
         ),
         (
-            "plugins/ext/docker-py/dashboard_plugin.py",
-            "sdk/python/dashboard_plugin.py",
+            "plugins/ext/docker-py/sitroom_plugin.py",
+            "sdk/python/sitroom_plugin.py",
         ),
     ] {
         let a = std::fs::read_to_string(repo(copy)).unwrap();

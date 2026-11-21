@@ -2,7 +2,7 @@
 
 from typing import Any, Dict, List, Optional
 
-from dashboard_plugin import ListItem, View, upstream_error
+from sitroom_plugin import ListItem, View, upstream_error
 from token_api import is_int, plural
 
 

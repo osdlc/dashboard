@@ -35,9 +35,9 @@ pub struct Launch {
 }
 
 pub const USAGE: &str = "\
-usage: dashboard-desktop [--config FILE] [--port N] [--ambient | --wallpaper | --screensaver] [--no-tray]
+usage: sitroom-desktop [--config FILE] [--port N] [--ambient | --wallpaper | --screensaver] [--no-tray]
 
-  --config FILE   config file (default: the same one `dashboard` uses)
+  --config FILE   config file (default: the same one `sitroom` uses)
   --port N        serve on this port (default: any free port)
   --ambient       open the window in ambient mode: no controls, screens rotating
   --wallpaper     one ambient window per display, on the desktop behind the icons

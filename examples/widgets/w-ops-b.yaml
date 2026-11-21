@@ -3,8 +3,8 @@
 # packages in plugins/ext/; examples/widgets/plugins links there, so
 # `package: <id>` finds them). From the repository root:
 #
-#   cargo run -p dashboard -- serve --config examples/widgets/w-ops-b.yaml
-#   cargo run -p dashboard -- tui   --config examples/widgets/w-ops-b.yaml
+#   cargo run -p sitroom -- serve --config examples/widgets/w-ops-b.yaml
+#   cargo run -p sitroom -- tui   --config examples/widgets/w-ops-b.yaml
 #
 # None of these were run against the real service ("untested live"), so
 # nothing here calls one:

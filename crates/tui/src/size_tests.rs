@@ -1,15 +1,15 @@
 //! Renders every screen of `examples/demo.yaml`, with views from the real
 //! demo modules, at terminal sizes from tiny to large.
 //!
-//! `cargo test -p dashboard-tui size_preview -- --ignored --nocapture` prints
+//! `cargo test -p sitroom-tui size_preview -- --ignored --nocapture` prints
 //! a screen at a given size for eyeballing (see `size_preview`).
 
 use std::collections::{BTreeMap, HashMap};
 use std::time::Instant;
 
-use dashboard_contract::{ScreenLayout, TilePlacement, TileUpdate, UiSettings, View, Widget};
 use ratatui::Terminal;
 use ratatui::backend::TestBackend;
+use sitroom_contract::{ScreenLayout, TilePlacement, TileUpdate, UiSettings, View, Widget};
 
 use super::*;
 
@@ -25,13 +25,13 @@ const SIZES: &[(u16, u16)] = &[
 /// Runs each demo tile's module enough times to fill its graphs, the way the
 /// host's history would.
 async fn demo_tiles() -> (Vec<ScreenLayout>, BTreeMap<String, TileUpdate>) {
-    let config = dashboard_config::parse(dashboard_config::DEFAULT_CONFIG).unwrap();
+    let config = sitroom_config::parse(sitroom_config::DEFAULT_CONFIG).unwrap();
     let mut tiles = BTreeMap::new();
     for (id, m) in &config.modules {
         if m.builtin.as_deref() != Some("demo") {
             continue;
         }
-        let mut module = dashboard_modules::builtin("demo").unwrap();
+        let mut module = sitroom_modules::builtin("demo").unwrap();
         module.init(m.config.clone()).await.unwrap();
         let mut history: HashMap<(String, String), Vec<(i64, f64)>> = HashMap::new();
         let mut view = None;
@@ -65,7 +65,7 @@ async fn demo_tiles() -> (Vec<ScreenLayout>, BTreeMap<String, TileUpdate>) {
                 .filter(|t| tiles.contains_key(&t.module))
                 .map(|t| TilePlacement {
                     tile_id: t.module.clone(),
-                    size: t.size.unwrap_or(dashboard_contract::Size::Medium),
+                    size: t.size.unwrap_or(sitroom_contract::Size::Medium),
                 })
                 .collect(),
         })
@@ -194,7 +194,7 @@ async fn every_screen_at_every_size() {
 }
 
 /// Prints one screen at one size, top and scrolled to the end.
-/// `SIZE=60x20 SCREEN=showcase cargo test -p dashboard-tui size_preview -- --ignored --nocapture`
+/// `SIZE=60x20 SCREEN=showcase cargo test -p sitroom-tui size_preview -- --ignored --nocapture`
 #[tokio::test]
 #[ignore]
 async fn size_preview() {
@@ -222,7 +222,7 @@ async fn size_preview() {
 /// of each getting an equal share of the height (the GitHub tile bug).
 #[test]
 fn column_of_sections_packs_to_the_top() {
-    use dashboard_contract::{ListItem, Status};
+    use sitroom_contract::{ListItem, Status};
     let item = |t: &str| ListItem {
         tone: None,
         title: t.into(),

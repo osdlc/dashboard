@@ -1,5 +1,5 @@
 // The widget registry: every catalog entry, from src/data/registry.json, which
-// scripts/registry.mjs writes from `dashboard widgets --json`.
+// scripts/registry.mjs writes from `sitroom widgets --json`.
 import data from '../data/registry.json'
 import shotSizes from '../data/registry-shots.json'
 import type { Widget } from './config-example.ts'

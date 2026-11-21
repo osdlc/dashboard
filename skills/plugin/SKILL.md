@@ -1,11 +1,11 @@
 ---
 name: plugin
-description: Write a dashboard plugin, a program in any language that answers JSON-RPC requests on stdin and stdout with a manifest and views (stats, gauges, charts, lists, tables, logs). Scaffold it with `dashboard plugin new`, check it with `dashboard plugin-check`, and add it to the config. Use when someone wants a tile the dashboard doesn't have built in.
+description: Write a sitroom plugin, a program in any language that answers JSON-RPC requests on stdin and stdout with a manifest and views (stats, gauges, charts, lists, tables, logs). Scaffold it with `sitroom plugin new`, check it with `sitroom plugin-check`, and add it to the config. Use when someone wants a tile sitroom doesn't have built in.
 ---
 
-# Dashboard plugin
+# Sitroom plugin
 
-A plugin is one program. The dashboard starts it, writes one JSON request per line to its
+A plugin is one program. Sitroom starts it, writes one JSON request per line to its
 stdin, and reads one reply per line from its stdout. Any language works. TypeScript and Python
 have a small SDK.
 
@@ -27,8 +27,8 @@ end. `docs/plugins.md` in the repository is the full reference.
 ## Scaffold
 
 ```sh
-dashboard plugin new --lang ts my-plugin   # main.ts + dashboard-plugin.ts (Node 24 or Bun)
-dashboard plugin new --lang py my-plugin   # main.py + dashboard_plugin.py (Python 3.9+)
+sitroom plugin new --lang ts my-plugin   # main.ts + sitroom-plugin.ts (Node 24 or Bun)
+sitroom plugin new --lang py my-plugin   # main.py + sitroom_plugin.py (Python 3.9+)
 ```
 
 The name is the plugin's ID: lowercase letters, digits and dashes, starting with a letter. An
@@ -44,7 +44,7 @@ the right codes:
 | Bad config (-32002) | `throw configError(msg)` | `raise config_error(msg)` |
 | Service down (-32001) | `throw upstreamError(msg)` | `raise upstream_error(msg)` |
 | Defaults, reject unknown keys | `withDefaults(config, defaults)` | `with_defaults(config, defaults)` |
-| A line in the dashboard's log | `log("info", msg)` | `log("info", msg)` |
+| A line in sitroom's log | `log("info", msg)` | `log("info", msg)` |
 | Chart with host-kept history | `liveSeries({ id, label }, { name: value })` | `live_series(id, label, {name: value})` |
 
 `console.log` and `print` go to stderr, so they can't break the protocol. Any other exception
@@ -53,18 +53,18 @@ becomes error -32603.
 Without the SDK, follow [The protocol](#the-protocol). Rules: stdout carries only protocol lines,
 debug output goes to stderr, and flush after every line.
 
-Complete examples, each a package folder with a `dashboard-plugin.yaml`: `examples/plugins/hello`,
+Complete examples, each a package folder with a `sitroom-plugin.yaml`: `examples/plugins/hello`,
 `git-repos` (config, a table, links, errors, a config schema), `gh-actions` (Node, a list from a
 CLI) and `latency` (a live chart).
 
 ## Check
 
 ```sh
-dashboard plugin-check -- node my-plugin/main.ts
-dashboard plugin-check --plugin-config '{"key": "value"}' --renders 5 -- python3 my-plugin/main.py
+sitroom plugin-check -- node my-plugin/main.ts
+sitroom plugin-check --plugin-config '{"key": "value"}' --renders 5 -- python3 my-plugin/main.py
 ```
 
-It runs the plugin as the dashboard does, calls `initialize` and then `view/render` (3 times by
+It runs the plugin as sitroom does, calls `initialize` and then `view/render` (3 times by
 default), and prints the manifest, each render and the tile drawn as text. It lists problems the
 JSON alone won't catch: percents outside 0–100, chart times in seconds instead of milliseconds,
 table cells with no matching column, and links that aren't http(s). It exits non-zero on a
@@ -89,19 +89,19 @@ screens:
       - { module: my-tile, size: medium }
 ```
 
-The dashboard picks up the change while it runs. Run `dashboard config` to check the file.
+Sitroom picks up the change while it runs. Run `sitroom config` to check the file.
 
-To share it, make it a package: a folder named after the ID with a `dashboard-plugin.yaml`
+To share it, make it a package: a folder named after the ID with a `sitroom-plugin.yaml`
 (`id`, `version`, `name`, `description`, `run`, and optional `tags`, `runtime`, `binaries`, `env`,
-`hosts`, `size`, `config_schema`, `demo`). `dashboard schema package` prints its schema. Use it
+`hosts`, `size`, `config_schema`, `demo`). `sitroom schema package` prints its schema. Use it
 with `package: <id>`. Packages are found in `plugins/<id>/` next to the config file, then in
-`~/.local/share/dashboard/plugins/`. A package runs in its own folder, so use absolute or `~`
+`~/.local/share/sitroom/plugins/`. A package runs in its own folder, so use absolute or `~`
 paths in its config.
 
 ## Iterate
 
-The dashboard restarts a plugin when its config entry changes. After editing the plugin's code,
-change its config entry or restart the dashboard. If the plugin exits, or a request times out
+Sitroom restarts a plugin when its config entry changes. After editing the plugin's code,
+change its config entry or restart sitroom. If the plugin exits, or a request times out
 (30 s) or fails to parse, it is started again at the next refresh, and the tile keeps its last
 good view, marked stale.
 
@@ -126,11 +126,11 @@ Error codes: `-32001` something outside is unavailable (CLI missing, not logged 
 Not built yet, so don't rely on them: push mode (`view/update`), running declared commands,
 `run_command` actions, and clicks sent back to the plugin.
 
-`dashboard schema manifest`, `view` and `initialize-params` print the JSON Schemas.
+`sitroom schema manifest`, `view` and `initialize-params` print the JSON Schemas.
 
 ## Widgets
 
-Every widget has a `type`. Leave out any optional field. Run `dashboard schema view` for every
+Every widget has a `type`. Leave out any optional field. Run `sitroom schema view` for every
 field.
 
 | type | Main fields |
@@ -148,7 +148,7 @@ field.
 | `table` | `columns: [{ key, label, priority }]`, `rows: [{ cells: { key: text, number or widget }, status, action }]` |
 | `log` | `label`, `lines: [{ text, level, time }]`, newest last |
 | `uptime` | `checks: [{ name, status, uptime, latency_ms, detail, history: [status…], url }]` |
-| `image` | `path` (a file on the dashboard's machine), `caption` |
+| `image` | `path` (a file on sitroom's machine), `caption` |
 | `row` / `column` | `children: [widgets]` (a row stacks when narrow) |
 
 A table cell is text, a number, or a `stat`, `gauge`, `pie`, `display` or `clock_face` widget.

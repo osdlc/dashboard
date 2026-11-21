@@ -3,8 +3,8 @@
 # per widget, so the three can be compared side by side. From the repository
 # root:
 #
-#   cargo run -p dashboard -- serve --config examples/bench.yaml
-#   cargo run -p dashboard -- tui   --config examples/bench.yaml
+#   cargo run -p sitroom -- serve --config examples/bench.yaml
+#   cargo run -p sitroom -- tui   --config examples/bench.yaml
 #
 # See bench/README.md.
 #

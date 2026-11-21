@@ -1,10 +1,10 @@
 //! One process and everything it started, as three numbers: CPU, memory and
-//! the number of processes. With no settings it watches the dashboard itself,
-//! so the tile shows what the dashboard and its plugins cost:
+//! the number of processes. With no settings it watches sitroom itself,
+//! so the tile shows what sitroom and its plugins cost:
 //!
 //! ```yaml
 //! modules:
-//!   process: {}            # the dashboard and its plugins
+//!   process: {}            # sitroom and its plugins
 //!   postgres:
 //!     builtin: process
 //!     config:
@@ -17,10 +17,10 @@ use std::time::{Duration, Instant};
 
 use anyhow::Result;
 use async_trait::async_trait;
-use dashboard_contract::{CatalogEntry, Manifest, Size, Status, View, Widget};
-use dashboard_host::Module;
 use schemars::JsonSchema;
 use serde::Deserialize;
+use sitroom_contract::{CatalogEntry, Manifest, Size, Status, View, Widget};
+use sitroom_host::Module;
 use sysinfo::{Pid, ProcessRefreshKind, ProcessesToUpdate, System};
 
 use super::{bytes, manifest};
@@ -29,9 +29,9 @@ use super::{bytes, manifest};
 #[serde(default, deny_unknown_fields)]
 struct Config {
     /// Watch every process with this name, e.g. `postgres`. Default: the
-    /// dashboard itself.
+    /// sitroom itself.
     name: Option<String>,
-    /// Count the processes they started too (for the dashboard: its plugins).
+    /// Count the processes they started too (for sitroom: its plugins).
     children: bool,
 }
 
@@ -83,7 +83,7 @@ impl Module for Process {
         if !config.is_null() {
             self.config = serde_json::from_value(config)?;
         }
-        let title = self.config.name.as_deref().unwrap_or("Dashboard");
+        let title = self.config.name.as_deref().unwrap_or("Sitroom");
         Ok(manifest("process", title, 2000, 1000, Size::Small, 60))
     }
 
@@ -226,12 +226,12 @@ pub fn catalog() -> CatalogEntry {
     );
     CatalogEntry {
         description: "CPU and memory of one process and the processes it started, as three \
-                      numbers. With no settings it watches the dashboard itself and its plugins. \
+                      numbers. With no settings it watches sitroom itself and its plugins. \
                       Add it several times with `builtin: process`."
             .into(),
         tags: crate::strings(&["system", "local", "process"]),
         config_schema: crate::schema::<Config>(),
-        ..crate::entry("process", "Dashboard", Size::Small, demo)
+        ..crate::entry("process", "Sitroom", Size::Small, demo)
     }
 }
 
@@ -265,7 +265,7 @@ mod tests {
     fn sample() -> Vec<Proc> {
         vec![
             proc(1, None, "init", 0.5, 1),
-            proc(10, Some(1), "dashboard", 1.0, 100),
+            proc(10, Some(1), "sitroom", 1.0, 100),
             proc(11, Some(10), "node", 2.0, 200),
             proc(12, Some(11), "gh", 4.0, 400),
             proc(20, Some(1), "other", 50.0, 5000),

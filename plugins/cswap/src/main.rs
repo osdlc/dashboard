@@ -1,3 +1,3 @@
 fn main() -> anyhow::Result<()> {
-    dashboard_cswap::run()
+    sitroom_cswap::run()
 }

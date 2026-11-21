@@ -14,11 +14,11 @@ use std::time::Duration;
 
 use anyhow::Result;
 use async_trait::async_trait;
-use dashboard_contract::{CatalogEntry, ListItem, Manifest, Size, Status, View, Widget};
-use dashboard_host::Module;
-use dashboard_modules_common::manifest;
 use schemars::JsonSchema;
 use serde::Deserialize;
+use sitroom_contract::{CatalogEntry, ListItem, Manifest, Size, Status, View, Widget};
+use sitroom_host::Module;
+use sitroom_modules_common::manifest;
 use tokio::process::Command;
 
 /// No settings yet; the block exists so a typo is an error.
@@ -484,7 +484,7 @@ mod tests {
 
     #[test]
     fn demo_is_valid() {
-        let problems: Vec<String> = dashboard_contract::check::check_view(&catalog().demo)
+        let problems: Vec<String> = sitroom_contract::check::check_view(&catalog().demo)
             .into_iter()
             .filter(|f| f.problem)
             .map(|f| f.text)

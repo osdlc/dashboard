@@ -20,13 +20,13 @@ use std::time::Duration;
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::{CatalogEntry, Manifest, Requirements, Size, Status, View, Widget};
-use dashboard_host::Module;
 use schemars::JsonSchema;
 use serde::Deserialize;
+use sitroom_contract::{CatalogEntry, Manifest, Requirements, Size, Status, View, Widget};
+use sitroom_host::Module;
 use tokio::process::Command;
 
-use dashboard_modules_common::{expand_home, manifest};
+use sitroom_modules_common::{expand_home, manifest};
 
 const SYSFS: &str = "/sys/class/power_supply";
 
