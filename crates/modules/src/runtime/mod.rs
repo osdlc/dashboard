@@ -1100,6 +1100,7 @@ mod tests {
 
     /// Machine file, a saved dashboard and a project file, in a temp folder.
     #[tokio::test]
+    #[cfg(feature = "module-cswap")]
     async fn creates_blank_and_copied_dashboards_and_switches_to_them() {
         let dir = std::env::temp_dir().join(format!("sitroom-runtime-new-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
@@ -1153,6 +1154,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[cfg(feature = "module-cswap")]
     async fn switches_dashboards_and_writes_to_the_right_file() {
         let dir = std::env::temp_dir().join(format!("sitroom-runtime-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
@@ -1265,6 +1267,7 @@ mod tests {
     /// A project screen with the name of one of the user's: saving keeps the
     /// user's, and says that edits to the project's are not saved.
     #[tokio::test]
+    #[cfg(feature = "module-cswap")]
     async fn saving_keeps_screens_a_project_screen_hides() {
         let dir = std::env::temp_dir().join(format!("sitroom-shadow-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
@@ -1394,6 +1397,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[cfg(feature = "module-cswap")]
     async fn demo_uses_the_catalog_view() {
         let config = sitroom_core::config::parse(
             r"
@@ -1426,6 +1430,7 @@ modules:
     }
 
     #[test]
+    #[cfg(feature = "module-cswap")]
     fn new_module_picks_builtin_package_or_bundled() {
         let config = sitroom_core::config::parse(
             "modules:\n  taken: {}\nscreens:\n  - name: a\n    tiles:\n      - module: cswap\n",
@@ -1471,6 +1476,7 @@ modules:
     }
 
     #[tokio::test]
+    #[cfg(feature = "module-cswap")]
     async fn add_module_writes_the_config_and_starts_it() {
         let dir = std::env::temp_dir().join(format!("sitroom-runtime-add-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
