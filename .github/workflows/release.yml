@@ -1,4 +1,11 @@
-# Publishes every crate to crates.io when a version tag (v0.9.0) is pushed.
+# Releases sitroom when a version tag (v0.9.0) is pushed, three ways:
+#
+# - crates.io: every crate (`publish`), so `cargo install sitroom` works.
+# - GitHub Release: `sitroom` and `sit` built for macOS and Linux, arm64 and
+#   x86-64, one .tar.gz per platform, with SHA256SUMS (`binaries`, `github`).
+# - Homebrew: Formula/sitroom.rb in osdlc/homebrew-tap, pointing at those
+#   archives (`homebrew`), so `brew install osdlc/tap/sitroom` works.
+#
 # The steps are the ones in docs/releasing.md.
 #
 # Auth is trusted publishing: crates.io trades the job's OIDC token for a
@@ -10,12 +17,19 @@
 # osdlc/sitroom, workflow release.yml, environment crates-io) and delete the
 # secret. docs/releasing.md has the steps.
 #
-# Prerequisite, created by the owner: the `crates-io` environment (Settings,
-# Environments), with a required reviewer and a deployment rule for `v*`
-# tags, so a release waits for approval.
+# Prerequisites, created by the owner (Settings, Environments):
+#
+# - `crates-io`, with a required reviewer and a deployment rule for `v*`
+#   tags, so a release waits for approval.
+# - `homebrew-tap`, for `v*` tags, holding RELEASE_PLZ_APP_PRIVATE_KEY: the
+#   private key of the osdlc-release GitHub App, which osdlc/skillwright
+#   already uses to push its formula to the tap.
+#
+# macOS binaries are not signed or notarized. Homebrew downloads them
+# without the quarantine flag, so Gatekeeper doesn't stop them.
 #
 # A manual run (workflow_dispatch) is a dry run: it packs and builds every
-# crate and uploads nothing.
+# crate and builds the binaries, and uploads nothing.
 #
 # Every action is pinned to a commit SHA; the comment names its release.
 name: release
@@ -31,10 +45,6 @@ permissions:
 concurrency:
   group: release
   cancel-in-progress: false
-
-env:
-  # The crates with publish = false, left out by name as in rust-ci.yml.
-  UNPUBLISHED: --exclude sitroom-desktop --exclude sitroom-native --exclude sitroom-bench
 
 defaults:
   run:
@@ -78,33 +88,234 @@ jobs:
         with:
           node-version: '24'
 
-      # The published sitroom-web carries the built UI in ui/.
-      - name: Build the UI
+      # A version published by hand (docs/releasing.md) is left as it is, so
+      # the tag still makes the binaries, the release and the formula. Some
+      # crates published and some not is a failed upload: it stops.
+      - name: Already on crates.io?
+        id: published
         run: |
-          (cd web && pnpm install --frozen-lockfile && pnpm build)
-          rm -rf crates/web/ui && cp -r web/dist crates/web/ui
+          state=$(scripts/crates.sh status)
+          echo "state=$state" >> "$GITHUB_OUTPUT"
 
-      # --allow-dirty is for the git-ignored crates/web/ui only: nothing else
-      # may have changed (the UI build must not touch tracked files).
-      - name: Only the UI is new
-        run: |
-          if [ -n "$(git status --porcelain)" ]; then
-            git status --short
-            echo "::error::the checkout changed while building the UI"
-            exit 1
-          fi
-
-      # crates/web/ui is git-ignored, so cargo counts it as uncommitted.
+      # Builds the UI into sitroom-web, packs and builds every crate.
       - name: Dry run
-        run: cargo publish --workspace --locked --allow-dirty --dry-run $UNPUBLISHED
+        if: steps.published.outputs.state != 'published'
+        run: scripts/crates.sh dry-run
 
       # Trusted publishing, unless the first-release token is set.
       - uses: rust-lang/crates-io-auth-action@3268eb413133e2960fa4ae0e963ca76380c54cd9 # v1.0.6
-        if: github.event_name == 'push' && env.FIRST_RELEASE_TOKEN == ''
+        if: github.event_name == 'push' && env.FIRST_RELEASE_TOKEN == '' && steps.published.outputs.state != 'published'
         id: auth
 
       - name: Publish
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && steps.published.outputs.state != 'published'
         env:
           CARGO_REGISTRY_TOKEN: ${{ env.FIRST_RELEASE_TOKEN || steps.auth.outputs.token }}
-        run: cargo publish --workspace --locked --allow-dirty --no-verify $UNPUBLISHED
+        run: scripts/crates.sh publish
+
+  # `sitroom` and `sit` for each platform, with the web UI built in.
+  binaries:
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - target: aarch64-apple-darwin
+            runner: macos-latest
+          - target: x86_64-apple-darwin
+            runner: macos-latest
+          # glibc 2.35: an older runner, so the binary runs on older systems.
+          - target: x86_64-unknown-linux-gnu
+            runner: ubuntu-22.04
+          - target: aarch64-unknown-linux-gnu
+            runner: ubuntu-22.04-arm
+    name: binaries (${{ matrix.target }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: osdlc/osdlc/.github/actions/rust-toolchain@8a0f1f09e91423444b6d317a4abac05edc74c5ae # as rust-ci.yml
+        with:
+          workspace: .
+          targets: ${{ matrix.target }}
+
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          version: 10.28.0
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+
+      # build.rs builds web/ with pnpm and embeds it.
+      - name: Build
+        env:
+          TARGET: ${{ matrix.target }}
+        run: cargo build --locked --profile dist -p sitroom --bins --target "$TARGET"
+
+      - name: Pack
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          set -euo pipefail
+          version=$(sed -n 's/^version = "\(.*\)"$/\1/p' Cargo.toml | head -1)
+          name="sitroom-$version-$TARGET"
+          mkdir -p "dist/$name"
+          cp "target/$TARGET/dist/sitroom" "target/$TARGET/dist/sit" README.md LICENSE-MIT LICENSE-APACHE "dist/$name/"
+          "dist/$name/sitroom" --version
+          tar -C dist -czf "dist/$name.tar.gz" "$name"
+          echo "ARCHIVE=dist/$name.tar.gz" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: binaries-${{ matrix.target }}
+          path: ${{ env.ARCHIVE }}
+          if-no-files-found: error
+
+  # The GitHub Release of the tag: the archives, SHA256SUMS and the
+  # changelog's section for the version.
+  github:
+    needs: [publish, binaries]
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: binaries-*
+          merge-multiple: true
+          path: dist
+
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          (cd dist && sha256sum *.tar.gz > SHA256SUMS)
+          # The changelog's section for this version, without its heading.
+          awk -v h="## $version" '$0 == h {on = 1; next} on && /^## / {exit} on' CHANGELOG.md > notes.md
+          gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" \
+            --title "sitroom $version" --notes-file notes.md dist/*.tar.gz dist/SHA256SUMS
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: sha256sums
+          path: dist/SHA256SUMS
+          if-no-files-found: error
+
+  # Formula/sitroom.rb in osdlc/homebrew-tap, for the archives just released.
+  homebrew:
+    needs: github
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Holds the osdlc-release App's private key (see the header).
+    environment: homebrew-tap
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: sha256sums
+
+      # The osdlc-release App, as in osdlc/skillwright's release; its client
+      # ID is not a secret.
+      - name: Get a GitHub App token for osdlc/homebrew-tap
+        id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: Iv23liYTGAl78fzN8YWm
+          private-key: ${{ secrets.RELEASE_PLZ_APP_PRIVATE_KEY }}
+          owner: osdlc
+          repositories: homebrew-tap
+          permission-contents: write
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: osdlc/homebrew-tap
+          token: ${{ steps.app-token.outputs.token }}
+          path: tap
+
+      - name: Write Formula/sitroom.rb
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          base="https://github.com/$GITHUB_REPOSITORY/releases/download/$GITHUB_REF_NAME"
+          sum() { awk -v f="sitroom-$version-$1.tar.gz" '$2 == f {print $1}' SHA256SUMS; }
+          for t in aarch64-apple-darwin x86_64-apple-darwin aarch64-unknown-linux-gnu x86_64-unknown-linux-gnu; do
+            [ -n "$(sum "$t")" ] || { echo "::error::no checksum for $t"; exit 1; }
+          done
+          mkdir -p tap/Formula
+          cat > tap/Formula/sitroom.rb <<RUBY
+          # Written by .github/workflows/release.yml in osdlc/sitroom for sitroom $version.
+          # The release workflow rewrites this file on each release; do not edit it by hand.
+          class Sitroom < Formula
+            desc "Developer dashboard with a terminal UI and a web UI"
+            homepage "https://github.com/osdlc/sitroom"
+            version "$version"
+            license any_of: ["MIT", "Apache-2.0"]
+
+            livecheck do
+              url :stable
+              strategy :github_latest
+            end
+
+            on_macos do
+              on_arm do
+                url "$base/sitroom-$version-aarch64-apple-darwin.tar.gz"
+                sha256 "$(sum aarch64-apple-darwin)"
+              end
+              on_intel do
+                url "$base/sitroom-$version-x86_64-apple-darwin.tar.gz"
+                sha256 "$(sum x86_64-apple-darwin)"
+              end
+            end
+
+            on_linux do
+              on_arm do
+                url "$base/sitroom-$version-aarch64-unknown-linux-gnu.tar.gz"
+                sha256 "$(sum aarch64-unknown-linux-gnu)"
+              end
+              on_intel do
+                url "$base/sitroom-$version-x86_64-unknown-linux-gnu.tar.gz"
+                sha256 "$(sum x86_64-unknown-linux-gnu)"
+              end
+            end
+
+            def install
+              bin.install "sitroom", "sit"
+            end
+
+            test do
+              assert_match version.to_s, shell_output("#{bin}/sitroom --version")
+              assert_match version.to_s, shell_output("#{bin}/sit --version")
+            end
+          end
+          RUBY
+          cat tap/Formula/sitroom.rb
+
+      - name: Commit and push
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+        working-directory: tap
+        run: |
+          set -euo pipefail
+          git add Formula/sitroom.rb
+          if git diff --cached --quiet; then
+            echo "Formula/sitroom.rb is unchanged"
+            exit 0
+          fi
+          user_id="$(gh api "/users/${APP_SLUG}%5Bbot%5D" --jq .id)"
+          git config user.name "${APP_SLUG}[bot]"
+          git config user.email "${user_id}+${APP_SLUG}[bot]@users.noreply.github.com"
+          git commit -m "sitroom ${GITHUB_REF_NAME#v}"
+          git push origin HEAD
