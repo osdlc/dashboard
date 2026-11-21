@@ -13,16 +13,16 @@ use std::time::Instant;
 
 use anyhow::Result;
 use async_trait::async_trait;
-use dashboard_contract::rpc::LogLevel;
-use dashboard_contract::{
+use sitroom_contract::rpc::LogLevel;
+use sitroom_contract::{
     Action, Bar, CatalogEntry, Cell, ColorScale, Column, ListItem, LogLine, Manifest, Meter, Row,
     SeriesData, SeriesStyle, Size, Slice, Status, Thresholds, ValueFormat, View, Widget,
 };
-use dashboard_host::{Module, now_ms};
+use sitroom_host::{Module, now_ms};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
-use dashboard_modules_common::manifest;
+use sitroom_modules_common::manifest;
 
 #[derive(Debug, Clone, Copy, Default, Deserialize, JsonSchema)]
 #[serde(rename_all = "kebab-case")]

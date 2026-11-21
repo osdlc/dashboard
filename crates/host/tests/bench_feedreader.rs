@@ -10,9 +10,9 @@ use std::net::TcpListener;
 use std::path::PathBuf;
 use std::process::Command;
 
-use dashboard_contract::check::{check_manifest, check_view};
-use dashboard_contract::{Status, View, Widget};
-use dashboard_host::{Module, Plugin};
+use sitroom_contract::check::{check_manifest, check_view};
+use sitroom_contract::{Status, View, Widget};
+use sitroom_host::{Module, Plugin};
 use serde_json::json;
 
 /// Single-feed samples: `<name>.xml`, expected `<name>.view.json`.
@@ -57,7 +57,7 @@ fn plugins() -> Vec<(&'static str, Vec<String>)> {
     // .ts file (it strips types from Node 22.18 and 23.6 on).
     if runs(&[
         "node",
-        &path("plugins/ext/feedreader-ts/dashboard-plugin.ts"),
+        &path("plugins/ext/feedreader-ts/sitroom-plugin.ts"),
     ]) {
         out.push((
             "feedreader-ts",
@@ -77,7 +77,7 @@ fn plugins() -> Vec<(&'static str, Vec<String>)> {
     out
 }
 
-fn problems(found: Vec<dashboard_contract::check::Finding>) -> Vec<String> {
+fn problems(found: Vec<sitroom_contract::check::Finding>) -> Vec<String> {
     found
         .into_iter()
         .filter(|f| f.problem)
@@ -140,7 +140,7 @@ async fn plugins_parse_the_xml_cases_like_the_native_module() {
     let text = std::fs::read_to_string(dir().join("xml-cases.json")).unwrap();
     let cases: Vec<serde_json::Value> = serde_json::from_str(&text).unwrap();
     let tmp =
-        TempDir(std::env::temp_dir().join(format!("dashboard-feedreader-{}", std::process::id())));
+        TempDir(std::env::temp_dir().join(format!("sitroom-feedreader-{}", std::process::id())));
     std::fs::create_dir_all(&tmp.0).unwrap();
     let mut feeds = vec![data("demo.xml")];
     for (i, case) in cases.iter().enumerate() {
@@ -249,12 +249,12 @@ fn sdk_copies_match_the_sdk() {
     // installed. Keep them in step with sdk/.
     for (copy, sdk) in [
         (
-            "plugins/ext/feedreader-ts/dashboard-plugin.ts",
-            "sdk/typescript/dashboard-plugin.ts",
+            "plugins/ext/feedreader-ts/sitroom-plugin.ts",
+            "sdk/typescript/sitroom-plugin.ts",
         ),
         (
-            "plugins/ext/feedreader-py/dashboard_plugin.py",
-            "sdk/python/dashboard_plugin.py",
+            "plugins/ext/feedreader-py/sitroom_plugin.py",
+            "sdk/python/sitroom_plugin.py",
         ),
     ] {
         let a = std::fs::read_to_string(repo(copy)).unwrap();

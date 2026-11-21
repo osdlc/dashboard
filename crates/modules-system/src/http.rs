@@ -25,11 +25,11 @@ use std::time::Duration;
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::{CatalogEntry, Manifest, Size, View};
-use dashboard_host::Module;
-use dashboard_modules_common::http::{self, Client};
-use dashboard_modules_common::manifest;
-use dashboard_modules_common::secret::Secret;
+use sitroom_contract::{CatalogEntry, Manifest, Size, View};
+use sitroom_host::Module;
+use sitroom_modules_common::http::{self, Client};
+use sitroom_modules_common::manifest;
+use sitroom_modules_common::secret::Secret;
 use schemars::JsonSchema;
 use serde::Deserialize;
 
@@ -220,7 +220,7 @@ pub fn catalog() -> CatalogEntry {
     };
     CatalogEntry {
         description: "Shows what a URL returns, fetched again on each refresh: a view or \
-                      widget in the dashboard's JSON, values picked out of any JSON, or \
+                      widget in sitroom's JSON, values picked out of any JSON, or \
                       text. Add it several times with `builtin: http`."
             .into(),
         tags: crate::strings(&["http", "json", "api", "custom"]),
@@ -237,7 +237,7 @@ pub fn catalog() -> CatalogEntry {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dashboard_contract::{Status, Widget};
+    use sitroom_contract::{Status, Widget};
     use tokio::io::{AsyncReadExt, AsyncWriteExt};
     use tokio::net::TcpListener;
 
@@ -306,7 +306,7 @@ mod tests {
     #[tokio::test]
     async fn sends_the_token_and_picks_fields() {
         // SAFETY: only this test reads this variable.
-        unsafe { std::env::set_var("DASHBOARD_HTTP_TEST_TOKEN", "t0k") };
+        unsafe { std::env::set_var("SITROOM_HTTP_TEST_TOKEN", "t0k") };
         let (url, server) = serve(vec![ok("", DEMO), ok("", DEMO)]).await;
         let fields = serde_json::to_value(
             demo_fields()
@@ -318,7 +318,7 @@ mod tests {
         let mut m = Http::default();
         m.init(serde_json::json!({
             "url": url, "name": "Queue", "fields": fields,
-            "token_env": "DASHBOARD_HTTP_TEST_TOKEN",
+            "token_env": "SITROOM_HTTP_TEST_TOKEN",
         }))
         .await
         .unwrap();
@@ -328,7 +328,7 @@ mod tests {
 
         let mut m = Http::default();
         m.init(serde_json::json!({
-            "url": url, "token_env": "DASHBOARD_HTTP_TEST_TOKEN", "token_header": "X-Api-Key",
+            "url": url, "token_env": "SITROOM_HTTP_TEST_TOKEN", "token_header": "X-Api-Key",
         }))
         .await
         .unwrap();
@@ -379,7 +379,7 @@ mod tests {
 
     #[test]
     fn demo_is_valid() {
-        let problems: Vec<String> = dashboard_contract::check::check_view(&catalog().demo)
+        let problems: Vec<String> = sitroom_contract::check::check_view(&catalog().demo)
             .into_iter()
             .filter(|f| f.problem)
             .map(|f| f.text)

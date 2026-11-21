@@ -12,13 +12,13 @@ use std::path::PathBuf;
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::rpc::LogLevel;
-use dashboard_contract::{CatalogEntry, LogLine, Manifest, Size, Status, View, Widget};
-use dashboard_host::Module;
+use sitroom_contract::rpc::LogLevel;
+use sitroom_contract::{CatalogEntry, LogLine, Manifest, Size, Status, View, Widget};
+use sitroom_host::Module;
 use schemars::JsonSchema;
 use serde::Deserialize;
 
-use dashboard_modules_common::{expand_home, manifest};
+use sitroom_modules_common::{expand_home, manifest};
 
 /// Bytes read from the end of the file per line wanted. Long lines just mean
 /// fewer lines shown.
@@ -215,7 +215,7 @@ mod tests {
 
     #[test]
     fn tails_utf16_and_crlf() {
-        let dir = std::env::temp_dir().join(format!("dashboard-log-utf16-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sitroom-log-utf16-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let text: String = (0..20).map(|i| format!("línea {i}\r\n")).collect();
         for (name, bom, unit) in [
@@ -257,7 +257,7 @@ mod tests {
 
     #[tokio::test]
     async fn tails_and_filters() {
-        let dir = std::env::temp_dir().join(format!("dashboard-log-test-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sitroom-log-test-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("app.log");
         let text: String = (0..50)

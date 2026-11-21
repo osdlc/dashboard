@@ -40,7 +40,7 @@ env:
   CARGO_TERM_COLOR: always
   CARGO_INCREMENTAL: '0'
   # The web job builds the Vue app; the other jobs embed a placeholder page.
-  DASHBOARD_SKIP_UI_BUILD: '1'
+  SITROOM_SKIP_UI_BUILD: '1'
 
 defaults:
   run:
@@ -68,7 +68,7 @@ jobs:
       setup: node --version && if [ "$RUNNER_OS" != Windows ]; then python3 --version; fi
       # The web job builds the Vue app; the other jobs embed a placeholder page.
       env: |
-        DASHBOARD_SKIP_UI_BUILD=1
+        SITROOM_SKIP_UI_BUILD=1
 
   # Runs scripts/check-features.sh --bundles (see its header). The per-module
   # builds (the script without --bundles) are left to a local run.

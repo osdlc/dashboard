@@ -9,7 +9,7 @@ sample responses (sample.json). The personal access token (Work Items and Code, 
 from $AZURE_DEVOPS_EXT_PAT (the variable the az CLI uses), another variable (`token_env`) or a
 command (`token_command`), never from the config file.
 
-    dashboard plugin-check -- python3 plugins/ext/azure-devops/main.py --sample
+    sitroom plugin-check -- python3 plugins/ext/azure-devops/main.py --sample
 
     modules:
       azure:
@@ -33,7 +33,7 @@ import urllib.request
 from typing import Any, Callable, Dict, List, Optional
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from dashboard_plugin import ListItem, View, Widget, config_error, serve, upstream_error, with_defaults  # noqa: E402
+from sitroom_plugin import ListItem, View, Widget, config_error, serve, upstream_error, with_defaults  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 # How long one request may take, in seconds.
@@ -254,7 +254,7 @@ def token() -> str:
     value = os.environ.get(var, "").strip()
     if not value:
         raise upstream_error(
-            f"no API token: set ${var} before starting the dashboard, or set token_env / token_command in the config"
+            f"no API token: set ${var} before starting sitroom, or set token_env / token_command in the config"
         )
     return value
 
@@ -269,7 +269,7 @@ def http_call(path: str, params: Dict[str, Any], body: Optional[Any], key: str) 
     """GET (or POST, with a body) under the project, with basic auth: no user, the token."""
     query = urllib.parse.urlencode({**params, "api-version": API_VERSION})
     auth = base64.b64encode(f":{key}".encode()).decode()
-    headers = {"Authorization": f"Basic {auth}", "Accept": "application/json", "User-Agent": "dashboard-plugin azure-devops"}
+    headers = {"Authorization": f"Basic {auth}", "Accept": "application/json", "User-Agent": "sitroom-plugin azure-devops"}
     data = None
     if body is not None:
         data = json.dumps(body).encode()

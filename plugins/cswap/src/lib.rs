@@ -6,8 +6,8 @@ use std::io::{BufRead, Write};
 use std::process::Command;
 
 use anyhow::{Context, Result, bail};
-use dashboard_contract::rpc::{InitializeResult, Message, Response, RpcError, error_code, method};
-use dashboard_contract::{
+use sitroom_contract::rpc::{InitializeResult, Message, Response, RpcError, error_code, method};
+use sitroom_contract::{
     Action, CONTRACT_VERSION, CatalogEntry, Cell, Column, CommandDecl, EntryKind, LayoutHints,
     Manifest, ParamDecl, Refresh, Requirements, Row, Size, Status, Thresholds, View, Widget,
 };

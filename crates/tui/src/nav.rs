@@ -8,7 +8,7 @@
 
 use std::collections::BTreeMap;
 
-use dashboard_contract::{Action, Cell, Widget};
+use sitroom_contract::{Action, Cell, Widget};
 use ratatui::layout::Rect;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -243,7 +243,7 @@ pub fn neighbor(rects: &[Rect], from: usize, dir: Dir) -> Option<usize> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dashboard_contract::{ListItem, UptimeCheck};
+    use sitroom_contract::{ListItem, UptimeCheck};
 
     fn list(titles: &[&str]) -> Widget {
         Widget::List {
@@ -375,7 +375,7 @@ mod tests {
     fn items_come_from_nested_lists_tables_uptime_and_bars() {
         let check = |name: &str, url: Option<&str>| UptimeCheck {
             name: name.into(),
-            status: dashboard_contract::Status::Ok,
+            status: sitroom_contract::Status::Ok,
             uptime: None,
             latency_ms: None,
             detail: None,

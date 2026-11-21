@@ -5,8 +5,8 @@
 
 use std::path::PathBuf;
 
-use dashboard_contract::check::check_view;
-use dashboard_contract::{Size, View, Widget};
+use sitroom_contract::check::check_view;
+use sitroom_contract::{Size, View, Widget};
 use serde::Deserialize;
 
 #[derive(Deserialize)]

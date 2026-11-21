@@ -146,7 +146,7 @@ onMounted(() => first.value?.focus())
 
       <footer class="add-foot">
         <span v-if="!canAdd" class="muted">
-          Not installed. Install it first: <code>dashboard plugin install {{ entry.id }}</code>
+          Not installed. Install it first: <code>sitroom plugin install {{ entry.id }}</code>
         </span>
         <span v-else class="muted">
           Writes <code>modules.{{ tileId.trim() }}</code>{{ screen ? ` and a tile on “${screen}”` : '' }} to the config file; comments stay.

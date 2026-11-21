@@ -1,7 +1,7 @@
 //! Pie and donut charts. With room, a braille disc with the legend beside
 //! it; in a small area, one stacked bar with the legend packed below.
 
-use dashboard_contract::{ColorScale, Slice, ValueFormat, format_value};
+use sitroom_contract::{ColorScale, Slice, ValueFormat, format_value};
 use ratatui::layout::Rect;
 use ratatui::style::{Color, Style};
 use ratatui::text::{Line, Span};
@@ -361,7 +361,7 @@ fn packed<'a>(p: &Palette, entries: &[Entry], width: u16) -> Vec<Line<'a>> {
 
 #[cfg(test)]
 mod tests {
-    use dashboard_contract::{Status, Theme};
+    use sitroom_contract::{Status, Theme};
     use ratatui::buffer::Buffer;
 
     use super::*;

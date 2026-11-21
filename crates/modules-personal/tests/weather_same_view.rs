@@ -12,7 +12,7 @@ mod open_meteo;
 use std::path::PathBuf;
 use std::process::Command;
 
-use dashboard_host::{Module, Plugin};
+use sitroom_host::{Module, Plugin};
 use serde_json::json;
 
 fn repo(path: &str) -> String {
@@ -41,7 +41,7 @@ fn have(program: &str) -> bool {
 
 /// The view each implementation renders for `config`, as JSON.
 async fn views(config: serde_json::Value) -> Vec<(String, serde_json::Value)> {
-    let mut native = dashboard_modules_personal::weather::Weather::default();
+    let mut native = sitroom_modules_personal::weather::Weather::default();
     native.init(config.clone()).await.unwrap();
     let mut out = vec![(
         "native".to_string(),
@@ -123,7 +123,7 @@ async fn same_config_errors() {
         ),
         (json!({ "place": " " }), "place must not be empty"),
     ] {
-        let err = dashboard_modules_personal::weather::Weather::default()
+        let err = sitroom_modules_personal::weather::Weather::default()
             .init(config.clone())
             .await
             .unwrap_err();
@@ -148,8 +148,8 @@ async fn same_config_errors() {
 /// Each package's demo is the built-in module's demo view.
 #[test]
 fn package_demos_match() {
-    let native = serde_json::to_value(dashboard_modules_personal::weather::catalog().demo).unwrap();
-    let found = dashboard_config::packages::Packages::load_from(&[repo("plugins/ext").into()]);
+    let native = serde_json::to_value(sitroom_modules_personal::weather::catalog().demo).unwrap();
+    let found = sitroom_config::packages::Packages::load_from(&[repo("plugins/ext").into()]);
     assert!(found.errors.is_empty(), "{:?}", found.errors);
     for id in ["weather-ts", "weather-py"] {
         let package = &found.get(id).expect(id).package;
@@ -162,7 +162,7 @@ fn package_demos_match() {
 #[tokio::test]
 async fn native_errors() {
     let base = open_meteo::start().await;
-    let mut w = dashboard_modules_personal::weather::Weather::default();
+    let mut w = sitroom_modules_personal::weather::Weather::default();
     w.init(open_meteo::config(&base, json!({ "place": "Nowhere" })))
         .await
         .unwrap();
@@ -171,7 +171,7 @@ async fn native_errors() {
 
     let mut config = open_meteo::config(&base, json!({ "latitude": 1, "longitude": 2 }));
     config["forecast_url"] = format!("{base}/fail").into();
-    let mut w = dashboard_modules_personal::weather::Weather::default();
+    let mut w = sitroom_modules_personal::weather::Weather::default();
     w.init(config).await.unwrap();
     let err = w.render().await.unwrap_err().to_string();
     assert!(

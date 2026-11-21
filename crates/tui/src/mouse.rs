@@ -1,7 +1,7 @@
 //! Mouse support. Drawing records what can be clicked where; a click looks
 //! up the topmost target under the pointer.
 
-use dashboard_contract::{Action, Theme};
+use sitroom_contract::{Action, Theme};
 use ratatui::layout::{Position, Rect};
 
 #[derive(Debug, Clone, PartialEq)]

@@ -4,8 +4,8 @@ use std::collections::BTreeMap;
 
 use anyhow::Result;
 use async_trait::async_trait;
-use dashboard_contract::{CatalogEntry, Cell, Column, Manifest, Row, Size, Status, View, Widget};
-use dashboard_host::Module;
+use sitroom_contract::{CatalogEntry, Cell, Column, Manifest, Row, Size, Status, View, Widget};
+use sitroom_host::Module;
 use schemars::JsonSchema;
 use serde::Deserialize;
 use sysinfo::{ProcessRefreshKind, ProcessesToUpdate, System};
@@ -117,7 +117,7 @@ pub fn catalog() -> CatalogEntry {
         ("postgres", "640", 9.8, 230 * MIB),
         ("Slack Helper", "2214", 6.1, 410 * MIB),
         ("kernel_task", "0", 4.7, 96 * MIB),
-        ("dashboard", "51007", 1.2, 24 * MIB),
+        ("sitroom", "51007", 1.2, 24 * MIB),
     ]
     .map(|(name, pid, cpu, mem)| row(name, pid, cpu, mem))
     .to_vec();

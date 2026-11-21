@@ -23,12 +23,12 @@
 
 use anyhow::{Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::{
+use sitroom_contract::{
     Action, CatalogEntry, ListItem, Manifest, Requirements, Size, Status, View, Widget,
 };
-use dashboard_host::Module;
-use dashboard_modules_common::http::client;
-use dashboard_modules_common::{expand_home, manifest};
+use sitroom_host::Module;
+use sitroom_modules_common::http::client;
+use sitroom_modules_common::{expand_home, manifest};
 use roxmltree::{Document, Node, ParsingOptions};
 use schemars::JsonSchema;
 use serde::Deserialize;

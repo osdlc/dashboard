@@ -6,9 +6,9 @@
 use std::path::PathBuf;
 use std::process::Command;
 
-use dashboard_contract::check::{check_manifest, check_view};
-use dashboard_contract::{Status, View, Widget};
-use dashboard_host::{History, Module, Plugin};
+use sitroom_contract::check::{check_manifest, check_view};
+use sitroom_contract::{Status, View, Widget};
+use sitroom_host::{History, Module, Plugin};
 use serde_json::json;
 
 fn sdk_file(path: &str) -> String {
@@ -33,7 +33,7 @@ fn runners(lang: &str) -> Vec<&'static str> {
     all.iter().copied().filter(|p| have(p)).collect()
 }
 
-fn problems(found: Vec<dashboard_contract::check::Finding>) -> Vec<String> {
+fn problems(found: Vec<sitroom_contract::check::Finding>) -> Vec<String> {
     found
         .into_iter()
         .filter(|f| f.problem)

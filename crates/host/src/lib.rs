@@ -7,7 +7,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use anyhow::Result;
 use async_trait::async_trait;
-use dashboard_contract::{
+use sitroom_contract::{
     CONTRACT_VERSION, CatalogEntry, LayoutHints, Manifest, Refresh, Status, TileUpdate, View,
     Widget,
 };
@@ -84,9 +84,9 @@ impl Demo {
             version: String::new(),
             description: String::new(),
             tags: vec![],
-            kind: dashboard_contract::EntryKind::Plugin,
+            kind: sitroom_contract::EntryKind::Plugin,
             source: String::new(),
-            default_size: dashboard_contract::Size::Small,
+            default_size: sitroom_contract::Size::Small,
             config_schema: None,
             requirements: Default::default(),
             demo: View {
@@ -411,7 +411,7 @@ mod tests {
 #[cfg(test)]
 mod stop_tests {
     use super::*;
-    use dashboard_contract::{CONTRACT_VERSION, LayoutHints, Size};
+    use sitroom_contract::{CONTRACT_VERSION, LayoutHints, Size};
 
     struct Counter(u32);
 

@@ -2,8 +2,8 @@
 # plugins, for the native-vs-plugin benchmark. The module code is the real
 # built-in module source (crates/modules-fun/src/clock.rs and
 # crates/modules-system/src/textfile.rs), compiled against two small stand-ins:
-# `host` for dashboard-host (tokio with process and net does not build for
-# WASI) and `common`, which is dashboard-modules-common's own source built
+# `host` for sitroom-host (tokio with process and net does not build for
+# WASI) and `common`, which is sitroom-modules-common's own source built
 # against that stand-in. Not part of the main workspace. See bench/README.md.
 [workspace]
 members = [".", "host", "common"]
@@ -23,9 +23,9 @@ publish = false
 [dependencies]
 anyhow = "1.0.104"
 async-trait = "0.1.92"
-dashboard-contract = { path = "../../crates/contract" }
-dashboard-host = { path = "host", package = "bench-wasm-host" }
-dashboard-modules-common = { path = "common", package = "bench-wasm-common" }
+sitroom-contract = { path = "../../crates/contract" }
+sitroom-host = { path = "host", package = "bench-wasm-host" }
+sitroom-modules-common = { path = "common", package = "bench-wasm-common" }
 jiff = "0.2.38"
 schemars = "1.2.3"
 serde = { version = "1.0.229", features = ["derive"] }

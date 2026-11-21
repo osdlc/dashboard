@@ -14,7 +14,7 @@ import os
 import subprocess
 from typing import Any, Dict, Optional
 
-from dashboard_plugin import config_error, upstream_error
+from sitroom_plugin import config_error, upstream_error
 
 # How long a command may take, in seconds.
 TIMEOUT = 20

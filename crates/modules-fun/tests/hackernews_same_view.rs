@@ -10,8 +10,8 @@
 use std::path::PathBuf;
 use std::process::Command;
 
-use dashboard_contract::check::{check_manifest, check_view};
-use dashboard_host::{Module, Plugin};
+use sitroom_contract::check::{check_manifest, check_view};
+use sitroom_host::{Module, Plugin};
 use serde_json::json;
 
 fn repo(path: &str) -> String {
@@ -57,7 +57,7 @@ fn plugins() -> Vec<(&'static str, Vec<String>)> {
     out
 }
 
-fn problems(found: Vec<dashboard_contract::check::Finding>) -> Vec<String> {
+fn problems(found: Vec<sitroom_contract::check::Finding>) -> Vec<String> {
     found
         .into_iter()
         .filter(|f| f.problem)
@@ -68,7 +68,7 @@ fn problems(found: Vec<dashboard_contract::check::Finding>) -> Vec<String> {
 /// Every implementation renders `config`; each plugin's view must equal the
 /// native one.
 async fn same(config: serde_json::Value) {
-    let mut native = dashboard_modules_fun::hackernews::HackerNews::default();
+    let mut native = sitroom_modules_fun::hackernews::HackerNews::default();
     native.init(config.clone()).await.unwrap();
     let expected = native.render().await.unwrap();
     for (id, argv) in plugins() {
@@ -137,8 +137,8 @@ fn sdk_copies_match_the_sdk() {
     // Each package in plugins/ext carries its own copy of the SDK, so it runs
     // wherever it is installed. Keep every copy in step with sdk/.
     let sdks = [
-        ("dashboard-plugin.ts", "sdk/typescript/dashboard-plugin.ts"),
-        ("dashboard_plugin.py", "sdk/python/dashboard_plugin.py"),
+        ("sitroom-plugin.ts", "sdk/typescript/sitroom-plugin.ts"),
+        ("sitroom_plugin.py", "sdk/python/sitroom_plugin.py"),
     ];
     let mut checked = 0;
     for dir in std::fs::read_dir(repo("plugins/ext")).unwrap() {

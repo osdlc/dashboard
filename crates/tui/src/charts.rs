@@ -1,6 +1,6 @@
 //! Graphs, meter grids and bar lists, drawn straight into the buffer.
 
-use dashboard_contract::{
+use sitroom_contract::{
     Bar, ColorScale, Meter, SeriesData, SeriesStyle, ValueFormat, format_value, series_scale,
 };
 use ratatui::layout::{Constraint, Layout, Rect};
@@ -553,7 +553,7 @@ pub fn heat_color(stops: &[(u8, u8, u8); 3], t: f64) -> Color {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dashboard_contract::Theme;
+    use sitroom_contract::Theme;
     use ratatui::buffer::Buffer;
 
     fn data(name: &str, values: &[f64]) -> SeriesData {

@@ -4,7 +4,7 @@ the tests and the --sample mode run the same code as the real tile."""
 import datetime
 from typing import Any, Dict, List
 
-from dashboard_plugin import Row, Status, View
+from sitroom_plugin import Row, Status, View
 
 # The fields we ask for. `color` is blue, red, yellow, grey, disabled, aborted or notbuilt,
 # with `_anime` while building; folders have none. Times are unix milliseconds.

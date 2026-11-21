@@ -6,9 +6,9 @@
 use std::path::PathBuf;
 use std::process::Command;
 
-use dashboard_contract::View;
-use dashboard_contract::check::{check_manifest, check_view};
-use dashboard_host::{History, Module, Plugin};
+use sitroom_contract::View;
+use sitroom_contract::check::{check_manifest, check_view};
+use sitroom_host::{History, Module, Plugin};
 use serde_json::json;
 
 fn example(file: &str) -> String {
@@ -22,7 +22,7 @@ fn have(program: &str) -> bool {
     Command::new(program).arg("--version").output().is_ok()
 }
 
-fn problems(found: Vec<dashboard_contract::check::Finding>) -> Vec<String> {
+fn problems(found: Vec<sitroom_contract::check::Finding>) -> Vec<String> {
     found
         .into_iter()
         .filter(|f| f.problem)
@@ -111,11 +111,11 @@ async fn latency_keeps_history_in_the_host() {
         { "name": "closed", "host": "127.0.0.1", "port": 9 },
     ] });
     let (_, view) = run(&["python3", &example("latency/latency.py")], config, 3).await;
-    assert_eq!(view.status, dashboard_contract::Status::Error);
-    let dashboard_contract::Widget::Column { children } = &view.root else {
+    assert_eq!(view.status, sitroom_contract::Status::Error);
+    let sitroom_contract::Widget::Column { children } = &view.root else {
         panic!("column")
     };
-    let dashboard_contract::Widget::Series { series, .. } = &children[1] else {
+    let sitroom_contract::Widget::Series { series, .. } = &children[1] else {
         panic!("series")
     };
     assert_eq!(series[0].points.len(), 3, "host kept all three points");
@@ -134,7 +134,7 @@ async fn gh_actions_needs_repos() {
         .unwrap_err();
     assert!(format!("{err:#}").contains("code -32002"), "{err:#}");
     let manifest = Plugin::new("test", argv)
-        .init(json!({ "repos": ["osdlc/dashboard"] }))
+        .init(json!({ "repos": ["osdlc/sitroom"] }))
         .await
         .unwrap();
     assert_eq!(manifest.id, "gh-actions");

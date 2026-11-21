@@ -11,7 +11,7 @@
 //!
 //! The session token never goes in a URL. The link the server prints and
 //! opens carries a one-time boot token (`?boot=`), which the page trades for
-//! the session token at `POST /api/session` (see `dashboard_cli_kit::boot`).
+//! the session token at `POST /api/session` (see `sitroom_cli_kit::boot`).
 //! The UI's static files (built by build.rs and embedded) are served without
 //! the token.
 
@@ -27,11 +27,11 @@ use axum::middleware::{self, Next};
 use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
 use axum::{Json, Router};
-use dashboard_cli_kit::boot::{self, Redeem, SignIn};
-use dashboard_contract::{
+use sitroom_cli_kit::boot::{self, Redeem, SignIn};
+use sitroom_contract::{
     CatalogEntry, CatalogResponse, ClientMessage, ServerMessage, UiSettings, Widget,
 };
-use dashboard_host::Host;
+use sitroom_host::Host;
 use futures_util::{SinkExt, StreamExt};
 use rust_embed::RustEmbed;
 use serde::{Deserialize, Serialize};
@@ -122,9 +122,9 @@ pub async fn serve(
         s.token().to_string()
     };
     let sign_in = format!("{url}?boot={boot}");
-    println!("dashboard: {sign_in}");
+    println!("sitroom: {sign_in}");
     println!("           signs one browser tab in; unused, it expires in a minute.");
-    println!("           `dashboard open` makes a new link.");
+    println!("           `sitroom open` makes a new link.");
     if let Some(origin) = &config.dev_origin {
         println!("dev:       {origin}/?boot={boot}");
     }
@@ -257,7 +257,7 @@ async fn session(State(state): State<AppState>, Json(req): Json<SessionRequest>)
         Redeem::Replayed => {
             tracing::warn!(
                 "a used sign-in link was opened again (a second tab, or another program that \
-                 read it); refused. `dashboard open` makes a new link"
+                 read it); refused. `sitroom open` makes a new link"
             );
             StatusCode::UNAUTHORIZED.into_response()
         }
@@ -270,7 +270,7 @@ struct BootResponse {
     boot: String,
 }
 
-/// A new boot token, for `dashboard open`. The old one stops working.
+/// A new boot token, for `sitroom open`. The old one stops working.
 async fn new_boot(State(state): State<AppState>) -> Json<BootResponse> {
     let boot = state
         .sign_in
@@ -381,10 +381,10 @@ async fn catalog(State(state): State<AppState>, Query(q): Query<CatalogQuery>) -
 }
 
 async fn ws(State(state): State<AppState>, upgrade: WebSocketUpgrade) -> Response {
-    // The page offers `dashboard` and `bearer.<token>`; answer the first, so the
+    // The page offers `sitroom` and `bearer.<token>`; answer the first, so the
     // token isn't echoed back.
     upgrade
-        .protocols(["dashboard"])
+        .protocols(["sitroom"])
         .on_upgrade(move |socket| feed(socket, state.host, state.settings, state.actions))
 }
 
@@ -458,7 +458,7 @@ async fn send(
 mod tests {
     use axum::body::Body;
     use axum::http::Request;
-    use dashboard_contract::ConfigInfo;
+    use sitroom_contract::ConfigInfo;
     use tower::ServiceExt;
 
     use super::*;
@@ -471,7 +471,7 @@ mod tests {
             screens: vec![],
             modules: vec![],
             rotate: None,
-            tui_fps: dashboard_contract::DEFAULT_TUI_FPS,
+            tui_fps: sitroom_contract::DEFAULT_TUI_FPS,
             config: ConfigInfo::default(),
         });
         let (actions, _) = mpsc::unbounded_channel();
@@ -554,21 +554,21 @@ mod tests {
     struct Picture(String);
 
     #[async_trait::async_trait]
-    impl dashboard_host::Module for Picture {
+    impl sitroom_host::Module for Picture {
         async fn init(
             &mut self,
             _: serde_json::Value,
-        ) -> anyhow::Result<dashboard_contract::Manifest> {
-            Ok(dashboard_contract::Manifest {
+        ) -> anyhow::Result<sitroom_contract::Manifest> {
+            Ok(sitroom_contract::Manifest {
                 id: "picture".into(),
                 name: "picture".into(),
-                contract_version: dashboard_contract::CONTRACT_VERSION.into(),
-                refresh: dashboard_contract::Refresh::Poll {
+                contract_version: sitroom_contract::CONTRACT_VERSION.into(),
+                refresh: sitroom_contract::Refresh::Poll {
                     interval_ms: 60_000,
                     min_interval_ms: None,
                 },
-                layout: dashboard_contract::LayoutHints {
-                    size: dashboard_contract::Size::Medium,
+                layout: sitroom_contract::LayoutHints {
+                    size: sitroom_contract::Size::Medium,
                     priority: 0,
                     min_size: None,
                 },
@@ -576,9 +576,9 @@ mod tests {
                 config_schema: None,
             })
         }
-        async fn render(&mut self) -> anyhow::Result<dashboard_contract::View> {
-            Ok(dashboard_contract::View {
-                status: dashboard_contract::Status::Ok,
+        async fn render(&mut self) -> anyhow::Result<sitroom_contract::View> {
+            Ok(sitroom_contract::View {
+                status: sitroom_contract::Status::Ok,
                 summary: "a picture".into(),
                 root: Widget::Column {
                     children: vec![Widget::Image {
@@ -593,7 +593,7 @@ mod tests {
     /// A picture a tile shows is served; any other file, or no token, is not.
     #[tokio::test]
     async fn serves_only_pictures_a_tile_shows() {
-        let dir = std::env::temp_dir().join(format!("dashboard-web-image-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sitroom-web-image-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let shown = dir.join("shown.png");
         let other = dir.join("other.png");
@@ -644,7 +644,7 @@ mod tests {
     /// The Add module preview shows a catalog entry's demo, which no tile shows.
     #[tokio::test]
     async fn serves_pictures_a_catalog_demo_shows() {
-        let dir = std::env::temp_dir().join(format!("dashboard-web-demo-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sitroom-web-demo-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let demo = dir.join("demo.png");
         std::fs::write(&demo, b"demo bytes").unwrap();
@@ -695,11 +695,11 @@ mod tests {
                 .body(Body::empty())
                 .unwrap()
         };
-        let ok = call(&state, with("dashboard, bearer.session")).await;
+        let ok = call(&state, with("sitroom, bearer.session")).await;
         assert_eq!(ok.0, StatusCode::OK);
-        let bad = call(&state, with("dashboard, bearer.nope")).await;
+        let bad = call(&state, with("sitroom, bearer.nope")).await;
         assert_eq!(bad.0, StatusCode::UNAUTHORIZED);
-        let none = call(&state, with("dashboard")).await;
+        let none = call(&state, with("sitroom")).await;
         assert_eq!(none.0, StatusCode::UNAUTHORIZED);
     }
 }

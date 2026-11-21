@@ -1,18 +1,18 @@
-# dashboard
+# sitroom
 
 Modular developer dashboard with a terminal UI and a web UI. See [docs/](docs/) for the design and
 [docs/roadmap.md](docs/roadmap.md) for where it is going and what is experimental.
 
-Requires Rust and pnpm. `cargo build` also builds the Vue app in `web/` (only when its files change) and embeds it in the binary. Set `DASHBOARD_SKIP_UI_BUILD=1` to skip that.
+Requires Rust and pnpm. `cargo build` also builds the Vue app in `web/` (only when its files change) and embeds it in the binary. Set `SITROOM_SKIP_UI_BUILD=1` to skip that.
 
 ## Run
 
 ```sh
-cargo run -p dashboard -- tui      # terminal UI (q to quit)
-cargo run -p dashboard -- serve    # web UI: opens http://127.0.0.1:7878/?boot=… in the browser (--no-open to skip)
-cargo run -p dashboard -- serve -d # the same in the background; `dashboard status` / `dashboard stop`
-cargo run -p dashboard -- open     # sign another browser tab in to the running server
-cargo run -p dashboard-desktop     # desktop app: a window, --wallpaper or --screensaver (docs/desktop.md)
+cargo run -p sitroom -- tui      # terminal UI (q to quit)
+cargo run -p sitroom -- serve    # web UI: opens http://127.0.0.1:7878/?boot=… in the browser (--no-open to skip)
+cargo run -p sitroom -- serve -d # the same in the background; `sitroom status` / `sitroom stop`
+cargo run -p sitroom -- open     # sign another browser tab in to the running server
+cargo run -p sitroom-desktop     # desktop app: a window, --wallpaper or --screensaver (docs/desktop.md)
 ```
 
 Add `mode=ambient` to the web page's URL (`?mode=ambient`) for ambient mode: no controls, large type, screens rotating.
@@ -38,14 +38,14 @@ settings or the screen editor are open.
 ## Demo
 
 ```sh
-cargo run -p dashboard -- serve --config examples/demo.yaml   # or: tui --config examples/demo.yaml
+cargo run -p sitroom -- serve --config examples/demo.yaml   # or: tui --config examples/demo.yaml
 ```
 
 Eight screens (`1`–`8` or `[` `]` to switch) using every tile size and widget style, filled with made-up animated data. Edit `examples/demo.yaml` while it runs to try other styles, colors and sizes; the file's header lists the options.
 
 ## Config
 
-Optional. Lives at `~/.config/dashboard/config.yaml` (`%APPDATA%\dashboard\config.yaml` on Windows; override with `--config <path>` or `$DASHBOARD_MACHINE_CONFIG`).
+Optional. Lives at `~/.config/sitroom/config.yaml` (`%APPDATA%\sitroom\config.yaml` on Windows; override with `--config <path>` or `$SITROOM_MACHINE_CONFIG`).
 
 ```yaml
 theme: auto            # auto | light | dark
@@ -77,7 +77,7 @@ modules:
 
 ### Demo mode
 
-Add `demo: true` to any module's entry (built-in, bundled plugin or package) to show its demo view instead of running it. The demo view is the made-up data from the module's catalog entry (`dashboard widgets` lists them). Nothing runs: no process, no network calls, no token needed. The tile is tagged `demo` in the TUI and web. Use it to try a layout, take screenshots, or show a module you have no account for.
+Add `demo: true` to any module's entry (built-in, bundled plugin or package) to show its demo view instead of running it. The demo view is the made-up data from the module's catalog entry (`sitroom widgets` lists them). Nothing runs: no process, no network calls, no token needed. The tile is tagged `demo` in the TUI and web. Use it to try a layout, take screenshots, or show a module you have no account for.
 
 ```yaml
 modules:
@@ -178,15 +178,15 @@ modules:
     config: { repos: [~/dev/api, ~/dev/web] }
 ```
 
-### The dashboard's own cost
+### Sitroom's own cost
 
 `process` shows the CPU, memory and process count of one process and everything it started. With
-no settings that is the dashboard itself and its plugins. CPU is in percent of one core; memory is
+no settings that is sitroom itself and its plugins. CPU is in percent of one core; memory is
 resident memory added up, so memory shared between the processes is counted more than once.
 
 ```yaml
 modules:
-  process: {}                  # the dashboard and its plugins
+  process: {}                  # sitroom and its plugins
   postgres:
     builtin: process
     config: { name: postgres } # every process with this name, and their children
@@ -265,23 +265,23 @@ GitHub uses the `gh` CLI's login (`github-prs`, `github-issues`), so it needs no
 
 Press `s` (TUI or web) for the settings screen: the config path, any config error, the theme (changeable there; written into the file with your comments kept), rotation, and each module's refresh period. In the TUI, `e` in settings opens the file in `$VISUAL` / `$EDITOR`.
 
-Changes to the file apply while the dashboard runs. Only modules whose settings changed restart. If the file has an error, the previous config stays in effect and the error is shown in the settings screen.
+Changes to the file apply while sitroom runs. Only modules whose settings changed restart. If the file has an error, the previous config stays in effect and the error is shown in the settings screen.
 
 ### Dashboards and project files
 
-Keep named dashboards in `~/.config/dashboard/dashboards/<name>.yaml` and open one with
-`dashboard --dashboard work serve`, or switch in the web view. A `.dashboard.yaml` in a
-repository adds that repository's modules and screens when you run the dashboard inside it.
+Keep named dashboards in `~/.config/sitroom/dashboards/<name>.yaml` and open one with
+`sitroom --dashboard work serve`, or switch in the web view. A `.sitroom.yaml` in a
+repository adds that repository's modules and screens when you run sitroom inside it.
 A project file can run programs, so it is only used after you read it and run
-`dashboard trust`, and again after every change to it.
-`dashboard dashboards list`, `dashboard import <file|url>` and `dashboard export NAME [FILE]`
+`sitroom trust`, and again after every change to it.
+`sitroom dashboards list`, `sitroom import <file|url>` and `sitroom export NAME [FILE]`
 manage saved dashboards. See [docs/dashboards.md](docs/dashboards.md) for how the files merge.
 
-- `dashboard config` lists the config files in use, in order, and checks them.
-- `dashboard schema config` prints a JSON Schema for editor completion (yaml-language-server).
-- `dashboard widgets [words] [--tag t]` lists what can be added: built-in modules, bundled plugins
+- `sitroom config` lists the config files in use, in order, and checks them.
+- `sitroom schema config` prints a JSON Schema for editor completion (yaml-language-server).
+- `sitroom widgets [words] [--tag t]` lists what can be added: built-in modules, bundled plugins
   and installed plugin packages (see [docs/plugins.md](docs/plugins.md)).
-- `dashboard plugin install <id|file|url|folder>` installs a plugin package, checking its
+- `sitroom plugin install <id|file|url|folder>` installs a plugin package, checking its
   sha256 and asking first; `plugin list`, `update` and `remove` too (see
   [docs/marketplace.md](docs/marketplace.md)).
 
@@ -293,11 +293,11 @@ into the config file, keeping your comments, and the module starts.
 ## Develop the web UI with live reload
 
 ```sh
-cargo run -p dashboard -- serve --dev-origin http://localhost:5173   # terminal 1
+cargo run -p sitroom -- serve --dev-origin http://localhost:5173   # terminal 1
 cd web && pnpm dev                                                   # terminal 2
 ```
 
-Open the printed `http://localhost:5173/?boot=…` link within a minute. `dashboard open` makes a new one,
+Open the printed `http://localhost:5173/?boot=…` link within a minute. `sitroom open` makes a new one,
 but for port 7878; change its start to `http://localhost:5173` by hand.
 
 After changing the Rust contract types, regenerate the TypeScript types with `cd web && pnpm gen:types`.
@@ -309,8 +309,8 @@ After changing the Rust contract types, regenerate the TypeScript types with `cd
 `plugins/cswap` is a stdio plugin (JSON-RPC, one message per line). Try it directly:
 
 ```sh
-cargo build -p dashboard-cswap
-printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"view/render"}' | ./target/debug/dashboard-cswap
+cargo build -p sitroom-cswap
+printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"view/render"}' | ./target/debug/sitroom-cswap
 ```
 
 ## Windows

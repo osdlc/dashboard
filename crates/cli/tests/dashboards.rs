@@ -1,4 +1,4 @@
-//! `dashboard import`, `dashboards list`, `export` and `config` with layers,
+//! `sitroom import`, `dashboards list`, `export` and `config` with layers,
 //! run as a user would, with the config and data homes and the working
 //! directory in a temp folder. No network.
 
@@ -10,7 +10,7 @@ struct Temp(PathBuf);
 impl Temp {
     fn new() -> Self {
         let dir =
-            std::env::temp_dir().join(format!("dashboard-cli-dashboards-{}", std::process::id()));
+            std::env::temp_dir().join(format!("sitroom-cli-dashboards-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(dir.join("repo/src")).unwrap();
         Self(dir)
@@ -22,16 +22,16 @@ impl Temp {
         path
     }
 
-    /// Run the dashboard in `cwd` with its config and data homes in the temp folder.
+    /// Run sitroom in `cwd` with its config and data homes in the temp folder.
     fn run(&self, cwd: &Path, args: &[&str]) -> Output {
-        Command::new(env!("CARGO_BIN_EXE_dashboard"))
+        Command::new(env!("CARGO_BIN_EXE_sitroom"))
             .args(args)
             .current_dir(cwd)
             // Not XDG_*: Windows ignores those and uses its Known Folders.
-            .env("DASHBOARD_CONFIG_DIR", self.0.join("xdg/config"))
-            .env("DASHBOARD_DURABLE_DIR", self.0.join("xdg/data"))
-            .env_remove("DASHBOARD_ROOT")
-            .env_remove("DASHBOARD_MACHINE_CONFIG")
+            .env("SITROOM_CONFIG_DIR", self.0.join("xdg/config"))
+            .env("SITROOM_DURABLE_DIR", self.0.join("xdg/data"))
+            .env_remove("SITROOM_ROOT")
+            .env_remove("SITROOM_MACHINE_CONFIG")
             // Not a test binary: don't let tiered-dirs pick a scratch root.
             .env_remove("CARGO")
             .output()
@@ -67,7 +67,7 @@ fn import_list_export_and_layers() {
          screens:\n  - name: pager\n    tiles: [{ module: cswap }]\n",
     );
     t.write(
-        "repo/.dashboard.yaml",
+        "repo/.sitroom.yaml",
         "screens:\n  - name: repo\n    tiles: [{ module: cswap }]\n",
     );
     let repo = t.0.join("repo/src");
@@ -77,7 +77,7 @@ fn import_list_export_and_layers() {
         &["--config", config, "import", shared.to_str().unwrap()],
     );
     assert!(out.status.success(), "{}", text(&out));
-    let saved = t.0.join("xdg/config/dashboard/dashboards/on-call.yaml");
+    let saved = t.0.join("xdg/config/sitroom/dashboards/on-call.yaml");
     assert!(saved.is_file(), "{}", text(&out));
     assert!(
         text(&out).contains("plugin package \"pagerduty-missing\""),
@@ -85,7 +85,7 @@ fn import_list_export_and_layers() {
         text(&out)
     );
     assert!(
-        text(&out).contains("dashboard plugin install"),
+        text(&out).contains("sitroom plugin install"),
         "{}",
         text(&out)
     );
@@ -103,7 +103,7 @@ fn import_list_export_and_layers() {
     assert!(listed.contains("on-call  Pager rotation"), "{listed}");
     assert!(listed.contains("project file:"), "{listed}");
 
-    // Layers, in order. The dashboard needs a package that isn't installed.
+    // Layers, in order. Sitroom needs a package that isn't installed.
     let out = t.run(
         &repo,
         &["--config", config, "--dashboard", "on-call", "config"],
@@ -111,11 +111,11 @@ fn import_list_export_and_layers() {
     let shown = text(&out);
     assert!(shown.contains("machine"), "{shown}");
     assert!(shown.contains("on-call.yaml"), "{shown}");
-    assert!(shown.contains(".dashboard.yaml"), "{shown}");
+    assert!(shown.contains(".sitroom.yaml"), "{shown}");
     assert!(shown.contains("pagerduty-missing"), "{shown}");
     let out = t.run(&repo, &["--config", config, "--no-project", "config"]);
     assert!(out.status.success(), "{}", text(&out));
-    assert!(!text(&out).contains(".dashboard.yaml"), "{}", text(&out));
+    assert!(!text(&out).contains(".sitroom.yaml"), "{}", text(&out));
 
     let out = t.run(&repo, &["--config", config, "export", "on-call"]);
     assert_eq!(out.stdout, std::fs::read(&shared).unwrap());

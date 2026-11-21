@@ -5,7 +5,7 @@ import os
 import unittest
 
 import main
-from dashboard_plugin import PluginError
+from sitroom_plugin import PluginError
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 

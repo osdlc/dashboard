@@ -28,11 +28,11 @@ pub struct Record {
 }
 
 fn record_path() -> Result<PathBuf> {
-    Ok(dashboard_config::run_dirs()?.0.join("serve.json"))
+    Ok(sitroom_config::run_dirs()?.0.join("serve.json"))
 }
 
 fn log_path() -> Result<PathBuf> {
-    Ok(dashboard_config::run_dirs()?.1.join("serve.log"))
+    Ok(sitroom_config::run_dirs()?.1.join("serve.log"))
 }
 
 /// Called by the server once it is listening.
@@ -103,7 +103,7 @@ fn forget_at(path: &Path, pid: u32) {
     }
 }
 
-/// Start `dashboard serve` again as a detached process (its own process group,
+/// Start `sitroom serve` again as a detached process (its own process group,
 /// output to the log file) and wait until it is listening.
 /// `args` are the global options (`--config` and the like) to run it with.
 pub fn detach(args: &[std::ffi::OsString], port: u16, dev_origin: Option<&str>) -> Result<Record> {
@@ -204,7 +204,7 @@ pub fn stop() -> Result<Option<Record>> {
 pub fn sign_in_link(record: &Record) -> Result<String> {
     let Some(token) = &record.token else {
         bail!(
-            "the server at {} was started by an older version; stop it with `dashboard stop` and start it again",
+            "the server at {} was started by an older version; stop it with `sitroom stop` and start it again",
             record.url
         );
     };
@@ -239,7 +239,7 @@ pub fn sign_in_link(record: &Record) -> Result<String> {
     Ok(format!("{}?boot={boot}", record.url))
 }
 
-/// Whether `pid` is a live dashboard process. On Windows, only that it is live.
+/// Whether `pid` is a live sitroom process. On Windows, only that it is live.
 fn ours(pid: u32) -> bool {
     #[cfg(unix)]
     let ours = alive(pid) && is_dashboard(pid);
@@ -291,7 +291,7 @@ fn same_program(comm: &str, ours: &str) -> bool {
 }
 
 /// Whether `tasklist /NH /FO CSV` output lists `pid`. Each process is a line
-/// like `"dashboard.exe","4242","Console","1","12,345 K"`; with no match it
+/// like `"sitroom.exe","4242","Console","1","12,345 K"`; with no match it
 /// prints an "INFO: No tasks..." line instead.
 #[cfg_attr(not(windows), allow(dead_code))]
 fn tasklist_has(out: &str, pid: u32) -> bool {
@@ -302,7 +302,7 @@ fn tasklist_has(out: &str, pid: u32) -> bool {
 
 /// Open `url` in the default browser. Skipped where there is no display.
 pub fn open_browser(url: &str) {
-    if let Err(err) = dashboard_host::browser::open(url) {
+    if let Err(err) = sitroom_host::browser::open(url) {
         crate::warn(&format!(
             "couldn't open a browser ({err}); open the link above within a minute"
         ))
@@ -322,7 +322,7 @@ mod tests {
     #[cfg(unix)]
     #[test]
     fn drops_a_record_whose_pid_is_another_program() {
-        let dir = std::env::temp_dir().join(format!("dashboard-bg-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sitroom-bg-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("serve.json");
         let mut other = Command::new("sleep").arg("30").spawn().unwrap();
@@ -347,17 +347,17 @@ mod tests {
 
     #[test]
     fn matches_ps_comm() {
-        assert!(same_program("/usr/local/bin/dashboard\n", "dashboard"));
-        assert!(same_program("dashboard", "dashboard"));
-        assert!(same_program("dashboard-relea", "dashboard-release"));
-        assert!(!same_program("sshd", "dashboard"));
-        assert!(!same_program("dash", "dashboard"));
-        assert!(!same_program("", "dashboard"));
+        assert!(same_program("/usr/local/bin/sitroom\n", "sitroom"));
+        assert!(same_program("sitroom", "sitroom"));
+        assert!(same_program("sitroom-relea", "sitroom-release"));
+        assert!(!same_program("sshd", "sitroom"));
+        assert!(!same_program("dash", "sitroom"));
+        assert!(!same_program("", "sitroom"));
     }
 
     #[test]
     fn reads_tasklist_output() {
-        let out = "\"dashboard.exe\",\"4242\",\"Console\",\"1\",\"12,345 K\"\r\n";
+        let out = "\"sitroom.exe\",\"4242\",\"Console\",\"1\",\"12,345 K\"\r\n";
         assert!(tasklist_has(out, 4242));
         assert!(!tasklist_has(out, 42));
         assert!(!tasklist_has(out, 1));

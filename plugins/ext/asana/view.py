@@ -4,7 +4,7 @@ the --sample mode run the same code as the real tile."""
 import datetime
 from typing import Any, Dict, List, Optional
 
-from dashboard_plugin import ListItem, Status, View
+from sitroom_plugin import ListItem, Status, View
 
 # The fields we ask for with `opt_fields=`. `due_on` is YYYY-MM-DD; Asana sets it for tasks
 # with a due time too.

@@ -1,6 +1,6 @@
 # AI agent usage widgets from the agents bundle. From the repository root:
 #
-#   cargo run -p dashboard -- serve --config examples/widgets/w-agents.yaml
+#   cargo run -p sitroom -- serve --config examples/widgets/w-agents.yaml
 #
 # Tiles marked `demo: true` show made-up data from the module's catalog entry:
 # nothing runs for them. Remove the line to run the module for real.

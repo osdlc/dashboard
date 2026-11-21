@@ -8,8 +8,8 @@
 
 use anyhow::{Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::{CatalogEntry, Manifest, Requirements, Size, Status, View};
-use dashboard_host::Module;
+use sitroom_contract::{CatalogEntry, Manifest, Requirements, Size, Status, View};
+use sitroom_host::Module;
 use schemars::JsonSchema;
 use serde::Deserialize;
 

@@ -11,16 +11,16 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::{CatalogEntry, Manifest, Requirements, Size, View, Widget};
-use dashboard_host::Module;
+use sitroom_contract::{CatalogEntry, Manifest, Requirements, Size, View, Widget};
+use sitroom_host::Module;
 use schemars::JsonSchema;
 use serde::Deserialize;
 use serde_json::Value;
 
 use super::tally::{Record, Tally, recent_files};
 use super::{Window, now_secs};
-use dashboard_modules_common::time::{parse_time, rfc3339};
-use dashboard_modules_common::{expand_home, manifest};
+use sitroom_modules_common::time::{parse_time, rfc3339};
+use sitroom_modules_common::{expand_home, manifest};
 
 const QUOTAS: &str =
     "https://github.com/google-gemini/gemini-cli/blob/main/docs/quota-and-pricing.md";
@@ -255,9 +255,9 @@ mod tests {
             "{}",
             v.summary
         );
-        assert_eq!(v.status, dashboard_contract::Status::Ok);
+        assert_eq!(v.status, sitroom_contract::Status::Ok);
         let v = view(&vec![records[0].clone(); 4], 4, now);
-        assert_eq!(v.status, dashboard_contract::Status::Error);
+        assert_eq!(v.status, sitroom_contract::Status::Error);
         assert!(parse("[]").is_empty());
     }
 

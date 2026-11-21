@@ -13,9 +13,9 @@ mod open_meteo;
 use std::path::PathBuf;
 use std::process::Command;
 
-use dashboard_contract::check::check_view;
-use dashboard_contract::{Cell, Status, View, Widget};
-use dashboard_host::{Module, Plugin};
+use sitroom_contract::check::check_view;
+use sitroom_contract::{Cell, Status, View, Widget};
+use sitroom_host::{Module, Plugin};
 use serde_json::json;
 
 fn repo(path: &str) -> String {
@@ -188,12 +188,12 @@ async fn rejects_bad_settings() {
 fn sdk_copies_are_current() {
     for (copy, sdk) in [
         (
-            "plugins/ext/weather-ts/dashboard-plugin.ts",
-            "sdk/typescript/dashboard-plugin.ts",
+            "plugins/ext/weather-ts/sitroom-plugin.ts",
+            "sdk/typescript/sitroom-plugin.ts",
         ),
         (
-            "plugins/ext/weather-py/dashboard_plugin.py",
-            "sdk/python/dashboard_plugin.py",
+            "plugins/ext/weather-py/sitroom_plugin.py",
+            "sdk/python/sitroom_plugin.py",
         ),
     ] {
         let a = std::fs::read_to_string(repo(copy)).unwrap();

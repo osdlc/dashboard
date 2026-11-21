@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Dashboard",
-  "mainBinaryName": "dashboard-desktop",
-  "identifier": "dev.dashboard.desktop",
+  "productName": "Sitroom",
+  "mainBinaryName": "sitroom-desktop",
+  "identifier": "dev.sitroom.desktop",
   "build": {
     "frontendDist": "dist"
   },

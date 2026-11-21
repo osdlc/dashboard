@@ -180,12 +180,12 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
 
 <template>
   <header class="top">
-    <h1>Dashboard</h1>
+    <h1>Sitroom</h1>
     <select
       v-if="settings && (settings.config.dashboards?.length || settings.config.dashboard)"
       class="dash-switch"
-      aria-label="Dashboard"
-      title="Switch dashboard (saved in ~/.config/dashboard/dashboards)"
+      aria-label="Sitroom"
+      title="Switch dashboard (saved in ~/.config/sitroom/dashboards)"
       :value="settings.config.dashboard ?? ''"
       @change="switchDashboard"
     >
@@ -237,7 +237,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
     <button type="button" class="help-btn" aria-label="Help" title="Help (?)" @click="toggle('help')">?</button>
   </header>
   <p v-if="state === 'signed out'" class="notice">
-    Not signed in. A sign-in link works once and for a minute; run <code>dashboard open</code> for a new
+    Not signed in. A sign-in link works once and for a minute; run <code>sitroom open</code> for a new
     one.
   </p>
   <ScreenEditor

@@ -1,6 +1,6 @@
 //! The `?` overlay: keys, screens, and running modules.
 
-use dashboard_contract::UiSettings;
+use sitroom_contract::UiSettings;
 use ratatui::Frame;
 use ratatui::layout::{Constraint, Flex, Layout, Rect};
 use ratatui::style::{Modifier, Style};

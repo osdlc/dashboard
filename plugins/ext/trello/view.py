@@ -6,7 +6,7 @@ import datetime
 import math
 from typing import Any, Dict, List, Optional, Tuple
 
-from dashboard_plugin import ListItem, Status, View
+from sitroom_plugin import ListItem, Status, View
 
 # The card fields we ask for. `due` is an ISO time, or null with no due date.
 CARD_FIELDS = "name,due,dueComplete,shortUrl,labels"

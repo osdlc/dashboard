@@ -17,10 +17,10 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::{
+use sitroom_contract::{
     Action, CatalogEntry, ListItem, Manifest, Requirements, Size, Status, View, Widget,
 };
-use dashboard_host::Module;
+use sitroom_host::Module;
 use jiff::civil::Date;
 use schemars::JsonSchema;
 use serde::Deserialize;

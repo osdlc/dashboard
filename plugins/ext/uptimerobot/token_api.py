@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
 import apitoken
-from dashboard_plugin import config_error, upstream_error
+from sitroom_plugin import config_error, upstream_error
 
 # How long one request may take, in seconds.
 TIMEOUT = 20
@@ -26,7 +26,7 @@ def request_json(url: str, headers: Optional[Dict[str, str]] = None, data: Optio
     req = urllib.request.Request(
         url,
         data=data,
-        headers={"User-Agent": "dashboard-plugin", "Accept": "application/json", **(headers or {})},
+        headers={"User-Agent": "sitroom-plugin", "Accept": "application/json", **(headers or {})},
     )
     try:
         with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:

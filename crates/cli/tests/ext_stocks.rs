@@ -6,10 +6,10 @@
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use dashboard_config::packages::load_package;
-use dashboard_contract::check::check_view;
-use dashboard_contract::{Cell, Status, Widget};
-use dashboard_host::{Module, Plugin};
+use sitroom_config::packages::load_package;
+use sitroom_contract::check::check_view;
+use sitroom_contract::{Cell, Status, Widget};
+use sitroom_host::{Module, Plugin};
 use serde_json::json;
 
 fn dir() -> PathBuf {
@@ -67,7 +67,7 @@ async fn sample_shows_the_demo_view() {
     assert!(matches!(children[1], Widget::Series { .. }));
 
     let package = load_package(&dir()).expect("package loads");
-    assert_eq!(package.package.demo, view, "demo: in dashboard-plugin.yaml");
+    assert_eq!(package.package.demo, view, "demo: in sitroom-plugin.yaml");
 }
 
 #[tokio::test]
@@ -132,7 +132,7 @@ fn python_parse_tests_pass() {
 #[test]
 fn sdk_copy_is_current() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
-    let copy = std::fs::read_to_string(dir().join("dashboard_plugin.py")).unwrap();
-    let sdk = std::fs::read_to_string(root.join("sdk/python/dashboard_plugin.py")).unwrap();
-    assert!(copy == sdk, "copy sdk/python/dashboard_plugin.py again");
+    let copy = std::fs::read_to_string(dir().join("sitroom_plugin.py")).unwrap();
+    let sdk = std::fs::read_to_string(root.join("sdk/python/sitroom_plugin.py")).unwrap();
+    assert!(copy == sdk, "copy sdk/python/sitroom_plugin.py again");
 }

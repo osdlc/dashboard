@@ -1,7 +1,7 @@
 # Command line conventions
 
-The `dashboard` command follows the osdlc CLI standard (`standards/cli-interface.md` in
-osdlc/osdlc). The shared parts live in `crates/cli-kit`, which knows nothing about the dashboard,
+The `sitroom` command follows the osdlc CLI standard (`standards/cli-interface.md` in
+osdlc/osdlc). The shared parts live in `crates/cli-kit`, which knows nothing about sitroom,
 so it can move into a shared `cli-kit` crate once another Rust tool needs it.
 
 ## Exit codes
@@ -16,16 +16,16 @@ so it can move into a shared `cli-kit` crate once another Rust tool needs it.
 | 24 | There is no repository or remote to work on |
 | 25 | A service could not be reached, or limited the caller |
 
-The code uses the named constants in `dashboard_cli_kit::exit`. A failure that has its own code is
-a `dashboard_cli_kit::Failure` somewhere in the error chain; anything else exits 1.
+The code uses the named constants in `sitroom_cli_kit::exit`. A failure that has its own code is
+a `sitroom_cli_kit::Failure` somewhere in the error chain; anything else exits 1.
 
 ## Errors and warnings
 
 stdout carries the answer. Everything else goes to stderr:
 
 ```text
-dashboard: no web server is running. Start one with `dashboard serve`.
-dashboard: warning: skipped a plugin package: ...
+sitroom: no web server is running. Start one with `sitroom serve`.
+sitroom: warning: skipped a plugin package: ...
 ```
 
 An error is one line, the message then the hint. Terminal control characters are removed from it,
@@ -42,7 +42,7 @@ since it may quote a config file or a plugin.
 | `status` | `status` | `running`, and `url`, `pid` when running |
 | `stop` | `stop` | `stopped`, and `url`, `pid` when one was stopped |
 | `open` | `open` | `url` (the sign-in link), `pid` |
-| `widgets` | `widgets` | `entries`: full catalog entries (`dashboard schema catalog-entry`) |
+| `widgets` | `widgets` | `entries`: full catalog entries (`sitroom schema catalog-entry`) |
 | `plugin-check` | `plugin-check` | `plugin`, `manifest`, `renders`, `view`, `findings` |
 
 On failure it prints an error document instead, and the error line on stderr as usual:
@@ -57,7 +57,7 @@ and refuse it the same way.
 
 ## Signing in to the web view
 
-`dashboard serve` makes a session token for each run. Every `/api` request must carry it
+`sitroom serve` makes a session token for each run. Every `/api` request must carry it
 (`Authorization: Bearer`, or the WebSocket subprotocol `bearer.<token>`), must name a loopback
 `Host`, and a browser request must come from the page's own `Origin`.
 
@@ -66,7 +66,7 @@ opener's process list. The link the server prints and opens carries a boot token
 (`?boot=…`). The page sends it once to `POST /api/session` and gets the session token, which it
 keeps in the tab's sessionStorage. A boot token works once and expires a minute after it is shown.
 
-For another tab, or when the link expired, `dashboard open` asks the running server for a new
+For another tab, or when the link expired, `sitroom open` asks the running server for a new
 link. It reads the server's record (pid, URL, token; readable only by you) from the runtime
 directory. `serve --detach` always writes that record; a foreground `serve` writes it when no other
 server has.

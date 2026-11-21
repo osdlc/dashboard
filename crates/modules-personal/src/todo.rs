@@ -21,9 +21,9 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::{CatalogEntry, ListItem, Manifest, Size, Status, View, Widget};
-use dashboard_host::Module;
-use dashboard_modules_common::{expand_home, manifest};
+use sitroom_contract::{CatalogEntry, ListItem, Manifest, Size, Status, View, Widget};
+use sitroom_host::Module;
+use sitroom_modules_common::{expand_home, manifest};
 use jiff::civil::Date;
 use schemars::JsonSchema;
 use serde::Deserialize;
@@ -445,7 +445,7 @@ mod tests {
 
     #[tokio::test]
     async fn reads_the_file() {
-        let dir = std::env::temp_dir().join(format!("dashboard-todo-test-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sitroom-todo-test-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("list.md");
         std::fs::write(&path, "- [ ] one\n- [x] two\n").unwrap();
@@ -472,7 +472,7 @@ mod tests {
 
     #[test]
     fn demo_is_valid() {
-        let problems: Vec<String> = dashboard_contract::check::check_view(&catalog().demo)
+        let problems: Vec<String> = sitroom_contract::check::check_view(&catalog().demo)
             .into_iter()
             .filter(|f| f.problem)
             .map(|f| f.text)

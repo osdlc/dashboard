@@ -7,7 +7,7 @@ Untested live: built from the CircleCI API v2 docs and hand-written sample respo
 (sample.json). The token comes from $CIRCLECI_TOKEN, another variable (`token_env`) or a
 command (`token_command`), never from the config file.
 
-    dashboard plugin-check -- python3 plugins/ext/circleci/main.py --sample
+    sitroom plugin-check -- python3 plugins/ext/circleci/main.py --sample
 
     modules:
       ci:
@@ -31,7 +31,7 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Callable, Dict, List, Optional
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from dashboard_plugin import ListItem, View, config_error, serve, upstream_error, with_defaults  # noqa: E402
+from sitroom_plugin import ListItem, View, config_error, serve, upstream_error, with_defaults  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 # How long one request may take, in seconds.
@@ -218,7 +218,7 @@ def token() -> str:
     value = os.environ.get(var, "").strip()
     if not value:
         raise upstream_error(
-            f"no API token: set ${var} before starting the dashboard, or set token_env / token_command in the config"
+            f"no API token: set ${var} before starting sitroom, or set token_env / token_command in the config"
         )
     return value
 
@@ -228,7 +228,7 @@ def http_get(path: str, params: Dict[str, Any], key: str) -> Any:
     url = config["url"].rstrip("/") + urllib.parse.quote(path) + ("?" + urllib.parse.urlencode(params) if params else "")
     req = urllib.request.Request(
         url,
-        headers={"Circle-Token": key, "Accept": "application/json", "User-Agent": "dashboard-plugin circleci"},
+        headers={"Circle-Token": key, "Accept": "application/json", "User-Agent": "sitroom-plugin circleci"},
     )
     try:
         with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:

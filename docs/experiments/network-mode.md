@@ -14,7 +14,7 @@ under "Network" and shows it, or puts one of its tiles on a local screen.
 ## Words
 
 "Published" already means a stability tier in the roadmap. Here a dashboard **shares** screens
-and tiles, and a **peer** is another dashboard on the network.
+and tiles, and a **peer** is another sitroom on the network.
 
 ## What it would look like
 
@@ -27,7 +27,7 @@ network:
   share:
     screens: [ops]
     modules: [uptime]            # single tiles, beyond the screens
-  password_env: DASHBOARD_SHARE_PASSWORD     # or password_command, as with API tokens
+  password_env: SITROOM_SHARE_PASSWORD     # or password_command, as with API tokens
 ```
 
 The viewing side lists peers in the web view's settings ("Network") and opens a shared screen
@@ -47,7 +47,7 @@ A remote tile is tagged `remote` in both views, as a demo tile is tagged `demo`.
 
 ## Design sketch
 
-- **Discovery:** mDNS / DNS-SD (`_osdlc-dashboard._tcp.local`). The record carries the name, the
+- **Discovery:** mDNS / DNS-SD (`_osdlc-sitroom._tcp.local`). The record carries the name, the
   version, the port and a fingerprint of the peer's key. No data goes in it. Anyone on the
   network can send such a record, so nothing in it is trusted: it only says where to connect.
   The version is announced on purpose, for compatibility, though it also tells an attacker what
@@ -57,7 +57,7 @@ A remote tile is tagged `remote` in both views, as a demo tile is tagged `demo`.
   no config writes, no settings, no commands.
 - **Password and encryption:** a PAKE (SPAKE2 or CPace) turns the password into a session key
   without sending the password. Someone who records the exchange can't guess the password
-  offline. That rules out keying an encrypted channel directly from the password. Each dashboard
+  offline. That rules out keying an encrypted channel directly from the password. Each sitroom
   also has a long-lived key, which signs the PAKE transcript, so the key is tied to a session
   that proved the password. It is pinned the first time a peer connects, from that exchange and
   not from the mDNS record, so a later impostor shows up. The first pairing shows the key's
@@ -79,7 +79,7 @@ A remote tile is tagged `remote` in both views, as a demo tile is tagged `demo`.
 
 ## Steps
 
-1. Discovery only: `dashboard peers` lists the dashboards on the network.
+1. Discovery only: `sitroom peers` lists the other sitroom servers on the network.
 2. One shared screen, encrypted and read-only, shown in the web view.
 3. The `remote` module, and the TUI.
 4. A write-up: what worked, what it costs (binary size, idle CPU), and what should change before
@@ -87,7 +87,7 @@ A remote tile is tagged `remote` in both views, as a demo tile is tagged `demo`.
 
 ## Open questions
 
-- One password per dashboard, or one per shared screen?
+- One password per sitroom, or one per shared screen?
 - Does a viewer get the series history on connect, or only new points?
 - Should a peer be able to revoke a viewer without changing the password?
 

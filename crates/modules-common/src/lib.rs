@@ -4,11 +4,11 @@
 
 use std::path::{Component, Path, PathBuf};
 
-use dashboard_contract::{
+use sitroom_contract::{
     CONTRACT_VERSION, CatalogEntry, EntryKind, LayoutHints, Manifest, Refresh, Requirements, Size,
     View,
 };
-use dashboard_host::Module;
+use sitroom_host::Module;
 use schemars::JsonSchema;
 
 #[cfg(feature = "http")]

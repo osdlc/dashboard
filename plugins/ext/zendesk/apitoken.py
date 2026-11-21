@@ -14,7 +14,7 @@ import os
 import subprocess
 from typing import Any, Dict, Optional
 
-from dashboard_plugin import config_error, upstream_error
+from sitroom_plugin import config_error, upstream_error
 
 # How long a command may take, in seconds.
 TIMEOUT = 20
@@ -64,7 +64,7 @@ def secret(config: Dict[str, Any], env_key: str, command_key: Optional[str], wha
     value = os.environ.get(config[env_key], "").strip()
     if not value:
         also = f", or set {env_key} / {command_key}" if command_key else f", or set {env_key}"
-        raise upstream_error(f"no {what}: set ${config[env_key]} before starting the dashboard{also}")
+        raise upstream_error(f"no {what}: set ${config[env_key]} before starting sitroom{also}")
     return value
 
 

@@ -2,8 +2,8 @@
 //! real tile renderer, and saves the cells with their colors as JSON for the
 //! site's widget pages (site/scripts/registry.mjs runs this).
 //!
-//! `cargo test -p dashboard-tui tile_shots -- --ignored` with, all optional:
-//! CATALOG (a `dashboard widgets --json` file, default the site's
+//! `cargo test -p sitroom-tui tile_shots -- --ignored` with, all optional:
+//! CATALOG (a `sitroom widgets --json` file, default the site's
 //! registry.json), OUT (default site/src/data/tui-tiles), THEMES (default
 //! `dark,light`), WIDTH (the terminal width the tiles are laid out for,
 //! default 120) and ONLY (comma-separated IDs).
@@ -19,7 +19,7 @@ use std::collections::HashMap;
 use std::fmt::Write as _;
 use std::path::PathBuf;
 
-use dashboard_contract::{Size, Theme, TileUpdate, View};
+use sitroom_contract::{Size, Theme, TileUpdate, View};
 use ratatui::buffer::{Buffer, Cell};
 use ratatui::style::{Color, Modifier};
 use ratatui::text::Span;

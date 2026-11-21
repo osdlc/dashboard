@@ -5,9 +5,9 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result, bail};
-use dashboard_config::packages::market_index_path;
-use dashboard_contract::Index;
-use dashboard_contract::marketplace::INDEX_FORMAT;
+use sitroom_config::packages::market_index_path;
+use sitroom_contract::Index;
+use sitroom_contract::marketplace::INDEX_FORMAT;
 use reqwest::Url;
 use serde::{Deserialize, Serialize};
 
@@ -138,7 +138,7 @@ pub async fn load_index(at: &Location) -> Result<Index> {
         serde_json::from_slice(&bytes).with_context(|| format!("reading the index {at}"))?;
     if index.format != INDEX_FORMAT {
         bail!(
-            "the index {at} is format {}; this dashboard reads format {INDEX_FORMAT}",
+            "the index {at} is format {}; this version of sitroom reads format {INDEX_FORMAT}",
             index.format
         );
     }
@@ -148,7 +148,7 @@ pub async fn load_index(at: &Location) -> Result<Index> {
     Ok(index)
 }
 
-/// Keep the last index read at `<data home>/dashboard/marketplace/index.json`,
+/// Keep the last index read at `<data home>/sitroom/marketplace/index.json`,
 /// where the web editor's catalog lists the packages that aren't installed.
 fn cache_index(bytes: &[u8]) -> Result<()> {
     let path = market_index_path()?;

@@ -1,14 +1,14 @@
 // The smallest plugin with the SDK: a greeting, a clock and a render counter.
 //
-//   dashboard plugin-check -- node sdk/typescript/examples/hello.ts
-//   dashboard plugin-check -- bun sdk/typescript/examples/hello.ts
+//   sitroom plugin-check -- node sdk/typescript/examples/hello.ts
+//   sitroom plugin-check -- bun sdk/typescript/examples/hello.ts
 //
 //   modules:
 //     hello:
 //       plugin: [node, sdk/typescript/examples/hello.ts]
 //       config: { name: you }
 
-import { serve, withDefaults } from "../dashboard-plugin.ts";
+import { serve, withDefaults } from "../sitroom-plugin.ts";
 
 let config = { name: "world" };
 let renders = 0;

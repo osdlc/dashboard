@@ -1,17 +1,17 @@
 [package]
-name = "dashboard-modules-agents"
+name = "sitroom-modules-agents"
 edition.workspace = true
 version.workspace = true
 license.workspace = true
 
-# One feature per module, named after its id. dashboard-modules turns them on
+# One feature per module, named after its id. sitroom-modules turns them on
 # through its `bundle-agents` and `module-<id>` features.
 [features]
 default = ["codex", "copilot", "cursor", "antigravity", "gemini", "opencode", "pi"]
 codex = []
-copilot = ["dashboard-modules-common/http"]
-cursor = ["dashboard-modules-common/http"]
-antigravity = ["dashboard-modules-common/http"]
+copilot = ["sitroom-modules-common/http"]
+cursor = ["sitroom-modules-common/http"]
+antigravity = ["sitroom-modules-common/http"]
 gemini = []
 opencode = []
 pi = []
@@ -19,9 +19,9 @@ pi = []
 [dependencies]
 anyhow = "1.0.104"
 async-trait = "0.1.92"
-dashboard-contract = { version = "0.8.0", path = "../contract" }
-dashboard-host = { version = "0.8.0", path = "../host" }
-dashboard-modules-common = { version = "0.8.0", path = "../modules-common" }
+sitroom-contract = { version = "0.8.0", path = "../contract" }
+sitroom-host = { version = "0.8.0", path = "../host" }
+sitroom-modules-common = { version = "0.8.0", path = "../modules-common" }
 schemars = "1.2.3"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.154"

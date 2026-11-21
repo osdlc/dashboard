@@ -13,22 +13,22 @@ const kinds = [
   {
     kind: 'builtin' as const,
     title: 'Built-in',
-    blurb: 'Compiled into the dashboard. Nothing to install: name one in your config, or add it from the editor.',
+    blurb: 'Compiled into sitroom. Nothing to install: name one in your config, or add it from the editor.',
     sections: sections(widgets, 'builtin'),
   },
   {
     kind: 'plugin' as const,
     title: 'Plugins',
     blurb:
-      'Packages that run beside the dashboard, in Python, TypeScript or anything that speaks the plugin protocol. Most are for services that need a token.',
+      'Packages that run beside sitroom, in Python, TypeScript or anything that speaks the plugin protocol. Most are for services that need a token.',
     sections: sections(widgets, 'plugin'),
   },
 ]
 ---
 
 <Base
-  title="Widget registry · dashboard"
-  description={`All ${widgets.length} dashboard widgets, built-in and plugin, with demo screenshots, settings and config examples.`}
+  title="Widget registry · sitroom"
+  description={`All ${widgets.length} sitroom widgets, built-in and plugin, with demo screenshots, settings and config examples.`}
 >
   <SiteHeader here="widgets" />
 

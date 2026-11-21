@@ -20,11 +20,11 @@ use std::time::Duration;
 
 use anyhow::Result;
 use async_trait::async_trait;
-use dashboard_contract::{
+use sitroom_contract::{
     CatalogEntry, Cell, Column, Manifest, Requirements, Row, Size, Status, View, Widget,
 };
-use dashboard_host::Module;
-use dashboard_modules_common::manifest;
+use sitroom_host::Module;
+use sitroom_modules_common::manifest;
 use schemars::JsonSchema;
 use serde::Deserialize;
 use tokio::process::Command;
@@ -397,7 +397,7 @@ mod tests {
 
     #[test]
     fn demo_is_valid() {
-        let problems: Vec<String> = dashboard_contract::check::check_view(&catalog().demo)
+        let problems: Vec<String> = sitroom_contract::check::check_view(&catalog().demo)
             .into_iter()
             .filter(|f| f.problem)
             .map(|f| f.text)

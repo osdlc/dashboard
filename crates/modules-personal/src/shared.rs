@@ -4,7 +4,7 @@
 use std::path::{Path, PathBuf};
 
 use anyhow::{Result, bail};
-use dashboard_contract::{Action, ListItem, Status, View, Widget};
+use sitroom_contract::{Action, ListItem, Status, View, Widget};
 use jiff::civil::Date;
 
 use crate::expand_home;

@@ -1,4 +1,4 @@
-//! The user's config file: `<config home>/dashboard/config.yaml`.
+//! The user's config file: `<config home>/sitroom/config.yaml`.
 //!
 //! Read with serde-saphyr. Top-level keys are written back with yaml-splice,
 //! so everything here that the settings screen can change in place is a
@@ -11,8 +11,8 @@ use std::time::Duration;
 use anyhow::{Context, Result, bail};
 use config_layers::machine::MachineConfigFile;
 use config_layers::tiered_dirs::{Convention, ResolveOptions, TieredDirs, env_vars};
-use dashboard_contract::theme::{self, ColorTheme};
-use dashboard_contract::{LayoutHints, RotateSettings, ScreenLayout, Size, Theme, TilePlacement};
+use sitroom_contract::theme::{self, ColorTheme};
+use sitroom_contract::{LayoutHints, RotateSettings, ScreenLayout, Size, Theme, TilePlacement};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -24,13 +24,13 @@ pub mod trust;
 
 pub use add::{NewModule, add_module};
 
-pub const TOOL: &str = "dashboard";
+pub const TOOL: &str = "sitroom";
 const VENDOR: &str = "dev.sksizer";
 
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(default, deny_unknown_fields)]
 pub struct Config {
-    /// What this dashboard is for, in a few words. Shown by `dashboard
+    /// What this dashboard is for, in a few words. Shown by `sitroom
     /// dashboards list` and in the web view's dashboard switcher.
     pub description: Option<String>,
     pub theme: Theme,
@@ -132,7 +132,7 @@ pub struct Rotate {
     pub resume_after: Duration,
 }
 
-/// Settings for the terminal view (`dashboard tui`).
+/// Settings for the terminal view (`sitroom tui`).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(default, deny_unknown_fields)]
 pub struct Tui {
@@ -145,7 +145,7 @@ pub struct Tui {
 impl Default for Tui {
     fn default() -> Self {
         Self {
-            fps: dashboard_contract::DEFAULT_TUI_FPS,
+            fps: sitroom_contract::DEFAULT_TUI_FPS,
         }
     }
 }
@@ -168,27 +168,27 @@ pub struct Loaded {
 }
 
 /// Used when there is no config file: the demo, so a first run shows what
-/// the dashboard can do. Saving a setting from the UI writes this out first.
+/// sitroom can do. Saving a setting from the UI writes this out first.
 pub const DEFAULT_CONFIG: &str = include_str!("../../../examples/demo.yaml");
 
-/// Default config path: `<config home>/dashboard/config.yaml`, XDG layout on
-/// every OS (`~/.config/dashboard/config.yaml` on macOS too). Moved by
-/// `DASHBOARD_MACHINE_CONFIG`.
+/// Default config path: `<config home>/sitroom/config.yaml`, XDG layout on
+/// every OS (`~/.config/sitroom/config.yaml` on macOS too). Moved by
+/// `SITROOM_MACHINE_CONFIG`.
 pub fn default_path() -> Result<PathBuf> {
     Ok(MachineConfigFile::<Config>::new(TOOL, &tiered_dirs()?)?.path())
 }
 
-/// The OS homes, XDG layout on every OS, moved by `XDG_*` or `DASHBOARD_*_DIR`.
+/// The OS homes, XDG layout on every OS, moved by `XDG_*` or `SITROOM_*_DIR`.
 fn tiered_dirs() -> Result<TieredDirs> {
     Ok(TieredDirs::from_env(
         VENDOR,
-        &env_vars!("DASHBOARD"),
+        &env_vars!("SITROOM"),
         ResolveOptions::new().with_convention(Convention::Xdg),
     )?)
 }
 
 /// Where a background `serve` keeps its record (the runtime dir: pidfiles,
-/// locks) and its log (the logs dir), e.g. `~/.local/state/dashboard/...`.
+/// locks) and its log (the logs dir), e.g. `~/.local/state/sitroom/...`.
 pub fn run_dirs() -> Result<(PathBuf, PathBuf)> {
     let dirs = tiered_dirs()?;
     let tool = dirs.standalone(TOOL)?;
@@ -623,7 +623,7 @@ mod tests {
 theme: dark
 modules:
   cswap:
-    plugin: [dashboard-cswap]
+    plugin: [sitroom-cswap]
     refresh: 2m
   github-prs:
     size: wide
@@ -726,7 +726,7 @@ rotate:
     #[test]
     fn write_screens_replaces_only_screens() {
         let dir =
-            std::env::temp_dir().join(format!("dashboard-screens-test-{}", std::process::id()));
+            std::env::temp_dir().join(format!("sitroom-screens-test-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("config.yaml");
         std::fs::write(
@@ -756,7 +756,7 @@ rotate:
 
     #[test]
     fn missing_file_loads_the_demo() {
-        let loaded = load(Some(Path::new("/nonexistent/dashboard/config.yaml"))).unwrap();
+        let loaded = load(Some(Path::new("/nonexistent/sitroom/config.yaml"))).unwrap();
         assert!(!loaded.exists);
         assert_eq!(loaded.config.screens.len(), 8);
     }
@@ -764,7 +764,7 @@ rotate:
     #[test]
     fn write_theme_keeps_comments() {
         let dir =
-            std::env::temp_dir().join(format!("dashboard-config-test-{}", std::process::id()));
+            std::env::temp_dir().join(format!("sitroom-config-test-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("config.yaml");
 
@@ -813,7 +813,7 @@ rotate:
 
     #[test]
     fn stale_writes_are_refused() {
-        let dir = std::env::temp_dir().join(format!("dashboard-cas-test-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sitroom-cas-test-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("config.yaml");
         std::fs::write(&path, "theme: dark\n").unwrap();

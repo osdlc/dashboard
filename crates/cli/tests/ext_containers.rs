@@ -7,10 +7,10 @@
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use dashboard_config::packages::load_package;
-use dashboard_contract::check::check_view;
-use dashboard_contract::{Status, View};
-use dashboard_host::{Module, Plugin};
+use sitroom_config::packages::load_package;
+use sitroom_contract::check::check_view;
+use sitroom_contract::{Status, View};
+use sitroom_host::{Module, Plugin};
 use serde_json::{Value, json};
 
 fn dir() -> PathBuf {
@@ -116,7 +116,7 @@ async fn everything_present_is_the_demo_view() {
     assert!(!has_row(&view, "old-build"));
 
     let package = load_package(&dir()).expect("package loads");
-    assert_eq!(package.package.demo, view, "demo: in dashboard-plugin.yaml");
+    assert_eq!(package.package.demo, view, "demo: in sitroom-plugin.yaml");
     let mut plugin = plugin();
     let manifest = plugin.init(ok_config()).await.expect("initialize");
     assert_eq!(manifest.name, package.package.name);
@@ -129,7 +129,7 @@ async fn a_missing_or_disabled_cli_is_skipped() {
         return;
     }
     let mut config = ok_config();
-    config["podman"] = json!("dashboard-no-such-podman");
+    config["podman"] = json!("sitroom-no-such-podman");
     config["limactl"] = json!("");
     config["colima"] = json!(false);
     let view = render(config).await;
@@ -214,7 +214,7 @@ async fn a_unix_socket_that_exists_is_asked_for_its_containers() {
     }
     // A context whose socket file exists is queried; the fake docker answers
     // with the containers of the context named `colima`.
-    let tmp = std::env::temp_dir().join(format!("dashboard-containers-{}", std::process::id()));
+    let tmp = std::env::temp_dir().join(format!("sitroom-containers-{}", std::process::id()));
     std::fs::create_dir_all(&tmp).unwrap();
     let socket = tmp.join("docker.sock");
     std::fs::write(&socket, "").unwrap();
@@ -327,7 +327,7 @@ fn python_unit_tests_pass() {
 #[test]
 fn sdk_copy_is_current() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
-    let copy = std::fs::read_to_string(dir().join("dashboard_plugin.py")).unwrap();
-    let sdk = std::fs::read_to_string(root.join("sdk/python/dashboard_plugin.py")).unwrap();
-    assert!(copy == sdk, "copy sdk/python/dashboard_plugin.py again");
+    let copy = std::fs::read_to_string(dir().join("sitroom_plugin.py")).unwrap();
+    let sdk = std::fs::read_to_string(root.join("sdk/python/sitroom_plugin.py")).unwrap();
+    assert!(copy == sdk, "copy sdk/python/sitroom_plugin.py again");
 }

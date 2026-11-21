@@ -23,9 +23,9 @@ use std::time::{Duration, SystemTime};
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::{CatalogEntry, Manifest, Refresh, Size, View};
-use dashboard_host::{Module, ViewSender};
-use dashboard_modules_common::{expand_home, manifest};
+use sitroom_contract::{CatalogEntry, Manifest, Refresh, Size, View};
+use sitroom_host::{Module, ViewSender};
+use sitroom_modules_common::{expand_home, manifest};
 use schemars::JsonSchema;
 use serde::Deserialize;
 use tokio::sync::mpsc;
@@ -261,7 +261,7 @@ pub fn catalog() -> CatalogEntry {
     };
     CatalogEntry {
         description: "Shows a file another program writes: a view or widget in the \
-                      dashboard's JSON, values picked out of any JSON, or text. Watches \
+                      sitroom's JSON, values picked out of any JSON, or text. Watches \
                       the file and shows it again when it changes. Add it several times \
                       with `builtin: file`."
             .into(),
@@ -279,14 +279,14 @@ pub fn catalog() -> CatalogEntry {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dashboard_contract::{Status, Widget};
+    use sitroom_contract::{Status, Widget};
 
     struct Dir(PathBuf);
 
     impl Dir {
         fn new(name: &str) -> Self {
             let dir =
-                std::env::temp_dir().join(format!("dashboard-file-{name}-{}", std::process::id()));
+                std::env::temp_dir().join(format!("sitroom-file-{name}-{}", std::process::id()));
             std::fs::create_dir_all(&dir).unwrap();
             Self(dir)
         }
@@ -395,7 +395,7 @@ mod tests {
 
     #[test]
     fn demo_is_valid() {
-        let problems: Vec<String> = dashboard_contract::check::check_view(&catalog().demo)
+        let problems: Vec<String> = sitroom_contract::check::check_view(&catalog().demo)
             .into_iter()
             .filter(|f| f.problem)
             .map(|f| f.text)

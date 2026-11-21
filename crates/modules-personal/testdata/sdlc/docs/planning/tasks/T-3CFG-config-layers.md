@@ -15,4 +15,4 @@ prs:
 
 ## Goal
 
-A `.dashboard.yaml` in the repo adds its own screens.
+A `.sitroom.yaml` in the repo adds its own screens.

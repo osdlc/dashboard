@@ -19,12 +19,12 @@
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::{
+use sitroom_contract::{
     CatalogEntry, Cell, Column, Manifest, Requirements, Row, Size, Status, View, Widget,
 };
-use dashboard_host::Module;
-use dashboard_modules_common::http::{Client, client};
-use dashboard_modules_common::{manifest, time::parse_time};
+use sitroom_host::Module;
+use sitroom_modules_common::http::{Client, client};
+use sitroom_modules_common::{manifest, time::parse_time};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
@@ -644,7 +644,7 @@ mod tests {
 
     #[test]
     fn demo_is_valid() {
-        let problems: Vec<String> = dashboard_contract::check::check_view(&catalog().demo)
+        let problems: Vec<String> = sitroom_contract::check::check_view(&catalog().demo)
             .into_iter()
             .filter(|f| f.problem)
             .map(|f| f.text)

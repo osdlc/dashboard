@@ -6,7 +6,7 @@
 //! stretched to fill it; when they don't, the page is taller than the
 //! terminal and scrolls.
 
-use dashboard_contract::Size;
+use sitroom_contract::Size;
 use ratatui::layout::{Constraint, Layout, Rect};
 
 const COLUMNS: u16 = 12;

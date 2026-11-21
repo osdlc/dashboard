@@ -1,13 +1,13 @@
-//! Stands in for dashboard-host in the WASI build: the parts the clock and
+//! Stands in for sitroom-host in the WASI build: the parts the clock and
 //! textfile modules use, without tokio.
 
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::Result;
 use async_trait::async_trait;
-use dashboard_contract::{Manifest, View};
+use sitroom_contract::{Manifest, View};
 
-/// The same trait as dashboard_host::Module, poll mode only.
+/// The same trait as sitroom_host::Module, poll mode only.
 #[async_trait]
 pub trait Module: Send + 'static {
     async fn init(&mut self, config: serde_json::Value) -> Result<Manifest>;

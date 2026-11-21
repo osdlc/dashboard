@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """System load average as a live chart. Shows `live_series`: each render sends only the
-newest values and the dashboard keeps the history, so the plugin stays stateless.
+newest values and sitroom keeps the history, so the plugin stays stateless.
 
-    dashboard plugin-check --renders 5 -- python3 sdk/python/examples/load.py
+    sitroom plugin-check --renders 5 -- python3 sdk/python/examples/load.py
 """
 
 import os
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-from dashboard_plugin import View, live_series, serve, upstream_error  # noqa: E402
+from sitroom_plugin import View, live_series, serve, upstream_error  # noqa: E402
 
 
 def init(_config):

@@ -1,6 +1,6 @@
 //! The `s` overlay: config file, theme, rotation, and per-module settings.
 
-use dashboard_contract::{Theme, UiSettings};
+use sitroom_contract::{Theme, UiSettings};
 use ratatui::Frame;
 use ratatui::layout::{Constraint, Layout, Rect};
 use ratatui::style::{Modifier, Style};

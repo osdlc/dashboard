@@ -5,15 +5,15 @@
 //   ci:
 //     plugin: [node, examples/plugins/gh-actions/gh_actions.mjs]
 //     config:
-//       repos: [osdlc/dashboard, osdlc/osdlc]
+//       repos: [osdlc/sitroom, osdlc/osdlc]
 //       limit: 5          # runs per repository
 //       branch: main      # optional: only this branch
 //
 // Shows: stats in a row, a list with a status per item, tags and an
 // open_url action, the async request pattern (each request is answered when
-// its work finishes), and protocol errors with the dashboard's own codes.
+// its work finishes), and protocol errors with sitroom's own codes.
 //
-//   dashboard plugin-check --plugin-config '{"repos":["osdlc/dashboard"]}' -- node examples/plugins/gh-actions/gh_actions.mjs
+//   sitroom plugin-check --plugin-config '{"repos":["osdlc/sitroom"]}' -- node examples/plugins/gh-actions/gh_actions.mjs
 
 import { execFile } from 'node:child_process'
 import { createInterface } from 'node:readline'

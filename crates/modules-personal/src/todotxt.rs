@@ -14,8 +14,8 @@ use std::path::Path;
 
 use anyhow::{Context, Result};
 use async_trait::async_trait;
-use dashboard_contract::{CatalogEntry, Manifest, Requirements, Size, View};
-use dashboard_host::Module;
+use sitroom_contract::{CatalogEntry, Manifest, Requirements, Size, View};
+use sitroom_host::Module;
 use jiff::ToSpan;
 use jiff::civil::Date;
 use schemars::JsonSchema;
@@ -217,7 +217,7 @@ pub fn catalog() -> CatalogEntry {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dashboard_contract::{Status, Widget};
+    use sitroom_contract::{Status, Widget};
     use jiff::civil::date;
 
     const SAMPLE: &str = include_str!("../testdata/todo-txt/todo.txt");

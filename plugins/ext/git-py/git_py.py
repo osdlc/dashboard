@@ -6,7 +6,7 @@ The Python copy of the native `git` module (crates/modules-dev/src/git.rs), for 
 native-vs-plugin benchmark. It shows the same view for the same repositories, so keep
 the three (Rust, TypeScript, Python) in step. Standard library only.
 
-    dashboard plugin-check --plugin-config '{"repos": ["."]}' -- python3 plugins/ext/git-py/git_py.py
+    sitroom plugin-check --plugin-config '{"repos": ["."]}' -- python3 plugins/ext/git-py/git_py.py
 
     modules:
       git-py:
@@ -20,7 +20,7 @@ import sys
 from typing import Dict, List, Union
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from dashboard_plugin import Row, View, config_error, serve, upstream_error, with_defaults  # noqa: E402
+from sitroom_plugin import Row, View, config_error, serve, upstream_error, with_defaults  # noqa: E402
 
 config = {"repos": []}
 

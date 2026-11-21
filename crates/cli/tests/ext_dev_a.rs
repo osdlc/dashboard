@@ -9,9 +9,9 @@
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use dashboard_config::packages::{Packages, load_package};
-use dashboard_contract::check::{Finding, check_manifest, check_view};
-use dashboard_host::{Module, Plugin};
+use sitroom_config::packages::{Packages, load_package};
+use sitroom_contract::check::{Finding, check_manifest, check_view};
+use sitroom_host::{Module, Plugin};
 use serde_json::json;
 
 const IDS: [&str; 5] = [
@@ -47,7 +47,7 @@ fn plugin(id: &str, extra: &[&str]) -> Plugin {
 
 #[test]
 fn packages_load_with_metadata_and_the_current_sdk() {
-    let sdk = std::fs::read_to_string(repo().join("sdk/python/dashboard_plugin.py")).unwrap();
+    let sdk = std::fs::read_to_string(repo().join("sdk/python/sitroom_plugin.py")).unwrap();
     for id in IDS {
         let dir = repo().join("plugins/ext").join(id);
         let p = load_package(&dir).unwrap_or_else(|e| panic!("{id}: {e:#}"));
@@ -65,10 +65,10 @@ fn packages_load_with_metadata_and_the_current_sdk() {
             "{id}"
         );
         // The SDK is copied into each package; refresh the copies when it changes.
-        let copy = std::fs::read_to_string(dir.join("dashboard_plugin.py")).unwrap();
+        let copy = std::fs::read_to_string(dir.join("sitroom_plugin.py")).unwrap();
         assert!(
             copy == sdk,
-            "{id}: dashboard_plugin.py differs from sdk/python; copy it again"
+            "{id}: sitroom_plugin.py differs from sdk/python; copy it again"
         );
     }
 }
@@ -89,7 +89,7 @@ async fn sample_render_is_the_demo_view() {
         assert_eq!(problems(check_view(&view)), Vec::<String>::new(), "{id}");
         assert_eq!(
             view, p.package.demo,
-            "{id}: the demo in dashboard-plugin.yaml must match `python3 main.py --sample`"
+            "{id}: the demo in sitroom-plugin.yaml must match `python3 main.py --sample`"
         );
     }
 }
@@ -120,7 +120,7 @@ async fn without_a_token_it_names_the_variable() {
     if !have_python() {
         return;
     }
-    const VAR: &str = "DASHBOARD_TEST_NO_SUCH_TOKEN";
+    const VAR: &str = "SITROOM_TEST_NO_SUCH_TOKEN";
     let configs = [
         ("gitlab", json!({ "token_env": VAR })),
         ("gitlab-todos", json!({ "token_env": VAR })),
@@ -183,7 +183,7 @@ async fn bad_config_is_a_config_error() {
 #[test]
 fn the_example_config_finds_every_package() {
     let path = repo().join("examples/widgets/w-dev-a.yaml");
-    let loaded = dashboard_config::load(Some(&path)).unwrap();
+    let loaded = sitroom_config::load(Some(&path)).unwrap();
     let packages = Packages::load(&path);
     for id in IDS {
         assert!(packages.get(id).is_some(), "{id} not found from {path:?}");

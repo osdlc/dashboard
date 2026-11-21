@@ -12,7 +12,7 @@ sample reply. A read-only personal access token is enough.
 
 `--sample` shows sample.json instead of calling the API:
 
-    dashboard plugin-check -- python3 plugins/ext/digitalocean/main.py --sample
+    sitroom plugin-check -- python3 plugins/ext/digitalocean/main.py --sample
 """
 
 import os
@@ -23,7 +23,7 @@ from typing import Any, Dict
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import apitoken  # noqa: E402
-from dashboard_plugin import View, config_error, serve, with_defaults  # noqa: E402
+from sitroom_plugin import View, config_error, serve, with_defaults  # noqa: E402
 from token_api import check_limit, read_sample, request_json  # noqa: E402
 from view import view  # noqa: E402
 

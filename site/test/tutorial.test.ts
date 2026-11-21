@@ -19,13 +19,13 @@ function blocks(lang: string): string[] {
 
 test('code blocks become windows titled by kind or file name', () => {
   const html =
-    '<pre class="astro-code vitesse-dark" style="background-color:#000" tabindex="0" data-language="sh"><code><span>dashboard tui</span>\n</code></pre>' +
-    '<pre class="astro-code" data-language="yaml"><code># ~/.config/dashboard/config.yaml\ntheme: auto</code></pre>' +
+    '<pre class="astro-code vitesse-dark" style="background-color:#000" tabindex="0" data-language="sh"><code><span>sitroom tui</span>\n</code></pre>' +
+    '<pre class="astro-code" data-language="yaml"><code># ~/.config/sitroom/config.yaml\ntheme: auto</code></pre>' +
     '<pre class="astro-code" data-language="text"><code>ok</code></pre>'
   const out = codeWindows(html)
   assert.equal(out.match(/class="window code-window"/g)?.length, 3)
-  assert.match(out, /<span class="title">terminal<\/span><button type="button" class="copy" data-copy="dashboard tui">/)
-  assert.match(out, /<span class="title">~\/.config\/dashboard\/config.yaml<\/span>/)
+  assert.match(out, /<span class="title">terminal<\/span><button type="button" class="copy" data-copy="sitroom tui">/)
+  assert.match(out, /<span class="title">~\/.config\/sitroom\/config.yaml<\/span>/)
   assert.match(out, /<span class="title">output<\/span><span class="spacer"><\/span>/)
   assert.doesNotMatch(out, /background-color/)
   assert.match(out, /<pre class="code astro-code vitesse-dark"/)
@@ -35,11 +35,11 @@ test('plainText drops tags and decodes entities', () => {
   assert.equal(plainText('<b>a &amp; b</b> &lt;x&gt; &quot;q&quot; &#39;s&#x27;\n'), 'a & b <x> "q" \'s\'')
 })
 
-const bin = [process.env.DASHBOARD_BIN, join(repo, 'target/debug/dashboard'), join(repo, 'target/release/dashboard')]
+const bin = [process.env.SITROOM_BIN, join(repo, 'target/debug/sitroom'), join(repo, 'target/release/sitroom')]
   .filter((p): p is string => !!p)
   .find((p) => existsSync(p))
 
-test('every yaml block in the tutorial loads in `dashboard config`', { skip: !bin && 'no dashboard binary' }, () => {
+test('every yaml block in the tutorial loads in `sitroom config`', { skip: !bin && 'no sitroom binary' }, () => {
   const dir = join(repo, '.tmp', 'tutorial-check')
   rmSync(dir, { recursive: true, force: true })
   // The tutorial installs clock-py; here it is found in plugins/ next to the config.
@@ -64,7 +64,7 @@ test('every yaml block in the tutorial loads in `dashboard config`', { skip: !bi
   assert.deepEqual(failed, [])
 })
 
-test('every `dashboard` command in the tutorial exists', { skip: !bin && 'no dashboard binary' }, () => {
+test('every `sitroom` command in the tutorial exists', { skip: !bin && 'no sitroom binary' }, () => {
   const commands = (args: string[]) =>
     new Set(
       [...execFileSync(bin!, [...args, '--help'], { encoding: 'utf8' }).matchAll(/^ {2}([a-z][\w-]*) /gm)].map((m) => m[1]),
@@ -72,8 +72,8 @@ test('every `dashboard` command in the tutorial exists', { skip: !bin && 'no das
   const top = commands([])
   const unknown: string[] = []
   for (const line of blocks('sh').flatMap((b) => b.split('\n'))) {
-    // `dashboard [--global-flag [value]] command [subcommand]`
-    const m = /^dashboard((?:\s+--[\w-]+(?:\s+[a-z][\w-]*)?)*?)\s+([a-z][\w-]*)(?:\s+([a-z][\w-]*))?/.exec(line.trim())
+    // `sitroom [--global-flag [value]] command [subcommand]`
+    const m = /^sitroom((?:\s+--[\w-]+(?:\s+[a-z][\w-]*)?)*?)\s+([a-z][\w-]*)(?:\s+([a-z][\w-]*))?/.exec(line.trim())
     if (!m) continue
     const [, , cmd, sub] = m
     if (!top.has(cmd)) unknown.push(line)

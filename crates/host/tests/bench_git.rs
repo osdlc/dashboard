@@ -1,15 +1,15 @@
 //! Runs the git benchmark plugins in `plugins/ext` (TypeScript and Python)
 //! through the real plugin host against repositories made for the test, and
 //! checks the exact view. The built-in `git` module must show the same; the
-//! dashboard crate's `bench_git` test compares the three. A plugin whose
+//! sitroom crate's `bench_git` test compares the three. A plugin whose
 //! interpreter isn't installed is skipped. No network.
 
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use dashboard_contract::View;
-use dashboard_contract::check::{check_manifest, check_view};
-use dashboard_host::{Module, Plugin};
+use sitroom_contract::View;
+use sitroom_contract::check::{check_manifest, check_view};
+use sitroom_host::{Module, Plugin};
 use serde_json::json;
 
 fn have(program: &str) -> bool {
@@ -83,7 +83,7 @@ impl Drop for TempDir {
 /// `work`: a clone one commit ahead and one behind, with a changed and an
 /// untracked file. `plain`: a clean repository with no upstream.
 fn fixture(name: &str) -> TempDir {
-    let root = std::env::temp_dir().join(format!("dashboard-{name}-{}", std::process::id()));
+    let root = std::env::temp_dir().join(format!("sitroom-{name}-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&root);
     std::fs::create_dir_all(&root).unwrap();
     let origin = root.join("origin");
@@ -137,7 +137,7 @@ fn expected() -> View {
     .unwrap()
 }
 
-fn problems(found: Vec<dashboard_contract::check::Finding>) -> Vec<String> {
+fn problems(found: Vec<sitroom_contract::check::Finding>) -> Vec<String> {
     found
         .into_iter()
         .filter(|f| f.problem)
@@ -224,12 +224,12 @@ fn sdk_copies_are_current() {
     let repo = concat!(env!("CARGO_MANIFEST_DIR"), "/../..");
     for (copy, sdk) in [
         (
-            "plugins/ext/git-ts/dashboard-plugin.ts",
-            "sdk/typescript/dashboard-plugin.ts",
+            "plugins/ext/git-ts/sitroom-plugin.ts",
+            "sdk/typescript/sitroom-plugin.ts",
         ),
         (
-            "plugins/ext/git-py/dashboard_plugin.py",
-            "sdk/python/dashboard_plugin.py",
+            "plugins/ext/git-py/sitroom_plugin.py",
+            "sdk/python/sitroom_plugin.py",
         ),
     ] {
         let a = std::fs::read_to_string(format!("{repo}/{copy}")).unwrap();

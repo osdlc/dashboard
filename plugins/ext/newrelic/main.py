@@ -12,7 +12,7 @@ Needs a user API key: $NEW_RELIC_API_KEY, or a command that prints it (token_com
 
 from typing import Any, Dict, List, Optional
 
-from dashboard_plugin import ListItem, Status, View, config_error, serve, upstream_error, with_defaults
+from sitroom_plugin import ListItem, Status, View, config_error, serve, upstream_error, with_defaults
 from ops import ago, base_url, count, env_name, get_json, join, read_token, strings
 
 DEFAULTS: Dict[str, Any] = {

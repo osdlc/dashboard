@@ -2,8 +2,8 @@
 # Python plugin package in plugins/ext/ (Python 3.9 or newer, standard library
 # only). From the repository root:
 #
-#   cargo run -p dashboard -- serve --config examples/widgets/w-ops-a.yaml
-#   cargo run -p dashboard -- tui   --config examples/widgets/w-ops-a.yaml
+#   cargo run -p sitroom -- serve --config examples/widgets/w-ops-a.yaml
+#   cargo run -p sitroom -- tui   --config examples/widgets/w-ops-a.yaml
 #
 # Every tile is `demo: true`: it shows the package's made-up demo view, and
 # nothing runs (no process, no network calls). None of these has been tried

@@ -10,7 +10,7 @@
 use std::path::Path;
 
 use anyhow::{Context, Result, bail};
-use dashboard_contract::Size;
+use sitroom_contract::Size;
 use yaml_splice::parse::parse_with_spans;
 use yaml_splice::{FieldEdit, Mapping, Value, edit_yaml};
 
@@ -440,7 +440,7 @@ mod tests {
 
     #[test]
     fn add_module_writes_both_and_rejects_bad_ids() {
-        let dir = std::env::temp_dir().join(format!("dashboard-add-test-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sitroom-add-test-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("config.yaml");
         std::fs::write(
@@ -481,7 +481,7 @@ mod tests {
     #[test]
     fn add_module_without_a_file_starts_from_the_default_config() {
         let dir =
-            std::env::temp_dir().join(format!("dashboard-add-default-{}", std::process::id()));
+            std::env::temp_dir().join(format!("sitroom-add-default-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("config.yaml");
         let default = parse(crate::DEFAULT_CONFIG).unwrap();

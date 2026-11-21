@@ -4,11 +4,11 @@ use std::process::Stdio;
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::{
+use sitroom_contract::{
     Action, CONTRACT_VERSION, CatalogEntry, LayoutHints, ListItem, Manifest, Refresh, Requirements,
     Size, Status, View, Widget,
 };
-use dashboard_host::Module;
+use sitroom_host::Module;
 use schemars::JsonSchema;
 use serde::Deserialize;
 use tokio::process::Command;

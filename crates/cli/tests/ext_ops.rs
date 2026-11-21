@@ -14,10 +14,10 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::{Arc, Mutex};
 
-use dashboard_config::packages::{Installed, Packages};
-use dashboard_contract::check::check_view;
-use dashboard_contract::{Status, View, Widget};
-use dashboard_host::{Module, Plugin};
+use sitroom_config::packages::{Installed, Packages};
+use sitroom_contract::check::check_view;
+use sitroom_contract::{Status, View, Widget};
+use sitroom_host::{Module, Plugin};
 use serde_json::{Value, json};
 
 const IDS: [&str; 5] = ["datadog", "newrelic", "opsgenie", "pagerduty", "sentry"];
@@ -146,7 +146,7 @@ fn parts(view: &View) -> Parts {
     let urls = items
         .iter()
         .map(|i| match &i.action {
-            Some(dashboard_contract::Action::OpenUrl { url }) => Some(url.clone()),
+            Some(sitroom_contract::Action::OpenUrl { url }) => Some(url.clone()),
             _ => None,
         })
         .collect();
@@ -551,11 +551,11 @@ async fn errors() {
         // No token: the variable it names is unset.
         let err = render_error(
             id,
-            with(json!({ "token_env": "DASHBOARD_TEST_NO_SUCH_VAR" })),
+            with(json!({ "token_env": "SITROOM_TEST_NO_SUCH_VAR" })),
         )
         .await;
         assert!(err.contains("code -32002"), "{id}: {err}");
-        assert!(err.contains("$DASHBOARD_TEST_NO_SUCH_VAR"), "{id}: {err}");
+        assert!(err.contains("$SITROOM_TEST_NO_SUCH_VAR"), "{id}: {err}");
 
         // A refused token (the server answers 404 to everything here).
         let mut extra = json!({ "token_command": token() });
@@ -636,12 +636,12 @@ fn packages_load_and_say_untested_live() {
 #[test]
 fn shared_copies_are_current() {
     let read = |p: PathBuf| std::fs::read_to_string(&p).unwrap_or_else(|e| panic!("{p:?}: {e}"));
-    let sdk = read(ext().join("../../sdk/python/dashboard_plugin.py"));
+    let sdk = read(ext().join("../../sdk/python/sitroom_plugin.py"));
     let ops = read(ext().join("datadog/ops.py"));
     for id in IDS {
         let dir = ext().join(id);
         assert!(
-            read(dir.join("dashboard_plugin.py")) == sdk,
+            read(dir.join("sitroom_plugin.py")) == sdk,
             "{id}: copy the SDK again"
         );
         assert!(

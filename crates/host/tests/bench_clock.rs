@@ -8,9 +8,9 @@
 use std::path::PathBuf;
 use std::process::Command;
 
-use dashboard_contract::View;
-use dashboard_contract::check::{check_manifest, check_view};
-use dashboard_host::{Module, Plugin};
+use sitroom_contract::View;
+use sitroom_contract::check::{check_manifest, check_view};
+use sitroom_host::{Module, Plugin};
 use serde_json::json;
 
 /// Every sample: `<name>.json` (the config) with `<name>.view.json`.
@@ -53,7 +53,7 @@ fn plugins() -> Vec<(&'static str, Vec<String>)> {
     out
 }
 
-fn problems(found: Vec<dashboard_contract::check::Finding>) -> Vec<String> {
+fn problems(found: Vec<sitroom_contract::check::Finding>) -> Vec<String> {
     found
         .into_iter()
         .filter(|f| f.problem)
@@ -125,12 +125,12 @@ fn sdk_copies_match_the_sdk() {
     // installed. Keep them in step with sdk/.
     for (copy, sdk) in [
         (
-            "plugins/ext/clock-ts/dashboard-plugin.ts",
-            "sdk/typescript/dashboard-plugin.ts",
+            "plugins/ext/clock-ts/sitroom-plugin.ts",
+            "sdk/typescript/sitroom-plugin.ts",
         ),
         (
-            "plugins/ext/clock-py/dashboard_plugin.py",
-            "sdk/python/dashboard_plugin.py",
+            "plugins/ext/clock-py/sitroom_plugin.py",
+            "sdk/python/sitroom_plugin.py",
         ),
     ] {
         let a = std::fs::read_to_string(repo(copy)).unwrap();

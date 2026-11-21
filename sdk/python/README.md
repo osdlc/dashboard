@@ -1,24 +1,24 @@
 # Python plugin SDK
 
-[`dashboard_plugin.py`](dashboard_plugin.py) is the whole SDK: one file, standard library only,
+[`sitroom_plugin.py`](sitroom_plugin.py) is the whole SDK: one file, standard library only,
 Python 3.9 or later.
 
 ## Start
 
 ```sh
-dashboard plugin new --lang py my-plugin     # writes my-plugin/main.py and a copy of the SDK
-dashboard plugin-check -- python3 my-plugin/main.py
+sitroom plugin new --lang py my-plugin     # writes my-plugin/main.py and a copy of the SDK
+sitroom plugin-check -- python3 my-plugin/main.py
 ```
 
-Or copy `dashboard_plugin.py` next to your plugin and import it:
+Or copy `sitroom_plugin.py` next to your plugin and import it:
 
 ```python
-from dashboard_plugin import View, serve, with_defaults, config_error, upstream_error, log, live_series
+from sitroom_plugin import View, serve, with_defaults, config_error, upstream_error, log, live_series
 ```
 
 ## What is in it
 
-- `serve(manifest=, render=, init=None, shutdown=None)` answers the dashboard on stdin and
+- `serve(manifest=, render=, init=None, shutdown=None)` answers sitroom on stdin and
   stdout. `manifest` is a dict or a function of the config. `contract_version` and `commands`
   are filled in for you. `init(config)` gets the tile's `config:` block (`{}` when there is
   none). `render()` returns a `View`.
@@ -26,7 +26,7 @@ from dashboard_plugin import View, serve, with_defaults, config_error, upstream_
   tile shows `msg`. Any other exception becomes -32603, with the traceback on stderr.
 - `with_defaults(config, defaults)` merges the config over the defaults and rejects unknown
   keys (usually typos) with a config error.
-- `log(level, msg)` writes a line to the dashboard's log, not the tile.
+- `log(level, msg)` writes a line to sitroom's log, not the tile.
 - `live_series(id, label, {name: value}, **widget)` builds a `series` widget whose history the
   host keeps, so each render sends only the newest value. `None` sends no point.
 - `TypedDict` types for the manifest, the view and every widget (`Manifest`, `View`, `Widget`,
@@ -37,7 +37,7 @@ from dashboard_plugin import View, serve, with_defaults, config_error, upstream_
 
 ## Examples
 
-Run any of them with `dashboard plugin-check -- python3 examples/<file>`.
+Run any of them with `sitroom plugin-check -- python3 examples/<file>`.
 
 | File | Shows |
 |---|---|

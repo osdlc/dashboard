@@ -1,13 +1,13 @@
 //! Colors for light and dark terminals, from the color theme's tokens.
 //!
 //! The TUI keeps the terminal's own background and text color; everything
-//! else comes from the theme (see `dashboard_contract::theme`). Colors that
+//! else comes from the theme (see `sitroom_contract::theme`). Colors that
 //! are drawn as text are darkened (light) or lightened (dark) until they read
 //! well on the theme's background: terminal glyphs are thin, so a color that
 //! works as a web bar can be too faint as a character.
 
-use dashboard_contract::theme::{self, ColorTheme, Tokens, Tone};
-use dashboard_contract::{ColorScale, Status, Theme};
+use sitroom_contract::theme::{self, ColorTheme, Tokens, Tone};
+use sitroom_contract::{ColorScale, Status, Theme};
 use ratatui::style::Color;
 use terminal_colorsaurus::{QueryOptions, ThemeMode, theme_mode};
 

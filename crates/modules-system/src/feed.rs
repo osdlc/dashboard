@@ -3,7 +3,7 @@
 //! `docs/contract.md`), values picked out of any JSON, or plain text.
 
 use anyhow::{Context, Result, bail};
-use dashboard_contract::{Status, View, Widget};
+use sitroom_contract::{Status, View, Widget};
 use schemars::JsonSchema;
 use serde::Deserialize;
 use serde_json::Value;
@@ -113,7 +113,7 @@ fn contract_view(json: Value, name: &str) -> Result<View> {
             root: serde_json::from_value::<Widget>(json).context("not a widget")?,
         }
     };
-    let problems: Vec<String> = dashboard_contract::check::check_view(&view)
+    let problems: Vec<String> = sitroom_contract::check::check_view(&view)
         .into_iter()
         .filter(|f| f.problem)
         .map(|f| f.text)

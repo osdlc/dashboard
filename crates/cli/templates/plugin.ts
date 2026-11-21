@@ -1,10 +1,10 @@
-// __NAME__: a dashboard plugin. Made by `dashboard plugin new`.
+// __NAME__: a sitroom plugin. Made by `sitroom plugin new`.
 //
-// Try it:   dashboard plugin-check -- node main.ts      (or: bun main.ts)
-// SDK:      dashboard-plugin.ts, next to this file. Protocol and widgets: docs/plugins.md.
+// Try it:   sitroom plugin-check -- node main.ts      (or: bun main.ts)
+// SDK:      sitroom-plugin.ts, next to this file. Protocol and widgets: docs/plugins.md.
 
-import { serve, withDefaults } from "./dashboard-plugin.ts";
-import type { View } from "./dashboard-plugin.ts";
+import { serve, withDefaults } from "./sitroom-plugin.ts";
+import type { View } from "./sitroom-plugin.ts";
 
 // Settings from the tile's `config:` block, with their defaults.
 let config = { greeting: "hello" };
@@ -50,7 +50,7 @@ serve({
               {
                 title: "Read about widgets",
                 subtitle: "docs/plugins.md",
-                action: { type: "open_url", url: "https://github.com/osdlc/dashboard/blob/main/docs/plugins.md" },
+                action: { type: "open_url", url: "https://github.com/osdlc/sitroom/blob/main/docs/plugins.md" },
               },
             ],
           },
