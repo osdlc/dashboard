@@ -12,6 +12,6 @@ fn main() -> anyhow::Result<()> {
 
 #[cfg(not(unix))]
 fn main() {
-    eprintln!("dashboard-bench runs on unix only (macOS, Linux)");
+    eprintln!("sitroom-bench runs on unix only (macOS, Linux)");
     std::process::exit(1);
 }

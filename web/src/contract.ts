@@ -82,7 +82,7 @@ export type Widget =
       /**
        * Draw the first series above the axis and the second below it,
        * e.g. network download and upload. Negative values count as 0 here
-       * (`dashboard check` flags them).
+       * (`sitroom check` flags them).
        */
       mirrored?: boolean;
       /**
@@ -364,7 +364,7 @@ export type Cell =
           /**
            * Draw the first series above the axis and the second below it,
            * e.g. network download and upload. Negative values count as 0 here
-           * (`dashboard check` flags them).
+           * (`sitroom check` flags them).
            */
           mirrored?: boolean;
           /**
@@ -655,7 +655,7 @@ export interface CatalogEntry {
   requirements?: Requirements;
   /**
    * Where it comes from: `builtin`, `bundled` (a plugin inside the
-   * dashboard binary), or the folder of an installed package.
+   * sitroom binary), or the folder of an installed package.
    */
   source: string;
   tags?: string[];
@@ -997,7 +997,7 @@ export interface ConfigInfo {
   exists: boolean;
   /**
    * The files merged into the config, lowest precedence first, e.g.
-   * "machine: ~/.config/dashboard/config.yaml".
+   * "machine: ~/.config/sitroom/config.yaml".
    */
   layers?: string[];
   path: string;

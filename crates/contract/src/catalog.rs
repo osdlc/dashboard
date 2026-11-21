@@ -1,6 +1,6 @@
 //! The catalog: everything that can be added to a dashboard, built in or
 //! installed, with what it needs and a demo view that works with no account.
-//! Also the plugin package file (`dashboard-plugin.yaml`). See docs/plugins.md.
+//! Also the plugin package file (`sitroom-plugin.yaml`). See docs/plugins.md.
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use crate::{Size, View};
 
 /// The file at the root of a plugin package.
-pub const PACKAGE_FILE: &str = "dashboard-plugin.yaml";
+pub const PACKAGE_FILE: &str = "sitroom-plugin.yaml";
 
 /// One thing the catalog lists.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
@@ -23,7 +23,7 @@ pub struct CatalogEntry {
     pub tags: Vec<String>,
     pub kind: EntryKind,
     /// Where it comes from: `builtin`, `bundled` (a plugin inside the
-    /// dashboard binary), or the folder of an installed package.
+    /// sitroom binary), or the folder of an installed package.
     pub source: String,
     pub default_size: Size,
     /// JSON Schema for the module's `config:` block.
@@ -38,7 +38,7 @@ pub struct CatalogEntry {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum EntryKind {
-    /// Compiled into the dashboard and run in its process.
+    /// Compiled into sitroom and run in its process.
     Builtin,
     /// A separate program run over stdio.
     Plugin,
@@ -127,7 +127,7 @@ pub fn search<'a>(
     entries.iter().filter(|e| e.matches(query, tag)).collect()
 }
 
-/// A plugin package: a folder holding this file (`dashboard-plugin.yaml`)
+/// A plugin package: a folder holding this file (`sitroom-plugin.yaml`)
 /// and the plugin's own files.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]

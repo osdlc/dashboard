@@ -29,7 +29,7 @@ impl Secret {
             None => {
                 let var = self.token_env.as_deref().unwrap_or(default_env);
                 bail!(
-                    "no API token: set ${var} before starting the dashboard, or set token_env / token_command in the config"
+                    "no API token: set ${var} before starting sitroom, or set token_env / token_command in the config"
                 )
             }
         }
@@ -84,12 +84,12 @@ mod tests {
     #[tokio::test]
     async fn missing_token_names_the_variable() {
         let s = Secret {
-            token_env: Some("DASHBOARD_TEST_NO_SUCH_SECRET".into()),
+            token_env: Some("SITROOM_TEST_NO_SUCH_SECRET".into()),
             token_command: None,
         };
         assert_eq!(s.token_opt("X").await.unwrap(), None);
         let err = s.token("X").await.unwrap_err().to_string();
-        assert!(err.contains("$DASHBOARD_TEST_NO_SUCH_SECRET"), "{err}");
+        assert!(err.contains("$SITROOM_TEST_NO_SUCH_SECRET"), "{err}");
     }
 
     #[cfg(unix)]

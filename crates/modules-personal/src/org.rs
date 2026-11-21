@@ -15,12 +15,12 @@ use std::path::Path;
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::{CatalogEntry, Manifest, Requirements, Size, View};
-use dashboard_host::Module;
 use jiff::ToSpan;
 use jiff::civil::Date;
 use schemars::JsonSchema;
 use serde::Deserialize;
+use sitroom_contract::{CatalogEntry, Manifest, Requirements, Size, View};
+use sitroom_host::Module;
 
 use crate::{
     Task, file_name, find_files, link, manifest, parse_date, sort_tasks, tasks_view, today,
@@ -288,8 +288,8 @@ pub fn catalog() -> CatalogEntry {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dashboard_contract::{Action, Status, Widget};
     use jiff::civil::date;
+    use sitroom_contract::{Action, Status, Widget};
 
     const SAMPLE: &str = include_str!("../testdata/org/agenda.org");
 

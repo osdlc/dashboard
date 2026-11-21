@@ -68,13 +68,13 @@ test('a widget with no settings still gets a module block with a value', () => {
   assert.match(example, /^ {2}cpu:\n {4}demo: false/m)
 })
 
-// Every widget page's example, through the dashboard's own config check. Needs
-// a built dashboard (cargo build -p dashboard, or DASHBOARD_BIN).
-const bin = [process.env.DASHBOARD_BIN, join(repo, 'target/debug/dashboard'), join(repo, 'target/release/dashboard')]
+// Every widget page's example, through sitroom's own config check. Needs
+// a built sitroom (cargo build -p sitroom, or SITROOM_BIN).
+const bin = [process.env.SITROOM_BIN, join(repo, 'target/debug/sitroom'), join(repo, 'target/release/sitroom')]
   .filter((p): p is string => !!p)
   .find((p) => existsSync(p))
 
-test('every config example loads in `dashboard config`', { skip: !bin && 'no dashboard binary' }, () => {
+test('every config example loads in `sitroom config`', { skip: !bin && 'no sitroom binary' }, () => {
   const entries = JSON.parse(readFileSync(join(site, 'src/data/registry.json'), 'utf8')).entries as Widget[]
   const dir = join(repo, '.tmp', 'site-config-check')
   rmSync(dir, { recursive: true, force: true })

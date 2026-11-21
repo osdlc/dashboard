@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 // Generates the contract types in both SDKs from the host's JSON Schemas:
 //
-//   node sdk/gen-types.mjs                 # runs `cargo run -p dashboard -- schema ...`
+//   node sdk/gen-types.mjs                 # runs `cargo run -p sitroom -- schema ...`
 //   node sdk/gen-types.mjs --schemas DIR   # reads DIR/{manifest,view,initialize-params}.json
 //   node sdk/gen-types.mjs --check ...     # fails if the SDK files are out of date
 //
-// The types go between the GENERATED markers in sdk/typescript/dashboard-plugin.ts and
-// sdk/python/dashboard_plugin.py; the rest of those files is written by hand.
+// The types go between the GENERATED markers in sdk/typescript/sitroom-plugin.ts and
+// sdk/python/sitroom_plugin.py; the rest of those files is written by hand.
 // No packages: it handles only the schema shapes schemars produces for the contract.
 
 import { execFileSync } from "node:child_process";
@@ -25,7 +25,7 @@ const dirAt = args.indexOf("--schemas");
 
 function load(name) {
   if (dirAt >= 0) return JSON.parse(readFileSync(join(args[dirAt + 1], `${name}.json`), "utf8"));
-  const out = execFileSync("cargo", ["run", "-q", "-p", "dashboard", "--", "schema", name], {
+  const out = execFileSync("cargo", ["run", "-q", "-p", "sitroom", "--", "schema", name], {
     cwd: join(here, ".."),
     encoding: "utf8",
     stdio: ["ignore", "pipe", "inherit"],
@@ -239,7 +239,7 @@ function splice(file, body) {
 }
 
 const ok = [
-  splice(join(here, "typescript/dashboard-plugin.ts"), typescript()),
-  splice(join(here, "python/dashboard_plugin.py"), python()),
+  splice(join(here, "typescript/sitroom-plugin.ts"), typescript()),
+  splice(join(here, "python/sitroom_plugin.py"), python()),
 ].every(Boolean);
 process.exit(ok ? 0 : 1);

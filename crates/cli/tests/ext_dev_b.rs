@@ -9,10 +9,10 @@
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use dashboard_config::packages::load_package;
-use dashboard_contract::check::{check_manifest, check_view};
-use dashboard_host::{Module, Plugin};
 use serde_json::json;
+use sitroom_config::packages::load_package;
+use sitroom_contract::check::{check_manifest, check_view};
+use sitroom_host::{Module, Plugin};
 
 fn ext_dir() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("../../plugins/ext")
@@ -29,7 +29,7 @@ fn have_python() -> bool {
     Command::new("python3").arg("--version").output().is_ok()
 }
 
-fn problems(found: Vec<dashboard_contract::check::Finding>) -> Vec<String> {
+fn problems(found: Vec<sitroom_contract::check::Finding>) -> Vec<String> {
     found
         .into_iter()
         .filter(|f| f.problem)
@@ -40,7 +40,7 @@ fn problems(found: Vec<dashboard_contract::check::Finding>) -> Vec<String> {
 #[test]
 fn every_package_loads_and_carries_the_current_sdk() {
     let sdk = std::fs::read_to_string(
-        Path::new(env!("CARGO_MANIFEST_DIR")).join("../../sdk/python/dashboard_plugin.py"),
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("../../sdk/python/sitroom_plugin.py"),
     )
     .unwrap();
     let apitoken = std::fs::read_to_string(ext_dir().join("buildkite/apitoken.py")).unwrap();
@@ -53,10 +53,10 @@ fn every_package_loads_and_carries_the_current_sdk() {
         );
         assert!(p.package.config_schema.is_some(), "{}", p.package.id);
         // The SDK is copied into each package; refresh the copies when it changes.
-        let copy = std::fs::read_to_string(dir.join("dashboard_plugin.py")).unwrap();
+        let copy = std::fs::read_to_string(dir.join("sitroom_plugin.py")).unwrap();
         assert!(
             copy == sdk,
-            "{}: dashboard_plugin.py differs from sdk/python; copy it again",
+            "{}: sitroom_plugin.py differs from sdk/python; copy it again",
             p.package.id
         );
         // So is the token helper: a fix to one copy goes to all of them.
@@ -88,7 +88,7 @@ async fn sample_render_is_the_demo_view() {
         assert_eq!(problems(check_view(&view)), Vec::<String>::new(), "{id}");
         assert_eq!(
             view, p.package.demo,
-            "{id}: the demo in dashboard-plugin.yaml must match `python3 main.py --sample`"
+            "{id}: the demo in sitroom-plugin.yaml must match `python3 main.py --sample`"
         );
     }
 }
@@ -120,7 +120,7 @@ async fn without_a_token_it_names_the_variable() {
     if !have_python() {
         return;
     }
-    const VAR: &str = "DASHBOARD_TEST_NO_SUCH_TOKEN";
+    const VAR: &str = "SITROOM_TEST_NO_SUCH_TOKEN";
     let configs = [
         ("asana", json!({ "workspace": "1", "token_env": VAR })),
         ("buildkite", json!({ "org": "acme", "token_env": VAR })),

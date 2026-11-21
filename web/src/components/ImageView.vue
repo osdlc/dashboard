@@ -11,7 +11,7 @@ const failed = ref(false)
 let latestLoad = 0
 
 /**
- * The picture is a file on the dashboard's machine. The server sends it from
+ * The picture is a file on sitroom's machine. The server sends it from
  * /api/image, but only while a tile shows it, and only with the session token,
  * which can't go in an <img> URL: so it is fetched and shown as a blob.
  */

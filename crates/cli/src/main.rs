@@ -5,14 +5,14 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use clap::{Parser, Subcommand, ValueEnum};
-use dashboard_cli_kit::Failure;
-use dashboard_cli_kit::output::{Reporter, write_json};
-use dashboard_config::layers::Sources;
-use dashboard_config::packages::Packages;
-use dashboard_config::{Config, Part};
-use dashboard_contract::{CatalogEntry, Index, Manifest, Package, ServerMessage, View, rpc};
-use dashboard_runtime::{load_valid, missing_packages, start};
 use serde_json::json;
+use sitroom_cli_kit::Failure;
+use sitroom_cli_kit::output::{Reporter, write_json};
+use sitroom_config::layers::Sources;
+use sitroom_config::packages::Packages;
+use sitroom_config::{Config, Part};
+use sitroom_contract::{CatalogEntry, Index, Manifest, Package, ServerMessage, View, rpc};
+use sitroom_runtime::{load_valid, missing_packages, start};
 
 mod background;
 mod dashboards;
@@ -21,7 +21,7 @@ mod plugin_check;
 mod plugin_new;
 mod widgets;
 
-const NAME: &str = "dashboard";
+const NAME: &str = "sitroom";
 
 #[derive(Parser)]
 #[command(
@@ -31,14 +31,14 @@ const NAME: &str = "dashboard";
     after_long_help = exit_codes()
 )]
 struct Cli {
-    /// Config file. Default: ~/.config/dashboard/config.yaml (or $DASHBOARD_MACHINE_CONFIG).
+    /// Config file. Default: ~/.config/sitroom/config.yaml (or $SITROOM_MACHINE_CONFIG).
     #[arg(long, global = true)]
     config: Option<PathBuf>,
     /// Lay this saved dashboard over the config, e.g. `--dashboard work`.
-    /// See `dashboard dashboards list`.
+    /// See `sitroom dashboards list`.
     #[arg(long, global = true, value_name = "NAME")]
     dashboard: Option<String>,
-    /// Don't read a `.dashboard.yaml` from this folder or the ones above it.
+    /// Don't read a `.sitroom.yaml` from this folder or the ones above it.
     #[arg(long, global = true)]
     no_project: bool,
     /// Print one JSON document on stdout (`schemaVersion`, `kind`), or an
@@ -51,9 +51,9 @@ struct Cli {
 }
 
 /// The exit codes, for the end of `--help`: every code in
-/// `dashboard_cli_kit::exit` (docs/cli.md).
+/// `sitroom_cli_kit::exit` (docs/cli.md).
 fn exit_codes() -> String {
-    use dashboard_cli_kit::exit;
+    use sitroom_cli_kit::exit;
     format!(
         "Exit codes: {} ok, {} failed, {} the command can't run as typed, \
          {} a program it needs is not installed, {} a service refused the request or gave \
@@ -71,7 +71,7 @@ fn exit_codes() -> String {
 
 #[derive(Subcommand)]
 enum Command {
-    /// Show the dashboard in the terminal.
+    /// Show sitroom in the terminal.
     Tui,
     /// Serve the web view on 127.0.0.1 and open it in the browser.
     Serve {
@@ -80,7 +80,7 @@ enum Command {
         /// Also allow this origin (for the Vite dev server), e.g. http://localhost:5173
         #[arg(long)]
         dev_origin: Option<String>,
-        /// Run in the background and return. `dashboard stop` stops it.
+        /// Run in the background and return. `sitroom stop` stops it.
         #[arg(short, long)]
         detach: bool,
         /// Don't open a browser.
@@ -102,7 +102,7 @@ enum Command {
     },
     /// Show the config files in use and whether they are valid.
     Config,
-    /// Saved dashboards: `dashboard dashboards list`.
+    /// Saved dashboards: `sitroom dashboards list`.
     Dashboards {
         #[command(subcommand)]
         command: DashboardsCommand,
@@ -119,9 +119,9 @@ enum Command {
         #[arg(long)]
         force: bool,
     },
-    /// Allow the project file (`.dashboard.yaml`) here or above to be used.
+    /// Allow the project file (`.sitroom.yaml`) here or above to be used.
     /// It can run programs, so read it first. Any change to it needs a new
-    /// `dashboard trust`.
+    /// `sitroom trust`.
     Trust {
         /// The project file. Default: the one found from this folder upward.
         file: Option<PathBuf>,
@@ -151,9 +151,9 @@ enum Command {
         #[arg(value_enum)]
         which: SchemaKind,
     },
-    /// Run a stdio plugin the way the dashboard does, check what it sends,
+    /// Run a stdio plugin the way sitroom does, check what it sends,
     /// and print its tile. For plugin authors:
-    /// `dashboard plugin-check -- python3 my_plugin.py`
+    /// `sitroom plugin-check -- python3 my_plugin.py`
     PluginCheck {
         /// The tile's `config:` block passed to `initialize`, as JSON.
         #[arg(long = "plugin-config", value_name = "JSON")]
@@ -175,7 +175,7 @@ enum Command {
         #[arg(required = true, last = true)]
         argv: Vec<String>,
     },
-    /// Plugin tools: `dashboard plugin new --lang ts my-plugin`.
+    /// Plugin tools: `sitroom plugin new --lang ts my-plugin`.
     Plugin {
         #[command(subcommand)]
         command: PluginCommand,
@@ -245,8 +245,8 @@ enum PluginCommand {
         #[arg(long)]
         out: PathBuf,
     },
-    /// `plugin <id>` runs a bundled plugin over stdio (the dashboard starts it
-    /// itself; see dashboard_runtime::run_bundled).
+    /// `plugin <id>` runs a bundled plugin over stdio (sitroom starts it
+    /// itself; see sitroom_runtime::run_bundled).
     #[command(external_subcommand)]
     Bundled(Vec<String>),
 }
@@ -254,7 +254,7 @@ enum PluginCommand {
 #[derive(clap::Args)]
 struct IndexArg {
     /// The marketplace index: a path or https:// URL of an index.json.
-    /// Default: $DASHBOARD_PLUGIN_INDEX.
+    /// Default: $SITROOM_PLUGIN_INDEX.
     #[arg(long, value_name = "PATH|URL")]
     index: Option<String>,
 }
@@ -267,9 +267,9 @@ enum SchemaKind {
     InitializeParams,
     InitializeResult,
     ServerMessage,
-    /// One entry of `dashboard widgets --json`.
+    /// One entry of `sitroom widgets --json`.
     CatalogEntry,
-    /// A plugin package's `dashboard-plugin.yaml`.
+    /// A plugin package's `sitroom-plugin.yaml`.
     Package,
     /// A marketplace `index.json`.
     Index,
@@ -291,6 +291,9 @@ fn main() -> ExitCode {
         name: NAME,
         json: cli.json,
     };
+    for note in sitroom_config::move_old_folders() {
+        warn(&note);
+    }
     let result = tokio::runtime::Runtime::new()
         .map_err(anyhow::Error::from)
         .and_then(|rt| {
@@ -309,7 +312,7 @@ fn main() -> ExitCode {
     }
 }
 
-/// Print `dashboard: warning: <message>` on stderr.
+/// Print `sitroom: warning: <message>` on stderr.
 pub fn warn(message: &str) {
     Reporter {
         name: NAME,
@@ -371,9 +374,9 @@ async fn run(cli: Cli) -> Result<()> {
                 () = &mut shutdown => return Ok(()),
             };
             tokio::select! {
-                result = dashboard_tui::run(host, settings, actions) => result,
+                result = sitroom_tui::run(host, settings, actions) => result,
                 () = &mut shutdown => {
-                    dashboard_tui::restore_terminal();
+                    sitroom_tui::restore_terminal();
                     Ok(())
                 }
             }
@@ -399,7 +402,7 @@ async fn run(cli: Cli) -> Result<()> {
                     "already running"
                 };
                 let link = background::sign_in_link(&record)?;
-                println!("dashboard: {link} (pid {}, {verb})", record.pid);
+                println!("sitroom: {link} (pid {}, {verb})", record.pid);
                 println!("           signs one browser tab in; unused, it expires in a minute.");
                 if !no_open {
                     background::open_browser(&link);
@@ -417,9 +420,9 @@ async fn run(cli: Cli) -> Result<()> {
                 started = start(sources) => started?,
                 () = &mut shutdown => return Ok(()),
             };
-            let on_ready = move |ready: &dashboard_web::Ready| {
+            let on_ready = move |ready: &sitroom_web::Ready| {
                 // A foreground server is recorded too, unless another one is,
-                // so `dashboard open` can sign in another tab.
+                // so `sitroom open` can sign in another tab.
                 let write = record || matches!(background::running(), Ok(None));
                 if write && let Err(err) = background::write_record(&ready.url, &ready.token) {
                     tracing::error!("{err:#}");
@@ -428,18 +431,18 @@ async fn run(cli: Cli) -> Result<()> {
                     background::open_browser(&ready.sign_in);
                 }
             };
-            let served = dashboard_web::serve(
+            let served = sitroom_web::serve(
                 host,
                 settings,
                 actions,
-                dashboard_web::WebConfig {
+                sitroom_web::WebConfig {
                     port,
                     dev_origin,
                     on_ready: Some(Box::new(on_ready)),
-                    catalog: Some(Arc::new(dashboard_runtime::catalog_source(layer_paths))),
+                    catalog: Some(Arc::new(sitroom_runtime::catalog_source(layer_paths))),
                 },
             );
-            // Stopped by Ctrl-C or `dashboard stop`: remove the record on the
+            // Stopped by Ctrl-C or `sitroom stop`: remove the record on the
             // way out, so a later run never trusts it once the pid is reused.
             let result = tokio::select! {
                 result = served => result,
@@ -473,7 +476,7 @@ async fn run(cli: Cli) -> Result<()> {
         Command::Open { no_open } => {
             let Some(record) = background::running()? else {
                 return Err(Failure::new("not-running", "no web server is running.")
-                    .hint("Start one with `dashboard serve`.")
+                    .hint("Start one with `sitroom serve`.")
                     .into());
             };
             let link = background::sign_in_link(&record)?;
@@ -509,7 +512,7 @@ async fn run(cli: Cli) -> Result<()> {
                     }
                     if let Some(path) = &loaded.untrusted {
                         println!(
-                            "{:9}  {} (not trusted, not used; see `dashboard trust`)",
+                            "{:9}  {} (not trusted, not used; see `sitroom trust`)",
                             "project",
                             path.display()
                         );
@@ -559,11 +562,11 @@ async fn run(cli: Cli) -> Result<()> {
         Command::Widgets { query, tag } => {
             // Packages next to every file in use; just the machine file's if
             // the files don't load.
-            let paths = match dashboard_config::layers::load(&sources) {
+            let paths = match sitroom_config::layers::load(&sources) {
                 Ok(loaded) => loaded.paths(),
                 Err(_) => vec![match &cli.config {
                     Some(p) => p.clone(),
-                    None => dashboard_config::default_path()?,
+                    None => sitroom_config::default_path()?,
                 }],
             };
             widgets::run(&paths, &query.join(" "), tag.as_deref(), json)
@@ -643,24 +646,24 @@ async fn run(cli: Cli) -> Result<()> {
             PluginCommand::Remove { id, yes } => marketplace::remove(&id, yes),
             PluginCommand::Pack { dirs, out } => marketplace::pack(&dirs, &out),
             PluginCommand::Bundled(args) => match args.as_slice() {
-                [id] => dashboard_runtime::run_bundled(id)
+                [id] => sitroom_runtime::run_bundled(id)
                     .unwrap_or_else(|| Err(anyhow::anyhow!("no bundled plugin {id:?}"))),
-                _ => Err(anyhow::anyhow!("usage: dashboard plugin <bundled-id>")),
+                _ => Err(anyhow::anyhow!("usage: sitroom plugin <bundled-id>")),
             },
         },
     }
 }
 
-/// `dashboard trust [FILE] [--remove]`.
+/// `sitroom trust [FILE] [--remove]`.
 fn trust(sources: &Sources, file: Option<PathBuf>, remove: bool) -> Result<()> {
     let file = match file {
         Some(f) => f,
         None => {
             let here = std::env::current_dir()?;
-            dashboard_config::layers::find_project(&here).ok_or_else(|| {
+            sitroom_config::layers::find_project(&here).ok_or_else(|| {
                 anyhow::anyhow!(
                     "no {} in {} or above",
-                    dashboard_config::layers::PROJECT_FILE,
+                    sitroom_config::layers::PROJECT_FILE,
                     here.display()
                 )
             })?
@@ -678,8 +681,8 @@ fn trust(sources: &Sources, file: Option<PathBuf>, remove: bool) -> Result<()> {
     // Check it before trusting it, and say what it will run.
     let text = std::fs::read_to_string(&file)
         .map_err(|e| anyhow::anyhow!("reading {}: {e}", file.display()))?;
-    let config = dashboard_config::parse(&text)
-        .map_err(|e| anyhow::anyhow!("{e:#} in {}", file.display()))?;
+    let config =
+        sitroom_config::parse(&text).map_err(|e| anyhow::anyhow!("{e:#} in {}", file.display()))?;
     list.allow(&file)?;
     println!("trusted: {}", file.display());
     for line in dashboards::commands(&config) {
@@ -689,7 +692,7 @@ fn trust(sources: &Sources, file: Option<PathBuf>, remove: bool) -> Result<()> {
     Ok(())
 }
 
-/// Resolves on Ctrl-C, on SIGTERM (what `dashboard stop` sends), or on SIGHUP
+/// Resolves on Ctrl-C, on SIGTERM (what `sitroom stop` sends), or on SIGHUP
 /// (the terminal closed).
 async fn shutdown_signal() {
     #[cfg(unix)]

@@ -18,12 +18,12 @@ use std::time::SystemTime;
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::{CatalogEntry, Manifest, Size, Status, View, Widget};
-use dashboard_host::Module;
 use schemars::JsonSchema;
 use serde::Deserialize;
+use sitroom_contract::{CatalogEntry, Manifest, Size, Status, View, Widget};
+use sitroom_host::Module;
 
-use dashboard_modules_common::{expand_home, manifest};
+use sitroom_modules_common::{expand_home, manifest};
 
 /// Larger files are refused: this is for notes, not logs (use `log` for those).
 const MAX_BYTES: u64 = 1024 * 1024;
@@ -224,7 +224,7 @@ mod tests {
     #[tokio::test]
     async fn shows_the_file_again_when_it_changes() {
         let dir =
-            std::env::temp_dir().join(format!("dashboard-textfile-test-{}", std::process::id()));
+            std::env::temp_dir().join(format!("sitroom-textfile-test-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("todo.txt");
         std::fs::write(&path, "one\n").unwrap();

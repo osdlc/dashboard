@@ -4,7 +4,7 @@ import json
 import os
 import unittest
 
-from dashboard_plugin import PluginError
+from sitroom_plugin import PluginError
 from view import SAMPLE_NOW, view
 
 HERE = os.path.dirname(os.path.abspath(__file__))

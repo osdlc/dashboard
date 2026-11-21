@@ -7,14 +7,14 @@
 // (plugins/ext/feedreader-py), and must show the same view for the same input. Node has no XML
 // parser, so this file has a small one.
 //
-//   dashboard plugin-check -- node plugins/ext/feedreader-ts/main.ts
+//   sitroom plugin-check -- node plugins/ext/feedreader-ts/main.ts
 
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-import { configError, serve, upstreamError, withDefaults } from "./dashboard-plugin.ts";
-import type { ListItem, View } from "./dashboard-plugin.ts";
+import { configError, serve, upstreamError, withDefaults } from "./sitroom-plugin.ts";
+import type { ListItem, View } from "./sitroom-plugin.ts";
 
 const XML_NS = "http://www.w3.org/XML/1998/namespace";
 const RDF_NS = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
@@ -53,7 +53,7 @@ async function read(entry: string): Promise<Feed> {
     let resp: Response;
     try {
       resp = await fetch(entry, {
-        headers: { "user-agent": "dashboard/0.1.0" },
+        headers: { "user-agent": "sitroom/0.1.0" },
         signal: AbortSignal.timeout(20_000),
       });
     } catch {

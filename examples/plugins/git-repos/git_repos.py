@@ -20,7 +20,7 @@ column and an open_url action per row. Uses only the standard library and the
 
 Check it with:
 
-    dashboard plugin-check --plugin-config '{"roots": ["."], "depth": 1}' -- python3 examples/plugins/git-repos/git_repos.py
+    sitroom plugin-check --plugin-config '{"roots": ["."], "depth": 1}' -- python3 examples/plugins/git-repos/git_repos.py
 """
 
 import json
@@ -44,7 +44,7 @@ class RpcError(Exception):
 
 
 def log(level, message):
-    """A `log` notification: shows up in the dashboard's log, not the tile."""
+    """A `log` notification: shows up in sitroom's log, not the tile."""
     send({"jsonrpc": "2.0", "method": "log", "params": {"level": level, "message": message}})
 
 

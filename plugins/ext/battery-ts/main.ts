@@ -5,7 +5,7 @@
 // the native module (crates/modules-system/src/battery.rs) and the Python plugin
 // (plugins/ext/battery-py), and must show the same view for the same input.
 //
-//   dashboard plugin-check -- node plugins/ext/battery-ts/main.ts
+//   sitroom plugin-check -- node plugins/ext/battery-ts/main.ts
 
 import { execFile } from "node:child_process";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
@@ -13,8 +13,8 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
 
-import { serve, upstreamError, withDefaults } from "./dashboard-plugin.ts";
-import type { View, Widget } from "./dashboard-plugin.ts";
+import { serve, upstreamError, withDefaults } from "./sitroom-plugin.ts";
+import type { View, Widget } from "./sitroom-plugin.ts";
 
 const SYSFS = "/sys/class/power_supply";
 

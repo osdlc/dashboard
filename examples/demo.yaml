@@ -1,8 +1,8 @@
 # Demo layout: screens using every tile size and widget style. This is
-# also the default config when ~/.config/dashboard/config.yaml doesn't exist.
+# also the default config when ~/.config/sitroom/config.yaml doesn't exist.
 #
-#   cargo run -p dashboard -- serve --config examples/demo.yaml
-#   cargo run -p dashboard -- tui   --config examples/demo.yaml
+#   cargo run -p sitroom -- serve --config examples/demo.yaml
+#   cargo run -p sitroom -- tui   --config examples/demo.yaml
 #
 # Switch screens with the number keys, Tab (terminal) or [ and ] (web). Edit this
 # file while it runs; changes apply live.

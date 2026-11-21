@@ -5,13 +5,13 @@ The Python version of a native-vs-plugin benchmark widget. It follows the same r
 native module (crates/modules-system/src/textfile.rs) and the TypeScript plugin
 (plugins/ext/textfile-ts), and must show the same view for the same file.
 
-    dashboard plugin-check --plugin-config '{"path": "README.md"}' -- python3 plugins/ext/textfile-py/main.py
+    sitroom plugin-check --plugin-config '{"path": "README.md"}' -- python3 plugins/ext/textfile-py/main.py
 """
 
 import os
 from typing import Optional, Tuple
 
-from dashboard_plugin import View, config_error, serve, upstream_error, with_defaults
+from sitroom_plugin import View, config_error, serve, upstream_error, with_defaults
 
 # Larger files are refused: this is for notes, not logs.
 MAX_BYTES = 1024 * 1024

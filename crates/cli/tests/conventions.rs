@@ -3,15 +3,15 @@
 use std::path::PathBuf;
 use std::process::{Command, Output};
 
-/// Run `dashboard` with its dirs inside a fresh temp dir, so no user config or
+/// Run `sitroom` with its dirs inside a fresh temp dir, so no user config or
 /// server record is touched.
-fn dashboard(args: &[&str]) -> Output {
+fn sitroom(args: &[&str]) -> Output {
     let home: PathBuf = std::env::temp_dir().join(format!(
-        "dashboard-conventions-{}-{}",
+        "sitroom-conventions-{}-{}",
         std::process::id(),
         args.join("-").replace(['/', ' '], "_")
     ));
-    let mut cmd = Command::new(env!("CARGO_BIN_EXE_dashboard"));
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_sitroom"));
     for var in [
         "XDG_CONFIG_HOME",
         "XDG_STATE_HOME",
@@ -34,17 +34,17 @@ fn document(out: &Output) -> serde_json::Value {
 
 #[test]
 fn usage_errors_exit_2_with_an_error_document() {
-    let out = dashboard(&["nosuch", "--json"]);
+    let out = sitroom(&["nosuch", "--json"]);
     assert_eq!(out.status.code(), Some(2));
     let doc = document(&out);
     assert_eq!(doc["schemaVersion"], 1);
     assert_eq!(doc["kind"], "error");
     assert_eq!(doc["code"], "usage");
     let err = String::from_utf8_lossy(&out.stderr);
-    assert!(err.starts_with("dashboard: "), "{err}");
+    assert!(err.starts_with("sitroom: "), "{err}");
 
     // Without --json: the line only.
-    let out = dashboard(&["serve", "--port", "x"]);
+    let out = sitroom(&["serve", "--port", "x"]);
     assert_eq!(out.status.code(), Some(2));
     assert!(out.stdout.is_empty());
 }
@@ -52,18 +52,18 @@ fn usage_errors_exit_2_with_an_error_document() {
 #[test]
 fn version_prints_the_crate_version() {
     for flag in ["--version", "-V"] {
-        let out = dashboard(&[flag]);
+        let out = sitroom(&[flag]);
         assert_eq!(out.status.code(), Some(0));
         assert_eq!(
             String::from_utf8_lossy(&out.stdout).trim(),
-            format!("dashboard {}", env!("CARGO_PKG_VERSION"))
+            format!("sitroom {}", env!("CARGO_PKG_VERSION"))
         );
     }
 }
 
 #[test]
 fn help_lists_every_exit_code() {
-    let out = dashboard(&["--help"]);
+    let out = sitroom(&["--help"]);
     assert_eq!(out.status.code(), Some(0));
     let help = String::from_utf8_lossy(&out.stdout);
     for code in [0, 1, 2, 22, 23, 24, 25] {
@@ -73,31 +73,28 @@ fn help_lists_every_exit_code() {
 
 #[test]
 fn serve_refuses_json() {
-    let out = dashboard(&["serve", "--json"]);
+    let out = sitroom(&["serve", "--json"]);
     assert_eq!(out.status.code(), Some(2));
     assert_eq!(document(&out)["code"], "usage");
 }
 
 #[test]
 fn status_and_open_without_a_server() {
-    let out = dashboard(&["status", "--json"]);
+    let out = sitroom(&["status", "--json"]);
     assert_eq!(out.status.code(), Some(0));
     let doc = document(&out);
     assert_eq!(doc["kind"], "status");
     assert_eq!(doc["running"], false);
 
-    let out = dashboard(&["open", "--json"]);
+    let out = sitroom(&["open", "--json"]);
     assert_eq!(out.status.code(), Some(1));
     assert_eq!(document(&out)["code"], "not-running");
 }
 
 #[test]
 fn a_missing_plugin_program_exits_22() {
-    let out = dashboard(&["plugin-check", "--", "/nonexistent/dashboard-plugin"]);
+    let out = sitroom(&["plugin-check", "--", "/nonexistent/sitroom-plugin"]);
     assert_eq!(out.status.code(), Some(22));
     let err = String::from_utf8_lossy(&out.stderr);
-    assert!(
-        err.contains("dashboard: couldn't start the plugin"),
-        "{err}"
-    );
+    assert!(err.contains("sitroom: couldn't start the plugin"), "{err}");
 }

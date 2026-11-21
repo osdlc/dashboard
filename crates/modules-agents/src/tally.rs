@@ -7,8 +7,8 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, SystemTime};
 
-use dashboard_contract::{Bar, Status, ValueFormat, Widget};
-use dashboard_modules_common::time::rfc3339;
+use sitroom_contract::{Bar, Status, ValueFormat, Widget};
+use sitroom_modules_common::time::rfc3339;
 
 use super::{count, day_label};
 
@@ -245,7 +245,7 @@ pub fn recent_files(dir: &Path, exts: &[&str], now: i64) -> Vec<PathBuf> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dashboard_modules_common::time::parse_time;
+    use sitroom_modules_common::time::parse_time;
 
     #[test]
     fn sums_per_day_and_model() {

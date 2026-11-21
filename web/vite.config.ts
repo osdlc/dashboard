@@ -1,7 +1,7 @@
 import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vite'
 
-// In dev, run `dashboard serve --dev-origin http://localhost:5173` and open the printed
+// In dev, run `sitroom serve --dev-origin http://localhost:5173` and open the printed
 // http://localhost:5173/?boot=<token> link. The proxy forwards API and WebSocket traffic.
 export default defineConfig({
   plugins: [vue()],

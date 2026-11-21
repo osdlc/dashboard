@@ -8,7 +8,7 @@
 //! - [`output`]: the error line, warnings, `--json` documents and clap errors.
 //! - [`boot`]: the one-time boot token a local web view signs in with.
 //!
-//! Nothing here knows about the dashboard, so it can move into a shared
+//! Nothing here knows about sitroom, so it can move into a shared
 //! `cli-kit` crate once a second Rust tool needs it.
 
 pub mod boot;

@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """The smallest useful plugin: a greeting, a clock and a render counter.
 
-Run it through the dashboard's checker:
+Run it through sitroom's checker:
 
-    dashboard plugin-check -- python3 examples/plugins/hello/hello.py
+    sitroom plugin-check -- python3 examples/plugins/hello/hello.py
 
-The protocol: the dashboard starts this program and writes one JSON-RPC 2.0
+The protocol: sitroom starts this program and writes one JSON-RPC 2.0
 request per line to its stdin. The program answers each request with one line
 on stdout. stdout carries only protocol messages; print anything else to
-stderr (the dashboard logs it).
+stderr (sitroom logs it).
 """
 
 import json

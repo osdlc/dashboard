@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""__NAME__: a dashboard plugin. Made by `dashboard plugin new`.
+"""__NAME__: a sitroom plugin. Made by `sitroom plugin new`.
 
-Try it:   dashboard plugin-check -- python3 main.py
-SDK:      dashboard_plugin.py, next to this file. Protocol and widgets: docs/plugins.md.
+Try it:   sitroom plugin-check -- python3 main.py
+SDK:      sitroom_plugin.py, next to this file. Protocol and widgets: docs/plugins.md.
 """
 
 import time
 
-from dashboard_plugin import View, serve, with_defaults
+from sitroom_plugin import View, serve, with_defaults
 
 # Settings from the tile's `config:` block, with their defaults.
 config = {"greeting": "hello"}
@@ -40,7 +40,7 @@ def render() -> View:
                         {
                             "title": "Read about widgets",
                             "subtitle": "docs/plugins.md",
-                            "action": {"type": "open_url", "url": "https://github.com/osdlc/dashboard/blob/main/docs/plugins.md"},
+                            "action": {"type": "open_url", "url": "https://github.com/osdlc/sitroom/blob/main/docs/plugins.md"},
                         },
                     ],
                 },

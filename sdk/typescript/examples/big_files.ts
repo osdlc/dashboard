@@ -1,7 +1,7 @@
 // The largest files under a folder: a row of stats and a table. Shows config with defaults,
 // a config error, and a table with a gauge in each row.
 //
-//   dashboard plugin-check --plugin-config '{"dir": "."}' -- node sdk/typescript/examples/big_files.ts
+//   sitroom plugin-check --plugin-config '{"dir": "."}' -- node sdk/typescript/examples/big_files.ts
 //
 //   modules:
 //     big-files:
@@ -12,8 +12,8 @@
 import { readdirSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, relative } from "node:path";
-import { configError, log, serve, withDefaults } from "../dashboard-plugin.ts";
-import type { Row } from "../dashboard-plugin.ts";
+import { configError, log, serve, withDefaults } from "../sitroom-plugin.ts";
+import type { Row } from "../sitroom-plugin.ts";
 
 let config = { dir: ".", top: 5, max_files: 20000 };
 

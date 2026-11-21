@@ -1,6 +1,6 @@
-//! dashboard-desktop: the dashboard in its own window, as the desktop
+//! sitroom-desktop: sitroom in its own window, as the desktop
 //! wallpaper, or as a screensaver. It runs the same modules and web server as
-//! `dashboard serve` (on 127.0.0.1, any free port) and loads that page in the
+//! `sitroom serve` (on 127.0.0.1, any free port) and loads that page in the
 //! system webview. See docs/desktop.md.
 
 // Release builds on Windows get no console window.
@@ -10,8 +10,8 @@ use std::path::Path;
 use std::sync::Arc;
 
 use anyhow::{Context, Result};
-use dashboard_config::layers::Sources;
 use launch::{Launch, Mode};
+use sitroom_config::layers::Sources;
 
 mod app;
 mod launch;
@@ -22,12 +22,15 @@ mod win;
 
 fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().skip(1).collect();
-    // Bundled plugins run as `<exe> plugin <id>` (see dashboard-runtime).
+    // Bundled plugins run as `<exe> plugin <id>` (see sitroom-runtime).
     if let [cmd, id] = args.as_slice()
         && cmd == "plugin"
-        && let Some(result) = dashboard_runtime::run_bundled(id)
+        && let Some(result) = sitroom_runtime::run_bundled(id)
     {
         return result;
+    }
+    for note in sitroom_config::move_old_folders() {
+        eprintln!("sitroom-desktop: {note}");
     }
 
     let scr = std::env::current_exe()
@@ -59,26 +62,26 @@ fn main() -> Result<()> {
 /// Start the modules and the web server. Returns the page URL and the
 /// session token the app's windows sign in with, and the host running the
 /// modules.
-async fn serve(launch: &Launch) -> Result<(tauri::Url, String, dashboard_runtime::Host)> {
+async fn serve(launch: &Launch) -> Result<(tauri::Url, String, sitroom_runtime::Host)> {
     // The machine file and a saved dashboard; no project file, since the app
     // has no working folder of its own.
     let sources = Sources {
         machine: launch.config.clone(),
         ..Default::default()
     };
-    let (host, settings, actions, layer_paths) = dashboard_runtime::start(sources).await?;
+    let (host, settings, actions, layer_paths) = sitroom_runtime::start(sources).await?;
     let (ready, url) = tokio::sync::oneshot::channel::<(String, String)>();
-    let config = dashboard_web::WebConfig {
+    let config = sitroom_web::WebConfig {
         port: launch.port,
         dev_origin: None,
-        on_ready: Some(Box::new(move |r: &dashboard_web::Ready| {
+        on_ready: Some(Box::new(move |r: &sitroom_web::Ready| {
             let _ = ready.send((r.url.clone(), r.token.clone()));
         })),
-        catalog: Some(Arc::new(dashboard_runtime::catalog_source(layer_paths))),
+        catalog: Some(Arc::new(sitroom_runtime::catalog_source(layer_paths))),
     };
     let ours = host.clone();
     tauri::async_runtime::spawn(async move {
-        if let Err(err) = dashboard_web::serve(host, settings, actions, config).await {
+        if let Err(err) = sitroom_web::serve(host, settings, actions, config).await {
             tracing::error!("web server stopped: {err:#}");
         }
     });
@@ -91,15 +94,15 @@ async fn serve(launch: &Launch) -> Result<(tauri::Url, String, dashboard_runtime
 fn configure(config: Option<&Path>) -> Result<()> {
     let path = match config {
         Some(p) => p.to_path_buf(),
-        None => dashboard_config::default_path()?,
+        None => sitroom_config::default_path()?,
     };
     let message = format!(
-        "The dashboard screensaver shows the screens from\n{}\n\nEdit that file, or use \
-         the editor in `dashboard serve`, to change them.",
+        "The sitroom screensaver shows the screens from\n{}\n\nEdit that file, or use \
+         the editor in `sitroom serve`, to change them.",
         path.display()
     );
     #[cfg(windows)]
-    win::message_box("Dashboard screensaver", &message);
+    win::message_box("Sitroom screensaver", &message);
     #[cfg(not(windows))]
     println!("{message}");
     Ok(())

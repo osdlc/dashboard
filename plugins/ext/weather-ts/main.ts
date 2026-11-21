@@ -4,7 +4,7 @@
 // The TypeScript copy of the built-in `weather` module (crates/modules-personal/src/weather.rs),
 // for the native-vs-plugin benchmark. It builds the same view from the same Open-Meteo reply.
 //
-//   dashboard plugin-check -- node plugins/ext/weather-ts/main.ts
+//   sitroom plugin-check -- node plugins/ext/weather-ts/main.ts
 //
 // A `plugin:` runs in the config file's folder, so this path is for a config in the repository
 // root; examples/bench.yaml uses `../plugins/ext/weather-ts/main.ts`.
@@ -14,8 +14,8 @@
 //       plugin: [node, plugins/ext/weather-ts/main.ts]
 //       config: { place: Berlin, days: 5 }
 
-import { configError, serve, upstreamError, withDefaults } from "./dashboard-plugin.ts";
-import type { Row, StatWidget, View } from "./dashboard-plugin.ts";
+import { configError, serve, upstreamError, withDefaults } from "./sitroom-plugin.ts";
+import type { Row, StatWidget, View } from "./sitroom-plugin.ts";
 
 /** How long one request may take, in ms. */
 const TIMEOUT = 20_000;

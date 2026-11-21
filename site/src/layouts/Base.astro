@@ -28,7 +28,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
     <script is:inline>
       // Apply a saved theme before first paint. No saved choice: follow the OS.
       try {
-        const t = localStorage.getItem('dashboard-site.theme')
+        const t = localStorage.getItem('sitroom-site.theme')
         if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t
       } catch {}
     </script>

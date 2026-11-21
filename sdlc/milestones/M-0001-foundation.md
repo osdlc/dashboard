@@ -19,7 +19,7 @@ Make changes safe to land, and mark what is experimental, before the larger work
   the generated types, all on every pull request. Windows runs without gating. Done in #20.
 - The stability tiers ([roadmap](../../docs/roadmap.md#stability-tiers)) shown where people meet
   each surface: a note at the top of each doc, a `stability` field on catalog entries, shown by
-  `dashboard widgets` and in the web catalog.
+  `sitroom widgets` and in the web catalog.
 - Settle the open pull requests: merge each one, or move it to an experiment. Done: #12 to #16
   are merged, and #6 (image widget and screensaver module) is merged as an experiment, with the
   fixes from its review in #30.

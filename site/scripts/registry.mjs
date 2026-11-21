@@ -1,5 +1,5 @@
-// Builds the site's widget registry from the dashboard's own catalog, and the
-// building blocks from examples/blocks/. Run from site/ (needs the dashboard
+// Builds the site's widget registry from sitroom's own catalog, and the
+// building blocks from examples/blocks/. Run from site/ (needs sitroom
 // binary and web/dist, see below):
 //
 //   node scripts/registry.mjs           # all four steps below
@@ -10,13 +10,13 @@
 //
 // Each step does two sets: the widgets and the building blocks (SET picks one).
 //
-// data: `dashboard widgets --json` for each config in CONFIGS, merged by ID.
+// data: `sitroom widgets --json` for each config in CONFIGS, merged by ID.
 // That is every built-in and bundled plugin, plus the packages next to those
 // configs (plugins/ext and examples/plugins). XDG_* point into an empty folder
 // so packages installed on this machine are left out. The blocks: each
 // examples/blocks/<id>.json (an example view, checked by the contract's tests)
 // shaped like a catalog entry of kind `block`, into src/data/blocks.json, and
-// the view's JSON Schema (`dashboard schema view`) into
+// the view's JSON Schema (`sitroom schema view`) into
 // src/data/view-schema.json, for the blocks' field tables.
 //
 // shots: serves web/dist and the catalog, opens each entry's demo view in
@@ -38,15 +38,15 @@
 // demo page (?mode=demo&fill) in a frame the reader resizes. Committed like
 // the rest, because the site's CI builds only site/.
 //
-// Settings, all optional: DASHBOARD_BIN (default ../target/debug/dashboard,
-// then ../target/release/dashboard), CHROME (the Chrome or Chromium program),
+// Settings, all optional: SITROOM_BIN (default ../target/debug/sitroom,
+// then ../target/release/sitroom), CHROME (the Chrome or Chromium program),
 // ONLY (comma-separated IDs: redoes just those, and without a step argument
 // implies `shots` and `tui`), SET (`widgets` or `blocks`: just that one),
 // THEMES (comma-separated, default dark,light), QUALITY (webp quality,
 // default 40) and SCALE (pixels per CSS pixel, default 1.5).
 //
 // Needs Node 22 or later (for the global WebSocket). `pnpm test` checks that
-// every widget page's config example loads in `dashboard config`.
+// every widget page's config example loads in `sitroom config`.
 
 import { execFileSync, spawn } from 'node:child_process'
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
@@ -121,7 +121,7 @@ for (const set of SETS) {
 if (what === 'app' || (what === 'all' && !only)) demoApp()
 
 function writeData({ data: dataFile }) {
-  const bin = dashboardBin()
+  const bin = sitroomBin()
   const home = join(scratch, 'home')
   rmSync(home, { recursive: true, force: true })
   const env = { ...process.env }
@@ -171,7 +171,7 @@ function writeBlocks({ data: dataFile }) {
     })
   writeFileSync(dataFile, JSON.stringify({ entries }, null, 1) + '\n')
   console.log(`${relative(site, dataFile)}: ${entries.length} blocks`)
-  const schema = execFileSync(dashboardBin(), ['schema', 'view'], { cwd: repo })
+  const schema = execFileSync(sitroomBin(), ['schema', 'view'], { cwd: repo })
   writeFileSync(schemaFile, JSON.stringify(JSON.parse(schema.toString())) + '\n')
   console.log(relative(site, schemaFile))
 }
@@ -213,18 +213,18 @@ function demoApp() {
 
 /** Runs the TUI's tile_shots test, which writes the set's terminal captures. */
 function tuiTiles({ data, tui }) {
-  const env = { ...process.env, CATALOG: data, OUT: tui, THEMES: THEMES.join(','), DASHBOARD_SKIP_UI_BUILD: '1' }
-  execFileSync('cargo', ['test', '-q', '-p', 'dashboard-tui', 'tile_shots', '--', '--ignored', '--nocapture'], {
+  const env = { ...process.env, CATALOG: data, OUT: tui, THEMES: THEMES.join(','), SITROOM_SKIP_UI_BUILD: '1' }
+  execFileSync('cargo', ['test', '-q', '-p', 'sitroom-tui', 'tile_shots', '--', '--ignored', '--nocapture'], {
     cwd: repo,
     env,
     stdio: ['ignore', 'inherit', 'inherit'],
   })
 }
 
-function dashboardBin() {
-  const candidates = [process.env.DASHBOARD_BIN, '../target/debug/dashboard', '../target/release/dashboard']
+function sitroomBin() {
+  const candidates = [process.env.SITROOM_BIN, '../target/debug/sitroom', '../target/release/sitroom']
   const found = candidates.filter(Boolean).map((p) => resolve(site, p)).find((p) => existsSync(p))
-  if (!found) fail('no dashboard binary: run `cargo build -p dashboard` or set DASHBOARD_BIN')
+  if (!found) fail('no sitroom binary: run `cargo build -p sitroom` or set SITROOM_BIN')
   return found
 }
 

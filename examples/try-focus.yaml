@@ -2,8 +2,8 @@
 # file's screens, and it uses the modules that file defines (a dashboard may
 # also add its own under modules:). See the header of examples/try.yaml.
 #
-#   cargo run -p dashboard -- import examples/try-focus.yaml
-#   cargo run -p dashboard -- serve --config examples/try.yaml --dashboard try-focus
+#   cargo run -p sitroom -- import examples/try-focus.yaml
+#   cargo run -p sitroom -- serve --config examples/try.yaml --dashboard try-focus
 
 description: Focus - the machine, open work and the news
 

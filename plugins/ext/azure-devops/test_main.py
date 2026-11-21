@@ -9,7 +9,7 @@ import urllib.parse
 from unittest import mock
 
 import main
-from dashboard_plugin import PluginError
+from sitroom_plugin import PluginError
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 BASE = "https://dev.azure.com/acme/Web"

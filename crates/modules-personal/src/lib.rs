@@ -5,9 +5,9 @@
 //! Everything here is local or a plain URL: no accounts, no OAuth, no tokens.
 //! The task modules share one list layout: overdue first, then by date.
 
-use dashboard_modules_common::Builtin;
+use sitroom_modules_common::Builtin;
 #[allow(unused_imports)]
-pub(crate) use dashboard_modules_common::{entry, expand_home, manifest, schema, strings};
+pub(crate) use sitroom_modules_common::{entry, expand_home, manifest, schema, strings};
 
 #[cfg(feature = "lunar")]
 pub mod lunar;

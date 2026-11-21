@@ -3,7 +3,7 @@
 //!
 //! 1. the machine file, `config.yaml` (or `--config`);
 //! 2. a saved dashboard, when one is chosen (`--dashboard work`);
-//! 3. the project file, `.dashboard.yaml`, found by walking up from the
+//! 3. the project file, `.sitroom.yaml`, found by walking up from the
 //!    working directory. Only used once trusted (see `trust`): it can start
 //!    programs.
 //!
@@ -22,7 +22,7 @@ use crate::trust::Trust;
 use crate::{Config, DEFAULT_CONFIG, Part, parse};
 
 /// The project file's name.
-pub const PROJECT_FILE: &str = ".dashboard.yaml";
+pub const PROJECT_FILE: &str = ".sitroom.yaml";
 
 /// Which files to read.
 #[derive(Debug, Clone, Default)]
@@ -170,7 +170,7 @@ impl Layered {
         self.untrusted.as_ref().map(|p| {
             format!(
                 "{} is not trusted, so it is not used: it can run programs. \
-                 Read it, then run `dashboard trust` in that folder to use it.",
+                 Read it, then run `sitroom trust` in that folder to use it.",
                 p.display()
             )
         })
@@ -401,14 +401,14 @@ fn screen_name(screen: &Value) -> Option<&str> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dashboard_contract::Theme;
+    use sitroom_contract::Theme;
 
     struct Temp(PathBuf);
 
     impl Temp {
         fn new(name: &str) -> Self {
-            let dir = std::env::temp_dir()
-                .join(format!("dashboard-layers-{name}-{}", std::process::id()));
+            let dir =
+                std::env::temp_dir().join(format!("sitroom-layers-{name}-{}", std::process::id()));
             let _ = std::fs::remove_dir_all(&dir);
             std::fs::create_dir_all(&dir).unwrap();
             Self(dir)
@@ -530,7 +530,7 @@ screens:
         let t = Temp::new("project");
         let machine = t.write("home/config.yaml", MACHINE);
         let project = t.trusted(
-            "repo/.dashboard.yaml",
+            "repo/.sitroom.yaml",
             "modules:\n  ci:\n    plugin: [python3, ci.py]\n\
              screens:\n  - name: repo\n    tiles: [{ module: ci }]\n  - name: system\n    tiles: [{ module: clock }]\n",
         );
@@ -581,7 +581,7 @@ screens:
         assert!(l.config.modules.is_empty());
 
         std::fs::write(&machine, MACHINE).unwrap();
-        t.trusted("repo/.dashboard.yaml", "modules:\nscreens:\n");
+        t.trusted("repo/.sitroom.yaml", "modules:\nscreens:\n");
         let l = load(&Sources {
             machine: Some(machine),
             project_from: Some(t.0.join("repo")),
@@ -599,7 +599,7 @@ screens:
         let t = Temp::new("untrusted");
         let machine = t.write("config.yaml", MACHINE);
         let project = t.write(
-            "repo/.dashboard.yaml",
+            "repo/.sitroom.yaml",
             "modules:\n  ci:\n    plugin: [sh, -c, 'echo hi']\n",
         );
         let sources = Sources {
@@ -612,7 +612,7 @@ screens:
         assert_eq!(l.layer(LayerKind::Project), None);
         assert!(!l.config.modules.contains_key("ci"));
         assert_eq!(l.untrusted.as_deref(), Some(project.as_path()));
-        assert!(l.untrusted_notice().unwrap().contains("dashboard trust"));
+        assert!(l.untrusted_notice().unwrap().contains("sitroom trust"));
 
         Trust::new(t.trust_file()).allow(&project).unwrap();
         let l = load(&sources).unwrap();
@@ -621,7 +621,7 @@ screens:
 
         // Changed since it was trusted: not used again until trusted again.
         t.write(
-            "repo/.dashboard.yaml",
+            "repo/.sitroom.yaml",
             "modules:\n  ci:\n    plugin: [rm, x]\n",
         );
         assert!(load(&sources).unwrap().untrusted.is_some());
@@ -631,7 +631,7 @@ screens:
     fn a_bad_layer_names_its_file() {
         let t = Temp::new("bad");
         let machine = t.write("config.yaml", MACHINE);
-        t.trusted("repo/.dashboard.yaml", "themes: dark\n");
+        t.trusted("repo/.sitroom.yaml", "themes: dark\n");
         let err = load(&Sources {
             machine: Some(machine),
             project_from: Some(t.0.join("repo")),
@@ -639,14 +639,14 @@ screens:
             ..Default::default()
         })
         .unwrap_err();
-        assert!(format!("{err:#}").contains(".dashboard.yaml"), "{err:#}");
+        assert!(format!("{err:#}").contains(".sitroom.yaml"), "{err:#}");
     }
 
     #[test]
     fn empty_project_file_changes_nothing() {
         let t = Temp::new("empty");
         let machine = t.write("config.yaml", MACHINE);
-        t.trusted("repo/.dashboard.yaml", "# nothing yet\n");
+        t.trusted("repo/.sitroom.yaml", "# nothing yet\n");
         let l = load(&Sources {
             machine: Some(machine),
             project_from: Some(t.0.join("repo")),

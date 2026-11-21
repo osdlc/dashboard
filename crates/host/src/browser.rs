@@ -1,4 +1,4 @@
-//! Opening a link in the default browser. Shared by `dashboard serve` (which
+//! Opening a link in the default browser. Shared by `sitroom serve` (which
 //! opens its own page) and the TUI (which opens links in tiles).
 
 use std::process::{Command, Stdio};

@@ -17,12 +17,12 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
-use dashboard_contract::{CatalogEntry, Manifest, Size, Status, View, Widget};
-use dashboard_host::Module;
 use schemars::JsonSchema;
 use serde::Deserialize;
+use sitroom_contract::{CatalogEntry, Manifest, Size, Status, View, Widget};
+use sitroom_host::Module;
 
-use dashboard_modules_common::{expand_home, manifest};
+use sitroom_modules_common::{expand_home, manifest};
 
 /// File types the renderers can decode. Keep in step with the image crate
 /// features in crates/tui/Cargo.toml and the MIME match in crates/web/src/lib.rs.
@@ -266,7 +266,7 @@ fn samples() -> Result<PathBuf> {
     let user = unsafe { libc::getuid() };
     #[cfg(not(unix))]
     let user = std::env::var("USERNAME").unwrap_or_default();
-    let dir = std::env::temp_dir().join(format!("dashboard-screensaver-samples-{user}"));
+    let dir = std::env::temp_dir().join(format!("sitroom-screensaver-samples-{user}"));
     #[cfg(unix)]
     private_dir(&dir, user)?;
     #[cfg(not(unix))]
@@ -411,7 +411,7 @@ mod tests {
 
     #[tokio::test]
     async fn subfolders_only_when_recursive_and_other_files_are_skipped() {
-        let dir = std::env::temp_dir().join(format!("dashboard-saver-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sitroom-saver-{}", std::process::id()));
         std::fs::create_dir_all(dir.join("trip")).unwrap();
         std::fs::write(dir.join("notes.txt"), "x").unwrap();
         std::fs::write(dir.join(".hidden.png"), "x").unwrap();
@@ -435,7 +435,7 @@ mod tests {
 
     #[tokio::test]
     async fn a_removed_file_is_skipped_and_rounds_do_not_repeat() {
-        let dir = std::env::temp_dir().join(format!("dashboard-saver-gone-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sitroom-saver-gone-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         for name in ["a.png", "b.png", "c.png"] {
             std::fs::write(dir.join(name), "x").unwrap();
@@ -467,7 +467,7 @@ mod tests {
         // SAFETY: getuid has no preconditions and cannot fail.
         let user = unsafe { libc::getuid() };
         let dir =
-            std::env::temp_dir().join(format!("dashboard-saver-private-{}", std::process::id()));
+            std::env::temp_dir().join(format!("sitroom-saver-private-{}", std::process::id()));
         let mode = |d: &Path| std::fs::metadata(d).unwrap().permissions().mode() & 0o777;
         private_dir(&dir, user).unwrap();
         assert_eq!(mode(&dir), 0o700);
@@ -500,7 +500,7 @@ mod tests {
     #[test]
     fn demo_is_a_clean_view() {
         let demo = catalog().demo;
-        assert!(dashboard_contract::check::check_view(&demo).is_empty());
+        assert!(sitroom_contract::check::check_view(&demo).is_empty());
         assert!(Path::new(&shown(&demo)).is_file());
     }
 }

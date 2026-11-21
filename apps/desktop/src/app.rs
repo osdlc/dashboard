@@ -18,11 +18,11 @@ use crate::launch::{Launch, Mode};
 struct Page(Url, String);
 
 /// A navigation to this ends the screensaver (see `QUIT_ON_INPUT`).
-const QUIT_SCHEME: &str = "dashboard-quit";
+const QUIT_SCHEME: &str = "sitroom-quit";
 
 /// Run in screensaver windows: any key, click or real mouse move quits.
 const QUIT_ON_INPUT: &str = r#"(() => {
-  const quit = () => { location.href = 'dashboard-quit://now' }
+  const quit = () => { location.href = 'sitroom-quit://now' }
   let start = null
   addEventListener('keydown', quit, true)
   addEventListener('mousedown', quit, true)
@@ -113,9 +113,9 @@ fn open_window(app: &AppHandle, ambient: bool) -> tauri::Result<WebviewWindow> {
         return Ok(w);
     }
     let title = if ambient {
-        "Dashboard (ambient)"
+        "Sitroom (ambient)"
     } else {
-        "Dashboard"
+        "Sitroom"
     };
     links(
         app,
@@ -127,7 +127,7 @@ fn open_window(app: &AppHandle, ambient: bool) -> tauri::Result<WebviewWindow> {
     .build()
 }
 
-/// Sign the window in and keep it on the dashboard page: links to anything
+/// Sign the window in and keep it on sitroom page: links to anything
 /// else, and links that ask for a new window (`target="_blank"`,
 /// `window.open`), open in the system browser instead.
 fn links<'a>(
@@ -147,17 +147,17 @@ fn links<'a>(
 
 /// Put the session token where the page looks for one it kept earlier
 /// (sessionStorage, see web/src/useDashboard.ts), so no window needs a
-/// one-time boot link. Only on the dashboard's own origin.
+/// one-time boot link. Only on sitroom's own origin.
 fn sign_in_script(home: &Url, token: &str) -> String {
     let origin = home.origin().ascii_serialization();
     format!(
         "(() => {{ if (location.origin === {origin:?}) try {{ \
-         sessionStorage.setItem('dashboard-session', {token:?}) }} catch {{}} }})()"
+         sessionStorage.setItem('sitroom-session', {token:?}) }} catch {{}} }})()"
     )
 }
 
 /// Whether a navigation to `url` may load in the window: only pages of the
-/// dashboard's own server. Anything else opens in the browser.
+/// sitroom's own server. Anything else opens in the browser.
 fn stays(home: &Url, url: &Url) -> bool {
     if url.origin() == home.origin() {
         return true;
@@ -268,7 +268,7 @@ fn covering<'a>(
         app,
         WebviewWindowBuilder::new(app, label, WebviewUrl::External(page(app, true))),
     )
-    .title("Dashboard")
+    .title("Sitroom")
     .decorations(false)
     .resizable(false)
     .shadow(false)
@@ -312,8 +312,8 @@ fn add_tray(app: &AppHandle, wallpaper_on: bool) -> tauri::Result<()> {
     let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
     let separator = PredefinedMenuItem::separator(app)?;
     let menu = Menu::with_items(app, &[&open, &ambient, &wallpaper, &separator, &quit])?;
-    let mut tray = TrayIconBuilder::with_id("dashboard")
-        .tooltip("Dashboard")
+    let mut tray = TrayIconBuilder::with_id("sitroom")
+        .tooltip("Sitroom")
         .menu(&menu)
         .show_menu_on_left_click(true)
         .on_menu_event(move |app, event| {
@@ -343,7 +343,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn only_the_dashboard_page_stays_in_the_window() {
+    fn only_the_sitroom_page_stays_in_the_window() {
         let home: Url = "http://127.0.0.1:7878/".parse().unwrap();
         let same = "http://127.0.0.1:7878/?mode=ambient".parse().unwrap();
         assert!(stays(&home, &same));
@@ -355,10 +355,10 @@ mod tests {
     }
 
     #[test]
-    fn signs_in_on_the_dashboard_origin_only() {
+    fn signs_in_on_the_sitroom_origin_only() {
         let home: Url = "http://127.0.0.1:7878/".parse().unwrap();
         let script = sign_in_script(&home, "abc");
         assert!(script.contains(r#"location.origin === "http://127.0.0.1:7878""#));
-        assert!(script.contains(r#"setItem('dashboard-session', "abc")"#));
+        assert!(script.contains(r#"setItem('sitroom-session', "abc")"#));
     }
 }

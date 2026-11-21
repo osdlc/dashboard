@@ -1,8 +1,8 @@
 # Plugins in other languages
 
 Widgets written as TypeScript or Python plugins, each a [plugin package](../../docs/plugins.md#package-it):
-a folder with a `dashboard-plugin.yaml`, the plugin, and a copy of its SDK file
-(`dashboard-plugin.ts` or `dashboard_plugin.py`, from `sdk/`). A test checks that the copies
+a folder with a `sitroom-plugin.yaml`, the plugin, and a copy of its SDK file
+(`sitroom-plugin.ts` or `sitroom_plugin.py`, from `sdk/`). A test checks that the copies
 match the SDK; after an SDK change, copy it again.
 
 | Package | What |
@@ -43,28 +43,28 @@ module for the same input; the tests that check this are:
 Check one with:
 
 ```sh
-dashboard plugin-check -- node plugins/ext/clock-ts/main.ts
-dashboard plugin-check -- python3 plugins/ext/clock-py/main.py
-dashboard plugin-check --plugin-config '{"path": "README.md"}' -- node plugins/ext/textfile-ts/main.ts
-dashboard plugin-check --plugin-config '{"path": "README.md"}' -- python3 plugins/ext/textfile-py/main.py
-dashboard plugin-check --plugin-config '{"repos": ["."]}' -- node plugins/ext/git-ts/main.ts
-dashboard plugin-check --plugin-config '{"repos": ["."]}' -- python3 plugins/ext/git-py/git_py.py
-dashboard plugin-check -- node plugins/ext/docker-ts/main.ts
-dashboard plugin-check -- python3 plugins/ext/docker-py/main.py
-dashboard plugin-check -- node plugins/ext/hackernews-ts/main.ts
-dashboard plugin-check -- python3 plugins/ext/hackernews-py/main.py
-dashboard plugin-check --plugin-config '{"place":"Berlin"}' -- node plugins/ext/weather-ts/main.ts
-dashboard plugin-check --plugin-config '{"place":"Berlin"}' -- python3 plugins/ext/weather-py/main.py
-dashboard plugin-check --plugin-config '{"feeds": ["crates/modules-fun/testdata/feedreader/rss2.xml"]}' -- node plugins/ext/feedreader-ts/main.ts
-dashboard plugin-check --plugin-config '{"feeds": ["crates/modules-fun/testdata/feedreader/rss2.xml"]}' -- python3 plugins/ext/feedreader-py/main.py
-dashboard plugin-check -- node plugins/ext/battery-ts/main.ts
-dashboard plugin-check -- python3 plugins/ext/battery-py/main.py
+sitroom plugin-check -- node plugins/ext/clock-ts/main.ts
+sitroom plugin-check -- python3 plugins/ext/clock-py/main.py
+sitroom plugin-check --plugin-config '{"path": "README.md"}' -- node plugins/ext/textfile-ts/main.ts
+sitroom plugin-check --plugin-config '{"path": "README.md"}' -- python3 plugins/ext/textfile-py/main.py
+sitroom plugin-check --plugin-config '{"repos": ["."]}' -- node plugins/ext/git-ts/main.ts
+sitroom plugin-check --plugin-config '{"repos": ["."]}' -- python3 plugins/ext/git-py/git_py.py
+sitroom plugin-check -- node plugins/ext/docker-ts/main.ts
+sitroom plugin-check -- python3 plugins/ext/docker-py/main.py
+sitroom plugin-check -- node plugins/ext/hackernews-ts/main.ts
+sitroom plugin-check -- python3 plugins/ext/hackernews-py/main.py
+sitroom plugin-check --plugin-config '{"place":"Berlin"}' -- node plugins/ext/weather-ts/main.ts
+sitroom plugin-check --plugin-config '{"place":"Berlin"}' -- python3 plugins/ext/weather-py/main.py
+sitroom plugin-check --plugin-config '{"feeds": ["crates/modules-fun/testdata/feedreader/rss2.xml"]}' -- node plugins/ext/feedreader-ts/main.ts
+sitroom plugin-check --plugin-config '{"feeds": ["crates/modules-fun/testdata/feedreader/rss2.xml"]}' -- python3 plugins/ext/feedreader-py/main.py
+sitroom plugin-check -- node plugins/ext/battery-ts/main.ts
+sitroom plugin-check -- python3 plugins/ext/battery-py/main.py
 ```
 
 ## Use one
 
 To use one by its ID (`package: textfile-ts`), copy its folder into the plugins folder of your data
-home (`~/.local/share/dashboard/plugins/`).
+home (`~/.local/share/sitroom/plugins/`).
 
 ## Healthchecks.io (token API)
 
@@ -79,8 +79,8 @@ catalog demo use.
 | `healthchecks` (Python) | Healthchecks.io checks: up, late and down counts, then the checks, down ones first | `crates/cli/tests/ext_healthchecks.rs` |
 
 ```sh
-dashboard plugin-check -- python3 plugins/ext/healthchecks/main.py --sample
-HEALTHCHECKS_API_KEY=... dashboard plugin-check -- python3 plugins/ext/healthchecks/main.py
+sitroom plugin-check -- python3 plugins/ext/healthchecks/main.py --sample
+HEALTHCHECKS_API_KEY=... sitroom plugin-check -- python3 plugins/ext/healthchecks/main.py
 ```
 
 ## Containers and VMs (local CLIs)
@@ -98,7 +98,7 @@ that fails to list is not counted in the VM and engine totals. Other settings: `
 is what the ones in `testdata/ok` produce. The test is `crates/cli/tests/ext_containers.rs`.
 
 ```sh
-dashboard plugin-check -- python3 plugins/ext/containers/main.py
+sitroom plugin-check -- python3 plugins/ext/containers/main.py
 ```
 
 ## Stocks (unofficial API)
@@ -110,8 +110,8 @@ dashboard plugin-check -- python3 plugins/ext/containers/main.py
 With `--sample` it reads the saved replies in `stocks/samples/` instead of calling Yahoo.
 
 ```sh
-dashboard plugin-check -- python3 plugins/ext/stocks/main.py --sample
-dashboard plugin-check -- python3 plugins/ext/stocks/main.py
+sitroom plugin-check -- python3 plugins/ext/stocks/main.py --sample
+sitroom plugin-check -- python3 plugins/ext/stocks/main.py
 ```
 
 ## Ops widgets (token APIs)
@@ -122,7 +122,7 @@ in Python (3.9 or newer, standard library only). They were built from each servi
 docs and **have not been run against the real service** ("untested live"). Each has:
 
 - a hand-written sample response in `sample/`;
-- a `demo:` view in its `dashboard-plugin.yaml` with the same made-up data;
+- a `demo:` view in its `sitroom-plugin.yaml` with the same made-up data;
 - tests in `crates/cli/tests/ext_ops.rs` that run it through the real plugin host against a local
   server answering with the sample, and check the request (path, query, auth header) and the view.
 
@@ -134,7 +134,7 @@ prints them (`token_command`), never from the config file. Datadog needs two key
 `examples/widgets/w-ops-a.yaml` shows all five with `demo: true`. Check one with:
 
 ```sh
-dashboard plugin-check --plugin-config '{"org": "acme"}' -- python3 plugins/ext/sentry/main.py
+sitroom plugin-check --plugin-config '{"org": "acme"}' -- python3 plugins/ext/sentry/main.py
 ```
 
 ## Code review and CI (token APIs)
@@ -158,7 +158,7 @@ Each reads its token from that variable, another one (`token_env`) or a command
   ages as of a fixed time;
 - `sample.json`, the API responses, keyed by request path;
 - `test_main.py`, parse tests on the sample (`python3 -m unittest` in the folder);
-- `dashboard-plugin.yaml`, whose `demo:` is exactly the `--sample` view.
+- `sitroom-plugin.yaml`, whose `demo:` is exactly the `--sample` view.
 
 Each package is self-contained, so `token()`, `ago()` and `parse_time()` are copied into every
 `main.py`. A fix to one of them has to be made in all five. The token is read once per render, so
@@ -170,8 +170,8 @@ and running on their samples. Gerrit's anonymous mode (`auth: none`) was checked
 a public server.
 
 ```sh
-dashboard plugin-check -- python3 plugins/ext/gitlab/main.py --sample
-dashboard plugin-check --plugin-config '{"url": "https://review.opendev.org", "auth": "none", "sections": [{"label": "Nova", "query": "status:open project:openstack/nova"}]}' -- python3 plugins/ext/gerrit/main.py
+sitroom plugin-check -- python3 plugins/ext/gitlab/main.py --sample
+sitroom plugin-check --plugin-config '{"url": "https://review.opendev.org", "auth": "none", "sections": [{"label": "Nova", "query": "status:open project:openstack/nova"}]}' -- python3 plugins/ext/gerrit/main.py
 ```
 
 ## Builds and tasks (token APIs)
@@ -208,7 +208,7 @@ the `demo:` view, the parse tests pass, a missing token names its variable, a fa
 samples.
 
 ```sh
-dashboard plugin-check -- python3 plugins/ext/buildkite/main.py --sample
+sitroom plugin-check -- python3 plugins/ext/buildkite/main.py --sample
 ```
 
 ## Errors, uptime, hosting and tickets (token APIs)
@@ -240,5 +240,5 @@ measured from a fixed time, so the view is always the same. That view is the pac
 checks the config and missing-token errors. `examples/widgets/w-ops-b.yaml` shows them all.
 
 ```sh
-dashboard plugin-check -- python3 plugins/ext/rollbar/main.py --sample
+sitroom plugin-check -- python3 plugins/ext/rollbar/main.py --sample
 ```

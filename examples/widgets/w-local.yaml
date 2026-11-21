@@ -1,7 +1,7 @@
 # Local widgets: GPU, a command's output, a todo file, Kubernetes pods,
 # security settings, the moon and the public IP.
 #
-#   cargo run -p dashboard -- serve --config examples/widgets/w-local.yaml
+#   cargo run -p sitroom -- serve --config examples/widgets/w-local.yaml
 #
 # gpu reads ioreg on macOS, nvidia-smi for NVIDIA cards and amdgpu's sysfs
 # files on Linux. With none of them it says "no GPU stats".

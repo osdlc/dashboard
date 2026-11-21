@@ -4,7 +4,7 @@ so the tests and the --sample mode run the same code as the real tile."""
 import datetime
 from typing import Any, Dict, List, Optional
 
-from dashboard_plugin import ListItem, Status, View
+from sitroom_plugin import ListItem, Status, View
 
 # The fixed "now" for --sample and the tests, so ages always read the same.
 SAMPLE_NOW = datetime.datetime(2026, 10, 27, 12, 0, tzinfo=datetime.timezone.utc).timestamp()

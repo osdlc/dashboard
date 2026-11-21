@@ -6,13 +6,13 @@
 
 use std::time::Instant;
 
-use dashboard_contract::{
+use sitroom_contract::{
     ColorScale, SeriesData, SeriesStyle, Status, Thresholds, ValueFormat, Widget, format_value,
 };
-use dashboard_modules_common::Builtin;
-pub use dashboard_modules_common::manifest;
+use sitroom_modules_common::Builtin;
+pub use sitroom_modules_common::manifest;
 #[allow(unused_imports)]
-pub(crate) use dashboard_modules_common::{entry, schema, strings};
+pub(crate) use sitroom_modules_common::{entry, schema, strings};
 
 #[cfg(feature = "battery")]
 pub mod battery;
@@ -279,7 +279,7 @@ pub fn demo_values(n: usize, base: f64, amp: f64, seed: f64) -> Vec<f64> {
 
 /// A demo series, one sample every `step_ms`, ending now.
 pub fn demo_series(name: &str, step_ms: i64, values: &[f64]) -> SeriesData {
-    let end = dashboard_host::now_ms();
+    let end = sitroom_host::now_ms();
     let n = values.len() as i64;
     SeriesData {
         tone: None,

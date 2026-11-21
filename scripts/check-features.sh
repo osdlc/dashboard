@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds the dashboard binary with no built-in modules, with each bundle on
+# Builds sitroom binary with no built-in modules, with each bundle on
 # its own, and with each module on its own, so a bundle never depends on
 # another by accident, and runs the tests for no modules and for each bundle.
 # Run from anywhere: scripts/check-features.sh
@@ -17,13 +17,13 @@ export CARGO_TARGET_DIR="${CARGO_TARGET_DIR:-target/check-features}"
 build() {
     echo "== ${*:-no modules}"
     # -D warnings: a combination that leaves helpers unused should still build clean.
-    RUSTFLAGS="${RUSTFLAGS:-} -D warnings" cargo build --quiet -p dashboard --no-default-features "$@"
+    RUSTFLAGS="${RUSTFLAGS:-} -D warnings" cargo build --quiet -p sitroom --no-default-features "$@"
 }
 
 # Also runs the tests that depend on which modules are in the build.
 test_build() {
     echo "== test ${*:-no modules}"
-    RUSTFLAGS="${RUSTFLAGS:-} -D warnings" cargo test --quiet -p dashboard -p dashboard-modules --no-default-features "$@"
+    RUSTFLAGS="${RUSTFLAGS:-} -D warnings" cargo test --quiet -p sitroom -p sitroom-modules --no-default-features "$@"
 }
 
 build

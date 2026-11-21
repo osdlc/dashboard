@@ -16,7 +16,7 @@ import re
 import urllib.parse
 from typing import Any, Dict, List, Optional
 
-from dashboard_plugin import ListItem, Status, View, config_error, serve, upstream_error, with_defaults
+from sitroom_plugin import ListItem, Status, View, config_error, serve, upstream_error, with_defaults
 from ops import ago, base_url, count, env_name, get_json, join, plural, read_token, strings, upto
 
 DEFAULTS: Dict[str, Any] = {
