@@ -38,6 +38,11 @@ in the index before the next. A version can't be replaced once published, only y
 
 The first release has to be published by hand like this, with a crates.io API token
 (`cargo login`), because crates.io sets up trusted publishing only for crates that exist. Then,
-for each crate, add osdlc/sitroom as a trusted publisher on crates.io, so later releases can go out
-from a workflow without a stored token. osdlc/osdlc's `release-plz.yml` does that for its own
-crates.
+for each crate, add a trusted publisher on crates.io (repository osdlc/sitroom, workflow
+`release.yml`, environment `crates-io`), and create the `crates-io` environment in the repository
+settings with a required reviewer.
+
+After that a release is: bump the version, add its changelog section, merge, then push the tag
+(`git tag v0.9.0 && git push origin v0.9.0`). `.github/workflows/release.yml` builds the UI, runs
+the dry run, waits for approval of the `crates-io` environment and publishes with a short-lived
+token from crates.io. Run it by hand (Actions, release, Run workflow) for a dry run only.
