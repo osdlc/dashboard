@@ -30,6 +30,10 @@ concurrency:
   group: release
   cancel-in-progress: false
 
+env:
+  # The crates with publish = false, left out by name as in rust-ci.yml.
+  UNPUBLISHED: --exclude sitroom-desktop --exclude sitroom-native --exclude sitroom-bench
+
 defaults:
   run:
     shell: bash
@@ -87,7 +91,7 @@ jobs:
 
       # crates/web/ui is git-ignored, so cargo counts it as uncommitted.
       - name: Dry run
-        run: cargo publish --workspace --locked --allow-dirty --dry-run
+        run: cargo publish --workspace --locked --allow-dirty --dry-run $UNPUBLISHED
 
       - uses: rust-lang/crates-io-auth-action@3268eb413133e2960fa4ae0e963ca76380c54cd9 # v1.0.6
         if: github.event_name == 'push'
@@ -97,4 +101,4 @@ jobs:
         if: github.event_name == 'push'
         env:
           CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
-        run: cargo publish --workspace --locked --allow-dirty --no-verify
+        run: cargo publish --workspace --locked --allow-dirty --no-verify $UNPUBLISHED
