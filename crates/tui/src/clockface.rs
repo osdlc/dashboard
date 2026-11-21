@@ -1,13 +1,13 @@
 //! The analog clock face: a braille dial with hour ticks and hands. Too small
 //! for a dial, it is the time as text.
 
-use sitroom_contract::Status;
 use ratatui::layout::Rect;
 use ratatui::style::{Color, Style};
 use ratatui::symbols::Marker;
 use ratatui::text::{Line, Span};
 use ratatui::widgets::canvas::{Canvas as Plot, Circle, Line as Seg};
 use ratatui::widgets::{Paragraph, Widget};
+use sitroom_contract::Status;
 
 use crate::canvas::Canvas;
 use crate::fit;
@@ -193,8 +193,8 @@ fn draw_text(f: &mut Canvas, p: &Palette, area: Rect, s: &FaceSpec) {
 
 #[cfg(test)]
 mod tests {
-    use sitroom_contract::Theme;
     use ratatui::buffer::Buffer;
+    use sitroom_contract::Theme;
 
     use super::*;
 

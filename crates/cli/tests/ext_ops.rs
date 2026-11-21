@@ -14,11 +14,11 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::{Arc, Mutex};
 
+use serde_json::{Value, json};
 use sitroom_config::packages::{Installed, Packages};
 use sitroom_contract::check::check_view;
 use sitroom_contract::{Status, View, Widget};
 use sitroom_host::{Module, Plugin};
-use serde_json::{Value, json};
 
 const IDS: [&str; 5] = ["datadog", "newrelic", "opsgenie", "pagerduty", "sentry"];
 
@@ -549,11 +549,7 @@ async fn errors() {
         };
 
         // No token: the variable it names is unset.
-        let err = render_error(
-            id,
-            with(json!({ "token_env": "SITROOM_TEST_NO_SUCH_VAR" })),
-        )
-        .await;
+        let err = render_error(id, with(json!({ "token_env": "SITROOM_TEST_NO_SUCH_VAR" }))).await;
         assert!(err.contains("code -32002"), "{id}: {err}");
         assert!(err.contains("$SITROOM_TEST_NO_SUCH_VAR"), "{id}: {err}");
 

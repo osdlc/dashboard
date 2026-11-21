@@ -17,10 +17,10 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
-use sitroom_contract::{CatalogEntry, Manifest, Size, Status, View, Widget};
-use sitroom_host::Module;
 use schemars::JsonSchema;
 use serde::Deserialize;
+use sitroom_contract::{CatalogEntry, Manifest, Size, Status, View, Widget};
+use sitroom_host::Module;
 
 use sitroom_modules_common::{expand_home, manifest};
 

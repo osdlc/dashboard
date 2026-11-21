@@ -3,10 +3,10 @@
 //! `docs/contract.md`), values picked out of any JSON, or plain text.
 
 use anyhow::{Context, Result, bail};
-use sitroom_contract::{Status, View, Widget};
 use schemars::JsonSchema;
 use serde::Deserialize;
 use serde_json::Value;
+use sitroom_contract::{Status, View, Widget};
 
 /// Larger bodies and files are refused.
 pub const MAX_BYTES: u64 = 1024 * 1024;

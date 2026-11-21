@@ -20,11 +20,11 @@ use std::time::Duration;
 
 use anyhow::{Result, bail};
 use async_trait::async_trait;
+use schemars::JsonSchema;
+use serde::Deserialize;
 use sitroom_contract::{CatalogEntry, Manifest, Size, Status, View, Widget};
 use sitroom_host::Module;
 use sitroom_modules_common::manifest;
-use schemars::JsonSchema;
-use serde::Deserialize;
 use tokio::process::Command;
 
 #[derive(Debug, Deserialize, JsonSchema)]

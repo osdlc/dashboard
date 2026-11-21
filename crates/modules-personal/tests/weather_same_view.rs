@@ -12,8 +12,8 @@ mod open_meteo;
 use std::path::PathBuf;
 use std::process::Command;
 
-use sitroom_host::{Module, Plugin};
 use serde_json::json;
+use sitroom_host::{Module, Plugin};
 
 fn repo(path: &str) -> String {
     let path: PathBuf = [env!("CARGO_MANIFEST_DIR"), "../..", path].iter().collect();

@@ -21,14 +21,14 @@ use std::time::Duration;
 
 use anyhow::{Result, bail};
 use async_trait::async_trait;
+use schemars::JsonSchema;
+use serde::Deserialize;
 use sitroom_contract::{
     Bar, CatalogEntry, Cell, Column, Manifest, Requirements, Row, Size, Status, ValueFormat, View,
     Widget,
 };
 use sitroom_host::{Module, now_ms};
 use sitroom_modules_common::{manifest, time::parse_time};
-use schemars::JsonSchema;
-use serde::Deserialize;
 use tokio::process::Command;
 
 const TIMEOUT: Duration = Duration::from_secs(15);

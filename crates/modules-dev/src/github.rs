@@ -4,13 +4,13 @@ use std::process::Stdio;
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
+use schemars::JsonSchema;
+use serde::Deserialize;
 use sitroom_contract::{
     Action, CONTRACT_VERSION, CatalogEntry, LayoutHints, ListItem, Manifest, Refresh, Requirements,
     Size, Status, View, Widget,
 };
 use sitroom_host::Module;
-use schemars::JsonSchema;
-use serde::Deserialize;
 use tokio::process::Command;
 
 use crate::{ago, demo_time};

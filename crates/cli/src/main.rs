@@ -5,6 +5,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use clap::{Parser, Subcommand, ValueEnum};
+use serde_json::json;
 use sitroom_cli_kit::Failure;
 use sitroom_cli_kit::output::{Reporter, write_json};
 use sitroom_config::layers::Sources;
@@ -12,7 +13,6 @@ use sitroom_config::packages::Packages;
 use sitroom_config::{Config, Part};
 use sitroom_contract::{CatalogEntry, Index, Manifest, Package, ServerMessage, View, rpc};
 use sitroom_runtime::{load_valid, missing_packages, start};
-use serde_json::json;
 
 mod background;
 mod dashboards;
@@ -291,6 +291,9 @@ fn main() -> ExitCode {
         name: NAME,
         json: cli.json,
     };
+    for note in sitroom_config::move_old_folders() {
+        warn(&note);
+    }
     let result = tokio::runtime::Runtime::new()
         .map_err(anyhow::Error::from)
         .and_then(|rt| {
@@ -678,8 +681,8 @@ fn trust(sources: &Sources, file: Option<PathBuf>, remove: bool) -> Result<()> {
     // Check it before trusting it, and say what it will run.
     let text = std::fs::read_to_string(&file)
         .map_err(|e| anyhow::anyhow!("reading {}: {e}", file.display()))?;
-    let config = sitroom_config::parse(&text)
-        .map_err(|e| anyhow::anyhow!("{e:#} in {}", file.display()))?;
+    let config =
+        sitroom_config::parse(&text).map_err(|e| anyhow::anyhow!("{e:#} in {}", file.display()))?;
     list.allow(&file)?;
     println!("trusted: {}", file.display());
     for line in dashboards::commands(&config) {

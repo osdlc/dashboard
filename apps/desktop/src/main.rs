@@ -10,8 +10,8 @@ use std::path::Path;
 use std::sync::Arc;
 
 use anyhow::{Context, Result};
-use sitroom_config::layers::Sources;
 use launch::{Launch, Mode};
+use sitroom_config::layers::Sources;
 
 mod app;
 mod launch;
@@ -28,6 +28,9 @@ fn main() -> Result<()> {
         && let Some(result) = sitroom_runtime::run_bundled(id)
     {
         return result;
+    }
+    for note in sitroom_config::move_old_folders() {
+        eprintln!("sitroom-desktop: {note}");
     }
 
     let scr = std::env::current_exe()

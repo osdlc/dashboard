@@ -12,11 +12,11 @@ use std::process::Stdio;
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
-use sitroom_contract::{CatalogEntry, Manifest, Requirements, Size, Status, View, Widget};
-use sitroom_host::Module;
 use schemars::JsonSchema;
 use serde::Deserialize;
 use serde_json::Value;
+use sitroom_contract::{CatalogEntry, Manifest, Requirements, Size, Status, View, Widget};
+use sitroom_host::Module;
 use tokio::process::Command;
 
 use super::{Window, now_secs};

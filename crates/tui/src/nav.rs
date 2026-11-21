@@ -8,8 +8,8 @@
 
 use std::collections::BTreeMap;
 
-use sitroom_contract::{Action, Cell, Widget};
 use ratatui::layout::Rect;
+use sitroom_contract::{Action, Cell, Widget};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Dir {

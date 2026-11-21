@@ -7,9 +7,9 @@
 use std::collections::{BTreeMap, HashMap};
 use std::time::Instant;
 
-use sitroom_contract::{ScreenLayout, TilePlacement, TileUpdate, UiSettings, View, Widget};
 use ratatui::Terminal;
 use ratatui::backend::TestBackend;
+use sitroom_contract::{ScreenLayout, TilePlacement, TileUpdate, UiSettings, View, Widget};
 
 use super::*;
 

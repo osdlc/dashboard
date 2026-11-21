@@ -19,13 +19,13 @@ use std::process::Stdio;
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
+use schemars::JsonSchema;
+use serde::Deserialize;
 use sitroom_contract::{
     CatalogEntry, Cell, Column, Manifest, Requirements, Row, Size, Status, View, Widget,
 };
 use sitroom_host::Module;
 use sitroom_modules_common::{expand_home, manifest};
-use schemars::JsonSchema;
-use serde::Deserialize;
 use tokio::process::Command;
 
 #[derive(Debug, Default, Deserialize, JsonSchema)]

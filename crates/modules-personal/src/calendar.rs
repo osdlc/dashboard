@@ -18,15 +18,15 @@ use std::time::{Duration, Instant};
 
 use anyhow::{Context, Result, anyhow, bail};
 use async_trait::async_trait;
+use jiff::tz::TimeZone;
+use jiff::{Timestamp, ToSpan};
+use schemars::JsonSchema;
+use serde::Deserialize;
 use sitroom_contract::{
     Action, CatalogEntry, ListItem, Manifest, Requirements, Size, Status, View, Widget,
 };
 use sitroom_host::Module;
 use sitroom_modules_common::http::{check, client};
-use jiff::tz::TimeZone;
-use jiff::{Timestamp, ToSpan};
-use schemars::JsonSchema;
-use serde::Deserialize;
 
 use crate::ics::{self, Event, Occurrence};
 use crate::{day_text, expand_home, manifest};

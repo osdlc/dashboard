@@ -1,11 +1,11 @@
 //! The `s` overlay: config file, theme, rotation, and per-module settings.
 
-use sitroom_contract::{Theme, UiSettings};
 use ratatui::Frame;
 use ratatui::layout::{Constraint, Layout, Rect};
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Clear, Paragraph, Wrap};
+use sitroom_contract::{Theme, UiSettings};
 
 use crate::help::{centered, format_ms};
 use crate::mouse::{self, Click, Hits};

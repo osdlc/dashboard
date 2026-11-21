@@ -23,11 +23,11 @@ use std::time::{Duration, SystemTime};
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
+use schemars::JsonSchema;
+use serde::Deserialize;
 use sitroom_contract::{CatalogEntry, Manifest, Refresh, Size, View};
 use sitroom_host::{Module, ViewSender};
 use sitroom_modules_common::{expand_home, manifest};
-use schemars::JsonSchema;
-use serde::Deserialize;
 use tokio::sync::mpsc;
 
 use crate::feed::{self, Field, Format, MAX_BYTES, Shape};

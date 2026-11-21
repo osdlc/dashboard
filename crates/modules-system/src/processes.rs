@@ -4,10 +4,10 @@ use std::collections::BTreeMap;
 
 use anyhow::Result;
 use async_trait::async_trait;
-use sitroom_contract::{CatalogEntry, Cell, Column, Manifest, Row, Size, Status, View, Widget};
-use sitroom_host::Module;
 use schemars::JsonSchema;
 use serde::Deserialize;
+use sitroom_contract::{CatalogEntry, Cell, Column, Manifest, Row, Size, Status, View, Widget};
+use sitroom_host::Module;
 use sysinfo::{ProcessRefreshKind, ProcessesToUpdate, System};
 
 use super::{bytes, manifest};

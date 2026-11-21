@@ -8,12 +8,12 @@ use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result, bail};
-use sitroom_config::packages::{Installed, load_package};
-use sitroom_contract::PACKAGE_FILE;
 use flate2::Compression;
 use flate2::read::GzDecoder;
 use flate2::write::GzEncoder;
 use path_guard::Guard;
+use sitroom_config::packages::{Installed, load_package};
+use sitroom_contract::PACKAGE_FILE;
 use tar::EntryType;
 
 /// The largest download or archive read: 64 MiB.

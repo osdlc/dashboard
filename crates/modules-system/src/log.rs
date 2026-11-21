@@ -12,11 +12,11 @@ use std::path::PathBuf;
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
+use schemars::JsonSchema;
+use serde::Deserialize;
 use sitroom_contract::rpc::LogLevel;
 use sitroom_contract::{CatalogEntry, LogLine, Manifest, Size, Status, View, Widget};
 use sitroom_host::Module;
-use schemars::JsonSchema;
-use serde::Deserialize;
 
 use sitroom_modules_common::{expand_home, manifest};
 

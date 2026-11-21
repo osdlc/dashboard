@@ -8,10 +8,10 @@
 use std::path::PathBuf;
 use std::process::Command;
 
+use serde_json::json;
 use sitroom_contract::View;
 use sitroom_contract::check::{check_manifest, check_view};
 use sitroom_host::{Module, Plugin};
-use serde_json::json;
 
 /// Every sample: `<name>.txt` (pmset output) or the folder `<name>` (sysfs).
 const SAMPLES: &[&str] = &[

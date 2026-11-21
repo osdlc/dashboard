@@ -21,12 +21,12 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
-use sitroom_contract::{CatalogEntry, ListItem, Manifest, Size, Status, View, Widget};
-use sitroom_host::Module;
-use sitroom_modules_common::{expand_home, manifest};
 use jiff::civil::Date;
 use schemars::JsonSchema;
 use serde::Deserialize;
+use sitroom_contract::{CatalogEntry, ListItem, Manifest, Size, Status, View, Widget};
+use sitroom_host::Module;
+use sitroom_modules_common::{expand_home, manifest};
 
 /// Larger files are refused: a todo list this big is something else.
 const MAX_BYTES: u64 = 1024 * 1024;

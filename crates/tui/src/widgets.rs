@@ -1,11 +1,11 @@
 //! Drawing tiles and the widgets inside them.
 
-use sitroom_contract::rpc::LogLevel;
-use sitroom_contract::{Action, Cell as ViewCell, Status, TileUpdate, UptimeCheck, Widget};
 use ratatui::layout::{Constraint, Layout, Rect};
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Cell, Paragraph, Row, Table, Wrap};
+use sitroom_contract::rpc::LogLevel;
+use sitroom_contract::{Action, Cell as ViewCell, Status, TileUpdate, UptimeCheck, Widget};
 
 use crate::canvas::Canvas;
 use crate::charts;
@@ -913,8 +913,8 @@ fn inline_markdown<'a>(p: &Palette, text: &'a str) -> Vec<Span<'a>> {
 
 #[cfg(test)]
 mod tests {
-    use sitroom_contract::Theme;
     use ratatui::buffer::Buffer;
+    use sitroom_contract::Theme;
 
     use super::*;
 

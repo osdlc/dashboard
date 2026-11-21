@@ -5,11 +5,11 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result, bail};
+use reqwest::Url;
+use serde::{Deserialize, Serialize};
 use sitroom_config::packages::market_index_path;
 use sitroom_contract::Index;
 use sitroom_contract::marketplace::INDEX_FORMAT;
-use reqwest::Url;
-use serde::{Deserialize, Serialize};
 
 use super::archive::MAX_ARCHIVE;
 

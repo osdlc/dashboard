@@ -8,10 +8,10 @@
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+use serde_json::json;
 use sitroom_config::packages::load_package;
 use sitroom_contract::check::{Finding, check_manifest, check_view};
 use sitroom_host::{Module, Plugin};
-use serde_json::json;
 
 fn ext_dir() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("../../plugins/ext")

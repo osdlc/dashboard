@@ -144,8 +144,7 @@ mod tests {
                 .map(|f| f.text)
                 .collect()
         };
-        let root =
-            std::env::temp_dir().join(format!("sitroom-plugin-new-{}", std::process::id()));
+        let root = std::env::temp_dir().join(format!("sitroom-plugin-new-{}", std::process::id()));
         for lang in [Lang::Ts, Lang::Py] {
             if !have(lang.runner()) {
                 continue;
@@ -179,8 +178,7 @@ mod tests {
         if !have("node") {
             return;
         }
-        let dir =
-            std::env::temp_dir().join(format!("sitroom-sdk-schemas-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sitroom-sdk-schemas-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         for (name, schema) in [
             ("manifest", schemars::schema_for!(Manifest)),

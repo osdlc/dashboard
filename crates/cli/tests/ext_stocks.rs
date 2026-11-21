@@ -6,11 +6,11 @@
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+use serde_json::json;
 use sitroom_config::packages::load_package;
 use sitroom_contract::check::check_view;
 use sitroom_contract::{Cell, Status, Widget};
 use sitroom_host::{Module, Plugin};
-use serde_json::json;
 
 fn dir() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("../../plugins/ext/stocks")

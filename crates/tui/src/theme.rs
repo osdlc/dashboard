@@ -6,9 +6,9 @@
 //! well on the theme's background: terminal glyphs are thin, so a color that
 //! works as a web bar can be too faint as a character.
 
+use ratatui::style::Color;
 use sitroom_contract::theme::{self, ColorTheme, Tokens, Tone};
 use sitroom_contract::{ColorScale, Status, Theme};
-use ratatui::style::Color;
 use terminal_colorsaurus::{QueryOptions, ThemeMode, theme_mode};
 
 pub struct Palette {

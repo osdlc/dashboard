@@ -7,10 +7,10 @@
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+use serde_json::json;
 use sitroom_contract::View;
 use sitroom_contract::check::{check_manifest, check_view};
 use sitroom_host::{Module, Plugin};
-use serde_json::json;
 
 fn have(program: &str) -> bool {
     Command::new(program).arg("--version").output().is_ok()

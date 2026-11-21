@@ -23,15 +23,15 @@
 
 use anyhow::{Result, bail};
 use async_trait::async_trait;
+use roxmltree::{Document, Node, ParsingOptions};
+use schemars::JsonSchema;
+use serde::Deserialize;
 use sitroom_contract::{
     Action, CatalogEntry, ListItem, Manifest, Requirements, Size, Status, View, Widget,
 };
 use sitroom_host::Module;
 use sitroom_modules_common::http::client;
 use sitroom_modules_common::{expand_home, manifest};
-use roxmltree::{Document, Node, ParsingOptions};
-use schemars::JsonSchema;
-use serde::Deserialize;
 use tokio::task::JoinSet;
 
 const RDF_NS: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";

@@ -25,13 +25,13 @@ use std::time::Duration;
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
+use schemars::JsonSchema;
+use serde::Deserialize;
 use sitroom_contract::{CatalogEntry, Manifest, Size, View};
 use sitroom_host::Module;
 use sitroom_modules_common::http::{self, Client};
 use sitroom_modules_common::manifest;
 use sitroom_modules_common::secret::Secret;
-use schemars::JsonSchema;
-use serde::Deserialize;
 
 use crate::feed::{self, Field, Format, MAX_BYTES, Shape};
 

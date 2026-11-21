@@ -6,12 +6,12 @@ use std::io::{BufRead, Write};
 use std::process::Command;
 
 use anyhow::{Context, Result, bail};
+use serde::Deserialize;
 use sitroom_contract::rpc::{InitializeResult, Message, Response, RpcError, error_code, method};
 use sitroom_contract::{
     Action, CONTRACT_VERSION, CatalogEntry, Cell, Column, CommandDecl, EntryKind, LayoutHints,
     Manifest, ParamDecl, Refresh, Requirements, Row, Size, Status, Thresholds, View, Widget,
 };
-use serde::Deserialize;
 
 const THRESHOLDS: Thresholds = Thresholds {
     warn: 75.0,

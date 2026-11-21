@@ -19,14 +19,14 @@
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
+use schemars::JsonSchema;
+use serde::Deserialize;
 use sitroom_contract::{
     CatalogEntry, Cell, Column, Manifest, Requirements, Row, Size, Status, View, Widget,
 };
 use sitroom_host::Module;
 use sitroom_modules_common::http::{Client, client};
 use sitroom_modules_common::{manifest, time::parse_time};
-use schemars::JsonSchema;
-use serde::Deserialize;
 
 const FORECAST_URL: &str = "https://api.open-meteo.com/v1/forecast";
 const GEOCODING_URL: &str = "https://geocoding-api.open-meteo.com/v1/search";

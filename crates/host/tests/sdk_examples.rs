@@ -6,10 +6,10 @@
 use std::path::PathBuf;
 use std::process::Command;
 
+use serde_json::json;
 use sitroom_contract::check::{check_manifest, check_view};
 use sitroom_contract::{Status, View, Widget};
 use sitroom_host::{History, Module, Plugin};
-use serde_json::json;
 
 fn sdk_file(path: &str) -> String {
     let path: PathBuf = [env!("CARGO_MANIFEST_DIR"), "../../sdk", path]

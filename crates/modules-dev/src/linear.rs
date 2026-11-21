@@ -8,10 +8,10 @@
 
 use anyhow::{Result, bail};
 use async_trait::async_trait;
-use sitroom_contract::{CatalogEntry, Manifest, Requirements, Size, Status, View};
-use sitroom_host::Module;
 use schemars::JsonSchema;
 use serde::Deserialize;
+use sitroom_contract::{CatalogEntry, Manifest, Requirements, Size, Status, View};
+use sitroom_host::Module;
 
 use super::{Issue, Secret, check, client, demo_time, manifest, sections_view};
 

@@ -20,12 +20,12 @@ use std::time::Duration;
 
 use anyhow::{Result, bail};
 use async_trait::async_trait;
+use schemars::JsonSchema;
+use serde::Deserialize;
 use sitroom_contract::{
     CatalogEntry, Manifest, Requirements, SeriesData, Size, Status, UptimeCheck, View, Widget,
 };
 use sitroom_host::Module;
-use schemars::JsonSchema;
-use serde::Deserialize;
 use tokio::process::Command;
 use tokio::task::JoinSet;
 

@@ -19,11 +19,11 @@ use std::collections::HashMap;
 use std::fmt::Write as _;
 use std::path::PathBuf;
 
-use sitroom_contract::{Size, Theme, TileUpdate, View};
 use ratatui::buffer::{Buffer, Cell};
 use ratatui::style::{Color, Modifier};
 use ratatui::text::Span;
 use serde_json::Value;
+use sitroom_contract::{Size, Theme, TileUpdate, View};
 
 use super::*;
 

@@ -6,8 +6,6 @@ use std::collections::BTreeMap;
 use std::time::{Duration, Instant};
 
 use anyhow::Result;
-use sitroom_contract::{Action, ClientMessage, ScreenLayout, TileUpdate, UiSettings};
-use sitroom_host::Host;
 use ratatui::Frame;
 use ratatui::buffer::Buffer;
 use ratatui::crossterm::event::{
@@ -20,6 +18,8 @@ use ratatui::layout::{Constraint, Layout};
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Paragraph, Scrollbar, ScrollbarOrientation, ScrollbarState};
+use sitroom_contract::{Action, ClientMessage, ScreenLayout, TileUpdate, UiSettings};
+use sitroom_host::Host;
 use tokio::sync::broadcast::error::TryRecvError;
 use tokio::sync::{mpsc, watch};
 
@@ -858,12 +858,12 @@ fn open_editor(path: &str) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use sitroom_contract::{
-        ModuleSummary, ScreenLayout, Size, Status, Theme, TilePlacement, View, Widget,
-    };
     use ratatui::Terminal;
     use ratatui::backend::TestBackend;
     use ratatui::buffer::Buffer;
+    use sitroom_contract::{
+        ModuleSummary, ScreenLayout, Size, Status, Theme, TilePlacement, View, Widget,
+    };
 
     fn app() -> App {
         let tile = |id: &str, size| TilePlacement {
@@ -1447,12 +1447,12 @@ mod preview {
 #[cfg(test)]
 mod tests_support {
     use super::*;
+    use ratatui::Terminal;
+    use ratatui::backend::TestBackend;
     use sitroom_contract::{
         Bar, ColorScale, Meter, ModuleSummary, ScreenLayout, SeriesData, SeriesStyle, Size, Status,
         Theme, TilePlacement, ValueFormat, View, Widget,
     };
-    use ratatui::Terminal;
-    use ratatui::backend::TestBackend;
 
     fn series(
         id: &str,

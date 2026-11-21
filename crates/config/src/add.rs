@@ -480,8 +480,7 @@ mod tests {
 
     #[test]
     fn add_module_without_a_file_starts_from_the_default_config() {
-        let dir =
-            std::env::temp_dir().join(format!("sitroom-add-default-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sitroom-add-default-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("config.yaml");
         let default = parse(crate::DEFAULT_CONFIG).unwrap();

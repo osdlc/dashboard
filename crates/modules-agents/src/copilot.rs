@@ -7,9 +7,9 @@ use std::process::Stdio;
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
+use serde::Deserialize;
 use sitroom_contract::{CatalogEntry, Manifest, Requirements, Size, View, Widget};
 use sitroom_host::Module;
-use serde::Deserialize;
 use tokio::process::Command;
 
 use super::{Window, now_secs, worst};

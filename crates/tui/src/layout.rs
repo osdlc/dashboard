@@ -6,8 +6,8 @@
 //! stretched to fill it; when they don't, the page is taller than the
 //! terminal and scrolls.
 
-use sitroom_contract::Size;
 use ratatui::layout::{Constraint, Layout, Rect};
+use sitroom_contract::Size;
 
 const COLUMNS: u16 = 12;
 /// Below this width every tile takes a full row.

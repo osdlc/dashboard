@@ -10,10 +10,10 @@ use std::net::TcpListener;
 use std::path::PathBuf;
 use std::process::Command;
 
+use serde_json::json;
 use sitroom_contract::check::{check_manifest, check_view};
 use sitroom_contract::{Status, View, Widget};
 use sitroom_host::{Module, Plugin};
-use serde_json::json;
 
 /// Single-feed samples: `<name>.xml`, expected `<name>.view.json`.
 const SAMPLES: &[&str] = &["rss2", "atom", "rdf", "rss091", "demo"];
@@ -55,10 +55,7 @@ fn plugins() -> Vec<(&'static str, Vec<String>)> {
     let mut out = vec![];
     // The SDK copy does nothing when run, so this checks that node can run a
     // .ts file (it strips types from Node 22.18 and 23.6 on).
-    if runs(&[
-        "node",
-        &path("plugins/ext/feedreader-ts/sitroom-plugin.ts"),
-    ]) {
+    if runs(&["node", &path("plugins/ext/feedreader-ts/sitroom-plugin.ts")]) {
         out.push((
             "feedreader-ts",
             vec!["node".into(), path("plugins/ext/feedreader-ts/main.ts")],

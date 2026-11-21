@@ -20,13 +20,13 @@ use std::time::Duration;
 
 use anyhow::Result;
 use async_trait::async_trait;
+use schemars::JsonSchema;
+use serde::Deserialize;
 use sitroom_contract::{
     CatalogEntry, Cell, Column, Manifest, Requirements, Row, Size, Status, View, Widget,
 };
 use sitroom_host::Module;
 use sitroom_modules_common::manifest;
-use schemars::JsonSchema;
-use serde::Deserialize;
 use tokio::process::Command;
 
 /// How long one docker command may take. A render runs up to two (ps, then

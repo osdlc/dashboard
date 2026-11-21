@@ -9,10 +9,10 @@ use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 
+use serde_json::json;
 use sitroom_contract::{Status, Widget};
 use sitroom_host::Module;
 use sitroom_modules_ops::{pihole::Pihole, transmission::Transmission};
-use serde_json::json;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpListener;
 

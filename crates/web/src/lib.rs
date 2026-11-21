@@ -27,14 +27,14 @@ use axum::middleware::{self, Next};
 use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
 use axum::{Json, Router};
+use futures_util::{SinkExt, StreamExt};
+use rust_embed::RustEmbed;
+use serde::{Deserialize, Serialize};
 use sitroom_cli_kit::boot::{self, Redeem, SignIn};
 use sitroom_contract::{
     CatalogEntry, CatalogResponse, ClientMessage, ServerMessage, UiSettings, Widget,
 };
 use sitroom_host::Host;
-use futures_util::{SinkExt, StreamExt};
-use rust_embed::RustEmbed;
-use serde::{Deserialize, Serialize};
 use tokio::sync::broadcast::error::RecvError;
 use tokio::sync::{mpsc, watch};
 

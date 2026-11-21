@@ -96,8 +96,5 @@ fn a_missing_plugin_program_exits_22() {
     let out = sitroom(&["plugin-check", "--", "/nonexistent/sitroom-plugin"]);
     assert_eq!(out.status.code(), Some(22));
     let err = String::from_utf8_lossy(&out.stderr);
-    assert!(
-        err.contains("sitroom: couldn't start the plugin"),
-        "{err}"
-    );
+    assert!(err.contains("sitroom: couldn't start the plugin"), "{err}");
 }

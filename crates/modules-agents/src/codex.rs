@@ -11,14 +11,14 @@ use std::time::Duration;
 
 use anyhow::{Context, Result, bail};
 use async_trait::async_trait;
-use sitroom_contract::{
-    Bar, CatalogEntry, Manifest, Requirements, Size, Status, ValueFormat, View, Widget,
-};
-use sitroom_host::Module;
 use schemars::JsonSchema;
 use serde::Deserialize;
 use serde::de::DeserializeOwned;
 use serde_json::{Value, json};
+use sitroom_contract::{
+    Bar, CatalogEntry, Manifest, Requirements, Size, Status, ValueFormat, View, Widget,
+};
+use sitroom_host::Module;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::process::Command;
 

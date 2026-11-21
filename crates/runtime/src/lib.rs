@@ -1095,8 +1095,7 @@ mod tests {
     /// Machine file, a saved dashboard and a project file, in a temp folder.
     #[tokio::test]
     async fn creates_blank_and_copied_dashboards_and_switches_to_them() {
-        let dir =
-            std::env::temp_dir().join(format!("sitroom-runtime-new-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sitroom-runtime-new-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         let machine = dir.join("config.yaml");
@@ -1466,8 +1465,7 @@ modules:
 
     #[tokio::test]
     async fn add_module_writes_the_config_and_starts_it() {
-        let dir =
-            std::env::temp_dir().join(format!("sitroom-runtime-add-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sitroom-runtime-add-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("config.yaml");
         std::fs::write(
