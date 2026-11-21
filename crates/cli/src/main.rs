@@ -293,9 +293,6 @@ fn main() -> ExitCode {
         name: NAME,
         json: cli.json,
     };
-    for note in sitroom_core::config::move_old_folders() {
-        warn(&note);
-    }
     let result = tokio::runtime::Runtime::new()
         .map_err(anyhow::Error::from)
         .and_then(|rt| {

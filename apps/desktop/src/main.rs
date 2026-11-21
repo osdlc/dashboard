@@ -29,10 +29,6 @@ fn main() -> Result<()> {
     {
         return result;
     }
-    for note in sitroom_core::config::move_old_folders() {
-        eprintln!("sitroom-desktop: {note}");
-    }
-
     let scr = std::env::current_exe()
         .ok()
         .and_then(|p| p.extension().map(|e| e.eq_ignore_ascii_case("scr")))
