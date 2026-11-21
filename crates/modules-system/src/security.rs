@@ -53,6 +53,7 @@ impl Check {
     }
 }
 
+/// Security settings of this machine, each on or off.
 #[derive(Default)]
 pub struct Security;
 
@@ -359,6 +360,7 @@ fn view(checks: &[Check]) -> View {
     }
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let demo = vec![
         Check::new(

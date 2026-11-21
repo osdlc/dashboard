@@ -31,6 +31,7 @@ struct Config {
     home: Option<String>,
 }
 
+/// OpenCode token use and cost, from its local data.
 #[derive(Default)]
 pub struct OpenCode {
     home: PathBuf,
@@ -211,6 +212,7 @@ fn view(t: &Tally, now: i64) -> View {
     }
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let now = now_secs();
     let records =

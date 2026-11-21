@@ -1,3 +1,5 @@
+//! The `sitroom` command: runs dashboards in the terminal or browser and manages their config.
+
 use std::io;
 use std::path::PathBuf;
 use std::process::ExitCode;

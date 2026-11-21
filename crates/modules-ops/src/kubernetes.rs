@@ -116,6 +116,7 @@ struct Reason {
     reason: Option<String>,
 }
 
+/// Kubernetes pods by namespace, with their status, read with `kubectl`.
 #[derive(Default)]
 pub struct Kubernetes {
     config: Config,
@@ -459,6 +460,7 @@ const SAMPLE: &str = include_str!("../testdata/kubernetes/pods.json");
 /// The sample's "now", so its ages read the same whenever the demo is shown.
 const SAMPLE_NOW: &str = "2026-10-27T12:00:00Z";
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let pods: PodList = serde_json::from_str(SAMPLE).expect("demo data parses");
     let now = parse_time(SAMPLE_NOW).expect("demo time parses");

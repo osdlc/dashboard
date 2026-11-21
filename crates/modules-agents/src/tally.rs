@@ -20,9 +20,11 @@ pub const DAYS: i64 = 7;
 pub struct Record {
     /// Seconds since the epoch.
     pub at: i64,
+    /// Tokens used in this record.
     pub tokens: u64,
     /// US dollars, when the agent logs a cost.
     pub cost: f64,
+    /// Model that answered.
     pub model: String,
 }
 
@@ -33,6 +35,7 @@ pub struct Tally {
     pub days: Vec<(String, u64, f64)>,
     /// (model, tokens), most first.
     pub models: Vec<(String, u64)>,
+    /// Number of replies counted.
     pub replies: usize,
     /// The newest reply read. Readers skip files untouched for `DAYS` days,
     /// so None means none in that time, not none ever.
@@ -40,6 +43,7 @@ pub struct Tally {
 }
 
 impl Tally {
+    /// Totals the records, with days and weeks measured back from `now` (Unix seconds).
     pub fn new(records: &[Record], now: i64) -> Tally {
         let today = now.div_euclid(86_400);
         let mut days: Vec<(String, u64, f64)> = (0..DAYS)
@@ -72,14 +76,17 @@ impl Tally {
         }
     }
 
+    /// Tokens used today.
     pub fn today(&self) -> u64 {
         self.days.last().map_or(0, |d| d.1)
     }
 
+    /// Tokens used in the last seven days.
     pub fn week_tokens(&self) -> u64 {
         self.days.iter().map(|d| d.1).sum()
     }
 
+    /// Cost of the last seven days, in US dollars.
     pub fn week_cost(&self) -> f64 {
         self.days.iter().map(|d| d.2).sum()
     }

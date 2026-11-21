@@ -18,6 +18,7 @@ use super::{
 
 const GIB: u64 = 1024 * 1024 * 1024;
 
+/// Disks: read/write graph and space per volume.
 pub struct Disk {
     disks: Disks,
     rate: Rate,
@@ -127,6 +128,7 @@ impl Module for Disk {
     }
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let read = demo_values(60, 900_000.0, 850_000.0, 1.5);
     let write = demo_values(60, 400_000.0, 380_000.0, 4.0);

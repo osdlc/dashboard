@@ -56,6 +56,7 @@ impl Default for Config {
     }
 }
 
+/// Open TODO headlines from org-mode files, overdue first.
 #[derive(Default)]
 pub struct OrgAgenda {
     config: Config,
@@ -244,6 +245,7 @@ fn stamp(line: &str, key: &str) -> Option<Date> {
     parse_date(rest.strip_prefix('<')?)
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let today = today();
     let d = |days: i64| {

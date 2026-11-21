@@ -20,6 +20,7 @@ use crate::{TOOL, VENDOR};
 /// A package found on disk.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Installed {
+    /// Its `package` file.
     pub package: Package,
     /// The package's folder. Its `run:` starts here.
     pub dir: PathBuf,
@@ -38,6 +39,7 @@ impl Installed {
         argv
     }
 
+    /// Its entry for the catalog.
     pub fn entry(&self) -> CatalogEntry {
         self.package.entry(&self.dir.display().to_string())
     }
@@ -47,7 +49,9 @@ impl Installed {
 /// folder that isn't a valid package (to show, not to fail on).
 #[derive(Debug, Default)]
 pub struct Packages {
+    /// The valid packages found.
     pub installed: Vec<Installed>,
+    /// Why each invalid folder was skipped.
     pub errors: Vec<String>,
 }
 
@@ -107,6 +111,7 @@ impl Packages {
         out
     }
 
+    /// The installed package with this ID, if any.
     pub fn get(&self, id: &str) -> Option<&Installed> {
         self.installed.iter().find(|p| p.package.id == id)
     }

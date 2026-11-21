@@ -108,6 +108,7 @@ struct Outcome {
     detail: String,
 }
 
+/// Uptime checks, run with `curl`.
 #[derive(Default)]
 pub struct Uptime {
     config: Config,
@@ -410,6 +411,7 @@ fn failed(detail: String) -> Outcome {
     }
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     use crate::{demo_series, demo_values};
     let strip = |fails: &[usize], slow: &[usize]| -> Vec<Status> {

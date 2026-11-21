@@ -57,6 +57,7 @@ struct Config {
     daily_limit: Option<u32>,
 }
 
+/// Gemini CLI requests against its daily quota, and tokens per day.
 #[derive(Default)]
 pub struct Gemini {
     home: PathBuf,
@@ -188,6 +189,7 @@ fn view(records: &[Record], limit: u32, now: i64) -> View {
     }
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let now = now_secs();
     let mut records = super::tally::demo_records(

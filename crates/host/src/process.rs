@@ -7,6 +7,9 @@
 //! or a job object (Windows), a [`KillTree`], so stopping it stops everything
 //! it started too (`npx` -> `node`, `sh` -> `curl`).
 
+// Ends a plugin's whole process tree: killpg on Unix, a Job Object on Windows.
+#![allow(unsafe_code)]
+
 use std::path::{Path, PathBuf};
 
 /// The command line to start: `argv` with the program resolved for this OS.

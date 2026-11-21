@@ -25,6 +25,7 @@ pub struct NewModule {
     pub builtin: Option<String>,
     /// Run this installed package.
     pub package: Option<String>,
+    /// Use the demo module.
     pub demo: bool,
     /// Written on the module, for configs without `screens:`.
     pub size: Option<Size>,

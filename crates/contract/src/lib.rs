@@ -2,6 +2,10 @@
 //! See `docs/contract.md`. These types are the source of truth for the
 //! generated JSON Schema and TypeScript types.
 
+// The docs here become the descriptions in the JSON Schema and the plugin
+// SDKs, so every public item needs one.
+#![warn(missing_docs)]
+
 use std::collections::BTreeMap;
 
 use schemars::JsonSchema;
@@ -19,26 +23,37 @@ pub use catalog::{
 pub use marketplace::{Index, IndexEntry};
 pub use theme::{ColorTheme, Tokens, Tone};
 
+/// The contract version, `MAJOR.MINOR`. The host refuses a plugin with a different major version.
 pub const CONTRACT_VERSION: &str = "0.1";
 
 // ---- Manifest ----
 
+/// What a module declares about itself, in reply to `initialize`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct Manifest {
+    /// Unique module ID, e.g. `cswap`.
     pub id: String,
+    /// Display name, shown in the tile header.
     pub name: String,
+    /// The contract version the module was built for, e.g. "0.1".
     pub contract_version: String,
+    /// How the module's view is refreshed: polled by the host or pushed by the module.
     pub refresh: Refresh,
+    /// Size and placement hints for the module's tile.
     pub layout: LayoutHints,
+    /// Commands the host may run for this module after the user confirms.
     #[serde(default)]
     pub commands: Vec<CommandDecl>,
+    /// JSON Schema for the module's `config:` block. `None`: no schema.
     #[serde(default)]
     pub config_schema: Option<serde_json::Value>,
 }
 
+/// How a tile gets new views.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "mode", rename_all = "snake_case")]
 pub enum Refresh {
+    /// The host asks for a view (`view/render`) every `interval_ms`.
     Poll {
         /// Suggested period. Config can override it.
         interval_ms: u64,
@@ -46,44 +61,62 @@ pub enum Refresh {
         #[serde(default)]
         min_interval_ms: Option<u64>,
     },
+    /// The module sends `view/update` notifications when it has a new view.
     Push,
 }
 
+/// Size and placement hints for a module's tile.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct LayoutHints {
+    /// The size the module suggests; a screen or the config can override it.
     pub size: Size,
+    /// Higher is placed earlier when auto-placing tiles. Default 0.
     #[serde(default)]
     pub priority: i32,
+    /// The smallest size the view still works at. `None`: any size.
     #[serde(default)]
     pub min_size: Option<Size>,
 }
 
+/// A tile's size class on the 12-column grid.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum Size {
+    /// 3 columns by 1 row.
     Small,
+    /// 4 columns by 2 rows.
     Medium,
+    /// 6 columns by 3 rows.
     Large,
+    /// 8 columns by 2 rows.
     Wide,
+    /// 4 columns by 4 rows.
     Tall,
 }
 
 // ---- Commands ----
 
+/// A command a module declares. The host runs it only after the user confirms.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct CommandDecl {
+    /// Names the command in `run_command` actions, e.g. "switch".
     pub id: String,
+    /// Shown to the user, e.g. "Switch to account".
     pub label: String,
     /// Program and arguments. May contain `{name}` placeholders declared in `params`.
     pub argv: Vec<String>,
+    /// Working directory to run in. `None`: the host's own.
     #[serde(default)]
     pub cwd: Option<String>,
+    /// Placeholders `argv` may use, each checked against its pattern.
     #[serde(default)]
     pub params: Vec<ParamDecl>,
 }
 
+/// A `{name}` placeholder in a command's `argv`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct ParamDecl {
+    /// The placeholder's name, without braces.
     pub name: String,
     /// Regex the value must fully match.
     pub pattern: String,
@@ -91,28 +124,38 @@ pub struct ParamDecl {
 
 // ---- View ----
 
+/// What a tile shows: an overall status, a one-line summary and a widget tree.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct View {
+    /// The tile's overall health, shown as its status color.
     pub status: Status,
     /// One line, used when the tile is too small.
     pub summary: String,
+    /// The widget the tile shows; use `row` and `column` to combine several.
     pub root: Widget,
 }
 
+/// Health of a tile, row or item: colors it ok, warn or error.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum Status {
+    /// All good.
     Ok,
+    /// Needs attention.
     Warn,
+    /// Broken or failing.
     Error,
+    /// Not known yet, e.g. before the first check.
     Unknown,
 }
 
+/// A piece of a view. `type` names the kind: `text`, `stat`, `gauge`, `table` and so on.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum Widget {
     /// A paragraph of text.
     Text {
+        /// The text to show.
         text: String,
         /// Read markdown in `text`: `**bold**`, and code between backticks.
         #[serde(default)]
@@ -136,6 +179,7 @@ pub enum Widget {
     },
     /// A horizontal meter from 0 to 100%.
     Gauge {
+        /// Shown with the meter.
         label: String,
         /// How full, 0-100.
         percent: f64,
@@ -151,6 +195,7 @@ pub enum Widget {
     },
     /// Values over time, as a line, a filled area or bars.
     Series {
+        /// The chart's title.
         label: String,
         /// Shown after values, e.g. "%" or "/s".
         #[serde(default)]
@@ -195,8 +240,10 @@ pub enum Widget {
     },
     /// Many small meters in a compact grid, e.g. one per CPU core.
     MeterGrid {
+        /// A title above the grid.
         #[serde(default)]
         label: Option<String>,
+        /// The meters, in order.
         meters: Vec<Meter>,
         /// The meters' color: `accent`, or a scale colored by each meter's value.
         #[serde(default)]
@@ -204,6 +251,7 @@ pub enum Widget {
     },
     /// Labeled horizontal bars, in the order given.
     Bars {
+        /// A title above the bars.
         #[serde(default)]
         label: Option<String>,
         /// Shown after each value.
@@ -215,13 +263,16 @@ pub enum Widget {
         /// Value of a full bar. Default: the largest value.
         #[serde(default)]
         max: Option<f64>,
+        /// The bars, top to bottom.
         bars: Vec<Bar>,
     },
     /// Shares of a whole, as a pie or donut with a legend. Slices keep the
     /// order given; each one's share is its value over the sum of all values.
     Pie {
+        /// A title above the chart.
         #[serde(default)]
         label: Option<String>,
+        /// The slices, in order. Values are zero or more.
         slices: Vec<Slice>,
         /// A ring with a hole in the middle. Default true; false draws a full disc.
         #[serde(default = "yes")]
@@ -279,6 +330,7 @@ pub enum Widget {
     },
     /// Items with a title, a subtitle, a status marker and tags.
     List {
+        /// The items, top to bottom.
         items: Vec<ListItem>,
         /// Shown when there are no items.
         #[serde(default)]
@@ -286,17 +338,24 @@ pub enum Widget {
     },
     /// Rows and columns. A cell holds text, a number, or a stat, gauge, pie, display or clock face.
     Table {
+        /// The columns, left to right.
         columns: Vec<Column>,
+        /// The rows, top to bottom.
         rows: Vec<Row>,
     },
     /// Log output, oldest first. Renderers show the newest lines that fit.
     Log {
+        /// A title above the lines.
         #[serde(default)]
         label: Option<String>,
+        /// The lines, oldest first.
         lines: Vec<LogLine>,
     },
     /// Availability checks, one row each with a strip of recent results.
-    Uptime { checks: Vec<UptimeCheck> },
+    Uptime {
+        /// The checks, one row each.
+        checks: Vec<UptimeCheck>,
+    },
     /// A picture from a file on the machine sitroom runs on. The terminal
     /// draws it with the best graphics it supports (Kitty, iTerm2 or Sixel),
     /// or with colored half blocks. It is scaled to fit and keeps its shape.
@@ -308,14 +367,22 @@ pub enum Widget {
         caption: Option<String>,
     },
     /// Widgets side by side, sharing the width.
-    Row { children: Vec<Widget> },
+    Row {
+        /// The widgets, left to right.
+        children: Vec<Widget>,
+    },
     /// Widgets stacked top to bottom.
-    Column { children: Vec<Widget> },
+    Column {
+        /// The widgets, top to bottom.
+        children: Vec<Widget>,
+    },
 }
 
+/// How a `series` chart draws its values.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum SeriesStyle {
+    /// A plain line. The default.
     #[default]
     Line,
     /// Filled under the line.
@@ -324,6 +391,7 @@ pub enum SeriesStyle {
     Bars,
 }
 
+/// A color, or a scale that colors by value.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum ColorScale {
@@ -338,9 +406,11 @@ pub enum ColorScale {
     Sunset,
 }
 
+/// How numbers are written.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum ValueFormat {
+    /// As given, e.g. "42%". The default.
     #[default]
     Plain,
     /// Show as KiB / MiB / GiB; `unit` is appended (e.g. "/s").
@@ -349,8 +419,10 @@ pub enum ValueFormat {
     Count,
 }
 
+/// One small meter in a `meter_grid`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct Meter {
+    /// Shown beside the meter, e.g. a core number.
     pub label: String,
     /// 0-100.
     pub percent: f64,
@@ -359,9 +431,12 @@ pub struct Meter {
     pub tone: Option<Tone>,
 }
 
+/// One bar in a `bars` widget.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct Bar {
+    /// Shown beside the bar.
     pub label: String,
+    /// Zero or more; the bar's length is this over the widget's `max`.
     pub value: f64,
     /// Colors the bar ok, warn or error.
     #[serde(default)]
@@ -371,8 +446,10 @@ pub struct Bar {
     pub tone: Option<Tone>,
 }
 
+/// One slice of a `pie`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct Slice {
+    /// Shown in the legend.
     pub label: String,
     /// Zero or more. Shown with the widget's `format` and `unit`.
     pub value: f64,
@@ -481,6 +558,7 @@ pub fn format_value(value: f64, format: ValueFormat, unit: Option<&str>) -> Stri
     }
 }
 
+/// Percents at which a gauge's fill changes color.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct Thresholds {
     /// The percent at which the fill turns the warn color.
@@ -489,6 +567,7 @@ pub struct Thresholds {
     pub error: f64,
 }
 
+/// One line of a `series` chart.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct SeriesData {
     /// Shown in the legend; also keys the history when the widget has an `id`.
@@ -501,8 +580,10 @@ pub struct SeriesData {
     pub tone: Option<Tone>,
 }
 
+/// One availability check in an `uptime` widget.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct UptimeCheck {
+    /// What is checked, e.g. a host or URL.
     pub name: String,
     /// Result of the latest check.
     pub status: Status,
@@ -523,8 +604,10 @@ pub struct UptimeCheck {
     pub url: Option<String>,
 }
 
+/// One line in a `log` widget.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct LogLine {
+    /// The log message.
     pub text: String,
     /// error, warn, info or debug: colors the line.
     #[serde(default)]
@@ -534,8 +617,10 @@ pub struct LogLine {
     pub time: Option<String>,
 }
 
+/// One item in a `list` widget.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct ListItem {
+    /// The main line.
     pub title: String,
     /// A second, quieter line.
     #[serde(default)]
@@ -554,6 +639,7 @@ pub struct ListItem {
     pub action: Option<Action>,
 }
 
+/// A table column.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct Column {
     /// Names the cell in each row's `cells`.
@@ -567,6 +653,7 @@ pub struct Column {
     pub priority: Option<i32>,
 }
 
+/// A table row.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct Row {
     /// Keyed by the column's `key`.
@@ -579,10 +666,13 @@ pub struct Row {
     pub action: Option<Action>,
 }
 
+/// A table cell: text, a number or a small widget.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
 pub enum Cell {
+    /// Plain text.
     Text(String),
+    /// A number, shown as is.
     Number(f64),
     /// `Stat`, `Gauge`, `Pie`, `Display` and `ClockFace` are rendered inline (the
     /// TUI shows a pie as its largest slice, a clock face as "14:05"); others
@@ -592,14 +682,20 @@ pub enum Cell {
 
 // ---- Actions ----
 
+/// What clicking a row or item does.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum Action {
+    /// Open a link in the browser.
     OpenUrl {
+        /// The link: http or https only.
         url: String,
     },
+    /// Run a command the module declared, after the user confirms.
     RunCommand {
+        /// The command's `id` from the manifest.
         command: String,
+        /// Values for the command's `{name}` placeholders. Each must match its pattern.
         #[serde(default)]
         params: BTreeMap<String, String>,
     },
@@ -610,7 +706,9 @@ pub enum Action {
 /// What the host sends to renderers (TUI, web) for each tile.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct TileUpdate {
+    /// The tile this update is for.
     pub tile_id: String,
+    /// What the tile shows.
     pub view: View,
     /// Unix ms.
     pub updated_at: i64,
@@ -622,19 +720,23 @@ pub struct TileUpdate {
     pub demo: bool,
 }
 
+/// Light or dark, for the whole sitroom.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum Theme {
     /// Follow the OS (web) or the terminal's background color (TUI).
     #[default]
     Auto,
+    /// Always light.
     Light,
+    /// Always dark.
     Dark,
 }
 
 /// Renderer-wide settings derived from the config.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct UiSettings {
+    /// Light, dark or auto: picks the variant of `color_theme`.
     pub theme: Theme,
     /// The color theme in use, both variants; `theme` picks one.
     #[serde(default)]
@@ -653,6 +755,7 @@ pub struct UiSettings {
     /// tiles change. The web view does not use it.
     #[serde(default = "default_tui_fps")]
     pub tui_fps: u32,
+    /// Where the config came from, for the settings screen.
     pub config: ConfigInfo,
 }
 
@@ -666,6 +769,7 @@ fn default_tui_fps() -> u32 {
 /// Where the config came from, for the settings screen.
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct ConfigInfo {
+    /// The config file's path.
     pub path: String,
     /// False when no file exists and defaults are in use.
     pub exists: bool,
@@ -700,7 +804,9 @@ pub struct ConfigInfo {
 /// the switch to it tried; a failed switch shows as the config error.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct CreateOutcome {
+    /// The name the request asked for.
     pub name: String,
+    /// Why the create failed. `None`: the file was written.
     #[serde(default)]
     pub error: Option<String>,
     /// Counts the requests the server has handled, as in `AddOutcome`.
@@ -712,7 +818,9 @@ pub struct CreateOutcome {
 /// module may still fail to start, which shows as the config error.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct AddOutcome {
+    /// The ID the module was added under.
     pub module_id: String,
+    /// Why the add failed. `None`: the config was written.
     #[serde(default)]
     pub error: Option<String>,
     /// Counts the adds the server has handled, so a renderer can tell the
@@ -725,13 +833,17 @@ pub struct AddOutcome {
 /// A saved dashboard, for the switcher.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct DashboardSummary {
+    /// Sitroom's name.
     pub name: String,
+    /// A line about what it shows.
     #[serde(default)]
     pub description: Option<String>,
 }
 
+/// Automatic screen rotation.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct RotateSettings {
+    /// Time on each screen, in ms.
     pub interval_ms: u64,
     /// Screen names to rotate through, in order. Never empty.
     pub screens: Vec<String>,
@@ -739,22 +851,30 @@ pub struct RotateSettings {
     pub resume_after_ms: u64,
 }
 
+/// A named screen and the tiles on it.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct ScreenLayout {
+    /// The screen's name, shown in the switcher.
     pub name: String,
+    /// Tiles in placement order.
     pub tiles: Vec<TilePlacement>,
 }
 
+/// Where a tile goes on a screen.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct TilePlacement {
+    /// The tile's module ID.
     pub tile_id: String,
     /// Resolved size: screen config, else module config, else the module's hint.
     pub size: Size,
 }
 
+/// A running module, for the help screen.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct ModuleSummary {
+    /// The module ID in the config.
     pub tile_id: String,
+    /// The module's display name.
     pub name: String,
     /// Effective poll period; `None` for push modules.
     #[serde(default)]
@@ -777,20 +897,26 @@ pub enum ClientMessage {
     /// Write `theme:` into the config file. `etag` is `config.etag` from the
     /// settings the change was made on.
     SetTheme {
+        /// Light, dark or auto.
         theme: Theme,
+        /// `config.etag` from the settings the change was made on. `None` when there was no config file; refused if one exists now.
         #[serde(default)]
         etag: Option<String>,
     },
     /// Write `color_theme:` into the config file. `etag` as for `SetTheme`.
     SetColorTheme {
+        /// The color theme's name.
         name: String,
+        /// As for `SetTheme`.
         #[serde(default)]
         etag: Option<String>,
     },
     /// Replace `screens:` in the config file (from the screen editor). `etag`
     /// as for `SetTheme`.
     SaveScreens {
+        /// The new screens, in order.
         screens: Vec<ScreenLayout>,
+        /// As for `SetTheme`.
         #[serde(default)]
         etag: Option<String>,
     },
@@ -802,6 +928,7 @@ pub enum ClientMessage {
         module_id: String,
         /// The catalog entry's ID and kind.
         entry: String,
+        /// Whether `entry` is a built-in or a plugin.
         kind: EntryKind,
         /// The module's `config:` block. Null or `{}` writes none.
         #[serde(default)]
@@ -812,17 +939,21 @@ pub enum ClientMessage {
         /// The screen to put a tile on. Ignored when the config has no `screens:`.
         #[serde(default)]
         screen: Option<String>,
+        /// The new tile's size.
         size: Size,
     },
     /// Show another saved dashboard; `None` for `config.yaml` alone.
     SwitchDashboard {
+        /// The saved dashboard's name. `None`: `config.yaml` alone.
         #[serde(default)]
         name: Option<String>,
     },
     /// Save a new dashboard and switch to it: a copy of the one in use, or
     /// one empty screen. The name is made into a slug.
     CreateDashboard {
+        /// The new dashboard's name, before it is made into a slug.
         name: String,
+        /// Copy sitroom in use. `false`: one empty screen.
         #[serde(default)]
         copy: bool,
     },
@@ -837,9 +968,12 @@ pub enum ClientMessage {
 pub enum ServerMessage {
     /// Sent first on connect, and again when settings change.
     Settings {
+        /// Everything renderers need besides tiles.
         settings: UiSettings,
     },
+    /// A tile's new view.
     Tile {
+        /// The update.
         tile: TileUpdate,
     },
 }

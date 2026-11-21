@@ -1,8 +1,11 @@
 [package]
 name = "sitroom-modules-ops"
+description = "Sitroom modules for infrastructure: containers, Kubernetes, the public IP, Pi-hole and Transmission"
 edition.workspace = true
+rust-version.workspace = true
 version.workspace = true
 license.workspace = true
+repository.workspace = true
 
 # One feature per module, named after its id. sitroom-modules turns them on
 # through its `bundle-ops` and `module-<id>` features.
@@ -30,3 +33,6 @@ tokio = { version = "1.54.1", features = ["process", "rt", "time"] }
 [dev-dependencies]
 sitroom-config = { version = "0.8.0", path = "../config" }
 tokio = { version = "1.54.1", features = ["io-util", "macros", "net", "rt"] }
+
+[lints]
+workspace = true

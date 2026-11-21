@@ -27,6 +27,7 @@ use sitroom_modules_common::manifest;
 const SITE: &str = "https://antigravity.google";
 const PATH: &str = "/exa.language_server_pb.LanguageServerService/RetrieveUserQuotaSummary";
 
+/// Google Antigravity model quotas, from the language server the Antigravity app runs on this machine.
 #[derive(Default)]
 pub struct Antigravity;
 
@@ -279,6 +280,7 @@ fn sample() -> Reply {
     .expect("demo data parses")
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     CatalogEntry {
         description: "Google Antigravity model quotas, read from the app's local language \

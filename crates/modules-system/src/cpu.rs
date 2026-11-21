@@ -10,6 +10,7 @@ use sysinfo::System;
 
 use super::{demo_graph, demo_series, demo_values, graph, manifest, sample, status_for};
 
+/// CPU: total usage graph, per-core meters, load average.
 #[derive(Default)]
 pub struct Cpu {
     sys: System,
@@ -75,6 +76,7 @@ impl Module for Cpu {
     }
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let total = demo_values(120, 34.0, 20.0, 1.0);
     let cores = [41.0, 27.5, 63.0, 18.2, 35.9, 22.4, 12.0, 8.7];

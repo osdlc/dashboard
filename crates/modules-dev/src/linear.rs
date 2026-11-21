@@ -43,6 +43,7 @@ impl Default for Config {
     }
 }
 
+/// Linear issues assigned to (or created by) you, via the GraphQL API.
 #[derive(Default)]
 pub struct Linear {
     config: Config,
@@ -151,6 +152,7 @@ fn parse(json: &serde_json::Value, field: &str) -> Result<Vec<Issue>> {
         .collect())
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     // A hand-written GraphQL reply in the shape of the query above.
     let node = |id: &str, title: &str, state: &str, hours_ago: i64, priority: u8, label: &str| {

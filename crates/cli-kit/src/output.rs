@@ -53,9 +53,12 @@ pub struct ErrorDocument {
     /// `usage` for exit 2, a failure kind for 22-25, else `error` or a name the
     /// tool chose.
     pub code: String,
+    /// What went wrong, in one line.
     pub message: String,
+    /// The exit code the run ends with.
     pub exit: u8,
     #[serde(skip_serializing_if = "Option::is_none")]
+    /// What to do about it, if there is a hint.
     pub hint: Option<String>,
 }
 
@@ -83,6 +86,7 @@ impl Reporter {
         safe(&format!("{}: warning: {message}\n", self.name))
     }
 
+    /// Print a warning line on stderr.
     pub fn warn(&self, message: &str) {
         eprint!("{}", self.warning_line(message));
     }

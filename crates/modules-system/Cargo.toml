@@ -1,8 +1,11 @@
 [package]
 name = "sitroom-modules-system"
+description = "Sitroom modules for the machine: CPU, memory, disk, network, logs, files and command output"
 edition.workspace = true
+rust-version.workspace = true
 version.workspace = true
 license.workspace = true
+repository.workspace = true
 
 # One feature per module, named after its id. sitroom-modules turns them on
 # through its `bundle-system` and `module-<id>` features.
@@ -42,7 +45,10 @@ tokio = { version = "1.54.1", features = ["io-util", "macros", "process", "rt", 
 tracing = { version = "0.1.44", optional = true }
 
 [target.'cfg(unix)'.dependencies]
-libc = "0.2.191"
+rustix = { version = "1.1.6", features = ["process"] }
 
 [dev-dependencies]
 tokio = { version = "1.54.1", features = ["macros", "net", "rt", "rt-multi-thread"] }
+
+[lints]
+workspace = true

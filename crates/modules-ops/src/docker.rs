@@ -79,6 +79,7 @@ struct Stats {
     mem_usage: String,
 }
 
+/// Running Docker containers with their CPU and memory.
 #[derive(Default)]
 pub struct Docker {
     config: Config,
@@ -288,6 +289,7 @@ fn short(id: &str) -> &str {
     id.get(..12).unwrap_or(id)
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let containers = parse_lines(include_str!("../testdata/docker/ps.jsonl"));
     let stats: Vec<Stats> = parse_lines(include_str!("../testdata/docker/stats.jsonl"));

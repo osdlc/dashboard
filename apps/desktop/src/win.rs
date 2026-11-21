@@ -9,6 +9,9 @@
 //! the WorkerW is a child of Progman instead of a top-level sibling; both are
 //! looked for.
 
+// Win32 calls for wallpaper mode and the message box.
+#![allow(unsafe_code)]
+
 use std::ffi::c_void;
 
 use tauri::{AppHandle, Monitor, WebviewWindow, WebviewWindowBuilder, Wry};
