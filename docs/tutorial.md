@@ -16,7 +16,8 @@ You need:
 ## 1. Install and run the demo
 
 There are no packages yet, so you build from source. `cargo install` builds the web view too,
-and puts `sitroom` in `~/.cargo/bin`, which is on your `PATH` once Rust is installed.
+and puts `sitroom` in `~/.cargo/bin`, which is on your `PATH` once Rust is installed. It also
+installs `sit`, a short name for the same thing: `sit tui` is `sitroom tui`.
 
 ```sh
 git clone https://github.com/osdlc/sitroom
