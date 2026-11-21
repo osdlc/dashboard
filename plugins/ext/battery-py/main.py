@@ -3,7 +3,7 @@
 macOS and /sys/class/power_supply elsewhere.
 
 The Python version of a native-vs-plugin benchmark widget. It follows the same rules as the
-native module (crates/modules-system/src/battery.rs) and the TypeScript plugin
+native module (crates/modules/src/system/battery.rs) and the TypeScript plugin
 (plugins/ext/battery-ts), and must show the same view for the same input.
 
     sitroom plugin-check -- python3 plugins/ext/battery-py/main.py

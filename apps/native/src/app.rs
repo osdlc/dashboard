@@ -11,7 +11,7 @@ use gpui::{
     WindowAppearance, div, point, prelude::*, px,
 };
 use sitroom_contract::{CatalogEntry, ClientMessage, Theme, TileUpdate, UiSettings};
-use sitroom_runtime::Host;
+use sitroom_modules::runtime::Host;
 use tokio::sync::{broadcast, mpsc, watch};
 
 use crate::editor::Editor;

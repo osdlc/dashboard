@@ -13,7 +13,7 @@ const COPIES: &[(&str, &str)] = &[
         "crates/cli/sdk/sitroom_plugin.py",
         "sdk/python/sitroom_plugin.py",
     ),
-    ("crates/config/demo.yaml", "examples/demo.yaml"),
+    ("crates/core/demo.yaml", "examples/demo.yaml"),
 ];
 
 #[test]

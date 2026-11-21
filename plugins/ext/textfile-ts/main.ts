@@ -1,7 +1,7 @@
 // Text file: shows a text or markdown file, and shows it again when it changes.
 //
 // The TypeScript version of a native-vs-plugin benchmark widget. It follows the same rules as
-// the native module (crates/modules-system/src/textfile.rs) and the Python plugin
+// the native module (crates/modules/src/system/textfile.rs) and the Python plugin
 // (plugins/ext/textfile-py), and must show the same view for the same file.
 //
 //   sitroom plugin-check --plugin-config '{"path": "README.md"}' -- node plugins/ext/textfile-ts/main.ts

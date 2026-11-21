@@ -29,14 +29,14 @@ module for the same input; the tests that check this are:
 
 | Widget | Test |
 |---|---|
-| clock | `crates/host/tests/bench_clock.rs`, on the samples in `crates/modules-fun/testdata/clock/` |
-| textfile | `crates/host/tests/bench_textfile.rs`, on the cases in `crates/modules-system/testdata/textfile/cases.json` |
-| git | `crates/host/tests/bench_git.rs` and `crates/cli/tests/bench_git.rs` |
-| docker | `crates/modules-ops/tests/docker_same_view.rs` and `crates/host/tests/bench_docker.rs` |
-| hackernews | `crates/modules-fun/tests/hackernews_same_view.rs` |
-| weather | `crates/modules-personal/tests/weather_same_view.rs` and `crates/host/tests/bench_weather.rs` |
-| feedreader | `crates/host/tests/bench_feedreader.rs`, on the samples in `crates/modules-fun/testdata/feedreader/` |
-| battery | `crates/host/tests/bench_battery.rs`, on the samples in `crates/modules-system/testdata/battery/` |
+| clock | `crates/core/tests/bench_clock.rs`, on the samples in `crates/modules/testdata/clock/` |
+| textfile | `crates/core/tests/bench_textfile.rs`, on the cases in `crates/modules/testdata/textfile/cases.json` |
+| git | `crates/core/tests/bench_git.rs` and `crates/cli/tests/bench_git.rs` |
+| docker | `crates/modules/tests/docker_same_view.rs` and `crates/core/tests/bench_docker.rs` |
+| hackernews | `crates/modules/tests/hackernews_same_view.rs` |
+| weather | `crates/modules/tests/weather_same_view.rs` and `crates/core/tests/bench_weather.rs` |
+| feedreader | `crates/core/tests/bench_feedreader.rs`, on the samples in `crates/modules/testdata/feedreader/` |
+| battery | `crates/core/tests/bench_battery.rs`, on the samples in `crates/modules/testdata/battery/` |
 
 `examples/bench.yaml` shows them side by side.
 
@@ -55,8 +55,8 @@ sitroom plugin-check -- node plugins/ext/hackernews-ts/main.ts
 sitroom plugin-check -- python3 plugins/ext/hackernews-py/main.py
 sitroom plugin-check --plugin-config '{"place":"Berlin"}' -- node plugins/ext/weather-ts/main.ts
 sitroom plugin-check --plugin-config '{"place":"Berlin"}' -- python3 plugins/ext/weather-py/main.py
-sitroom plugin-check --plugin-config '{"feeds": ["crates/modules-fun/testdata/feedreader/rss2.xml"]}' -- node plugins/ext/feedreader-ts/main.ts
-sitroom plugin-check --plugin-config '{"feeds": ["crates/modules-fun/testdata/feedreader/rss2.xml"]}' -- python3 plugins/ext/feedreader-py/main.py
+sitroom plugin-check --plugin-config '{"feeds": ["crates/modules/testdata/feedreader/rss2.xml"]}' -- node plugins/ext/feedreader-ts/main.ts
+sitroom plugin-check --plugin-config '{"feeds": ["crates/modules/testdata/feedreader/rss2.xml"]}' -- python3 plugins/ext/feedreader-py/main.py
 sitroom plugin-check -- node plugins/ext/battery-ts/main.ts
 sitroom plugin-check -- python3 plugins/ext/battery-py/main.py
 ```

@@ -9,7 +9,7 @@
     "summary": "sunset.png",
     "root": {
       "type": "image",
-      "path": "crates/modules-system/testdata/screensaver/sunset.png",
+      "path": "crates/modules/testdata/screensaver/sunset.png",
       "caption": "sunset.png"
     }
   }

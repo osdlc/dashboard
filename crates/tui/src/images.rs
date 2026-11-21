@@ -176,7 +176,7 @@ mod tests {
     fn sample() -> String {
         concat!(
             env!("CARGO_MANIFEST_DIR"),
-            "/../modules-system/testdata/screensaver/sunset.png"
+            "/../modules/testdata/screensaver/sunset.png"
         )
         .into()
     }
@@ -209,7 +209,7 @@ mod tests {
     fn every_sample_format_draws() {
         let dir = concat!(
             env!("CARGO_MANIFEST_DIR"),
-            "/../modules-system/testdata/screensaver"
+            "/../modules/testdata/screensaver"
         );
         for name in [
             "ball.gif",

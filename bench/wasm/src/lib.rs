@@ -9,7 +9,7 @@ use std::task::{Context, Poll, Waker};
 
 use sitroom_contract::rpc::{InitializeParams, InitializeResult, Request, Response, RpcError};
 use sitroom_contract::rpc::{error_code, method};
-use sitroom_host::Module;
+use sitroom_core::host::Module;
 use serde_json::Value;
 
 /// Answer requests on stdin until it closes.

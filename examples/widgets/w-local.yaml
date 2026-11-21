@@ -21,10 +21,10 @@ modules:
     refresh: 1m
     config: { command: git log --oneline -15, name: Recent commits }
   todo:
-    config: { path: ../../crates/modules-personal/testdata/todo/todo.txt, show_done: true }
+    config: { path: ../../crates/modules/testdata/todo/todo.txt, show_done: true }
   checklist:
     builtin: todo
-    config: { path: ../../crates/modules-personal/testdata/todo/todo.md }
+    config: { path: ../../crates/modules/testdata/todo/todo.md }
   kubernetes:
     demo: true
   security: {}

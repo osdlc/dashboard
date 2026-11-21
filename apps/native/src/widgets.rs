@@ -77,7 +77,7 @@ impl Out {
 pub fn run_action(action: &Action) {
     if let Action::OpenUrl { url } = action
         && is_web_url(url)
-        && let Err(err) = sitroom_host::browser::open(url)
+        && let Err(err) = sitroom_core::host::browser::open(url)
     {
         eprintln!("couldn't open the browser: {err}");
     }

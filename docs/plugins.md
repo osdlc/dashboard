@@ -32,7 +32,7 @@ modules:
 URL that returns one point per fetch draws a growing chart. All settings:
 `sitroom widgets http --json` and `sitroom widgets file --json` (the `config_schema`).
 
-Examples, all tested against the real host (`crates/host/tests/example_plugins.rs`). Each
+Examples, all tested against the real host (`crates/core/tests/example_plugins.rs`). Each
 is a [plugin package](#package-it): a folder with the program and a `sitroom-plugin.yaml`.
 
 | Package | Shows |
@@ -41,7 +41,7 @@ is a [plugin package](#package-it): a folder with the program and a `sitroom-plu
 | [`examples/plugins/git-repos`](../examples/plugins/git-repos) | Config, a stats row and a table, `open_url` actions, `log` notifications, error codes, a config schema |
 | [`examples/plugins/gh-actions`](../examples/plugins/gh-actions) | Node, no packages: async work, lists with tags and statuses, running a CLI |
 | [`examples/plugins/latency`](../examples/plugins/latency) | A live chart using host-kept history, per-target stats, status from thresholds |
-| [`plugins/cswap`](../plugins/cswap) | A Rust plugin: a table with gauges in cells |
+| [`crates/modules/src/agents/cswap.rs`](../crates/modules/src/agents/cswap.rs) | A Rust plugin: a table with gauges in cells |
 
 Run them all on one screen: `cargo run -p sitroom -- --config examples/plugins.yaml serve`.
 See them in the catalog: `cargo run -p sitroom -- --config examples/plugins.yaml widgets example`.
@@ -98,7 +98,7 @@ Any other exception becomes error -32603 with its message, and the stack goes to
 `console.log` and `print` go to stderr too, so they can't break the protocol. More in
 [`sdk/typescript`](../sdk/typescript/README.md) and [`sdk/python`](../sdk/python/README.md),
 with examples (`hello`, `big_files` for stats and a table, `load` for a live chart) tested
-against the real host in `crates/host/tests/sdk_examples.rs`.
+against the real host in `crates/core/tests/sdk_examples.rs`.
 
 ## Check a plugin
 

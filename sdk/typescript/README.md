@@ -49,7 +49,7 @@ Run any of them with `sitroom plugin-check -- node examples/<file>` (or `bun`).
 | [`examples/big_files.ts`](examples/big_files.ts) | A stats row and a table with gauges, a config schema, a config error, `log` |
 | [`examples/load.ts`](examples/load.ts) | A live chart with `liveSeries` |
 
-They are tested against the real host in `crates/host/tests/sdk_examples.rs`.
+They are tested against the real host in `crates/core/tests/sdk_examples.rs`.
 
 ## The types
 

@@ -1,9 +1,10 @@
 # Releasing to crates.io
 
-`cargo install sitroom` builds the `sitroom` crate from crates.io, so every crate it depends on is
-published too: `sitroom-cli-kit`, `-config`, `-contract`, `-host`, `-modules` and the seven
-`-modules-*` crates, `-runtime`, `-tui`, `-web` and `-cswap`. They share the workspace version and
-go out together. The desktop apps and `bench` have `publish = false`.
+`cargo install sitroom` builds the `sitroom` crate from crates.io, so the five crates it is built
+from are published too: `sitroom-contract` (the types plugins and renderers share),
+`sitroom-core` (config, host, CLI conventions), `sitroom-modules` (the built-in modules, the
+bundled cswap plugin and the runtime), `sitroom-tui` and `sitroom-web`. They share the workspace
+version and go out together. The desktop apps and `bench` have `publish = false`.
 
 ## What a published crate can't see
 
@@ -11,7 +12,7 @@ A crate on crates.io holds only the files in its own folder. So nothing a crate 
 live outside it:
 
 - **The SDK files** `sitroom plugin new` writes are copies in `crates/cli/sdk/`.
-- **The demo config** is a copy in `crates/config/demo.yaml`.
+- **The demo config** is a copy in `crates/core/demo.yaml`.
 - **The web UI** is built from `web/` in the repository. The published `sitroom-web` carries the
   built files in `crates/web/ui/` instead (git-ignored; `include` in its `Cargo.toml` lists it).
   Its `build.rs` uses `web/` when it is there, else `ui/`, else a placeholder page. Cargo counts

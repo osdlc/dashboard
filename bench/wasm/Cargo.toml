@@ -1,10 +1,10 @@
 # The clock and textfile modules built for WASI (wasm32-wasip1) as stdio
 # plugins, for the native-vs-plugin benchmark. The module code is the real
-# built-in module source (crates/modules-fun/src/clock.rs and
-# crates/modules-system/src/textfile.rs), compiled against two small stand-ins:
-# `host` for sitroom-host (tokio with process and net does not build for
-# WASI) and `common`, which is sitroom-modules-common's own source built
-# against that stand-in. Not part of the main workspace. See bench/README.md.
+# built-in module source (crates/modules/src/fun/clock.rs and
+# crates/modules/src/system/textfile.rs), compiled against two small stand-ins:
+# `host` for sitroom-core's `host` module (tokio with process and net does not
+# build for WASI) and `common`, which is sitroom-modules' own `common` source
+# built against that stand-in. Not part of the main workspace. See bench/README.md.
 [workspace]
 members = [".", "host", "common"]
 
@@ -24,7 +24,7 @@ publish = false
 anyhow = "1.0.104"
 async-trait = "0.1.92"
 sitroom-contract = { path = "../../crates/contract" }
-sitroom-host = { path = "host", package = "bench-wasm-host" }
+sitroom-core = { path = "host", package = "bench-wasm-host" }
 sitroom-modules-common = { path = "common", package = "bench-wasm-common" }
 jiff = "0.2.38"
 schemars = "1.2.3"

@@ -7,7 +7,7 @@ use sitroom_contract::catalog::search;
 use sitroom_contract::{CatalogEntry, EntryKind};
 
 pub fn run(config_paths: &[PathBuf], query: &str, tag: Option<&str>, json: bool) -> Result<()> {
-    let (entries, errors) = sitroom_runtime::catalog(config_paths);
+    let (entries, errors) = sitroom_modules::runtime::catalog(config_paths);
     for err in &errors {
         crate::warn(&format!("skipped a plugin package: {err}"));
     }

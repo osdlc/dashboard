@@ -1,7 +1,7 @@
 # Command line conventions
 
 The `sitroom` command follows the osdlc CLI standard (`standards/cli-interface.md` in
-osdlc/osdlc). The shared parts live in `crates/cli-kit`, which knows nothing about sitroom,
+osdlc/osdlc). The shared parts live in `crates/core/src/cli_kit/`, which knows nothing about sitroom,
 so it can move into a shared `cli-kit` crate once another Rust tool needs it.
 
 ## Exit codes
@@ -16,8 +16,8 @@ so it can move into a shared `cli-kit` crate once another Rust tool needs it.
 | 24 | There is no repository or remote to work on |
 | 25 | A service could not be reached, or limited the caller |
 
-The code uses the named constants in `sitroom_cli_kit::exit`. A failure that has its own code is
-a `sitroom_cli_kit::Failure` somewhere in the error chain; anything else exits 1.
+The code uses the named constants in `sitroom_core::cli_kit::exit`. A failure that has its own code is
+a `sitroom_core::cli_kit::Failure` somewhere in the error chain; anything else exits 1.
 
 ## Errors and warnings
 

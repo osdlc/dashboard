@@ -28,11 +28,11 @@ pub struct Record {
 }
 
 fn record_path() -> Result<PathBuf> {
-    Ok(sitroom_config::run_dirs()?.0.join("serve.json"))
+    Ok(sitroom_core::config::run_dirs()?.0.join("serve.json"))
 }
 
 fn log_path() -> Result<PathBuf> {
-    Ok(sitroom_config::run_dirs()?.1.join("serve.log"))
+    Ok(sitroom_core::config::run_dirs()?.1.join("serve.log"))
 }
 
 /// Called by the server once it is listening.
@@ -302,7 +302,7 @@ fn tasklist_has(out: &str, pid: u32) -> bool {
 
 /// Open `url` in the default browser. Skipped where there is no display.
 pub fn open_browser(url: &str) {
-    if let Err(err) = sitroom_host::browser::open(url) {
+    if let Err(err) = sitroom_core::host::browser::open(url) {
         crate::warn(&format!(
             "couldn't open a browser ({err}); open the link above within a minute"
         ))

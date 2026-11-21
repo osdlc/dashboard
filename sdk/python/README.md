@@ -46,7 +46,7 @@ Run any of them with `sitroom plugin-check -- python3 examples/<file>`.
 | [`examples/load.py`](examples/load.py) | A live chart with `live_series` |
 
 The examples find the SDK one folder up; your own plugin keeps it next to the main file. They
-are tested against the real host in `crates/host/tests/sdk_examples.rs`.
+are tested against the real host in `crates/core/tests/sdk_examples.rs`.
 
 ## The types
 

@@ -1,26 +1,41 @@
-//! Built-in modules. They live in bundle crates (system, dev, ops, fun, agents,
-//! personal), each behind cargo features; this crate gathers whatever the build
-//! includes. See docs/modules.md.
+//! Built-in modules, in bundles (system, dev, ops, fun, agents, personal), each
+//! module behind a cargo feature; `all()` gathers whatever the build includes.
+//! `runtime` runs them from the config. See docs/modules.md.
 
+#[cfg(feature = "agents")]
+pub mod agents;
+pub mod common;
+#[cfg(feature = "dev")]
+pub mod dev;
+#[cfg(feature = "fun")]
+pub mod fun;
+#[cfg(feature = "ops")]
+pub mod ops;
+#[cfg(feature = "personal")]
+pub mod personal;
+pub mod runtime;
+#[cfg(feature = "system")]
+pub mod system;
+
+pub use crate::common::Builtin;
 use sitroom_contract::CatalogEntry;
-use sitroom_host::Module;
-pub use sitroom_modules_common::Builtin;
+use sitroom_core::host::Module;
 
 /// Each included bundle's modules, in bundle order.
 fn bundles() -> Vec<&'static [Builtin]> {
     vec![
-        #[cfg(feature = "sitroom-modules-system")]
-        sitroom_modules_system::MODULES,
-        #[cfg(feature = "sitroom-modules-dev")]
-        sitroom_modules_dev::MODULES,
-        #[cfg(feature = "sitroom-modules-ops")]
-        sitroom_modules_ops::MODULES,
-        #[cfg(feature = "sitroom-modules-fun")]
-        sitroom_modules_fun::MODULES,
-        #[cfg(feature = "sitroom-modules-agents")]
-        sitroom_modules_agents::MODULES,
-        #[cfg(feature = "sitroom-modules-personal")]
-        sitroom_modules_personal::MODULES,
+        #[cfg(feature = "system")]
+        crate::system::MODULES,
+        #[cfg(feature = "dev")]
+        crate::dev::MODULES,
+        #[cfg(feature = "ops")]
+        crate::ops::MODULES,
+        #[cfg(feature = "fun")]
+        crate::fun::MODULES,
+        #[cfg(feature = "agents")]
+        crate::agents::MODULES,
+        #[cfg(feature = "personal")]
+        crate::personal::MODULES,
     ]
 }
 
@@ -44,14 +59,14 @@ pub fn builtin(id: &str) -> Option<Box<dyn Module>> {
 
 /// Make the relative paths in a built-in's `config:` start from `dir`, the
 /// folder of the config file that set it. Which settings are paths comes
-/// from the module's config schema (see `sitroom_modules_common::PATH_KEYWORD`).
+/// from the module's config schema (see `crate::common::PATH_KEYWORD`).
 pub fn resolve_paths(id: &str, config: &mut serde_json::Value, dir: &std::path::Path) {
     if let Some(schema) = all()
         .into_iter()
         .find(|b| b.id == id)
         .and_then(|b| (b.catalog)().config_schema)
     {
-        sitroom_modules_common::resolve_paths(config, &schema, dir);
+        crate::common::resolve_paths(config, &schema, dir);
     }
 }
 
@@ -205,7 +220,7 @@ mod tests {
     /// it flattens in (such as `Secret`, for the token settings).
     #[test]
     fn schemas_are_not_described_by_a_helper() {
-        let helpers: Vec<serde_json::Value> = sitroom_modules_common::flattened_helpers()
+        let helpers: Vec<serde_json::Value> = crate::common::flattened_helpers()
             .iter()
             .filter_map(|h| h.get("description").cloned())
             .collect();
@@ -236,8 +251,7 @@ mod tests {
             for (key, prop) in props {
                 let is_path = NAMES.contains(&key.as_str());
                 assert_eq!(
-                    prop.get(sitroom_modules_common::PATH_KEYWORD)
-                        == Some(&serde_json::Value::Bool(true)),
+                    prop.get(crate::common::PATH_KEYWORD) == Some(&serde_json::Value::Bool(true)),
                     is_path,
                     "{}.{key}",
                     e.id

@@ -3,7 +3,7 @@
 // items without a date go last. Times are shown in UTC.
 //
 // The TypeScript version of a native-vs-plugin benchmark widget. It follows the same rules as
-// the native module (crates/modules-fun/src/feedreader.rs) and the Python plugin
+// the native module (crates/modules/src/fun/feedreader.rs) and the Python plugin
 // (plugins/ext/feedreader-py), and must show the same view for the same input. Node has no XML
 // parser, so this file has a small one.
 //

@@ -6,6 +6,11 @@ released on their own; they record the stages the project was built in.
 
 ## Unreleased
 
+- **Six crates instead of nineteen.** `sitroom-core` is the config, the host and the CLI
+  conventions (was `sitroom-config`, `sitroom-host`, `sitroom-cli-kit`). `sitroom-modules` holds
+  every bundle, the runtime and the cswap plugin (was `sitroom-modules-*`, `sitroom-runtime`,
+  `sitroom-cswap`), each bundle a folder in `crates/modules/src/`. The `bundle-*` and `module-*`
+  features are unchanged; cswap is now `module-cswap`, in the agents bundle.
 - **`sit`, the short command.** `cargo install` now puts `sit` beside `sitroom`; it runs
   `sitroom` with the same arguments, so `sit serve` is `sitroom serve`.
 - **Clock face and display widgets:** `clock_face` is an analog dial (hour, minute and optional

@@ -8,13 +8,13 @@ use std::sync::Arc;
 use anyhow::Result;
 use clap::{Parser, Subcommand, ValueEnum};
 use serde_json::json;
-use sitroom_cli_kit::Failure;
-use sitroom_cli_kit::output::{Reporter, write_json};
-use sitroom_config::layers::Sources;
-use sitroom_config::packages::Packages;
-use sitroom_config::{Config, Part};
 use sitroom_contract::{CatalogEntry, Index, Manifest, Package, ServerMessage, View, rpc};
-use sitroom_runtime::{load_valid, missing_packages, start};
+use sitroom_core::cli_kit::Failure;
+use sitroom_core::cli_kit::output::{Reporter, write_json};
+use sitroom_core::config::layers::Sources;
+use sitroom_core::config::packages::Packages;
+use sitroom_core::config::{Config, Part};
+use sitroom_modules::runtime::{load_valid, missing_packages, start};
 
 mod background;
 mod dashboards;
@@ -53,9 +53,9 @@ struct Cli {
 }
 
 /// The exit codes, for the end of `--help`: every code in
-/// `sitroom_cli_kit::exit` (docs/cli.md).
+/// `sitroom_core::cli_kit::exit` (docs/cli.md).
 fn exit_codes() -> String {
-    use sitroom_cli_kit::exit;
+    use sitroom_core::cli_kit::exit;
     format!(
         "Exit codes: {} ok, {} failed, {} the command can't run as typed, \
          {} a program it needs is not installed, {} a service refused the request or gave \
@@ -248,7 +248,7 @@ enum PluginCommand {
         out: PathBuf,
     },
     /// `plugin <id>` runs a bundled plugin over stdio (sitroom starts it
-    /// itself; see sitroom_runtime::run_bundled).
+    /// itself; see sitroom_modules::runtime::run_bundled).
     #[command(external_subcommand)]
     Bundled(Vec<String>),
 }
@@ -293,7 +293,7 @@ fn main() -> ExitCode {
         name: NAME,
         json: cli.json,
     };
-    for note in sitroom_config::move_old_folders() {
+    for note in sitroom_core::config::move_old_folders() {
         warn(&note);
     }
     let result = tokio::runtime::Runtime::new()
@@ -441,7 +441,9 @@ async fn run(cli: Cli) -> Result<()> {
                     port,
                     dev_origin,
                     on_ready: Some(Box::new(on_ready)),
-                    catalog: Some(Arc::new(sitroom_runtime::catalog_source(layer_paths))),
+                    catalog: Some(Arc::new(sitroom_modules::runtime::catalog_source(
+                        layer_paths,
+                    ))),
                 },
             );
             // Stopped by Ctrl-C or `sitroom stop`: remove the record on the
@@ -564,11 +566,11 @@ async fn run(cli: Cli) -> Result<()> {
         Command::Widgets { query, tag } => {
             // Packages next to every file in use; just the machine file's if
             // the files don't load.
-            let paths = match sitroom_config::layers::load(&sources) {
+            let paths = match sitroom_core::config::layers::load(&sources) {
                 Ok(loaded) => loaded.paths(),
                 Err(_) => vec![match &cli.config {
                     Some(p) => p.clone(),
-                    None => sitroom_config::default_path()?,
+                    None => sitroom_core::config::default_path()?,
                 }],
             };
             widgets::run(&paths, &query.join(" "), tag.as_deref(), json)
@@ -648,7 +650,7 @@ async fn run(cli: Cli) -> Result<()> {
             PluginCommand::Remove { id, yes } => marketplace::remove(&id, yes),
             PluginCommand::Pack { dirs, out } => marketplace::pack(&dirs, &out),
             PluginCommand::Bundled(args) => match args.as_slice() {
-                [id] => sitroom_runtime::run_bundled(id)
+                [id] => sitroom_modules::runtime::run_bundled(id)
                     .unwrap_or_else(|| Err(anyhow::anyhow!("no bundled plugin {id:?}"))),
                 _ => Err(anyhow::anyhow!("usage: sitroom plugin <bundled-id>")),
             },
@@ -662,10 +664,10 @@ fn trust(sources: &Sources, file: Option<PathBuf>, remove: bool) -> Result<()> {
         Some(f) => f,
         None => {
             let here = std::env::current_dir()?;
-            sitroom_config::layers::find_project(&here).ok_or_else(|| {
+            sitroom_core::config::layers::find_project(&here).ok_or_else(|| {
                 anyhow::anyhow!(
                     "no {} in {} or above",
-                    sitroom_config::layers::PROJECT_FILE,
+                    sitroom_core::config::layers::PROJECT_FILE,
                     here.display()
                 )
             })?
@@ -683,8 +685,8 @@ fn trust(sources: &Sources, file: Option<PathBuf>, remove: bool) -> Result<()> {
     // Check it before trusting it, and say what it will run.
     let text = std::fs::read_to_string(&file)
         .map_err(|e| anyhow::anyhow!("reading {}: {e}", file.display()))?;
-    let config =
-        sitroom_config::parse(&text).map_err(|e| anyhow::anyhow!("{e:#} in {}", file.display()))?;
+    let config = sitroom_core::config::parse(&text)
+        .map_err(|e| anyhow::anyhow!("{e:#} in {}", file.display()))?;
     list.allow(&file)?;
     println!("trusted: {}", file.display());
     for line in dashboards::commands(&config) {

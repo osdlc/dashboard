@@ -4,7 +4,7 @@
 items without a date go last. Times are shown in UTC.
 
 The Python version of a native-vs-plugin benchmark widget. It follows the same rules as the
-native module (crates/modules-fun/src/feedreader.rs) and the TypeScript plugin
+native module (crates/modules/src/fun/feedreader.rs) and the TypeScript plugin
 (plugins/ext/feedreader-ts), and must show the same view for the same input. It parses with
 the standard library's ElementTree.
 

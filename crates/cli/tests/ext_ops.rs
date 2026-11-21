@@ -15,10 +15,10 @@ use std::process::Command;
 use std::sync::{Arc, Mutex};
 
 use serde_json::{Value, json};
-use sitroom_config::packages::{Installed, Packages};
 use sitroom_contract::check::check_view;
 use sitroom_contract::{Status, View, Widget};
-use sitroom_host::{Module, Plugin};
+use sitroom_core::config::packages::{Installed, Packages};
+use sitroom_core::host::{Module, Plugin};
 
 const IDS: [&str; 5] = ["datadog", "newrelic", "opsgenie", "pagerduty", "sentry"];
 

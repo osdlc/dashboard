@@ -22,7 +22,7 @@ modules:
     plugin: [python3, ../plugins/ext/clock-py/main.py]
     config: { zones: [local, UTC, America/New_York, Asia/Tokyo], seconds: true }
 
-  # ---- clock: a fixed time (crates/modules-fun/testdata/clock/world.json) ----
+  # ---- clock: a fixed time (crates/modules/testdata/clock/world.json) ----
   clock-sample:
     builtin: clock
     config: &clock-world
@@ -37,13 +37,13 @@ modules:
 
   # ---- textfile: the same notes file; edit it and all three update ----
   textfile:
-    config: { path: ../crates/modules-system/testdata/textfile/notes.md }
+    config: { path: ../crates/modules/testdata/textfile/notes.md }
   textfile-ts:
     plugin: [node, ../plugins/ext/textfile-ts/main.ts]
-    config: { path: ../crates/modules-system/testdata/textfile/notes.md }
+    config: { path: ../crates/modules/testdata/textfile/notes.md }
   textfile-py:
     plugin: [python3, ../plugins/ext/textfile-py/main.py]
-    config: { path: ../crates/modules-system/testdata/textfile/notes.md }
+    config: { path: ../crates/modules/testdata/textfile/notes.md }
 
   git:
     config: { repos: [..] }
@@ -74,13 +74,13 @@ modules:
   # ---- hackernews: the same saved stories, no network ----
   hackernews-sample:
     builtin: hackernews
-    config: { sample: ../crates/modules-fun/testdata/hackernews/top.json }
+    config: { sample: ../crates/modules/testdata/hackernews/top.json }
   hackernews-ts-sample:
     plugin: [node, ../plugins/ext/hackernews-ts/main.ts]
-    config: { sample: ../crates/modules-fun/testdata/hackernews/top.json }
+    config: { sample: ../crates/modules/testdata/hackernews/top.json }
   hackernews-py-sample:
     plugin: [python3, ../plugins/ext/hackernews-py/main.py]
-    config: { sample: ../crates/modules-fun/testdata/hackernews/top.json }
+    config: { sample: ../crates/modules/testdata/hackernews/top.json }
 
   # ---- weather: Open-Meteo, no key; calls api.open-meteo.com ----
   weather:
@@ -107,23 +107,23 @@ modules:
     builtin: feedreader
     config:
       feeds:
-        - ../crates/modules-fun/testdata/feedreader/rss2.xml
-        - ../crates/modules-fun/testdata/feedreader/atom.xml
-        - ../crates/modules-fun/testdata/feedreader/rdf.xml
+        - ../crates/modules/testdata/feedreader/rss2.xml
+        - ../crates/modules/testdata/feedreader/atom.xml
+        - ../crates/modules/testdata/feedreader/rdf.xml
   feedreader-ts-sample:
     plugin: [node, ../plugins/ext/feedreader-ts/main.ts]
     config:
       feeds:
-        - ../crates/modules-fun/testdata/feedreader/rss2.xml
-        - ../crates/modules-fun/testdata/feedreader/atom.xml
-        - ../crates/modules-fun/testdata/feedreader/rdf.xml
+        - ../crates/modules/testdata/feedreader/rss2.xml
+        - ../crates/modules/testdata/feedreader/atom.xml
+        - ../crates/modules/testdata/feedreader/rdf.xml
   feedreader-py-sample:
     plugin: [python3, ../plugins/ext/feedreader-py/main.py]
     config:
       feeds:
-        - ../crates/modules-fun/testdata/feedreader/rss2.xml
-        - ../crates/modules-fun/testdata/feedreader/atom.xml
-        - ../crates/modules-fun/testdata/feedreader/rdf.xml
+        - ../crates/modules/testdata/feedreader/rss2.xml
+        - ../crates/modules/testdata/feedreader/atom.xml
+        - ../crates/modules/testdata/feedreader/rdf.xml
 
   # ---- battery: this machine ----
   battery: {}
@@ -135,13 +135,13 @@ modules:
   # ---- battery: the same saved pmset output, for machines without a battery ----
   battery-sample:
     builtin: battery
-    config: { sample: ../crates/modules-system/testdata/battery/pmset-discharging.txt }
+    config: { sample: ../crates/modules/testdata/battery/pmset-discharging.txt }
   battery-ts-sample:
     plugin: [node, ../plugins/ext/battery-ts/main.ts]
-    config: { sample: ../crates/modules-system/testdata/battery/pmset-discharging.txt }
+    config: { sample: ../crates/modules/testdata/battery/pmset-discharging.txt }
   battery-py-sample:
     plugin: [python3, ../plugins/ext/battery-py/main.py]
-    config: { sample: ../crates/modules-system/testdata/battery/pmset-discharging.txt }
+    config: { sample: ../crates/modules/testdata/battery/pmset-discharging.txt }
 
 screens:
   - name: clock

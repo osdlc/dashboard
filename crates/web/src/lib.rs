@@ -11,7 +11,7 @@
 //!
 //! The session token never goes in a URL. The link the server prints and
 //! opens carries a one-time boot token (`?boot=`), which the page trades for
-//! the session token at `POST /api/session` (see `sitroom_cli_kit::boot`).
+//! the session token at `POST /api/session` (see `sitroom_core::cli_kit::boot`).
 //! The UI's static files (built by build.rs and embedded) are served without
 //! the token.
 
@@ -30,11 +30,11 @@ use axum::{Json, Router};
 use futures_util::{SinkExt, StreamExt};
 use rust_embed::RustEmbed;
 use serde::{Deserialize, Serialize};
-use sitroom_cli_kit::boot::{self, Redeem, SignIn};
 use sitroom_contract::{
     CatalogEntry, CatalogResponse, ClientMessage, ServerMessage, UiSettings, Widget,
 };
-use sitroom_host::Host;
+use sitroom_core::cli_kit::boot::{self, Redeem, SignIn};
+use sitroom_core::host::Host;
 use tokio::sync::broadcast::error::RecvError;
 use tokio::sync::{mpsc, watch};
 
@@ -562,7 +562,7 @@ mod tests {
     struct Picture(String);
 
     #[async_trait::async_trait]
-    impl sitroom_host::Module for Picture {
+    impl sitroom_core::host::Module for Picture {
         async fn init(
             &mut self,
             _: serde_json::Value,
