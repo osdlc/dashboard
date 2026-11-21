@@ -10,7 +10,7 @@ exclude = ["plugins/ext", "bench/wasm"]
 
 [workspace.package]
 edition = "2024"
-version = "0.8.0"
+version = "0.9.0"
 # The MSRV: sysinfo needs 1.95, the highest of any dependency.
 rust-version = "1.95"
 license = "MIT OR Apache-2.0"
