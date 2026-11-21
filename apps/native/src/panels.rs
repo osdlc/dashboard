@@ -182,7 +182,7 @@ impl Dashboard {
 
     /// Reads how a request from this window went. Closes the dialog once the
     /// dashboard exists; returns true if it was a blank one.
-    pub fn sitroom_created(&mut self, settings: &UiSettings) -> bool {
+    pub fn dashboard_created(&mut self, settings: &UiSettings) -> bool {
         let Some(new) = &mut self.new_dashboard else {
             return false;
         };
