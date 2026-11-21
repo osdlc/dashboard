@@ -238,36 +238,6 @@ pub fn run_dirs() -> Result<(PathBuf, PathBuf)> {
     Ok((tool.runtime().into_path(), tool.logs().into_path()))
 }
 
-/// Moves the config and data folders an earlier build kept under the old
-/// name, `dashboard`, to `sitroom`'s, each once: only when the new one doesn't
-/// exist yet. Returns what it did, to tell the user. 0.9.0, the first release,
-/// shipped with it for builds from before the rename; remove it in 1.0.
-pub fn move_old_folders() -> Vec<String> {
-    let Ok(dirs) = tiered_dirs() else {
-        return Vec::new();
-    };
-    let (Ok(new), Ok(old)) = (dirs.standalone(TOOL), dirs.standalone("dashboard")) else {
-        return Vec::new();
-    };
-    // On Windows both are under %APPDATA%: the first move takes both.
-    [(old.config(), new.config()), (old.durable(), new.durable())]
-        .into_iter()
-        .filter_map(|(old, new)| move_folder(&old.into_path(), &new.into_path()))
-        .collect()
-}
-
-/// Moves `old` to `new` if `old` is a folder and `new` doesn't exist.
-fn move_folder(old: &Path, new: &Path) -> Option<String> {
-    if new.exists() || !old.is_dir() {
-        return None;
-    }
-    let (from, to) = (old.display(), new.display());
-    Some(match std::fs::rename(old, new) {
-        Ok(()) => format!("moved {from} to {to} (sitroom used to be called dashboard)"),
-        Err(err) => format!("couldn't move {from} to {to}: {err}; move it yourself"),
-    })
-}
-
 /// Load from `path`, or the default path. A missing file means `DEFAULT_CONFIG`.
 pub fn load(path: Option<&Path>) -> Result<Loaded> {
     let path = match path {
@@ -1015,22 +985,5 @@ color_themes:
         assert!(err("color_themes:\n  x:\n    base: mine\n").contains("not a built-in theme"));
         assert!(err("color_themes:\n  paper: {}\n").contains("a built-in theme has this name"));
         assert!(parse("color_themes:\n  x:\n    lite: {}\n").is_err());
-    }
-
-    #[test]
-    fn an_old_folder_moves_once() {
-        let dir = std::env::temp_dir().join(format!("sitroom-move-{}", std::process::id()));
-        let (old, new) = (dir.join("dashboard"), dir.join("sitroom"));
-        std::fs::create_dir_all(&old).unwrap();
-        std::fs::write(old.join("config.yaml"), "screens: []\n").unwrap();
-        let note = move_folder(&old, &new).unwrap();
-        assert!(note.starts_with("moved "), "{note}");
-        assert!(new.join("config.yaml").is_file() && !old.exists());
-        // Nothing to move now; and an existing new folder is never replaced.
-        assert_eq!(move_folder(&old, &new), None);
-        std::fs::create_dir_all(&old).unwrap();
-        assert_eq!(move_folder(&old, &new), None);
-        assert!(old.is_dir());
-        std::fs::remove_dir_all(&dir).unwrap();
     }
 }

@@ -4,6 +4,12 @@ Sitroom is pre-1.0: the config format, the module contract and the CLI can still
 between minor versions. 0.4.0 is the first public release. The earlier versions were not
 released on their own; they record the stages the project was built in.
 
+## Unreleased
+
+- **No more moving the old folders.** 0.9.0 moved `~/.config/dashboard` and the data folder to
+  `sitroom/` on first run. That is gone: sitroom keeps no code for names or formats it no
+  longer uses. Move them yourself if you skipped 0.9.0.
+
 ## 0.9.0
 
 - **Renamed to sitroom** (was `dashboard`): the command, the crates, the repository
