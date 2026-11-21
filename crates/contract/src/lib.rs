@@ -755,6 +755,13 @@ pub struct UiSettings {
     /// tiles change. The web view does not use it.
     #[serde(default = "default_tui_fps")]
     pub tui_fps: u32,
+    /// The most frames a second the native app draws. The web view does not
+    /// use it.
+    #[serde(default = "default_native_fps")]
+    pub native_fps: u32,
+    /// False: the native app shows new values without motion.
+    #[serde(default = "yes")]
+    pub native_animations: bool,
     /// Where the config came from, for the settings screen.
     pub config: ConfigInfo,
 }
@@ -764,6 +771,13 @@ pub const DEFAULT_TUI_FPS: u32 = 4;
 
 fn default_tui_fps() -> u32 {
     DEFAULT_TUI_FPS
+}
+
+/// The native app's frame limit when the config sets none.
+pub const DEFAULT_NATIVE_FPS: u32 = 30;
+
+fn default_native_fps() -> u32 {
+    DEFAULT_NATIVE_FPS
 }
 
 /// Where the config came from, for the settings screen.

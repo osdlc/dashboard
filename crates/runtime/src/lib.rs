@@ -512,6 +512,8 @@ impl Runtime {
             color_themes: self.config.color_theme_names(),
             rotate: self.config.rotate_settings(&screens),
             tui_fps: self.config.tui.fps,
+            native_fps: self.config.native.fps,
+            native_animations: self.config.native.animations,
             screens,
             modules: modules
                 .iter()
@@ -846,6 +848,8 @@ fn placeholder_settings() -> UiSettings {
         modules: vec![],
         rotate: None,
         tui_fps: sitroom_contract::DEFAULT_TUI_FPS,
+        native_fps: sitroom_contract::DEFAULT_NATIVE_FPS,
+        native_animations: true,
         config: ConfigInfo::default(),
     }
 }

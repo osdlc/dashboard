@@ -59,6 +59,31 @@ Links open in the system browser, not in the app: the windows only load sitroom'
 page, and a link that asks for a new window (`target="_blank"` or `window.open`)
 goes to the browser too. Only `http` and `https` links are opened.
 
+## Frame rate and animations
+
+The native GPUI app (`apps/native`) has its own settings, like `tui:` for the terminal view:
+
+```yaml
+native:
+  fps: 30            # 1 to 240; default 30
+  animations: false  # default true
+```
+
+`fps` is the most frames a second the app draws. Animation and new data both wait for the next
+frame, so a lower number uses less CPU and moves less smoothly; the display's refresh rate is the
+limit above that. Input redraws at once, and an update for a tile on another screen doesn't
+redraw at all.
+
+With `animations: true`, numbers roll to new values, screens fade in, and charts scroll as new
+points arrive. With `false`, new values show at once, and the app draws only when data arrives
+or you press a key, at most `fps` times a second.
+
+The web view and the Tauri app ignore both, because the browser paces their animations. Like
+`theme:`, the last config file that sets `native:` wins.
+
+In the native app's screensaver, Esc quits and a click shows a tile fullscreen (Esc closes it
+first). Moving the mouse does nothing, so you can reach a tile. Cmd-Q also quits.
+
 ## Windows screensaver (.scr)
 
 Copy `sitroom-desktop.exe` to `Sitroom.scr`. Windows runs a screensaver with:
