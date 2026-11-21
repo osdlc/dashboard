@@ -229,7 +229,7 @@ pub enum Widget {
         color: ColorScale,
         /// Draw the first series above the axis and the second below it,
         /// e.g. network download and upload. Negative values count as 0 here
-        /// (`sitroom check` flags them).
+        /// (`sitroom plugin-check` flags them).
         #[serde(default)]
         mirrored: bool,
         /// How values are written: plain, bytes or count.

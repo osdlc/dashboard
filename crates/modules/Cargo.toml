@@ -6,6 +6,10 @@ rust-version.workspace = true
 version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+keywords = ["dashboard", "monitoring", "widgets", "sitroom"]
+categories = ["visualization", "development-tools"]
 
 # A module-<id> feature per module, and a bundle-<name> feature per bundle
 # (see docs/modules.md). Each module turns on its bundle's marker feature

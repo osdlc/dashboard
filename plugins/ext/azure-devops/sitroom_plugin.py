@@ -465,7 +465,7 @@ class SeriesWidget(_SeriesWidgetRequired, total=False):
     id: Optional[str]
     # Draw the first series above the axis and the second below it,
     # e.g. network download and upload. Negative values count as 0 here
-    # (`sitroom check` flags them).
+    # (`sitroom plugin-check` flags them).
     mirrored: bool
     # A line, a filled area or one bar per sample.
     style: "SeriesStyle"

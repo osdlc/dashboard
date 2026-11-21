@@ -49,7 +49,7 @@
 // every widget page's config example loads in `sitroom config`.
 
 import { execFileSync, spawn } from 'node:child_process'
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { createServer } from 'node:http'
 import { dirname, extname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -141,7 +141,7 @@ function writeData({ data: dataFile }) {
   for (const entry of entries) {
     if (entry.kind !== 'builtin') continue
     entry.bundle = bundles.get(entry.id)
-    if (!entry.bundle) fail(`${entry.id}: not found in any crates/modules-<bundle> crate`)
+    if (!entry.bundle) fail(`${entry.id}: not found in any crates/modules/src/<bundle>/ folder`)
   }
   writeFileSync(dataFile, JSON.stringify({ entries }, null, 1) + '\n')
   console.log(`${relative(site, dataFile)}: ${entries.length} widgets`)
@@ -176,16 +176,15 @@ function writeBlocks({ data: dataFile }) {
   console.log(relative(site, schemaFile))
 }
 
-/** Built-in module ID to its bundle (system, dev, ...): the crates/modules-<bundle> crate that declares it. */
+/** Built-in module ID to its bundle (system, dev, ...): the crates/modules/src/<bundle>/ folder that declares it. */
 function bundleOf() {
   const ids = new Map()
-  const crates = join(repo, 'crates')
-  for (const dir of readdirSync(crates)) {
-    const bundle = dir.match(/^modules-(.+)$/)?.[1]
-    if (!bundle || bundle === 'common') continue
-    for (const file of readdirSync(join(crates, dir, 'src'), { recursive: true })) {
+  const src = join(repo, 'crates/modules/src')
+  for (const bundle of readdirSync(src)) {
+    if (bundle === 'common' || bundle === 'runtime' || !statSync(join(src, bundle)).isDirectory()) continue
+    for (const file of readdirSync(join(src, bundle), { recursive: true })) {
       if (!file.endsWith('.rs')) continue
-      const text = readFileSync(join(crates, dir, 'src', file), 'utf8')
+      const text = readFileSync(join(src, bundle, file), 'utf8')
       for (const m of text.matchAll(/(?:\bid: |const ID: &str = )"([a-z0-9-]+)"/g)) ids.set(m[1], bundle)
     }
   }

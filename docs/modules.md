@@ -100,29 +100,31 @@ Python plugin); `bench/` has the harness.
 
 ## Adding a module to a bundle
 
-Say the new module is `weather` and it goes in the `personal` bundle. A new bundle is a new
+Say the new module is `tides` (there is none yet) and it goes in the `personal` bundle. A new bundle is a new
 folder in `crates/modules/src/`: copy `fun/` (the smallest), add a marker feature for it in
 `crates/modules/Cargo.toml` (`fun = []`), declare it in `lib.rs` behind that feature, and add
-it to `bundles()`.
+it to `bundles()`. Add `bundle-<name>` to both `crates/modules/Cargo.toml` and
+`crates/cli/Cargo.toml`, and to `default` in each.
 
-1. **File.** Write `crates/modules/src/<bundle>/weather.rs`: a struct that implements
+1. **File.** Write `crates/modules/src/<bundle>/tides.rs`: a struct that implements
    `sitroom_core::host::Module` (`init` reads the `config:` block and returns a manifest, `render`
    returns a `View`). Copy the shape of a module close to yours: `uptime.rs` for a command or
    URL check, `jira.rs` for a token API, `cpu.rs` for a graph.
-2. **Feature.** In `crates/modules/Cargo.toml`, add `module-weather` with the bundle's
-   marker and the module's own dependencies (`module-weather = ["personal", "dep:x"]`, or
+2. **Feature.** In `crates/modules/Cargo.toml`, add `module-tides` with the bundle's
+   marker and the module's own dependencies (`module-tides = ["personal", "dep:x"]`, or
    `"http"` for reqwest), and add it to `bundle-personal`. In `crates/cli/Cargo.toml` add
-   `module-weather = ["sitroom-modules/module-weather"]`.
+   `module-tides = ["sitroom-modules/module-tides"]`, and add `"module-tides"` to that file's
+   `bundle-personal` too (its tests check `cfg(feature = "module-tides")`).
 3. **Registration.** In the bundle's `mod.rs`, declare the file behind its feature
-   (`#[cfg(feature = "module-weather")] pub mod weather;`) and add a `Builtin` to `MODULES`:
+   (`#[cfg(feature = "module-tides")] pub mod tides;`) and add a `Builtin` to `MODULES`:
 
    ```rust
-   #[cfg(feature = "module-weather")]
+   #[cfg(feature = "module-tides")]
    Builtin {
-       id: "weather",
+       id: "tides",
        core: false, // true only for the system and GitHub tiles, listed first
-       new: || Box::new(weather::Weather::default()),
-       catalog: weather::catalog,
+       new: || Box::new(tides::Tides::default()),
+       catalog: tides::catalog,
    },
    ```
 

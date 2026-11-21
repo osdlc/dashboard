@@ -1,6 +1,6 @@
 # The example plugins on one screen. From the repository root:
 #
-#   cargo run -p sitroom -- --config examples/plugins.yaml
+#   cargo run -p sitroom -- --config examples/plugins.yaml tui     # or serve
 #
 # Each example is a plugin package: a folder under plugins/ with a
 # sitroom-plugin.yaml. Packages next to the config file are found by ID, so

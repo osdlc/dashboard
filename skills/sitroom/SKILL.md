@@ -10,8 +10,16 @@ in another language, use the `plugin` skill.
 
 ## Install
 
-There are no prebuilt packages yet. Build from source. It needs Rust and pnpm (pnpm builds
-the web view, which is embedded in the binary):
+```sh
+brew tap osdlc/tap && brew trust osdlc/tap   # once
+brew install osdlc/tap/sitroom               # Homebrew, macOS and Linux
+cargo install sitroom                        # or from crates.io (needs only Rust)
+```
+
+Each installs `sitroom` and `sit` (the same program, a shorter name). Prebuilt archives for
+macOS and Linux are on the GitHub Release: https://github.com/osdlc/sitroom/releases/latest.
+
+From a clone it needs Rust and pnpm (pnpm builds the web view, which is embedded in the binary):
 
 ```sh
 git clone https://github.com/osdlc/sitroom && cd sitroom
@@ -39,7 +47,8 @@ When you start it for someone, run `sitroom serve -d --no-open` and give them th
 a minute. If it expired, run `sitroom open --no-open` for a new one.
 
 With no config file sitroom shows a demo of eight screens. It is `examples/demo.yaml` in
-the repository; copy it as a starting point.
+the repository (https://github.com/osdlc/sitroom/blob/main/examples/demo.yaml); copy it as a
+starting point.
 
 Add `?mode=ambient` to the web page's URL for ambient mode: no controls, large type, screens
 rotating.

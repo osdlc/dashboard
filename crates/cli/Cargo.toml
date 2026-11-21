@@ -6,6 +6,10 @@ rust-version.workspace = true
 version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
+readme = "../../README.md"
+keywords = ["dashboard", "tui", "terminal", "monitoring", "developer-tools"]
+categories = ["command-line-utilities", "visualization", "development-tools"]
 # Two programs: `sitroom` and `sit`, its short name (src/bin/sit.rs).
 default-run = "sitroom"
 

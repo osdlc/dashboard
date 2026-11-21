@@ -40,19 +40,24 @@ git tag v0.9.0 && git push origin v0.9.0
 
 `.github/workflows/release.yml` then:
 
-1. `publish`: checks the tag matches the version, builds the UI into `crates/web/ui`, runs
-   `cargo publish --workspace --dry-run` (packs and builds every crate), waits for approval of
-   the `crates-io` environment, then publishes.
+1. `publish`: waits for approval of the `crates-io` environment, checks the tag matches the
+   version, then runs `scripts/crates.sh dry-run` (builds the UI into `crates/web/ui`, packs and
+   builds every crate) and `scripts/crates.sh publish`. A version already on crates.io (published
+   by hand) is skipped; some crates published and some not stops the run.
 2. `binaries`, at the same time: builds `sitroom` and `sit` (profile `dist`) for
    `aarch64-apple-darwin`, `x86_64-apple-darwin`, `x86_64-unknown-linux-gnu` and
    `aarch64-unknown-linux-gnu`, one `sitroom-<version>-<target>.tar.gz` each.
 3. `github`, once both are done: the GitHub Release of the tag, with the archives, `SHA256SUMS`
    and the changelog's section as the notes.
 4. `homebrew`: writes `Formula/sitroom.rb` in osdlc/homebrew-tap for those archives and pushes
-   it as the osdlc-release GitHub App, the way osdlc/skillwright updates its formula. `cargo publish --workspace` goes in
-dependency order and waits for each crate to appear in the index before the next. A version
-can't be replaced once published, only yanked. Run the workflow by hand (Actions, release, Run
-workflow) for a dry run only.
+   it as the osdlc-release GitHub App, the way osdlc/skillwright updates its formula.
+
+`cargo publish` goes in dependency order and waits for each crate to appear in the index before
+the next. A version can't be replaced once published, only yanked. crates.io limits how many
+*new* crates an account creates in a short time, so adding a crate may stop a publish partway
+with `429 Too Many Requests`: wait until the time it gives, then run `cargo publish -p <crate>`
+for the rest. Run the workflow by hand (Actions, release, Run workflow) for a dry run: it
+builds the four binaries too, and uploads nothing.
 
 ## Setting it up (once)
 

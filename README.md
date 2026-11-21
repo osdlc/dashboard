@@ -1,22 +1,39 @@
 # sitroom
 
-Modular developer dashboard with a terminal UI and a web UI. See [docs/](docs/) for the design and
+Modular developer dashboard with a terminal UI and a web UI. The site,
+<https://osdlc.github.io/sitroom/>, has a tour and the tutorial. See [docs/](docs/) for the design and
 [docs/roadmap.md](docs/roadmap.md) for where it is going and what is experimental.
+
+## Install
+
+```sh
+brew tap osdlc/tap && brew trust osdlc/tap   # once
+brew install osdlc/tap/sitroom               # Homebrew, macOS and Linux
+cargo install sitroom                        # or from crates.io (needs only Rust)
+```
+
+Each installs `sitroom` and `sit`, its short name (`sit tui` is `sitroom tui`). Prebuilt archives
+for macOS and Linux (arm64 and x86-64) are on the [GitHub Release](https://github.com/osdlc/sitroom/releases/latest),
+with `SHA256SUMS`. The macOS binaries are not signed or notarized: Homebrew is fine, but a binary
+downloaded in a browser is stopped by Gatekeeper until you clear its quarantine flag.
+
+## Build from source
 
 Requires Rust and pnpm. `cargo build` also builds the Vue app in `web/` (only when its files change) and embeds it in the binary. Set `SITROOM_SKIP_UI_BUILD=1` to skip that.
 
-## Run
+### Run from a clone
 
 ```sh
 cargo run -p sitroom -- tui      # terminal UI (q to quit)
 cargo run -p sitroom -- serve    # web UI: opens http://127.0.0.1:7878/?boot=… in the browser (--no-open to skip)
 cargo run -p sitroom -- serve -d # the same in the background; `sitroom status` / `sitroom stop`
 cargo run -p sitroom -- open     # sign another browser tab in to the running server
-cargo run -p sitroom-desktop     # desktop app: a window, --wallpaper or --screensaver (docs/desktop.md)
+cargo run -p sitroom-desktop     # desktop app: a window, --ambient, --wallpaper or --screensaver (docs/desktop.md)
+cargo run -p sitroom-native      # the native GPUI app (experimental), same flags
 ```
 
-Installed (`cargo install --path crates/cli`), it's `sitroom tui`, `sitroom serve` and so on, or
-`sit` for short: `sit` runs `sitroom` with the same arguments.
+Installed, it's `sitroom tui`, `sitroom serve` and so on, or `sit` for short: `sit` runs `sitroom`
+with the same arguments. `cargo install --path crates/cli` installs a clone's build.
 
 Add `mode=ambient` to the web page's URL (`?mode=ambient`) for ambient mode: no controls, large type, screens rotating.
 
