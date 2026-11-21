@@ -72,11 +72,23 @@ workflow) for a dry run only.
    environment `crates-io`. Then delete the `CARGO_REGISTRY_TOKEN` secret and revoke the token.
    Later releases get a short-lived token from crates.io instead.
 
-To publish from a machine instead (it needs a few GB free for the build), from a clean checkout:
+### Publishing from a machine instead
+
+The crates can be published by hand, the first release included; then no token goes in GitHub.
+It needs Rust, pnpm and a few GB free for the build. From a clean checkout of `main` at the
+release commit:
 
 ```sh
+cargo login                                          # a token with publish-new and publish-update
 (cd web && pnpm install --frozen-lockfile && pnpm build)
 rm -rf crates/web/ui && cp -r web/dist crates/web/ui
-cargo publish --workspace --allow-dirty --dry-run
-cargo publish --workspace --allow-dirty
+EXCLUDE="--exclude sitroom-desktop --exclude sitroom-native --exclude sitroom-bench"
+cargo publish --workspace --locked --allow-dirty --dry-run $EXCLUDE
+cargo publish --workspace --locked --allow-dirty $EXCLUDE
+rm -rf crates/web/ui
+git tag v0.9.0 && git push origin v0.9.0
 ```
+
+Then push the tag as usual. The workflow's `publish` job sees the version is on crates.io
+already and skips the upload; the binaries, the GitHub Release and the formula go ahead. (If
+only some crates made it, it stops: publish the rest by hand, then re-run it.)
