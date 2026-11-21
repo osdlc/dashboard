@@ -305,11 +305,11 @@ mod tests {
         assert!(requests[1].contains("\"v1\""), "{}", requests[1]);
     }
 
-    #[allow(unsafe_code)]
     #[tokio::test]
     async fn sends_the_token_and_picks_fields() {
-        // SAFETY: only this test reads this variable.
-        unsafe { std::env::set_var("DASHBOARD_HTTP_TEST_TOKEN", "t0k") };
+        // Cargo sets CARGO_PKG_NAME for every test run, so it serves as the
+        // token without the test changing the environment.
+        let token = env!("CARGO_PKG_NAME");
         let (url, server) = serve(vec![ok("", DEMO), ok("", DEMO)]).await;
         let fields = serde_json::to_value(
             demo_fields()
@@ -321,7 +321,7 @@ mod tests {
         let mut m = Http::default();
         m.init(serde_json::json!({
             "url": url, "name": "Queue", "fields": fields,
-            "token_env": "DASHBOARD_HTTP_TEST_TOKEN",
+            "token_env": "CARGO_PKG_NAME",
         }))
         .await
         .unwrap();
@@ -331,19 +331,21 @@ mod tests {
 
         let mut m = Http::default();
         m.init(serde_json::json!({
-            "url": url, "token_env": "DASHBOARD_HTTP_TEST_TOKEN", "token_header": "X-Api-Key",
+            "url": url, "token_env": "CARGO_PKG_NAME", "token_header": "X-Api-Key",
         }))
         .await
         .unwrap();
         m.render().await.unwrap();
         let requests = server.await.unwrap();
         assert!(
-            requests[0].contains("authorization: Bearer t0k"),
+            requests[0].contains(&format!("authorization: Bearer {token}")),
             "{}",
             requests[0]
         );
         assert!(
-            requests[1].to_ascii_lowercase().contains("x-api-key: t0k"),
+            requests[1]
+                .to_ascii_lowercase()
+                .contains(&format!("x-api-key: {token}")),
             "{}",
             requests[1]
         );

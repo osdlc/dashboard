@@ -263,9 +263,7 @@ const SAMPLES: &[(&str, &[u8])] = &[
 fn samples() -> Result<PathBuf> {
     static WRITES: AtomicUsize = AtomicUsize::new(0);
     #[cfg(unix)]
-    // SAFETY: getuid has no preconditions and cannot fail.
-    #[allow(unsafe_code)]
-    let user = unsafe { libc::getuid() };
+    let user = rustix::process::getuid().as_raw();
     #[cfg(not(unix))]
     let user = std::env::var("USERNAME").unwrap_or_default();
     let dir = std::env::temp_dir().join(format!("dashboard-screensaver-samples-{user}"));
@@ -467,9 +465,7 @@ mod tests {
     #[test]
     fn the_samples_folder_must_be_private() {
         use std::os::unix::fs::PermissionsExt;
-        // SAFETY: getuid has no preconditions and cannot fail.
-        #[allow(unsafe_code)]
-        let user = unsafe { libc::getuid() };
+        let user = rustix::process::getuid().as_raw();
         let dir =
             std::env::temp_dir().join(format!("dashboard-saver-private-{}", std::process::id()));
         let mode = |d: &Path| std::fs::metadata(d).unwrap().permissions().mode() & 0o777;

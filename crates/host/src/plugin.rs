@@ -219,16 +219,15 @@ mod tests {
         let mut plugin =
             Plugin::new("t", vec!["sh".into(), "-c".into(), script.into()]).in_dir(&dir);
         assert!(plugin.init(serde_json::Value::Null).await.is_err());
-        let pid: libc::pid_t = std::fs::read_to_string(dir.join("pid"))
+        let pid: i32 = std::fs::read_to_string(dir.join("pid"))
             .unwrap()
             .trim()
             .parse()
             .unwrap();
+        let pid = rustix::process::Pid::from_raw(pid).unwrap();
         std::fs::remove_dir_all(&dir).ok();
         tokio::time::sleep(Duration::from_millis(200)).await;
-        // SAFETY: signal 0 only checks that the process exists.
-        #[allow(unsafe_code)]
-        let alive = unsafe { libc::kill(pid, 0) } == 0;
+        let alive = rustix::process::test_kill_process(pid).is_ok();
         assert!(!alive, "sleep {pid} still running");
     }
 }
