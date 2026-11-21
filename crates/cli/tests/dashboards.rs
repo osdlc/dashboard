@@ -2,6 +2,9 @@
 //! run as a user would, with the config and data homes and the working
 //! directory in a temp folder. No network.
 
+// The screens in these tests use the cswap tile.
+#![cfg(feature = "module-cswap")]
+
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
@@ -54,7 +57,6 @@ fn text(out: &Output) -> String {
 }
 
 #[test]
-#[cfg(feature = "module-cswap")] // its screens use the cswap tile
 fn import_list_export_and_layers() {
     let t = Temp::new();
     let config = t.write(
