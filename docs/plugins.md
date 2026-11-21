@@ -373,9 +373,12 @@ A widget is a JSON object with a `type`. Optional fields can be left out.
   "detail":"HTTP 200","history":["ok","ok","error","ok"],"url":"https://api.example.com"}]}
 
 {"type":"image","path":"/home/me/Pictures/sunset.png","caption":"sunset.png"}
-// The terminal draws it with Kitty, iTerm2 or Sixel graphics, or half blocks. The path is
-// on the dashboard's machine; the web view loads it from the server, which sends only
-// pictures that a tile shows now.
+// The terminal draws it with Kitty, iTerm2 or Sixel graphics, or half blocks
+// (DASHBOARD_IMAGES=halfblocks skips asking the terminal). The path is on the dashboard's
+// machine, and a relative one starts from the folder the dashboard was started in. The web
+// view loads it from the server, which sends only pictures that a tile or a catalog demo
+// shows now: any PNG, JPEG, GIF, WebP or BMP file a plugin names, so name only files you
+// mean to show.
 
 {"type":"row","children":[ ... ]}      // side by side (stacks when narrow)
 {"type":"column","children":[ ... ]}   // top to bottom

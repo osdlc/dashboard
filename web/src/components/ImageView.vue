@@ -6,34 +6,38 @@ import { apiHeaders } from '../session'
 type Image = Extract<Widget, { type: 'image' }>
 const props = defineProps<{ widget: Image }>()
 
+const src = ref<string | null>(null)
+const failed = ref(false)
+let latestLoad = 0
+
 /**
  * The picture is a file on the dashboard's machine. The server sends it from
  * /api/image, but only while a tile shows it, and only with the session token,
  * which can't go in an <img> URL: so it is fetched and shown as a blob.
  */
-const src = ref<string | null>(null)
-const failed = ref(false)
-let loading = 0
-
 async function load(path: string) {
-  const mine = ++loading
+  const mine = ++latestLoad
   failed.value = false
   try {
     const res = await fetch(`/api/image?path=${encodeURIComponent(path)}`, { headers: apiHeaders() })
     if (!res.ok) throw new Error(String(res.status))
     const url = URL.createObjectURL(await res.blob())
     // A newer picture was asked for while this one loaded.
-    if (mine !== loading) return URL.revokeObjectURL(url)
+    if (mine !== latestLoad) return URL.revokeObjectURL(url)
     if (src.value) URL.revokeObjectURL(src.value)
     src.value = url
   } catch {
-    if (mine === loading) failed.value = true
+    if (mine !== latestLoad) return
+    // Not the old picture under the new caption.
+    if (src.value) URL.revokeObjectURL(src.value)
+    src.value = null
+    failed.value = true
   }
 }
 
 watch(() => props.widget.path, load, { immediate: true })
 onBeforeUnmount(() => {
-  loading++
+  latestLoad++
   if (src.value) URL.revokeObjectURL(src.value)
 })
 </script>

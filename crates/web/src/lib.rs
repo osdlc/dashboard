@@ -293,15 +293,17 @@ struct ImageQuery {
     path: String,
 }
 
-/// Sends a picture that an `image` widget shows now. Only those: a path no
-/// tile's current view names is refused, so this can't read other files.
+/// Sends a picture that an `image` widget shows now, in a tile or in a
+/// catalog entry's demo (the Add module preview). Only those: a path no view
+/// names is refused, so this can't read other files.
 async fn image(State(state): State<AppState>, Query(q): Query<ImageQuery>) -> Response {
     let shown = state
         .host
         .snapshot()
         .await
         .iter()
-        .any(|t| shows_image(&t.view.root, &q.path));
+        .any(|t| shows_image(&t.view.root, &q.path))
+        || in_a_demo(&state, &q.path).await;
     if !shown {
         return StatusCode::NOT_FOUND.into_response();
     }
@@ -333,6 +335,17 @@ async fn image(State(state): State<AppState>, Query(q): Query<ImageQuery>) -> Re
             .into_response(),
         Err(_) => StatusCode::NOT_FOUND.into_response(),
     }
+}
+
+async fn in_a_demo(state: &AppState, path: &str) -> bool {
+    let Some(source) = state.catalog.clone() else {
+        return false;
+    };
+    let path = path.to_string();
+    // Reading packages touches the disk.
+    tokio::task::spawn_blocking(move || source().0.iter().any(|e| shows_image(&e.demo.root, &path)))
+        .await
+        .unwrap_or(false)
 }
 
 fn shows_image(widget: &Widget, path: &str) -> bool {
@@ -625,6 +638,37 @@ mod tests {
             StatusCode::UNAUTHORIZED
         );
         state.host.stop_all().await;
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    /// The Add module preview shows a catalog entry's demo, which no tile shows.
+    #[tokio::test]
+    async fn serves_pictures_a_catalog_demo_shows() {
+        let dir = std::env::temp_dir().join(format!("dashboard-web-demo-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let demo = dir.join("demo.png");
+        std::fs::write(&demo, b"demo bytes").unwrap();
+        let entry: CatalogEntry = serde_json::from_value(serde_json::json!({
+            "id": "pictures", "name": "Pictures", "version": "1", "description": "",
+            "kind": "builtin", "source": "builtin", "default_size": "medium",
+            "demo": { "status": "ok", "summary": "",
+                      "root": { "type": "image", "path": demo.to_string_lossy() } }
+        }))
+        .unwrap();
+        let mut state = state();
+        state.catalog = Some(Arc::new(move || (vec![entry.clone()], vec![])));
+        let req = Request::get(format!(
+            "/api/image?path={}",
+            urlencode(&demo.to_string_lossy())
+        ))
+        .header(header::HOST, "127.0.0.1:1")
+        .header(header::AUTHORIZATION, "Bearer session")
+        .body(Body::empty())
+        .unwrap();
+        assert_eq!(
+            call(&state, req).await,
+            (StatusCode::OK, "demo bytes".to_string())
+        );
         std::fs::remove_dir_all(&dir).unwrap();
     }
 
