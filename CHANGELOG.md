@@ -6,6 +6,8 @@ released on their own; they record the stages the project was built in.
 
 ## Unreleased
 
+- **`sit`, the short command.** `cargo install` now puts `sit` beside `sitroom`; it runs
+  `sitroom` with the same arguments, so `sit serve` is `sitroom serve`.
 - **Clock face and display widgets:** `clock_face` is an analog dial (hour, minute and optional
   second hand) and `display` is one value as large as the tile allows, with a block font in the
   TUI. Any module can use them; the clock uses both in its new styles.
