@@ -73,6 +73,7 @@ struct Charge {
     minutes: Option<u64>,
 }
 
+/// Battery: power source, charge and time remaining, as a gauge.
 #[derive(Default)]
 pub struct Battery {
     config: Config,
@@ -353,6 +354,7 @@ fn view(r: &Reading, low: f64, critical: f64) -> View {
     }
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let demo = view(
         &Reading {

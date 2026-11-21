@@ -50,6 +50,7 @@ impl Default for Config {
     }
 }
 
+/// Shows a text or markdown file, and shows it again when it changes.
 #[derive(Default)]
 pub struct TextFile {
     config: Config,
@@ -165,6 +166,7 @@ fn is_markdown(path: &Path) -> bool {
 /// The demo is the view of the `notes.md` sample.
 const DEMO: &str = include_str!("../testdata/textfile/notes.md");
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     CatalogEntry {
         description: "Shows a text or markdown file and shows it again when it changes. \

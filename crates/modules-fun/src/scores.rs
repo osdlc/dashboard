@@ -58,6 +58,7 @@ impl Default for Config {
     }
 }
 
+/// Today's games of a sports league, from ESPN's public scoreboard.
 #[derive(Default)]
 pub struct Scores {
     config: Config,
@@ -295,6 +296,7 @@ fn view(board: &Scoreboard, c: &Config) -> View {
     }
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let board: Scoreboard = serde_json::from_str(include_str!("../testdata/scores/nba.json"))
         .expect("demo data parses");

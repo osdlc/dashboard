@@ -76,6 +76,7 @@ impl Default for Config {
     }
 }
 
+/// Forgejo (and Gitea) issues and pull requests across every repository you can see, e.g.
 #[derive(Default)]
 pub struct Forgejo {
     config: Config,
@@ -158,6 +159,7 @@ fn parse(json: &serde_json::Value) -> Result<Vec<Issue>> {
         .collect())
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     // A hand-written `/repos/issues/search` reply, as the Forgejo API documents it.
     let item =

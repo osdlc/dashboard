@@ -55,6 +55,7 @@ impl Default for Config {
     }
 }
 
+/// Shows the output of a command, run again on each refresh.
 #[derive(Default)]
 pub struct CmdRunner {
     config: Config,
@@ -212,6 +213,7 @@ fn strip_ansi(s: &str) -> String {
 /// The demo: `df -h` output, as cmdrunner shows it.
 const DEMO: &str = include_str!("../testdata/cmdrunner/df.txt");
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let run = Run {
         code: Some(0),
@@ -314,12 +316,11 @@ mod tests {
             .unwrap();
         assert!(m.render().await.is_err());
         let pid = std::fs::read_to_string(&pidfile).unwrap();
-        let pid: libc::pid_t = pid.trim().parse().unwrap();
+        let pid = rustix::process::Pid::from_raw(pid.trim().parse().unwrap()).unwrap();
         std::fs::remove_dir_all(&dir).ok();
         // Give the kill a moment, then the sleep must be gone.
         tokio::time::sleep(Duration::from_millis(200)).await;
-        // SAFETY: signal 0 only checks that the process exists.
-        let alive = unsafe { libc::kill(pid, 0) } == 0;
+        let alive = rustix::process::test_kill_process(pid).is_ok();
         assert!(!alive, "sleep {pid} still running");
     }
 

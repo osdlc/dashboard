@@ -84,6 +84,7 @@ impl Entity {
     }
 }
 
+/// The backlog of an osdlc sdlc vault: tasks in progress and ready to start.
 #[derive(Default)]
 pub struct Sdlc {
     config: Config,
@@ -382,6 +383,7 @@ fn view(tasks: &[Entity], milestones: &[Entity], today: Date, c: &Config) -> Vie
     }
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let t = |id: &str, state: &str, title: &str, impact: &str| Entity {
         id: id.into(),

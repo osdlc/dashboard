@@ -1,8 +1,11 @@
 [package]
 name = "sitroom-modules-fun"
+description = "Sitroom modules for fun: the demo, clocks, Hacker News, feeds and public-API widgets"
 edition.workspace = true
+rust-version.workspace = true
 version.workspace = true
 license.workspace = true
+repository.workspace = true
 
 # One feature per module, named after its id. sitroom-modules turns them on
 # through its `bundle-fun` and `module-<id>` features.
@@ -52,3 +55,6 @@ tokio = { version = "1.54.1", features = ["fs", "rt"], optional = true }
 
 [dev-dependencies]
 tokio = { version = "1.54.1", features = ["io-util", "macros", "net", "rt"] }
+
+[lints]
+workspace = true

@@ -121,7 +121,9 @@ impl Module for Demo {
 /// A running module, for the help and settings screens.
 #[derive(Debug, Clone)]
 pub struct ModuleInfo {
+    /// The tile it shows in.
     pub tile_id: String,
+    /// What the module said about itself.
     pub manifest: Manifest,
     /// The poll period actually used; `None` for push modules.
     pub interval: Option<Duration>,
@@ -137,6 +139,7 @@ struct Tile {
 }
 
 #[derive(Clone)]
+/// Runs modules and keeps each tile's latest update. Cheap to clone; clones share state.
 pub struct Host {
     tiles: Arc<RwLock<BTreeMap<String, Tile>>>,
     modules: Arc<RwLock<Vec<ModuleInfo>>>,
@@ -153,6 +156,7 @@ impl Default for Host {
 }
 
 impl Host {
+    /// A host with no modules running.
     pub fn new() -> Self {
         let (tx, _) = broadcast::channel(256);
         Self {
@@ -288,10 +292,12 @@ impl Host {
         self.modules.read().await.clone()
     }
 
+    /// Receive every tile update from now on.
     pub fn subscribe(&self) -> broadcast::Receiver<TileUpdate> {
         self.tx.subscribe()
     }
 
+    /// The latest update of every tile.
     pub async fn snapshot(&self) -> Vec<TileUpdate> {
         self.tiles
             .read()
@@ -381,6 +387,7 @@ fn error_view(err: &anyhow::Error) -> View {
     }
 }
 
+/// The current time in milliseconds since the Unix epoch, or 0 if the clock is before it.
 pub fn now_ms() -> i64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)

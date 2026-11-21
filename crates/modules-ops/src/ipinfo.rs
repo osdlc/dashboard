@@ -53,6 +53,7 @@ struct Info {
     timezone: Option<String>,
 }
 
+/// This machine's public IP address and where it appears to be, from ipinfo.io (no key needed for this lookup).
 #[derive(Default)]
 pub struct IpInfo {
     config: Config,
@@ -190,6 +191,7 @@ fn view(info: &Info, before: Option<&str>) -> View {
 
 const SAMPLE: &str = include_str!("../testdata/ipinfo/reply.json");
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let info: Info = serde_json::from_str(SAMPLE).expect("demo data parses");
     CatalogEntry {

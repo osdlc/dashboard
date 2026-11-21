@@ -58,6 +58,7 @@ impl Default for Config {
     }
 }
 
+/// Crypto prices: the price and 24-hour change of a few coins, from CoinGecko's public API, as a table.
 #[derive(Default)]
 pub struct Crypto {
     config: Config,
@@ -226,6 +227,7 @@ fn view(markets: &[Market], c: &Config) -> View {
     }
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let markets: Vec<Market> =
         serde_json::from_str(include_str!("../testdata/crypto/markets.json"))
