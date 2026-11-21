@@ -1,6 +1,8 @@
 /target
 node_modules/
 web/dist/
+# The built UI, copied into the sitroom-web crate to publish it.
+/crates/web/ui/
 *.tmp
 *.tmp.json
 /build/

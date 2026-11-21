@@ -6,6 +6,8 @@ version.workspace = true
 license.workspace = true
 repository.workspace = true
 description = "Sitroom as a desktop app: a window, wallpaper or screensaver"
+# Built and bundled with Tauri (docs/desktop.md), not installed with cargo.
+publish = false
 
 [build-dependencies]
 tauri-build = { version = "2.7.4", features = [] }
