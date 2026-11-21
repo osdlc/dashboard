@@ -79,15 +79,16 @@ It needs Rust, pnpm and a few GB free for the build. From a clean checkout of `m
 release commit:
 
 ```sh
-cargo login                                          # a token with publish-new and publish-update
-(cd web && pnpm install --frozen-lockfile && pnpm build)
-rm -rf crates/web/ui && cp -r web/dist crates/web/ui
-EXCLUDE="--exclude sitroom-desktop --exclude sitroom-native --exclude sitroom-bench"
-cargo publish --workspace --locked --allow-dirty --dry-run $EXCLUDE
-cargo publish --workspace --locked --allow-dirty $EXCLUDE
-rm -rf crates/web/ui
+cargo login                  # a token with publish-new and publish-update
+scripts/crates.sh dry-run    # builds the UI into crates/web/ui, packs and builds every crate
+scripts/crates.sh publish
 git tag v0.9.0 && git push origin v0.9.0
 ```
+
+`scripts/crates.sh` is what CI and the release workflow run too: it finds the crates to publish
+(every one without `publish = false`), builds the web UI and puts it in `crates/web/ui`, checks
+nothing else changed, runs cargo, and removes `crates/web/ui` again. `scripts/crates.sh status`
+says whether the version is on crates.io.
 
 Then push the tag as usual. The workflow's `publish` job sees the version is on crates.io
 already and skips the upload; the binaries, the GitHub Release and the formula go ahead. (If
