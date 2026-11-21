@@ -6,8 +6,8 @@
 #   curl -fsSL https://osdlc.github.io/sitroom/install.sh | sh -s -- --version 0.9.0 --to /usr/local/bin
 #   sh install.sh [--version <X.Y.Z>] [--to <dir>]
 #
-# It picks the archive for this OS and CPU (macOS or Linux, arm64 or x86_64),
-# checks it against the release's SHA256SUMS and installs `sitroom` and `sit`
+# It picks the archive for this OS and CPU (macOS or Linux, arm64 or x86_64;
+# on Linux the static musl build when there is no glibc 2.35 or later), checks it against the release's SHA256SUMS and installs `sitroom` and `sit`
 # in <dir>, default ~/.local/bin. Without --version it installs the latest
 # release. The site serves this file from site/public/install.sh, and each
 # release attaches a copy.
@@ -66,7 +66,7 @@ sha256() {
 
 case "$(uname -s)" in
   Darwin) os='apple-darwin' ;;
-  Linux) os='unknown-linux-gnu' ;;
+  Linux) os='linux' ;;
   *) die "no build for $(uname -s); see https://github.com/${REPO}#build-from-source" ;;
 esac
 case "$(uname -m)" in
@@ -74,7 +74,22 @@ case "$(uname -m)" in
   x86_64|amd64) cpu='x86_64' ;;
   *) die "no build for CPU $(uname -m); see https://github.com/${REPO}#build-from-source" ;;
 esac
-target="${cpu}-${os}"
+
+# Linux: the glibc build needs glibc 2.35 or later (it is built on Ubuntu
+# 22.04); anything else (musl, as on Alpine, or an older glibc) gets the
+# static musl build.
+libc='gnu'
+if [ "$os" = linux ]; then
+  glibc="$(getconf GNU_LIBC_VERSION 2>/dev/null | sed -n 's/^glibc \([0-9]*\)\.\([0-9]*\).*/\1 \2/p')"
+  if [ -z "$glibc" ]; then
+    libc='musl'
+  else
+    # shellcheck disable=SC2086 # split "2 35" into two numbers
+    set -- $glibc
+    if [ "$1" -lt 2 ] || { [ "$1" -eq 2 ] && [ "$2" -lt 35 ]; }; then libc='musl'; fi
+  fi
+  os="unknown-linux-$libc"
+fi
 
 tmp="$(mktemp -d 2>/dev/null || mktemp -d -t sitroom)"
 trap 'rm -rf "$tmp"' EXIT INT TERM
@@ -90,12 +105,19 @@ if [ -z "$version" ]; then
 fi
 
 base="${download_base}/v${version}"
+fetch "${base}/SHA256SUMS" "$tmp/SHA256SUMS" || die "couldn't download ${base}/SHA256SUMS"
+
+# Releases before the musl builds (0.9.0) have only glibc ones.
+target="${cpu}-${os}"
+if [ "$libc" = musl ] && ! grep -q "sitroom-${version}-${target}.tar.gz" "$tmp/SHA256SUMS"; then
+  say "release ${version} has no static build; using the glibc one, which needs glibc 2.35"
+  target="${cpu}-unknown-linux-gnu"
+fi
 name="sitroom-${version}-${target}"
 asset="${name}.tar.gz"
 
 say "downloading ${asset}"
 fetch "${base}/${asset}" "$tmp/$asset" || die "couldn't download ${base}/${asset}"
-fetch "${base}/SHA256SUMS" "$tmp/SHA256SUMS" || die "couldn't download ${base}/SHA256SUMS"
 
 want="$(awk -v f="$asset" '$2 == f || $2 == "*" f { print $1 }' "$tmp/SHA256SUMS")"
 [ -n "$want" ] || die "${asset} is not listed in SHA256SUMS"

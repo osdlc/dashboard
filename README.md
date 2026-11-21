@@ -10,15 +10,26 @@ Modular developer dashboard with a terminal UI and a web UI. The site,
 curl -fsSL https://osdlc.github.io/sitroom/install.sh | sh   # macOS and Linux: into ~/.local/bin
 brew tap osdlc/tap && brew trust osdlc/tap   # or Homebrew (tap once)
 brew install osdlc/tap/sitroom
-cargo install sitroom                        # or from crates.io (needs only Rust)
+cargo binstall sitroom                       # or the prebuilt binary, with cargo-binstall
+cargo install sitroom                        # or build it from crates.io (needs only Rust)
 ```
 
-The install script picks the build for your OS and CPU, checks it against the release's
+On Debian, Ubuntu, Fedora, RHEL or Alpine, the release also has packages (from 0.9.1), which put
+`sitroom` and `sit` in `/usr/bin`. They are static builds, so they depend on nothing:
+
+```sh
+sudo apt install ./sitroom_<version>_amd64.deb          # Debian, Ubuntu
+sudo dnf install ./sitroom-<version>-1.x86_64.rpm       # Fedora, RHEL
+sudo apk add --allow-untrusted ./sitroom_<version>_x86_64.apk   # Alpine (not signed)
+```
+
+The install script picks the build for your OS and CPU (on Linux the static one when the system
+has no glibc 2.35 or later), checks it against the release's
 `SHA256SUMS` and installs it; `sh -s -- --version 0.9.0 --to /usr/local/bin` after `sh` picks
 the version and folder. Read it first if you like: <https://osdlc.github.io/sitroom/install.sh>.
 
 Each installs `sitroom` and `sit`, its short name (`sit tui` is `sitroom tui`). Prebuilt archives
-for macOS and Linux (arm64 and x86-64) are on the [GitHub Release](https://github.com/osdlc/sitroom/releases/latest),
+for macOS and Linux (arm64 and x86-64; for Linux both glibc and static musl builds) are on the [GitHub Release](https://github.com/osdlc/sitroom/releases/latest),
 with `SHA256SUMS`. The macOS binaries are not signed or notarized: Homebrew is fine, but a binary
 downloaded in a browser is stopped by Gatekeeper until you clear its quarantine flag.
 
