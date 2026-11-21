@@ -25,7 +25,7 @@
 # ~/.local/share/sitroom/plugins/), drop `demo: true`, fill in `config:` and
 # set the token variable named next to it.
 #
-# The personal screens read the sample files in crates/modules-personal/testdata;
+# The personal screens read the sample files in crates/modules/testdata;
 # point `path:` / `paths:` at your own files to use them for real.
 #
 # The benchmark screen shows widgets built three ways: a built-in module, a
@@ -223,24 +223,24 @@ modules:
     config: { place: Berlin, days: 5 }
   lunar: {}
   # The task and calendar modules below read the sample files in
-  # crates/modules-personal/testdata. Point them at your own files.
+  # crates/modules/testdata. Point them at your own files.
   todo:
-    config: { path: ../crates/modules-personal/testdata/todo/todo.md }
+    config: { path: ../crates/modules/testdata/todo/todo.md }
   calendar:
-    config: { path: ../crates/modules-personal/testdata/calendar/team.ics, days: 2 }
+    config: { path: ../crates/modules/testdata/calendar/team.ics, days: 2 }
   org-agenda:
     config:
-      paths: [../crates/modules-personal/testdata/org]
+      paths: [../crates/modules/testdata/org]
       days: 14
       undated: true
   markdown-tasks:
-    config: { paths: [../crates/modules-personal/testdata/markdown] }
+    config: { paths: [../crates/modules/testdata/markdown] }
   todo-txt:
-    config: { path: ../crates/modules-personal/testdata/todo-txt/todo.txt }
+    config: { path: ../crates/modules/testdata/todo-txt/todo.txt }
   taskwarrior:
     demo: true            # real: install Taskwarrior (`task`)
   sdlc:
-    config: { path: ../crates/modules-personal/testdata/sdlc, planning: true }
+    config: { path: ../crates/modules/testdata/sdlc, planning: true }
   # Task services that need a token: plugin packages (untested live).
   asana:
     package: asana
@@ -344,13 +344,13 @@ modules:
     config: { zones: [local, UTC, Asia/Kolkata], seconds: true }
   battery-native:
     builtin: battery
-    config: { sample: ../crates/modules-system/testdata/battery/pmset-discharging.txt }
+    config: { sample: ../crates/modules/testdata/battery/pmset-discharging.txt }
   battery-ts:
     plugin: [node, ../plugins/ext/battery-ts/main.ts]
-    config: { sample: ../crates/modules-system/testdata/battery/pmset-discharging.txt }
+    config: { sample: ../crates/modules/testdata/battery/pmset-discharging.txt }
   battery-py:
     plugin: [python3, ../plugins/ext/battery-py/main.py]
-    config: { sample: ../crates/modules-system/testdata/battery/pmset-discharging.txt }
+    config: { sample: ../crates/modules/testdata/battery/pmset-discharging.txt }
   # How the benchmark is run.
   bench-report:
     builtin: textfile

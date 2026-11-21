@@ -1,7 +1,7 @@
 // Local git repositories: branch, commits ahead of and behind the upstream, and uncommitted
 // changes. Runs `git status --porcelain=v2 --branch` once per repository.
 //
-// The TypeScript copy of the native `git` module (crates/modules-dev/src/git.rs), for the
+// The TypeScript copy of the native `git` module (crates/modules/src/dev/git.rs), for the
 // native-vs-plugin benchmark. It shows the same view for the same repositories, so keep the
 // three (Rust, TypeScript, Python) in step. Node 24 runs it as is.
 //

@@ -77,6 +77,7 @@ bundle-agents = [
     "module-gemini",
     "module-opencode",
     "module-pi",
+    "module-cswap",
 ]
 bundle-personal = [
     "sitroom-modules/bundle-personal",
@@ -128,6 +129,7 @@ module-antigravity = ["sitroom-modules/module-antigravity"]
 module-gemini = ["sitroom-modules/module-gemini"]
 module-opencode = ["sitroom-modules/module-opencode"]
 module-pi = ["sitroom-modules/module-pi"]
+module-cswap = ["sitroom-modules/module-cswap"]
 module-docker = ["sitroom-modules/module-docker"]
 module-kubernetes = ["sitroom-modules/module-kubernetes"]
 module-ipinfo = ["sitroom-modules/module-ipinfo"]
@@ -146,12 +148,9 @@ module-sdlc = ["sitroom-modules/module-sdlc"]
 [dependencies]
 anyhow = "1.0.104"
 clap = { version = "4.6.7", features = ["derive"] }
-sitroom-cli-kit = { version = "0.8.0", path = "../cli-kit" }
-sitroom-config = { version = "0.8.0", path = "../config" }
+sitroom-core = { version = "0.8.0", path = "../core" }
 sitroom-contract = { version = "0.8.0", path = "../contract" }
-sitroom-host = { version = "0.8.0", path = "../host" }
 sitroom-modules = { version = "0.8.0", path = "../modules", default-features = false }
-sitroom-runtime = { version = "0.8.0", path = "../runtime" }
 sitroom-tui = { version = "0.8.0", path = "../tui" }
 sitroom-web = { version = "0.8.0", path = "../web" }
 etag-write = "0.2.4"

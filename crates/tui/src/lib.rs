@@ -19,7 +19,7 @@ use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Paragraph, Scrollbar, ScrollbarOrientation, ScrollbarState};
 use sitroom_contract::{Action, ClientMessage, ScreenLayout, TileUpdate, UiSettings};
-use sitroom_host::Host;
+use sitroom_core::host::Host;
 use tokio::sync::broadcast::error::TryRecvError;
 use tokio::sync::{mpsc, watch};
 
@@ -422,7 +422,7 @@ impl App {
         match action {
             Action::OpenUrl { url } => {
                 // Nowhere to show an error in the TUI; the link just doesn't open.
-                let _ = sitroom_host::browser::open_web_link(url);
+                let _ = sitroom_core::host::browser::open_web_link(url);
             }
             // Not run yet; `sitroom plugin-check` says so.
             Action::RunCommand { .. } => {}
@@ -847,7 +847,7 @@ fn open_editor(path: &str) -> Result<()> {
     }
     argv.push(path.into());
     // On Windows, so `code` finds `code.cmd`.
-    let argv = sitroom_host::process::resolve_argv(&argv, None);
+    let argv = sitroom_core::host::process::resolve_argv(&argv, None);
     let program = &argv[0];
     std::process::Command::new(program)
         .args(&argv[1..])

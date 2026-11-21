@@ -1,9 +1,9 @@
 [workspace]
 resolver = "3"
-members = ["crates/*", "plugins/*", "bench", "apps/*"]
+members = ["crates/*", "bench", "apps/*"]
 # Plain `cargo build` / `cargo test` leave out the desktop app (Tauri: slow to
 # build, and on Linux it needs WebKitGTK). `--workspace` or `-p` include it.
-default-members = ["crates/*", "plugins/*", "bench"]
+default-members = ["crates/*", "bench"]
 # Plugins in other languages and the WASM plugins (the native-vs-plugin
 # benchmark): not workspace crates.
 exclude = ["plugins/ext", "bench/wasm"]

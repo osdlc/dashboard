@@ -37,7 +37,7 @@ its own.
 No widget calls the internet. Weather and the feed reader fetch from a small HTTP server the
 benchmark runs on 127.0.0.1, serving the recorded samples from the tests. Hacker News reads its
 sample file (its `sample` setting), so it measures parsing, not HTTP. Docker runs the fake docker
-program from the tests (`crates/modules-ops/testdata/docker/docker`). Git reads this repository.
+program from the tests (`crates/modules/testdata/docker/docker`). Git reads this repository.
 Battery reads the real machine.
 
 ## Build: size and build time
@@ -60,7 +60,7 @@ It writes `bench/results/build.tsv` (name, value) and prints the same.
 
 `bench/wasm` builds the real clock and textfile module source for `wasm32-wasip1`, each as a
 stdio plugin, against two stand-ins: `host` (the `Module` trait without tokio, which does not
-build for WASI with the features the host uses) and `common` (sitroom-modules-common's own
+build for WASI with the features the host uses) and `common` (sitroom-modules's own
 source, built against that stand-in). `build.sh` also precompiles them for wasmtime
 (`.cwasm`); the benchmark runs both (`wasm` and `wasm-aot`).
 

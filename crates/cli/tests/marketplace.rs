@@ -139,7 +139,7 @@ fn install_list_update_remove_from_a_local_index() {
     let installed = s.plugins().join("hello");
     assert!(installed.join("sitroom-plugin.yaml").is_file());
     assert!(installed.join("hello.py").is_file());
-    let found = sitroom_config::packages::Packages::load_from(&[s.plugins()]);
+    let found = sitroom_core::config::packages::Packages::load_from(&[s.plugins()]);
     assert!(found.errors.is_empty(), "{:?}", found.errors);
     assert_eq!(found.get("hello").unwrap().package.version, "0.1.0");
     let record = std::fs::read_to_string(s.plugins().join("installed.json")).unwrap();

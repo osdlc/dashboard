@@ -138,6 +138,6 @@ None of this has been run on Windows. To check on a real machine (or a Windows C
 10. The bundled cswap plugin with cswap installed (`uv tool install`), and the TUI's
     "edit config" with and without `EDITOR` set (also set to a path under `Program Files`).
 11. The Windows-only unit test `process::tests::kill_tree_ends_grandchildren` in
-    `sitroom-host` (`cargo test -p sitroom-host`), which can't run on macOS.
+    `sitroom-core` (`cargo test -p sitroom-core`), which can't run on macOS.
 12. The test suite as a whole (`cargo test --workspace`): some tests start `sh`, `python3` or
     `node` and may need to skip on Windows.

@@ -306,11 +306,12 @@ After changing the Rust contract types, regenerate the TypeScript types with `cd
 
 ## Plugins
 
-`plugins/cswap` is a stdio plugin (JSON-RPC, one message per line). Try it directly:
+`crates/modules/src/agents/cswap.rs` is a stdio plugin (JSON-RPC, one message per line), bundled
+in the binary: `sitroom plugin cswap` runs it. Try it directly:
 
 ```sh
-cargo build -p sitroom-cswap
-printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"view/render"}' | ./target/debug/sitroom-cswap
+cargo build -p sitroom
+printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"view/render"}' | ./target/debug/sitroom plugin cswap
 ```
 
 ## Windows

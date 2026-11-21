@@ -106,9 +106,9 @@ for part in "${parts[@]}"; do
         # Touch one module file and rebuild, in each profile, with every
         # bundle; then with only that module's bundle.
         files=(
-            crates/modules-fun/src/clock.rs
-            crates/modules-system/src/textfile.rs
-            crates/modules-dev/src/git.rs
+            crates/modules/src/fun/clock.rs
+            crates/modules/src/system/textfile.rs
+            crates/modules/src/dev/git.rs
         )
         for profile in dev release small; do
             cargo build --quiet --profile "$profile" -p sitroom
@@ -119,7 +119,7 @@ for part in "${parts[@]}"; do
         done
         for profile in dev release; do
             cargo build --quiet --profile "$profile" -p sitroom --no-default-features --features bundle-fun
-            touch crates/modules-fun/src/clock.rs
+            touch crates/modules/src/fun/clock.rs
             timed "incremental.$profile.clock.bundle-fun-only" \
                 --profile "$profile" -p sitroom --no-default-features --features bundle-fun
         done

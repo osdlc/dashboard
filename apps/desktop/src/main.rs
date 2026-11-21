@@ -11,7 +11,7 @@ use std::sync::Arc;
 
 use anyhow::{Context, Result};
 use launch::{Launch, Mode};
-use sitroom_config::layers::Sources;
+use sitroom_core::config::layers::Sources;
 
 mod app;
 mod launch;
@@ -22,14 +22,14 @@ mod win;
 
 fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().skip(1).collect();
-    // Bundled plugins run as `<exe> plugin <id>` (see sitroom-runtime).
+    // Bundled plugins run as `<exe> plugin <id>` (see sitroom-modules).
     if let [cmd, id] = args.as_slice()
         && cmd == "plugin"
-        && let Some(result) = sitroom_runtime::run_bundled(id)
+        && let Some(result) = sitroom_modules::runtime::run_bundled(id)
     {
         return result;
     }
-    for note in sitroom_config::move_old_folders() {
+    for note in sitroom_core::config::move_old_folders() {
         eprintln!("sitroom-desktop: {note}");
     }
 
@@ -62,14 +62,14 @@ fn main() -> Result<()> {
 /// Start the modules and the web server. Returns the page URL and the
 /// session token the app's windows sign in with, and the host running the
 /// modules.
-async fn serve(launch: &Launch) -> Result<(tauri::Url, String, sitroom_runtime::Host)> {
+async fn serve(launch: &Launch) -> Result<(tauri::Url, String, sitroom_modules::runtime::Host)> {
     // The machine file and a saved dashboard; no project file, since the app
     // has no working folder of its own.
     let sources = Sources {
         machine: launch.config.clone(),
         ..Default::default()
     };
-    let (host, settings, actions, layer_paths) = sitroom_runtime::start(sources).await?;
+    let (host, settings, actions, layer_paths) = sitroom_modules::runtime::start(sources).await?;
     let (ready, url) = tokio::sync::oneshot::channel::<(String, String)>();
     let config = sitroom_web::WebConfig {
         port: launch.port,
@@ -77,7 +77,9 @@ async fn serve(launch: &Launch) -> Result<(tauri::Url, String, sitroom_runtime::
         on_ready: Some(Box::new(move |r: &sitroom_web::Ready| {
             let _ = ready.send((r.url.clone(), r.token.clone()));
         })),
-        catalog: Some(Arc::new(sitroom_runtime::catalog_source(layer_paths))),
+        catalog: Some(Arc::new(sitroom_modules::runtime::catalog_source(
+            layer_paths,
+        ))),
     };
     let ours = host.clone();
     tauri::async_runtime::spawn(async move {
@@ -94,7 +96,7 @@ async fn serve(launch: &Launch) -> Result<(tauri::Url, String, sitroom_runtime::
 fn configure(config: Option<&Path>) -> Result<()> {
     let path = match config {
         Some(p) => p.to_path_buf(),
-        None => sitroom_config::default_path()?,
+        None => sitroom_core::config::default_path()?,
     };
     let message = format!(
         "The sitroom screensaver shows the screens from\n{}\n\nEdit that file, or use \

@@ -25,7 +25,7 @@ const SIZES: &[(u16, u16)] = &[
 /// Runs each demo tile's module enough times to fill its graphs, the way the
 /// host's history would.
 async fn demo_tiles() -> (Vec<ScreenLayout>, BTreeMap<String, TileUpdate>) {
-    let config = sitroom_config::parse(sitroom_config::DEFAULT_CONFIG).unwrap();
+    let config = sitroom_core::config::parse(sitroom_core::config::DEFAULT_CONFIG).unwrap();
     let mut tiles = BTreeMap::new();
     for (id, m) in &config.modules {
         if m.builtin.as_deref() != Some("demo") {

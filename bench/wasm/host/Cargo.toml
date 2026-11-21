@@ -1,4 +1,4 @@
-# Stands in for sitroom-host: just the Module trait and now_ms.
+# Stands in for sitroom-core's `host` module: just the Module trait and now_ms.
 [package]
 name = "bench-wasm-host"
 edition.workspace = true

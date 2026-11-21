@@ -3,7 +3,7 @@
 rules come from the system's time zone database (zoneinfo).
 
 The Python version of a native-vs-plugin benchmark widget. It follows the same rules as the
-native module (crates/modules-fun/src/clock.rs) and the TypeScript plugin
+native module (crates/modules/src/fun/clock.rs) and the TypeScript plugin
 (plugins/ext/clock-ts), and must show the same view for the same input.
 
     sitroom plugin-check -- python3 plugins/ext/clock-py/main.py

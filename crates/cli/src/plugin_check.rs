@@ -5,10 +5,10 @@ use std::io::ErrorKind;
 use std::time::{Duration, Instant};
 
 use anyhow::{Context, Result};
-use sitroom_cli_kit::Failure;
 use sitroom_contract::check::{Finding, check_manifest, check_view};
 use sitroom_contract::{Refresh, TileUpdate};
-use sitroom_host::{History, Module, Plugin};
+use sitroom_core::cli_kit::Failure;
+use sitroom_core::host::{History, Module, Plugin};
 
 pub struct Options {
     pub config: Option<String>,
@@ -143,7 +143,7 @@ pub async fn run(o: Options) -> Result<()> {
     let tile = TileUpdate {
         tile_id: manifest.id.clone(),
         view,
-        updated_at: sitroom_host::now_ms(),
+        updated_at: sitroom_core::host::now_ms(),
         stale: false,
         demo: false,
     };

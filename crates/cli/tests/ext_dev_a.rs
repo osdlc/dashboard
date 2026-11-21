@@ -10,9 +10,9 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use serde_json::json;
-use sitroom_config::packages::{Packages, load_package};
 use sitroom_contract::check::{Finding, check_manifest, check_view};
-use sitroom_host::{Module, Plugin};
+use sitroom_core::config::packages::{Packages, load_package};
+use sitroom_core::host::{Module, Plugin};
 
 const IDS: [&str; 5] = [
     "gitlab",
@@ -183,7 +183,7 @@ async fn bad_config_is_a_config_error() {
 #[test]
 fn the_example_config_finds_every_package() {
     let path = repo().join("examples/widgets/w-dev-a.yaml");
-    let loaded = sitroom_config::load(Some(&path)).unwrap();
+    let loaded = sitroom_core::config::load(Some(&path)).unwrap();
     let packages = Packages::load(&path);
     for id in IDS {
         assert!(packages.get(id).is_some(), "{id} not found from {path:?}");

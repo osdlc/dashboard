@@ -2,7 +2,7 @@
 """Running Docker containers, read with the `docker` CLI: name, image, status and, from
 `docker stats`, CPU and memory. An error tile when the Docker daemon is not running.
 
-The Python copy of the built-in `docker` module (crates/modules-ops/src/docker.rs), for the
+The Python copy of the built-in `docker` module (crates/modules/src/ops/docker.rs), for the
 native-vs-plugin benchmark. It builds the same view from the same docker output.
 
     sitroom plugin-check -- python3 plugins/ext/docker-py/main.py
@@ -24,7 +24,7 @@ from sitroom_plugin import Column, Row, View, serve, with_defaults  # noqa: E402
 
 # How long one docker command may take, in seconds. A render runs up to two
 # (ps, then stats), so 2 x 10 s stays under the plugin host's 30 s limit
-# (crates/host/src/plugin.rs). Keep in step with the built-in module.
+# (crates/core/src/host/plugin.rs). Keep in step with the built-in module.
 TIMEOUT = 10
 
 config: Dict[str, Any] = {"stats": True, "limit": 20, "docker": "docker"}

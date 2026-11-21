@@ -9,26 +9,28 @@ screen tile. Leaving a module out of the build only changes what the config *can
 
 ## Bundles
 
-Built-in modules are grouped into bundles, one crate per bundle:
+Built-in modules are grouped into bundles, one folder per bundle in the `sitroom-modules`
+crate (`crates/modules`):
 
-| Bundle | Crate | Modules |
+| Bundle | Folder | Modules |
 |---|---|---|
-| system | `crates/modules-system` | cpu, memory, gpu, network, disk, processes, process, log, uptime, textfile, battery, cmdrunner, security, http, file, screensaver |
-| dev | `crates/modules-dev` | github-prs, github-issues, jira, linear, forgejo, git |
-| fun | `crates/modules-fun` | demo, clock, hackernews, feedreader, subreddit, devto, mempool, crypto, scores |
-| agents | `crates/modules-agents` | codex, copilot, cursor, antigravity, gemini, opencode, pi |
-| ops | `crates/modules-ops` | docker, kubernetes, ipinfo, pihole, transmission |
-| personal | `crates/modules-personal` | weather, todo, lunar, calendar, org-agenda, markdown-tasks, todo-txt, taskwarrior, sdlc |
+| system | `crates/modules/src/system/` | cpu, memory, gpu, network, disk, processes, process, log, uptime, textfile, battery, cmdrunner, security, http, file, screensaver |
+| dev | `crates/modules/src/dev/` | github-prs, github-issues, jira, linear, forgejo, git |
+| fun | `crates/modules/src/fun/` | demo, clock, hackernews, feedreader, subreddit, devto, mempool, crypto, scores |
+| agents | `crates/modules/src/agents/` | codex, copilot, cursor, antigravity, gemini, opencode, pi, and the bundled cswap plugin |
+| ops | `crates/modules/src/ops/` | docker, kubernetes, ipinfo, pihole, transmission |
+| personal | `crates/modules/src/personal/` | weather, todo, lunar, calendar, org-agenda, markdown-tasks, todo-txt, taskwarrior, sdlc |
 
-Two more crates hold the shared parts:
+Beside them in the same crate:
 
-- `crates/modules-common` (`sitroom-modules-common`): the `Builtin` registration type,
+- `common/`: the `Builtin` registration type,
   catalog entry helpers (`entry`, `schema`, `strings`), `manifest`, times (`time::ago`,
   `time::demo_time`), tokens from the environment or a command (`secret::Secret`) and,
-  behind its `http` feature, an HTTP client (`http::client`, `http::check`).
-- `crates/modules` (`sitroom-modules`): the facade the rest of the workspace uses. It
-  gathers the modules of every bundle in the build: `all()`, `ids()`, `builtin(id)` and
-  `catalog()`.
+  behind the `http` feature, an HTTP client (`http::client`, `http::check`).
+- `lib.rs`: what the rest of the workspace uses. It gathers the modules of every bundle in
+  the build: `all()`, `ids()`, `builtin(id)` and `catalog()`.
+- `runtime/`: runs the modules the config names, and restarts only what a config change
+  touches.
 
 ## Choosing what goes in the binary
 
@@ -52,7 +54,7 @@ rest in bundle order (system, dev, ops, fun, agents, personal).
 
 Heavy dependencies sit only in the bundles (and modules) that need them: `sysinfo` in the
 system modules that read it, and `reqwest` only in modules that call a web API (it comes from
-`sitroom-modules-common`'s `http` feature).
+the `http` feature).
 
 `scripts/check-features.sh` builds the binary with no modules, with each bundle alone and with
 each module alone, with warnings as errors. For no modules and for each bundle it also runs the
@@ -98,23 +100,24 @@ Python plugin); `bench/` has the harness.
 
 ## Adding a module to a bundle
 
-Say the new module is `weather` and it goes in the `personal` bundle. If the bundle has no
-crate yet, copy `crates/modules-fun` (the smallest), rename it, and add it to
-`sitroom-modules` as an optional dependency with `default-features = false` and to the list
-in `bundles()` in `crates/modules/src/lib.rs`.
+Say the new module is `weather` and it goes in the `personal` bundle. A new bundle is a new
+folder in `crates/modules/src/`: copy `fun/` (the smallest), add a marker feature for it in
+`crates/modules/Cargo.toml` (`fun = []`), declare it in `lib.rs` behind that feature, and add
+it to `bundles()`.
 
-1. **File.** Write `crates/modules-<bundle>/src/weather.rs`: a struct that implements
-   `sitroom_host::Module` (`init` reads the `config:` block and returns a manifest, `render`
+1. **File.** Write `crates/modules/src/<bundle>/weather.rs`: a struct that implements
+   `sitroom_core::host::Module` (`init` reads the `config:` block and returns a manifest, `render`
    returns a `View`). Copy the shape of a module close to yours: `uptime.rs` for a command or
    URL check, `jira.rs` for a token API, `cpu.rs` for a graph.
-2. **Feature.** In the bundle's `Cargo.toml`, add a feature named after the id and add it to
-   `default`. Put the module's own dependencies behind it (`weather = ["dep:x"]`, or
-   `["sitroom-modules-common/http"]` for reqwest).
-3. **Registration.** In the bundle's `lib.rs`, declare the file behind its feature
-   (`#[cfg(feature = "weather")] pub mod weather;`) and add a `Builtin` to `MODULES`:
+2. **Feature.** In `crates/modules/Cargo.toml`, add `module-weather` with the bundle's
+   marker and the module's own dependencies (`module-weather = ["personal", "dep:x"]`, or
+   `"http"` for reqwest), and add it to `bundle-personal`. In `crates/cli/Cargo.toml` add
+   `module-weather = ["sitroom-modules/module-weather"]`.
+3. **Registration.** In the bundle's `mod.rs`, declare the file behind its feature
+   (`#[cfg(feature = "module-weather")] pub mod weather;`) and add a `Builtin` to `MODULES`:
 
    ```rust
-   #[cfg(feature = "weather")]
+   #[cfg(feature = "module-weather")]
    Builtin {
        id: "weather",
        core: false, // true only for the system and GitHub tiles, listed first
@@ -123,27 +126,23 @@ in `bundles()` in `crates/modules/src/lib.rs`.
    },
    ```
 
-4. **Facade features.** In `crates/modules/Cargo.toml` add
-   `module-weather = ["sitroom-modules-personal/weather"]` and add `module-weather` to
-   `bundle-personal`. In `crates/cli/Cargo.toml` add
-   `module-weather = ["sitroom-modules/module-weather"]`.
-5. **Catalog entry and demo view.** Add `pub fn catalog() -> CatalogEntry` to the file. Start
-   from `crate::entry(id, name, size, demo)` and fill in `description`, `tags`,
-   `config_schema` (`crate::schema::<Config>()`) and `requirements` (binaries, environment
+4. **Catalog entry and demo view.** Add `pub fn catalog() -> CatalogEntry` to the file. Start
+   from `super::entry(id, name, size, demo)` and fill in `description`, `tags`,
+   `config_schema` (`super::schema::<Config>()`) and `requirements` (binaries, environment
    variables, hosts). The `demo` view is what the palette shows before the module is set up:
    build it with the same code `render` uses, fed with made-up data, so it can't drift from
    the real tile. For demo times use `time::demo_time(secs_ago)` so ages read the same
    whenever it is shown. A module for a token API that was never called live says
    "untested live" in its description.
-6. **Tests.** Add a `#[cfg(test)] mod tests` to the file that parses a hand-written sample of
+5. **Tests.** Add a `#[cfg(test)] mod tests` to the file that parses a hand-written sample of
    the command output or API response and checks the view. Add the id to
    `default_build_has_every_module` in `crates/modules/src/lib.rs`; the other facade tests
    then check that the entry is complete and its demo view is valid.
-7. **Check.** `cargo test --workspace`, `cargo clippy --workspace --all-targets`, and
+6. **Check.** `cargo test --workspace`, `cargo clippy --workspace --all-targets`, and
    `scripts/check-features.sh`.
 
 Tokens never go in the config file or the code: read them through `token_env` /
-`token_command` (see `Secret` in `crates/modules-common/src/secret.rs`).
+`token_command` (see `Secret` in `crates/modules/src/common/secret.rs`).
 
 A setting that is a file or folder path gets `#[schemars(extend("x-path" = true))]` on its field
 (a string or a list of strings). Before the module starts, the runtime makes relative paths in it

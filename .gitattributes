@@ -2,4 +2,4 @@
 # byte with what the generators print.
 * text=auto eol=lf
 # A test file kept with CRLF line ends on purpose.
-crates/modules-system/testdata/textfile/plain.txt -text
+crates/modules/testdata/textfile/plain.txt -text

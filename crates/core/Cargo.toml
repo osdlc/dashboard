@@ -1,0 +1,47 @@
+[package]
+name = "sitroom-core"
+description = "Sitroom's core: the config file, the host that runs modules and feeds renderers, and the osdlc CLI conventions"
+edition.workspace = true
+rust-version.workspace = true
+version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+anyhow = "1.0.104"
+async-trait = "0.1.92"
+clap = "4.6.7"
+config-layers = "0.7.1"
+etag-write = "0.2.4"
+getrandom = "0.4.3"
+humantime-serde = "1.1.1"
+schemars = "1.2.3"
+serde = { version = "1.0.229", features = ["derive"] }
+serde-saphyr = { version = "2.0.0", default-features = false, features = ["deserialize"] }
+serde_json = "1.0.154"
+sha2 = "0.10.9"
+sitroom-contract = { version = "0.8.0", path = "../contract" }
+slug-collate = "0.1.2"
+tokio = { version = "1.54.1", features = ["full"] }
+tracing = "0.1.44"
+yaml-splice = "0.3.2"
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2.191"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61.2", features = [
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_System_JobObjects",
+    "Win32_System_Threading",
+] }
+
+[dev-dependencies]
+clap = { version = "4.6.7", features = ["derive"] }
+
+[target.'cfg(unix)'.dev-dependencies]
+rustix = { version = "1.1.6", features = ["process"] }
+
+[lints]
+workspace = true

@@ -12,7 +12,7 @@ modules:
   pictures:
     builtin: screensaver
     refresh: 5s
-    config: { dir: ../crates/modules-system/testdata/screensaver }
+    config: { dir: ../crates/modules/testdata/screensaver }
 
 screens:
   - name: pictures

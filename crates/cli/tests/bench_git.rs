@@ -8,8 +8,8 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use serde_json::json;
-use sitroom_config::packages::load_package;
-use sitroom_host::{Module, Plugin};
+use sitroom_core::config::packages::load_package;
+use sitroom_core::host::{Module, Plugin};
 
 fn have(program: &str) -> bool {
     Command::new(program).arg("--version").output().is_ok()

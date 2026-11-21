@@ -94,7 +94,7 @@ fn check_name(name: &str) -> Result<()> {
             .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-');
     if !ok {
         // A bad argument: exit 2, like a clap error.
-        return Err(sitroom_cli_kit::Failure::usage(format!(
+        return Err(sitroom_core::cli_kit::Failure::usage(format!(
             "{name:?}: use lowercase letters, digits and dashes, starting with a letter"
         ))
         .into());
@@ -137,7 +137,7 @@ mod tests {
     #[tokio::test]
     async fn scaffolds_pass_the_checks() {
         use sitroom_contract::check::{check_manifest, check_view};
-        use sitroom_host::{Module, Plugin};
+        use sitroom_core::host::{Module, Plugin};
 
         let problems = |found: Vec<sitroom_contract::check::Finding>| -> Vec<String> {
             found

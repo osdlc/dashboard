@@ -3,7 +3,7 @@
 Firebase API, as a list. Clicking a story opens its link, or its HN page when it has none.
 
 The Python version of a native-vs-plugin benchmark widget. It follows the same rules as the
-native module (crates/modules-fun/src/hackernews.rs) and the TypeScript plugin
+native module (crates/modules/src/fun/hackernews.rs) and the TypeScript plugin
 (plugins/ext/hackernews-ts), and must show the same view for the same input.
 
     sitroom plugin-check -- python3 plugins/ext/hackernews-py/main.py

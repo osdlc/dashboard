@@ -12,8 +12,8 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result, bail};
-use sitroom_config::packages::{Packages, data_dir, load_package, parse_package, valid_id};
 use sitroom_contract::{Index, IndexEntry, PACKAGE_FILE, Package};
+use sitroom_core::config::packages::{Packages, data_dir, load_package, parse_package, valid_id};
 
 mod archive;
 mod source;

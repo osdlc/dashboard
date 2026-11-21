@@ -109,13 +109,13 @@ fn config(id: &str, repo: &Path, port: u16) -> Value {
     match id {
         // Named zones, not `local`: a WASI program can't see the machine's zone.
         "clock" => json!({ "zones": ["UTC", "America/New_York", "Europe/Berlin", "Asia/Tokyo"] }),
-        "textfile" => json!({ "path": path("crates/modules-system/testdata/textfile/notes.md") }),
+        "textfile" => json!({ "path": path("crates/modules/testdata/textfile/notes.md") }),
         "git" => json!({ "repos": [path(".")] }),
         "docker" => {
-            json!({ "docker": path("crates/modules-ops/testdata/docker/docker"), "stats": true })
+            json!({ "docker": path("crates/modules/testdata/docker/docker"), "stats": true })
         }
         "hackernews" => {
-            json!({ "sample": path("crates/modules-fun/testdata/hackernews/top.json") })
+            json!({ "sample": path("crates/modules/testdata/hackernews/top.json") })
         }
         "weather" => json!({
             "latitude": 52.52,
@@ -624,17 +624,17 @@ fn serve_samples(repo: &Path) -> Result<u16> {
         (
             "/v1/forecast",
             "application/json",
-            "crates/modules-personal/testdata/weather/forecast.json",
+            "crates/modules/testdata/weather/forecast.json",
         ),
         (
             "/rss2.xml",
             "application/rss+xml",
-            "crates/modules-fun/testdata/feedreader/rss2.xml",
+            "crates/modules/testdata/feedreader/rss2.xml",
         ),
         (
             "/atom.xml",
             "application/atom+xml",
-            "crates/modules-fun/testdata/feedreader/atom.xml",
+            "crates/modules/testdata/feedreader/atom.xml",
         ),
     ]
     .into_iter()

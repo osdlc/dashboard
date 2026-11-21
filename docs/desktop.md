@@ -4,7 +4,7 @@
 binary from the `sitroom` CLI, so the CLI stays small. It is built with Tauri 2 and uses the
 system webview: WKWebView on macOS, WebView2 on Windows.
 
-It runs the same modules as `sitroom serve` (crate `sitroom-runtime`) and the same web server
+It runs the same modules as `sitroom serve` (crate `sitroom-modules`) and the same web server
 (`sitroom-web`), on 127.0.0.1 and any free port, and loads that page in its windows. The page
 talks to the server over the usual WebSocket, not through Tauri, so the app needs no IPC
 permissions.

@@ -6,12 +6,12 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use anyhow::{Context, Result, bail};
-use sitroom_config::dashboards::name_for;
-use sitroom_config::layers::{Sources, find_project};
-use sitroom_config::packages::Packages;
-use sitroom_config::{Config, parse};
+use sitroom_core::config::dashboards::name_for;
+use sitroom_core::config::layers::{Sources, find_project};
+use sitroom_core::config::packages::Packages;
+use sitroom_core::config::{Config, parse};
 
-use sitroom_runtime::{known_modules, registry};
+use sitroom_modules::runtime::{known_modules, registry};
 
 /// Print the saved dashboards, and the project file if one applies here.
 pub fn list(sources: &Sources) -> Result<()> {
@@ -200,7 +200,7 @@ pub fn export(sources: &Sources, name: &str, file: Option<&Path>, force: bool) -
 fn sources_machine(sources: &Sources) -> Result<PathBuf> {
     match &sources.machine {
         Some(p) => Ok(p.clone()),
-        None => sitroom_config::default_path(),
+        None => sitroom_core::config::default_path(),
     }
 }
 

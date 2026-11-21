@@ -1,7 +1,7 @@
 // Current weather and a short forecast from Open-Meteo (no key needed), for a place name or a
 // latitude and longitude.
 //
-// The TypeScript copy of the built-in `weather` module (crates/modules-personal/src/weather.rs),
+// The TypeScript copy of the built-in `weather` module (crates/modules/src/personal/weather.rs),
 // for the native-vs-plugin benchmark. It builds the same view from the same Open-Meteo reply.
 //
 //   sitroom plugin-check -- node plugins/ext/weather-ts/main.ts

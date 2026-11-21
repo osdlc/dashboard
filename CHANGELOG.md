@@ -6,6 +6,11 @@ released on their own; they record the stages the project was built in.
 
 ## Unreleased
 
+- **Six crates instead of nineteen.** `sitroom-core` is the config, the host and the CLI
+  conventions (was `sitroom-config`, `sitroom-host`, `sitroom-cli-kit`). `sitroom-modules` holds
+  every bundle, the runtime and the cswap plugin (was `sitroom-modules-*`, `sitroom-runtime`,
+  `sitroom-cswap`), each bundle a folder in `crates/modules/src/`. The `bundle-*` and `module-*`
+  features are unchanged; cswap is now `module-cswap`, in the agents bundle.
 - **Clock face and display widgets:** `clock_face` is an analog dial (hour, minute and optional
   second hand) and `display` is one value as large as the tile allows, with a block font in the
   TUI. Any module can use them; the clock uses both in its new styles.
