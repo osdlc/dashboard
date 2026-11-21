@@ -1,0 +1,11 @@
+{
+  "name": "dashboard",
+  "version": "0.1.0",
+  "description": "Agent skills for the osdlc developer dashboard: install, run and configure it, and write tile plugins in any language.",
+  "author": {
+    "name": "osdlc"
+  },
+  "license": "MIT OR Apache-2.0",
+  "keywords": ["dashboard", "tui", "plugins"],
+  "skills": "./skills/"
+}
