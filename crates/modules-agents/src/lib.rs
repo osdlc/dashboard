@@ -91,7 +91,9 @@ pub const THRESHOLDS: Thresholds = Thresholds {
 
 /// A limit window: share used, and when it resets.
 pub struct Window {
+    /// Short name of the limit, e.g. "5h".
     pub label: String,
+    /// How much of the limit is used, 0 to 100.
     pub used_pct: f64,
     /// Seconds since the epoch.
     pub resets_at: Option<i64>,
@@ -124,6 +126,7 @@ impl Window {
         }
     }
 
+    /// Status color for the usage: warning or critical as it nears the limit.
     pub fn status(&self) -> Status {
         if self.used_pct >= THRESHOLDS.error {
             Status::Error
@@ -162,6 +165,7 @@ pub fn until(secs: i64) -> String {
     }
 }
 
+/// Current Unix time, in seconds.
 pub fn now_secs() -> i64 {
     sitroom_host::now_ms() / 1000
 }

@@ -96,6 +96,7 @@ impl Default for Config {
     }
 }
 
+/// Demo module: made-up, animated data in every widget style, for trying out layouts and looks.
 pub struct Demo {
     config: Config,
     start: Instant,
@@ -645,6 +646,7 @@ impl Demo {
     }
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let mut d = Demo::default();
     // A color per slice; the default heat scale reads like statuses on a pie.

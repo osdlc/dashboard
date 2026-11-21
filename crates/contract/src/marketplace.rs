@@ -16,6 +16,7 @@ pub const INDEX_FORMAT: u32 = 1;
 pub struct Index {
     /// The index format. Always 1 for now.
     pub format: u32,
+    /// The packages offered.
     #[serde(default)]
     pub plugins: Vec<IndexEntry>,
 }
@@ -30,6 +31,7 @@ impl Default for Index {
 }
 
 impl Index {
+    /// The entry with this package ID, if listed.
     pub fn get(&self, id: &str) -> Option<&IndexEntry> {
         self.plugins.iter().find(|e| e.id == id)
     }
@@ -41,8 +43,11 @@ impl Index {
 pub struct IndexEntry {
     /// The package's ID, as in its `sitroom-plugin.yaml`.
     pub id: String,
+    /// The package's version.
     pub version: String,
+    /// One line about what it does.
     pub description: String,
+    /// Words to search and filter by.
     #[serde(default)]
     pub tags: Vec<String>,
     /// Where the `.tar.gz` is: an `https://` or `file://` URL, or a path
@@ -62,10 +67,13 @@ pub struct IndexEntry {
     /// installed, copied from its `sitroom-plugin.yaml`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
+    /// The size it suggests for its tile.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub size: Option<Size>,
+    /// JSON Schema for the module's `config:` block.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub config_schema: Option<serde_json::Value>,
+    /// Made-up data shown as a preview. Needs no account.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub demo: Option<View>,
 }

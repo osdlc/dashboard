@@ -73,7 +73,9 @@ pub fn run_bundled(id: &str) -> Option<Result<()>> {
     }
 }
 
+/// A running sitroom: its config and the modules it started.
 pub struct Runtime {
+    /// The host running the modules.
     pub host: Host,
     sources: Sources,
     loaded: Layered,

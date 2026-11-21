@@ -57,6 +57,7 @@ impl Default for Config {
     }
 }
 
+/// Open tasks from a todo.txt file.
 #[derive(Default)]
 pub struct TodoTxt {
     config: Config,
@@ -179,6 +180,7 @@ fn task(line: &str) -> Option<(Task, Option<Date>)> {
     Some((t, threshold))
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     let today = today();
     let d = |days: i64| {

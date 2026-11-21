@@ -38,6 +38,7 @@ use sitroom_host::Host;
 use tokio::sync::broadcast::error::RecvError;
 use tokio::sync::{mpsc, watch};
 
+/// Called once with where the server is listening.
 pub type OnReady = Box<dyn FnOnce(&Ready) + Send>;
 
 /// Where the server is listening, given to `on_ready` once the port is bound.
@@ -54,7 +55,9 @@ pub struct Ready {
 /// `/api/catalog` request, so newly installed packages show up.
 pub type CatalogSource = Arc<dyn Fn() -> (Vec<CatalogEntry>, Vec<String>) + Send + Sync>;
 
+/// How to run the web server.
 pub struct WebConfig {
+    /// The local port to listen on; 0 picks a free one.
     pub port: u16,
     /// Extra allowed origin, e.g. the Vite dev server `http://localhost:5173`.
     pub dev_origin: Option<String>,
@@ -76,6 +79,7 @@ struct AppState {
     catalog: Option<CatalogSource>,
 }
 
+/// Serve the web view on localhost until it fails.
 pub async fn serve(
     host: Host,
     settings: watch::Receiver<UiSettings>,

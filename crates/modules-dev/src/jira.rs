@@ -69,6 +69,7 @@ impl Default for Config {
     }
 }
 
+/// Jira issues from JQL searches.
 #[derive(Default)]
 pub struct Jira {
     config: Config,
@@ -179,6 +180,7 @@ fn parse(json: &serde_json::Value, base: &str) -> Result<Vec<Issue>> {
         .collect())
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     // A hand-written search response in the shape the Jira Cloud API documents.
     let issue = |key: &str,

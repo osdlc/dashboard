@@ -167,6 +167,7 @@ pub const MODULES: &[Builtin] = &[
 
 /// Points the host keeps per graph: two minutes at the default 500 ms.
 pub const HISTORY: u32 = 240;
+/// Usage percentages at which a meter turns warning and critical.
 pub const THRESHOLDS: Thresholds = Thresholds {
     warn: 75.0,
     error: 90.0,
@@ -201,6 +202,7 @@ pub fn graph(
     }
 }
 
+/// One graph point of series `name` at time `t`.
 pub fn sample(name: &str, t: i64, v: f64) -> SeriesData {
     SeriesData {
         tone: None,
@@ -209,6 +211,7 @@ pub fn sample(name: &str, t: i64, v: f64) -> SeriesData {
     }
 }
 
+/// Gauge widget with a label, a fill percentage and a caption.
 pub fn gauge(label: &str, percent: f64, caption: String) -> Widget {
     Widget::Gauge {
         label: label.into(),
@@ -219,6 +222,7 @@ pub fn gauge(label: &str, percent: f64, caption: String) -> Widget {
     }
 }
 
+/// `used` as a percentage of `total`; 0 when `total` is 0.
 pub fn percent(used: u64, total: u64) -> f64 {
     if total == 0 {
         0.0
@@ -227,14 +231,17 @@ pub fn percent(used: u64, total: u64) -> f64 {
     }
 }
 
+/// Byte count in human units.
 pub fn bytes(v: f64) -> String {
     format_value(v, ValueFormat::Bytes, None)
 }
 
+/// "used / total" in human units.
 pub fn used_of(used: u64, total: u64) -> String {
     format!("{} / {}", bytes(used as f64), bytes(total as f64))
 }
 
+/// Status color for a usage percentage, per `THRESHOLDS`.
 pub fn status_for(pct: f64) -> Status {
     if pct >= THRESHOLDS.error {
         Status::Error

@@ -1,8 +1,11 @@
 [package]
 name = "sitroom-host"
+description = "Sitroom's host runtime: runs modules, keeps the latest view per tile and sends updates to renderers"
 edition.workspace = true
+rust-version.workspace = true
 version.workspace = true
 license.workspace = true
+repository.workspace = true
 
 [dependencies]
 anyhow = "1.0.104"
@@ -16,6 +19,9 @@ tracing = "0.1.44"
 [target.'cfg(unix)'.dependencies]
 libc = "0.2.191"
 
+[target.'cfg(unix)'.dev-dependencies]
+rustix = { version = "1.1.6", features = ["process"] }
+
 [target.'cfg(windows)'.dependencies]
 windows-sys = { version = "0.61.2", features = [
     "Win32_Foundation",
@@ -23,3 +29,6 @@ windows-sys = { version = "0.61.2", features = [
     "Win32_System_JobObjects",
     "Win32_System_Threading",
 ] }
+
+[lints]
+workspace = true

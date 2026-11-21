@@ -1,8 +1,11 @@
 [package]
 name = "sitroom-modules-common"
+description = "What sitroom's built-in module bundles share: registration, catalog helpers, times and HTTP"
 edition.workspace = true
+rust-version.workspace = true
 version.workspace = true
 license.workspace = true
+repository.workspace = true
 
 [features]
 # reqwest, for modules that call a web API.
@@ -20,3 +23,6 @@ tokio = { version = "1.54.1", features = ["process", "time"] }
 
 [dev-dependencies]
 tokio = { version = "1.54.1", features = ["macros", "process", "rt", "test-util"] }
+
+[lints]
+workspace = true

@@ -10,10 +10,12 @@ use std::fmt;
 use crate::exit;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+/// A failed run, classified so it exits with the right code.
 pub struct Failure {
     /// A stable name to branch on: `usage`, a kind from [`exit_code_for_kind`]
     /// such as `not-installed`, or one the tool chose.
     pub kind: String,
+    /// What went wrong, in one line.
     pub message: String,
     /// What to do about it, printed after the message.
     pub hint: Option<String>,
@@ -23,6 +25,7 @@ pub struct Failure {
 }
 
 impl Failure {
+    /// A failure of `kind` with `message` and no hint.
     pub fn new(kind: impl Into<String>, message: impl Into<String>) -> Self {
         Self {
             kind: kind.into(),
@@ -42,6 +45,7 @@ impl Failure {
         Self::new("not-installed", message)
     }
 
+    /// Add a hint saying what to do about it.
     pub fn hint(mut self, hint: impl Into<String>) -> Self {
         self.hint = Some(hint.into());
         self
@@ -53,6 +57,7 @@ impl Failure {
         self
     }
 
+    /// The exit code for this failure's `kind`.
     pub fn exit_code(&self) -> u8 {
         exit_code_for_kind(&self.kind)
     }

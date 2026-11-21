@@ -35,6 +35,7 @@ struct Config {
     db: Option<String>,
 }
 
+/// Cursor usage and on-demand spend this billing cycle.
 #[derive(Default)]
 pub struct Cursor {
     db: PathBuf,
@@ -278,6 +279,7 @@ fn sample() -> Summary {
     .expect("demo data parses")
 }
 
+/// Catalog entry for this module, with demo data.
 pub fn catalog() -> CatalogEntry {
     CatalogEntry {
         description: "Cursor usage this billing cycle: included usage and on-demand spend. \
