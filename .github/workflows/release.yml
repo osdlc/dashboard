@@ -76,7 +76,7 @@ jobs:
             exit 1
           fi
 
-      - uses: osdlc/osdlc/.github/actions/rust-toolchain@8a0f1f09e91423444b6d317a4abac05edc74c5ae # as rust-ci.yml
+      - uses: osdlc/osdlc/.github/actions/rust-toolchain@2419043759e28780926a0871dea3c170b7039e5a # as rust-ci.yml
         with:
           workspace: .
 
@@ -136,7 +136,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: osdlc/osdlc/.github/actions/rust-toolchain@8a0f1f09e91423444b6d317a4abac05edc74c5ae # as rust-ci.yml
+      - uses: osdlc/osdlc/.github/actions/rust-toolchain@2419043759e28780926a0871dea3c170b7039e5a # as rust-ci.yml
         with:
           workspace: .
           targets: ${{ matrix.target }}

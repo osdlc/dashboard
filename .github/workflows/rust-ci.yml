@@ -8,8 +8,10 @@
 # repository's own. The Rust actions they use come from the same osdlc/osdlc
 # commit as the workflow; move the pins together.
 #
-# The pins are osdlc/osdlc pull request #867's head commit until it merges;
-# then switch them to @main.
+# The pins are a commit on osdlc/osdlc main (#867's merge). Pin only to
+# commits on main: a pull request's head commit stops resolving once the
+# pull request is squash-merged and its branch deleted, and every run then
+# fails before it starts ("workflow file issue").
 #
 # Unlike upstream there is no `changes` job: the Rust tests read files from
 # most top-level folders, so nearly every pull request touches something they
@@ -48,7 +50,7 @@ defaults:
 
 jobs:
   core:
-    uses: osdlc/osdlc/.github/workflows/rust-ci-core.yml@8a0f1f09e91423444b6d317a4abac05edc74c5ae # PR #867; @main once it merges
+    uses: osdlc/osdlc/.github/workflows/rust-ci-core.yml@2419043759e28780926a0871dea3c170b7039e5a # osdlc/osdlc main, PR #867 merged
     with:
       # Plain `cargo test` covers the default members, which leave out the
       # Tauri desktop app (see the header).
@@ -80,12 +82,12 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: osdlc/osdlc/.github/actions/rust-toolchain@8a0f1f09e91423444b6d317a4abac05edc74c5ae # as `core`
+      - uses: osdlc/osdlc/.github/actions/rust-toolchain@2419043759e28780926a0871dea3c170b7039e5a # as `core`
         with:
           workspace: .
           components: clippy
 
-      - uses: osdlc/osdlc/.github/actions/rust-build-cache@8a0f1f09e91423444b6d317a4abac05edc74c5ae # as `core`
+      - uses: osdlc/osdlc/.github/actions/rust-build-cache@2419043759e28780926a0871dea3c170b7039e5a # as `core`
         with:
           workspace: .
 
@@ -105,11 +107,11 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: osdlc/osdlc/.github/actions/rust-toolchain@8a0f1f09e91423444b6d317a4abac05edc74c5ae # as `core`
+      - uses: osdlc/osdlc/.github/actions/rust-toolchain@2419043759e28780926a0871dea3c170b7039e5a # as `core`
         with:
           workspace: .
 
-      - uses: osdlc/osdlc/.github/actions/rust-build-cache@8a0f1f09e91423444b6d317a4abac05edc74c5ae # as `core`
+      - uses: osdlc/osdlc/.github/actions/rust-build-cache@2419043759e28780926a0871dea3c170b7039e5a # as `core`
         with:
           workspace: .
 
@@ -142,11 +144,11 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: osdlc/osdlc/.github/actions/rust-toolchain@8a0f1f09e91423444b6d317a4abac05edc74c5ae # as `core`
+      - uses: osdlc/osdlc/.github/actions/rust-toolchain@2419043759e28780926a0871dea3c170b7039e5a # as `core`
         with:
           workspace: .
 
-      - uses: osdlc/osdlc/.github/actions/rust-build-cache@8a0f1f09e91423444b6d317a4abac05edc74c5ae # as `core`
+      - uses: osdlc/osdlc/.github/actions/rust-build-cache@2419043759e28780926a0871dea3c170b7039e5a # as `core`
         with:
           workspace: .
 
